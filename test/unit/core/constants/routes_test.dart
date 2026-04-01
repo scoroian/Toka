@@ -10,7 +10,7 @@ void main() {
     });
 
     test('all route constants are unique', () {
-      final routes = AppRoutes.all;
+      const routes = AppRoutes.all;
       expect(routes.toSet().length, equals(routes.length),
           reason: 'Duplicate route path detected');
     });

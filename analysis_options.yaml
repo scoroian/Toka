@@ -1,6 +1,8 @@
 include: package:flutter_lints/flutter.yaml
 
 analyzer:
+  exclude:
+    - patches/**
   plugins:
     # Note: riverpod_lint rules require `dart run custom_lint` in terminal to activate.
     # IDE integration may also need the custom_lint analysis plugin configured separately.

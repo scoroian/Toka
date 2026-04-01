@@ -26,12 +26,11 @@ packages:
     source: hosted
     version: "7.6.0"
   analyzer_plugin:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: analyzer_plugin
-      sha256: "1d460d14e3c2ae36dc2b32cef847c4479198cf87704f63c3c3c8150ee50c3916"
-      url: "https://pub.dev"
-    source: hosted
+      path: "patches/analyzer_plugin"
+      relative: true
+    source: path
     version: "0.12.0"
   antlr4:
     dependency: transitive

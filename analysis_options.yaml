@@ -2,6 +2,8 @@ include: package:flutter_lints/flutter.yaml
 
 analyzer:
   plugins:
+    # Note: riverpod_lint rules require `dart run custom_lint` in terminal to activate.
+    # IDE integration may also need the custom_lint analysis plugin configured separately.
     - custom_lint
   errors:
     missing_required_param: error

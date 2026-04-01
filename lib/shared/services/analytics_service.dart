@@ -22,11 +22,11 @@ class AnalyticsService {
     }
   }
 
-  Future<void> setCurrentScreen(String screenName) async {
+  Future<void> logScreenView(String screenName) async {
     try {
       await _analytics.logScreenView(screenName: screenName);
     } catch (e, st) {
-      AppLogger.error('Analytics setCurrentScreen failed', e, st);
+      AppLogger.error('Analytics logScreenView failed', e, st);
     }
   }
 }

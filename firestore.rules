@@ -1,0 +1,144 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ─── Helpers ───────────────────────────────────────────────────────────────
+    
+    function isAuth() {
+      return request.auth != null;
+    }
+    
+    function isUser(uid) {
+      return isAuth() && request.auth.uid == uid;
+    }
+    
+    function isMemberOfHome(homeId) {
+      return isAuth() && exists(/databases/$(database)/documents/homes/$(homeId)/members/$(request.auth.uid));
+    }
+    
+    function getMembership(homeId) {
+      return get(/databases/$(database)/documents/homes/$(homeId)/members/$(request.auth.uid)).data;
+    }
+    
+    function isActiveMember(homeId) {
+      return isMemberOfHome(homeId) && getMembership(homeId).status == 'active';
+    }
+    
+    function isAdminOrOwner(homeId) {
+      return isMemberOfHome(homeId) && getMembership(homeId).role in ['owner', 'admin'];
+    }
+    
+    function isOwner(homeId) {
+      return isMemberOfHome(homeId) && getMembership(homeId).role == 'owner';
+    }
+    
+    // ─── Idiomas (pública) ──────────────────────────────────────────────────────
+    
+    match /languages/{code} {
+      allow read: if true;
+      allow write: if false;
+    }
+    
+    // ─── Usuarios ──────────────────────────────────────────────────────────────
+    
+    match /users/{uid} {
+      allow read: if isUser(uid);
+      allow create: if isUser(uid);
+      allow update: if isUser(uid) && !request.resource.data.diff(resource.data).affectedKeys()
+                       .hasAny(['baseHomeSlots', 'lifetimeUnlockedHomeSlots', 'homeSlotCap']);
+      allow delete: if false; // Solo via Function
+      
+      match /memberships/{homeId} {
+        allow read: if isUser(uid);
+        allow write: if false; // Solo via Functions
+      }
+      
+      match /slotLedger/{unlockId} {
+        allow read: if isUser(uid);
+        allow write: if false; // Solo via Functions
+      }
+    }
+    
+    // ─── Hogares ───────────────────────────────────────────────────────────────
+    
+    match /homes/{homeId} {
+      // Solo miembros pueden leer el hogar (incluyendo congelados)
+      allow read: if isMemberOfHome(homeId);
+      allow create: if false; // Solo via Functions
+      allow update: if isAdminOrOwner(homeId) && 
+                       !request.resource.data.diff(resource.data).affectedKeys()
+                       .hasAny(['ownerUid', 'currentPayerUid', 'premiumStatus', 'premiumEndsAt',
+                                'lifetimeUnlockedHomeSlots']);
+      allow delete: if false;
+      
+      // Dashboard: lectura para todos los miembros, escritura solo Functions
+      match /views/dashboard {
+        allow read: if isMemberOfHome(homeId);
+        allow write: if false;
+      }
+      
+      // Miembros del hogar
+      match /members/{uid} {
+        allow read: if isMemberOfHome(homeId);
+        allow write: if false; // Solo via Functions
+      }
+      
+      // Tareas
+      match /tasks/{taskId} {
+        allow read: if isMemberOfHome(homeId);
+        allow create: if isAdminOrOwner(homeId) && isActiveMember(homeId);
+        allow update: if isAdminOrOwner(homeId) && isActiveMember(homeId);
+        allow delete: if false; // Soft delete via update
+      }
+      
+      // Eventos de tarea
+      match /taskEvents/{eventId} {
+        allow read: if isMemberOfHome(homeId);
+        allow write: if false; // Solo via Functions
+        
+        // Valoraciones — solo lectura restringida
+        match /reviews/{reviewerUid} {
+          // El autor y el evaluado pueden leer
+          allow read: if isAuth() && (
+            request.auth.uid == reviewerUid ||
+            request.auth.uid == get(/databases/$(database)/documents/homes/$(homeId)/taskEvents/$(eventId)).data.performerUid
+          );
+          allow write: if false; // Solo via Functions
+        }
+      }
+      
+      // Estadísticas por miembro y tarea
+      match /memberTaskStats/{statId} {
+        allow read: if isMemberOfHome(homeId);
+        allow write: if false; // Solo via Functions
+      }
+      
+      // Plan de downgrade — solo owner
+      match /downgrade/current {
+        allow read: if isOwner(homeId);
+        allow write: if isOwner(homeId); // Owner puede escribir el plan manual
+      }
+      
+      // Historial de suscripciones
+      match /subscriptions/history/{chargeId} {
+        allow read: if isMemberOfHome(homeId) && getMembership(homeId).billingState in ['currentPayer', 'formerPayer'];
+        allow write: if false;
+      }
+      
+      // Invitaciones
+      match /invitations/{inviteId} {
+        allow read: if isAdminOrOwner(homeId) || 
+                       (isAuth() && resource.data.code != null); // Lectura pública por código via Function
+        allow create: if isAdminOrOwner(homeId);
+        allow update: if isAdminOrOwner(homeId);
+        allow delete: if isAdminOrOwner(homeId);
+      }
+      
+      // Metadatos del sistema
+      match /system/meta {
+        allow read: if isMemberOfHome(homeId);
+        allow write: if false;
+      }
+    }
+  }
+}

@@ -22,7 +22,7 @@ class TokaApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp.router(
-      title: 'Toka',
+      onGenerateTitle: (context) => AppLocalizations.of(context).appName,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: ThemeMode.system,
@@ -43,6 +43,7 @@ class _SplashPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // TODO(spec-03): replace with real onboarding/home redirect
     return const Scaffold(
       body: Center(
         child: Text('Toka', style: TextStyle(fontSize: 32)),

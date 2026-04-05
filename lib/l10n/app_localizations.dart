@@ -333,6 +333,144 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Idioma guardado'**
   String get language_saved;
+
+  /// Divider between social and email auth
+  ///
+  /// In es, this message translates to:
+  /// **'o'**
+  String get auth_or_divider;
+
+  /// Confirm password field label
+  ///
+  /// In es, this message translates to:
+  /// **'Confirmar contraseña'**
+  String get auth_confirm_password_label;
+
+  /// Show password tooltip
+  ///
+  /// In es, this message translates to:
+  /// **'Mostrar contraseña'**
+  String get auth_password_show;
+
+  /// Hide password tooltip
+  ///
+  /// In es, this message translates to:
+  /// **'Ocultar contraseña'**
+  String get auth_password_hide;
+
+  /// Link to login from register
+  ///
+  /// In es, this message translates to:
+  /// **'¿Ya tienes cuenta? Inicia sesión'**
+  String get auth_have_account;
+
+  /// Link to register from login
+  ///
+  /// In es, this message translates to:
+  /// **'¿No tienes cuenta? Crear cuenta'**
+  String get auth_no_account;
+
+  /// Email validation error
+  ///
+  /// In es, this message translates to:
+  /// **'Introduce un email válido'**
+  String get auth_validation_email_invalid;
+
+  /// Password length validation error
+  ///
+  /// In es, this message translates to:
+  /// **'La contraseña debe tener al menos 8 caracteres'**
+  String get auth_validation_password_min_length;
+
+  /// Password match validation error
+  ///
+  /// In es, this message translates to:
+  /// **'Las contraseñas no coinciden'**
+  String get auth_validation_passwords_no_match;
+
+  /// Required field validation error
+  ///
+  /// In es, this message translates to:
+  /// **'Este campo es obligatorio'**
+  String get auth_validation_required;
+
+  /// Verify email screen title
+  ///
+  /// In es, this message translates to:
+  /// **'Verifica tu email'**
+  String get auth_verify_email_title;
+
+  /// Verify email body
+  ///
+  /// In es, this message translates to:
+  /// **'Hemos enviado un enlace de verificación a {email}. Revisa tu bandeja de entrada.'**
+  String auth_verify_email_body(String email);
+
+  /// Resend verification email button
+  ///
+  /// In es, this message translates to:
+  /// **'Reenviar email'**
+  String get auth_resend_email;
+
+  /// Resend cooldown message
+  ///
+  /// In es, this message translates to:
+  /// **'Reenviar en {seconds}s'**
+  String auth_resend_cooldown(int seconds);
+
+  /// Network auth error
+  ///
+  /// In es, this message translates to:
+  /// **'Error de red. Comprueba tu conexión.'**
+  String get auth_error_network;
+
+  /// Invalid credentials error
+  ///
+  /// In es, this message translates to:
+  /// **'Email o contraseña incorrectos.'**
+  String get auth_error_invalid_credentials;
+
+  /// Email already in use error
+  ///
+  /// In es, this message translates to:
+  /// **'Ya existe una cuenta con este email.'**
+  String get auth_error_email_in_use;
+
+  /// User not found error
+  ///
+  /// In es, this message translates to:
+  /// **'No existe una cuenta con este email.'**
+  String get auth_error_user_not_found;
+
+  /// Weak password error
+  ///
+  /// In es, this message translates to:
+  /// **'La contraseña es demasiado débil. Usa al menos 8 caracteres.'**
+  String get auth_error_weak_password;
+
+  /// Too many requests error
+  ///
+  /// In es, this message translates to:
+  /// **'Demasiados intentos. Inténtalo más tarde.'**
+  String get auth_error_too_many_requests;
+
+  /// Forgot password screen title
+  ///
+  /// In es, this message translates to:
+  /// **'Recuperar contraseña'**
+  String get auth_forgot_password_title;
+
+  /// Forgot password instructions
+  ///
+  /// In es, this message translates to:
+  /// **'Introduce tu email y te enviaremos un enlace para restablecer tu contraseña.'**
+  String get auth_forgot_password_body;
+
+  /// Send reset link button
+  ///
+  /// In es, this message translates to:
+  /// **'Enviar enlace'**
+  String get auth_send_reset_link;
 }
 
 class _AppLocalizationsDelegate

@@ -125,4 +125,82 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get language_saved => 'Language saved';
+
+  @override
+  String get auth_or_divider => 'or';
+
+  @override
+  String get auth_confirm_password_label => 'Confirm password';
+
+  @override
+  String get auth_password_show => 'Show password';
+
+  @override
+  String get auth_password_hide => 'Hide password';
+
+  @override
+  String get auth_have_account => 'Already have an account? Sign in';
+
+  @override
+  String get auth_no_account => 'Don\'t have an account? Create one';
+
+  @override
+  String get auth_validation_email_invalid => 'Enter a valid email address';
+
+  @override
+  String get auth_validation_password_min_length =>
+      'Password must be at least 8 characters';
+
+  @override
+  String get auth_validation_passwords_no_match => 'Passwords do not match';
+
+  @override
+  String get auth_validation_required => 'This field is required';
+
+  @override
+  String get auth_verify_email_title => 'Verify your email';
+
+  @override
+  String auth_verify_email_body(String email) {
+    return 'We sent a verification link to $email. Check your inbox.';
+  }
+
+  @override
+  String get auth_resend_email => 'Resend email';
+
+  @override
+  String auth_resend_cooldown(int seconds) {
+    return 'Resend in ${seconds}s';
+  }
+
+  @override
+  String get auth_error_network => 'Network error. Check your connection.';
+
+  @override
+  String get auth_error_invalid_credentials => 'Incorrect email or password.';
+
+  @override
+  String get auth_error_email_in_use =>
+      'An account with this email already exists.';
+
+  @override
+  String get auth_error_user_not_found => 'No account with this email.';
+
+  @override
+  String get auth_error_weak_password =>
+      'Password is too weak. Use at least 8 characters.';
+
+  @override
+  String get auth_error_too_many_requests =>
+      'Too many attempts. Please try again later.';
+
+  @override
+  String get auth_forgot_password_title => 'Reset password';
+
+  @override
+  String get auth_forgot_password_body =>
+      'Enter your email and we\'ll send you a link to reset your password.';
+
+  @override
+  String get auth_send_reset_link => 'Send reset link';
 }

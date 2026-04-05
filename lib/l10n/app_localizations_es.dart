@@ -125,4 +125,84 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get language_saved => 'Idioma guardado';
+
+  @override
+  String get auth_or_divider => 'o';
+
+  @override
+  String get auth_confirm_password_label => 'Confirmar contraseña';
+
+  @override
+  String get auth_password_show => 'Mostrar contraseña';
+
+  @override
+  String get auth_password_hide => 'Ocultar contraseña';
+
+  @override
+  String get auth_have_account => '¿Ya tienes cuenta? Inicia sesión';
+
+  @override
+  String get auth_no_account => '¿No tienes cuenta? Crear cuenta';
+
+  @override
+  String get auth_validation_email_invalid => 'Introduce un email válido';
+
+  @override
+  String get auth_validation_password_min_length =>
+      'La contraseña debe tener al menos 8 caracteres';
+
+  @override
+  String get auth_validation_passwords_no_match =>
+      'Las contraseñas no coinciden';
+
+  @override
+  String get auth_validation_required => 'Este campo es obligatorio';
+
+  @override
+  String get auth_verify_email_title => 'Verifica tu email';
+
+  @override
+  String auth_verify_email_body(String email) {
+    return 'Hemos enviado un enlace de verificación a $email. Revisa tu bandeja de entrada.';
+  }
+
+  @override
+  String get auth_resend_email => 'Reenviar email';
+
+  @override
+  String auth_resend_cooldown(int seconds) {
+    return 'Reenviar en ${seconds}s';
+  }
+
+  @override
+  String get auth_error_network => 'Error de red. Comprueba tu conexión.';
+
+  @override
+  String get auth_error_invalid_credentials =>
+      'Email o contraseña incorrectos.';
+
+  @override
+  String get auth_error_email_in_use => 'Ya existe una cuenta con este email.';
+
+  @override
+  String get auth_error_user_not_found =>
+      'No existe una cuenta con este email.';
+
+  @override
+  String get auth_error_weak_password =>
+      'La contraseña es demasiado débil. Usa al menos 8 caracteres.';
+
+  @override
+  String get auth_error_too_many_requests =>
+      'Demasiados intentos. Inténtalo más tarde.';
+
+  @override
+  String get auth_forgot_password_title => 'Recuperar contraseña';
+
+  @override
+  String get auth_forgot_password_body =>
+      'Introduce tu email y te enviaremos un enlace para restablecer tu contraseña.';
+
+  @override
+  String get auth_send_reset_link => 'Enviar enlace';
 }

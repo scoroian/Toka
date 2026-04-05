@@ -125,4 +125,83 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get language_saved => 'Limbă salvată';
+
+  @override
+  String get auth_or_divider => 'sau';
+
+  @override
+  String get auth_confirm_password_label => 'Confirmați parola';
+
+  @override
+  String get auth_password_show => 'Afișați parola';
+
+  @override
+  String get auth_password_hide => 'Ascundeți parola';
+
+  @override
+  String get auth_have_account => 'Aveți deja un cont? Autentificați-vă';
+
+  @override
+  String get auth_no_account => 'Nu aveți cont? Creați unul';
+
+  @override
+  String get auth_validation_email_invalid =>
+      'Introduceți o adresă de email validă';
+
+  @override
+  String get auth_validation_password_min_length =>
+      'Parola trebuie să aibă cel puțin 8 caractere';
+
+  @override
+  String get auth_validation_passwords_no_match => 'Parolele nu se potrivesc';
+
+  @override
+  String get auth_validation_required => 'Acest câmp este obligatoriu';
+
+  @override
+  String get auth_verify_email_title => 'Verificați emailul';
+
+  @override
+  String auth_verify_email_body(String email) {
+    return 'Am trimis un link de verificare la $email. Verificați căsuța de intrare.';
+  }
+
+  @override
+  String get auth_resend_email => 'Retrimiteți emailul';
+
+  @override
+  String auth_resend_cooldown(int seconds) {
+    return 'Retrimiteți în ${seconds}s';
+  }
+
+  @override
+  String get auth_error_network => 'Eroare de rețea. Verificați conexiunea.';
+
+  @override
+  String get auth_error_invalid_credentials => 'Email sau parolă incorecte.';
+
+  @override
+  String get auth_error_email_in_use => 'Există deja un cont cu acest email.';
+
+  @override
+  String get auth_error_user_not_found =>
+      'Nu există niciun cont cu acest email.';
+
+  @override
+  String get auth_error_weak_password =>
+      'Parola este prea slabă. Folosiți cel puțin 8 caractere.';
+
+  @override
+  String get auth_error_too_many_requests =>
+      'Prea multe încercări. Încercați mai târziu.';
+
+  @override
+  String get auth_forgot_password_title => 'Recuperare parolă';
+
+  @override
+  String get auth_forgot_password_body =>
+      'Introduceți emailul și vă vom trimite un link pentru a vă reseta parola.';
+
+  @override
+  String get auth_send_reset_link => 'Trimiteți link-ul';
 }

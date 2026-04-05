@@ -31,11 +31,8 @@ class LanguageRepositoryImpl implements LanguageRepository {
             .toList();
       }
 
-      // Colección vacía: sembrar los idiomas por defecto y devolverlos
-      final col = _firestore.collection('languages');
-      for (final data in _defaults) {
-        await col.doc(data['code'] as String).set(data);
-      }
+      // Colección vacía: devolver los defaults en memoria (sin escribir en
+      // Firestore, ya que el cliente no tiene permiso de escritura).
       return _defaults.map(Language.fromFirestore).toList();
     } on FirebaseException catch (e) {
       throw LanguagesFetchException(e.message ?? 'Firestore error');

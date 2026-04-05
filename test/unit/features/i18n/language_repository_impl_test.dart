@@ -49,15 +49,16 @@ void main() {
     expect(langs.any((l) => l.code == 'ro'), isFalse);
   });
 
-  test('seeds default languages when collection is empty', () async {
+  test('returns default languages when collection is empty without writing to Firestore',
+      () async {
     // Collection vacía — no hay documentos
     final langs = await repo.fetchAvailableLanguages();
     expect(langs.length, 3);
     expect(langs.map((l) => l.code).toList(), containsAll(['es', 'en', 'ro']));
 
-    // Verifica que los documentos se crearon en Firestore
+    // NO debe haber escrito nada en Firestore (el cliente no tiene permiso)
     final snap = await fakeFirestore.collection('languages').get();
-    expect(snap.docs.length, 3);
+    expect(snap.docs.length, 0);
   });
 
   test('throws LanguagesFetchException on failure', () async {

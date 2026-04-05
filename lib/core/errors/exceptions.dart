@@ -32,3 +32,40 @@ class LanguagesFetchException implements Exception {
   @override
   String toString() => 'LanguagesFetchException: $message';
 }
+
+class InvalidInviteCodeException implements Exception {
+  const InvalidInviteCodeException([this.message = 'Invalid invite code']);
+  final String message;
+  @override
+  String toString() => 'InvalidInviteCodeException: $message';
+}
+
+class ExpiredInviteCodeException implements Exception {
+  const ExpiredInviteCodeException([this.message = 'Invite code expired']);
+  final String message;
+  @override
+  String toString() => 'ExpiredInviteCodeException: $message';
+}
+
+class NoHomeSlotsException implements Exception {
+  const NoHomeSlotsException([this.message = 'No home slots available']);
+  final String message;
+  @override
+  String toString() => 'NoHomeSlotsException: $message';
+}
+
+class CannotLeaveAsOwnerException implements Exception {
+  const CannotLeaveAsOwnerException(
+      [this.message = 'Owner must transfer ownership before leaving']);
+  final String message;
+  @override
+  String toString() => 'CannotLeaveAsOwnerException: $message';
+}
+
+class NoAvailableSlotsException implements Exception {
+  const NoAvailableSlotsException(
+      [this.message = 'No available home slots']);
+  final String message;
+  @override
+  String toString() => 'NoAvailableSlotsException: $message';
+}

@@ -10,4 +10,18 @@ abstract class AppRoutes {
   static const String profile = '/profile';
   static const String settings = '/settings';
   static const String subscription = '/subscription';
+
+  static const List<String> all = [
+    splash,
+    login,
+    register,
+    forgotPassword,
+    verifyEmail,
+    onboarding,
+    home,
+    taskDetail,
+    profile,
+    settings,
+    subscription,
+  ];
 }

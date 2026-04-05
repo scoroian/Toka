@@ -10,6 +10,8 @@ abstract class AppRoutes {
   static const String profile = '/profile';
   static const String settings = '/settings';
   static const String subscription = '/subscription';
+  static const String myHomes = '/my-homes';
+  static const String homeSettings = '/home-settings';
 
   static const List<String> all = [
     splash,
@@ -23,5 +25,7 @@ abstract class AppRoutes {
     profile,
     settings,
     subscription,
+    myHomes,
+    homeSettings,
   ];
 }

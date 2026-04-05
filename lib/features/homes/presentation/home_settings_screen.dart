@@ -212,6 +212,7 @@ class _HomeSettingsScreenState extends ConsumerState<HomeSettingsScreen> {
                 key: const Key('invite_code_tile'),
                 title: Text(l10n.homes_invite_code),
                 trailing: TextButton(
+                  key: const Key('generate_code_button'),
                   onPressed: () {
                     // TODO: generate code
                   },

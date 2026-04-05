@@ -170,7 +170,6 @@ class _HomeSettingsScreenState extends ConsumerState<HomeSettingsScreen> {
                         ),
                       )
                     : ListTile(
-                        key: const Key('home_name_field'),
                         title: Text(l10n.homes_name_label),
                         subtitle: Text(home.name),
                       ),

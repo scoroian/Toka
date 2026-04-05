@@ -148,8 +148,8 @@ void main() {
     await tester.pumpWidget(_wrap(role: MemberRole.member));
     await tester.pumpAndSettle();
 
-    // For member (canEdit=false) the widget is a read-only ListTile (no TextField)
-    expect(find.byKey(const Key('home_name_field')), findsOneWidget);
+    // For member (canEdit=false) there is no editable field — key must be absent
+    expect(find.byKey(const Key('home_name_field')), findsNothing);
     expect(find.byType(TextField), findsNothing);
   });
 

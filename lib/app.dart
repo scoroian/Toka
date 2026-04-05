@@ -14,6 +14,9 @@ import 'features/auth/presentation/login_screen.dart';
 import 'features/auth/presentation/register_screen.dart';
 import 'features/auth/presentation/verify_email_screen.dart';
 import 'features/i18n/application/locale_provider.dart';
+import 'features/homes/presentation/home_settings_screen.dart';
+import 'features/homes/presentation/my_homes_screen.dart';
+import 'features/onboarding/presentation/onboarding_flow_screen.dart';
 import 'l10n/app_localizations.dart';
 
 part 'app.g.dart';
@@ -99,11 +102,19 @@ GoRouter appRouter(AppRouterRef ref) {
       ),
       GoRoute(
         path: AppRoutes.onboarding,
-        builder: (_, __) => const _OnboardingPlaceholder(),
+        builder: (_, __) => const OnboardingFlowScreen(),
       ),
       GoRoute(
         path: AppRoutes.home,
         builder: (_, __) => const _HomePlaceholder(),
+      ),
+      GoRoute(
+        path: AppRoutes.myHomes,
+        builder: (_, __) => const MyHomesScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.homeSettings,
+        builder: (_, __) => const HomeSettingsScreen(),
       ),
     ],
   );
@@ -142,17 +153,6 @@ class _SplashPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Scaffold(
       body: Center(child: CircularProgressIndicator()),
-    );
-  }
-}
-
-class _OnboardingPlaceholder extends StatelessWidget {
-  const _OnboardingPlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(child: Text('Onboarding — próximamente')),
     );
   }
 }

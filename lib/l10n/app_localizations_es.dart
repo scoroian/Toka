@@ -297,4 +297,70 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get onboarding_change_photo => 'Cambiar foto';
+
+  @override
+  String get homes_my_homes => 'Mis hogares';
+
+  @override
+  String get homes_selector_title => 'Cambiar hogar';
+
+  @override
+  String get homes_settings_title => 'Ajustes del hogar';
+
+  @override
+  String get homes_name_label => 'Nombre del hogar';
+
+  @override
+  String get homes_plan_free => 'Plan gratuito';
+
+  @override
+  String get homes_plan_premium => 'Premium';
+
+  @override
+  String homes_plan_ends(String date) => 'Vence el $date';
+
+  @override
+  String get homes_manage_subscription => 'Gestionar suscripción';
+
+  @override
+  String get homes_members => 'Miembros';
+
+  @override
+  String get homes_invite_code => 'Código de invitación';
+
+  @override
+  String get homes_generate_code => 'Generar código';
+
+  @override
+  String get homes_leave_home => 'Abandonar hogar';
+
+  @override
+  String get homes_close_home => 'Cerrar hogar';
+
+  @override
+  String get homes_leave_confirm_title => '¿Abandonar hogar?';
+
+  @override
+  String get homes_leave_confirm_body =>
+      'Dejarás de tener acceso a las tareas de este hogar.';
+
+  @override
+  String get homes_close_confirm_title => '¿Cerrar hogar?';
+
+  @override
+  String get homes_close_confirm_body =>
+      'Se eliminarán todas las tareas y miembros del hogar. Esta acción es irreversible.';
+
+  @override
+  String get homes_error_cannot_leave_as_owner =>
+      'Transfiere la propiedad antes de abandonar el hogar';
+
+  @override
+  String get homes_role_owner => 'Propietario';
+
+  @override
+  String get homes_role_admin => 'Administrador';
+
+  @override
+  String get homes_role_member => 'Miembro';
 }

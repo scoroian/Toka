@@ -291,4 +291,70 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboarding_change_photo => 'Change photo';
+
+  @override
+  String get homes_my_homes => 'My homes';
+
+  @override
+  String get homes_selector_title => 'Switch home';
+
+  @override
+  String get homes_settings_title => 'Home settings';
+
+  @override
+  String get homes_name_label => 'Home name';
+
+  @override
+  String get homes_plan_free => 'Free plan';
+
+  @override
+  String get homes_plan_premium => 'Premium';
+
+  @override
+  String homes_plan_ends(String date) => 'Ends on $date';
+
+  @override
+  String get homes_manage_subscription => 'Manage subscription';
+
+  @override
+  String get homes_members => 'Members';
+
+  @override
+  String get homes_invite_code => 'Invite code';
+
+  @override
+  String get homes_generate_code => 'Generate code';
+
+  @override
+  String get homes_leave_home => 'Leave home';
+
+  @override
+  String get homes_close_home => 'Close home';
+
+  @override
+  String get homes_leave_confirm_title => 'Leave home?';
+
+  @override
+  String get homes_leave_confirm_body =>
+      'You will lose access to this home\'s tasks.';
+
+  @override
+  String get homes_close_confirm_title => 'Close home?';
+
+  @override
+  String get homes_close_confirm_body =>
+      'All tasks and members will be permanently deleted. This cannot be undone.';
+
+  @override
+  String get homes_error_cannot_leave_as_owner =>
+      'Transfer ownership before leaving the home';
+
+  @override
+  String get homes_role_owner => 'Owner';
+
+  @override
+  String get homes_role_admin => 'Admin';
+
+  @override
+  String get homes_role_member => 'Member';
 }

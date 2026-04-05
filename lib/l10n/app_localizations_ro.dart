@@ -295,4 +295,70 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get onboarding_change_photo => 'Schimbă fotografia';
+
+  @override
+  String get homes_my_homes => 'Casele mele';
+
+  @override
+  String get homes_selector_title => 'Schimbă casa';
+
+  @override
+  String get homes_settings_title => 'Setările casei';
+
+  @override
+  String get homes_name_label => 'Numele casei';
+
+  @override
+  String get homes_plan_free => 'Plan gratuit';
+
+  @override
+  String get homes_plan_premium => 'Premium';
+
+  @override
+  String homes_plan_ends(String date) => 'Expiră pe $date';
+
+  @override
+  String get homes_manage_subscription => 'Gestionează abonamentul';
+
+  @override
+  String get homes_members => 'Membri';
+
+  @override
+  String get homes_invite_code => 'Cod de invitație';
+
+  @override
+  String get homes_generate_code => 'Generează cod';
+
+  @override
+  String get homes_leave_home => 'Părăsește casa';
+
+  @override
+  String get homes_close_home => 'Închide casa';
+
+  @override
+  String get homes_leave_confirm_title => 'Părăsești casa?';
+
+  @override
+  String get homes_leave_confirm_body =>
+      'Vei pierde accesul la sarcinile acestei case.';
+
+  @override
+  String get homes_close_confirm_title => 'Închizi casa?';
+
+  @override
+  String get homes_close_confirm_body =>
+      'Toate sarcinile și membrii vor fi șterși definitiv. Această acțiune este ireversibilă.';
+
+  @override
+  String get homes_error_cannot_leave_as_owner =>
+      'Transferă proprietatea înainte de a părăsi casa';
+
+  @override
+  String get homes_role_owner => 'Proprietar';
+
+  @override
+  String get homes_role_admin => 'Administrator';
+
+  @override
+  String get homes_role_member => 'Membru';
 }

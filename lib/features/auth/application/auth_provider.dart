@@ -7,6 +7,7 @@ import '../data/auth_repository_impl.dart';
 import '../domain/auth_repository.dart';
 import '../domain/auth_user.dart';
 import '../domain/failures/auth_failure.dart';
+import '../../homes/application/current_home_provider.dart';
 import 'auth_state.dart';
 
 part 'auth_provider.g.dart';
@@ -103,6 +104,9 @@ class Auth extends _$Auth {
   Future<void> signOut() async {
     await _repo.signOut();
     ref.invalidateSelf();
-    // ref.invalidate(homesProvider); // wire up in spec-homes
+    // Invalidate after the current frame to avoid circular dependency
+    // (currentHomeProvider watches authProvider, so it rebuilds on its own,
+    // but explicit invalidation ensures stale cached data is cleared too).
+    Future.microtask(() => ref.invalidate(currentHomeProvider));
   }
 }

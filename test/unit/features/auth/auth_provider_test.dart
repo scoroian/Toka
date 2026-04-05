@@ -7,7 +7,14 @@ import 'package:toka/features/auth/application/auth_provider.dart';
 import 'package:toka/features/auth/application/auth_state.dart';
 import 'package:toka/features/auth/domain/auth_repository.dart';
 import 'package:toka/features/auth/domain/auth_user.dart';
+import 'package:toka/features/homes/application/current_home_provider.dart';
+import 'package:toka/features/homes/domain/home.dart';
 import 'package:toka/features/i18n/application/locale_provider.dart';
+
+class _FakeCurrentHome extends CurrentHome {
+  @override
+  Future<Home?> build() async => null;
+}
 
 class _FakeLocaleNotifier extends LocaleNotifier {
   @override
@@ -142,6 +149,9 @@ void main() {
         authStateChangesProvider.overrideWith((ref) => controller.stream),
         localeNotifierProvider.overrideWith(() => _FakeLocaleNotifier()),
         authRepositoryProvider.overrideWithValue(_FakeRepo()),
+        // Override to break circular dependency: currentHomeProvider watches
+        // authProvider, so invalidating it from authProvider requires a stub.
+        currentHomeProvider.overrideWith(() => _FakeCurrentHome()),
       ],
     );
 

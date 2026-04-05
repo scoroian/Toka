@@ -639,6 +639,132 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Cambiar foto'**
   String get onboarding_change_photo;
+
+  /// My homes screen title
+  ///
+  /// In es, this message translates to:
+  /// **'Mis hogares'**
+  String get homes_my_homes;
+
+  /// Home selector sheet title
+  ///
+  /// In es, this message translates to:
+  /// **'Cambiar hogar'**
+  String get homes_selector_title;
+
+  /// Home settings screen title
+  ///
+  /// In es, this message translates to:
+  /// **'Ajustes del hogar'**
+  String get homes_settings_title;
+
+  /// Home name field label
+  ///
+  /// In es, this message translates to:
+  /// **'Nombre del hogar'**
+  String get homes_name_label;
+
+  /// Free plan label
+  ///
+  /// In es, this message translates to:
+  /// **'Plan gratuito'**
+  String get homes_plan_free;
+
+  /// Premium plan label
+  ///
+  /// In es, this message translates to:
+  /// **'Premium'**
+  String get homes_plan_premium;
+
+  /// Premium ends date
+  ///
+  /// In es, this message translates to:
+  /// **'Vence el {date}'**
+  String homes_plan_ends(String date);
+
+  /// Manage subscription button
+  ///
+  /// In es, this message translates to:
+  /// **'Gestionar suscripción'**
+  String get homes_manage_subscription;
+
+  /// Members section label
+  ///
+  /// In es, this message translates to:
+  /// **'Miembros'**
+  String get homes_members;
+
+  /// Invite code section label
+  ///
+  /// In es, this message translates to:
+  /// **'Código de invitación'**
+  String get homes_invite_code;
+
+  /// Generate invite code button
+  ///
+  /// In es, this message translates to:
+  /// **'Generar código'**
+  String get homes_generate_code;
+
+  /// Leave home button
+  ///
+  /// In es, this message translates to:
+  /// **'Abandonar hogar'**
+  String get homes_leave_home;
+
+  /// Close home button (owner only)
+  ///
+  /// In es, this message translates to:
+  /// **'Cerrar hogar'**
+  String get homes_close_home;
+
+  /// Leave home confirmation title
+  ///
+  /// In es, this message translates to:
+  /// **'¿Abandonar hogar?'**
+  String get homes_leave_confirm_title;
+
+  /// Leave home confirmation body
+  ///
+  /// In es, this message translates to:
+  /// **'Dejarás de tener acceso a las tareas de este hogar.'**
+  String get homes_leave_confirm_body;
+
+  /// Close home confirmation title
+  ///
+  /// In es, this message translates to:
+  /// **'¿Cerrar hogar?'**
+  String get homes_close_confirm_title;
+
+  /// Close home confirmation body
+  ///
+  /// In es, this message translates to:
+  /// **'Se eliminarán todas las tareas y miembros del hogar. Esta acción es irreversible.'**
+  String get homes_close_confirm_body;
+
+  /// Cannot leave as owner error
+  ///
+  /// In es, this message translates to:
+  /// **'Transfiere la propiedad antes de abandonar el hogar'**
+  String get homes_error_cannot_leave_as_owner;
+
+  /// Owner role label
+  ///
+  /// In es, this message translates to:
+  /// **'Propietario'**
+  String get homes_role_owner;
+
+  /// Admin role label
+  ///
+  /// In es, this message translates to:
+  /// **'Administrador'**
+  String get homes_role_admin;
+
+  /// Member role label
+  ///
+  /// In es, this message translates to:
+  /// **'Miembro'**
+  String get homes_role_member;
 }
 
 class _AppLocalizationsDelegate

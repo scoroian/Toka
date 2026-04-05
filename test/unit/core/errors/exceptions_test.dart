@@ -49,4 +49,15 @@ void main() {
       expect(e.toString(), equals('NetworkException: timeout'));
     });
   });
+
+  group('LanguagesFetchException', () {
+    test('has default message', () {
+      const e = LanguagesFetchException();
+      expect(e.message, equals('Failed to fetch languages'));
+    });
+    test('toString includes message', () {
+      const e = LanguagesFetchException('network error');
+      expect(e.toString(), equals('LanguagesFetchException: network error'));
+    });
+  });
 }

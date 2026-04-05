@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
 import 'core/constants/routes.dart';
+import 'core/services/locale_service.dart';
 import 'core/theme/app_theme.dart';
+import 'features/i18n/application/locale_provider.dart';
 import 'l10n/app_localizations.dart';
 
 final _router = GoRouter(
@@ -21,19 +24,22 @@ class TokaApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final locale = ref.watch(localeNotifierProvider);
+
     return MaterialApp.router(
       onGenerateTitle: (context) => AppLocalizations.of(context).appName,
-      theme: AppTheme.light,
-      darkTheme: AppTheme.dark,
-      themeMode: ThemeMode.system,
-      routerConfig: _router,
+      locale: locale,
+      supportedLocales: LocaleService.supported,
       localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: AppLocalizations.supportedLocales,
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: ThemeMode.system,
+      routerConfig: _router,
     );
   }
 }

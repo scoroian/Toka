@@ -43,4 +43,86 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get skip => 'Sari';
+
+  @override
+  String get auth_title => 'Bun venit la Toka';
+
+  @override
+  String get auth_subtitle => 'Gestionați sarcinile gospodăriei împreună';
+
+  @override
+  String get auth_google => 'Continuați cu Google';
+
+  @override
+  String get auth_apple => 'Continuați cu Apple';
+
+  @override
+  String get auth_email => 'Continuați cu email';
+
+  @override
+  String get auth_email_label => 'Adresă de email';
+
+  @override
+  String get auth_password_label => 'Parolă';
+
+  @override
+  String get auth_login => 'Autentificare';
+
+  @override
+  String get auth_register => 'Creați cont';
+
+  @override
+  String get auth_forgot_password => 'Ați uitat parola?';
+
+  @override
+  String get auth_reset_sent =>
+      'V-am trimis un email pentru a vă reseta parola';
+
+  @override
+  String get onboarding_welcome => 'Bun venit';
+
+  @override
+  String get onboarding_select_language => 'Alegeți limba';
+
+  @override
+  String get onboarding_create_home => 'Creați o locuință';
+
+  @override
+  String get onboarding_join_home => 'Alăturați-vă unei locuințe';
+
+  @override
+  String get onboarding_your_name => 'Cum vă numiți?';
+
+  @override
+  String get onboarding_photo_optional => 'Adăugați o fotografie (opțional)';
+
+  @override
+  String get settings_title => 'Setări';
+
+  @override
+  String get settings_language => 'Limbă';
+
+  @override
+  String get settings_account => 'Cont';
+
+  @override
+  String get settings_privacy => 'Confidențialitate';
+
+  @override
+  String get settings_notifications => 'Notificări';
+
+  @override
+  String get settings_subscription => 'Abonament';
+
+  @override
+  String get settings_logout => 'Deconectare';
+
+  @override
+  String get language_select_title => 'Selectați limba';
+
+  @override
+  String get language_select_subtitle => 'Alegeți limba aplicației';
+
+  @override
+  String get language_saved => 'Limbă salvată';
 }

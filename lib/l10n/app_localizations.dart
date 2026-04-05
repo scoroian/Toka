@@ -171,6 +171,168 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Omitir'**
   String get skip;
+
+  /// Auth screen title
+  ///
+  /// In es, this message translates to:
+  /// **'Bienvenido a Toka'**
+  String get auth_title;
+
+  /// Auth screen subtitle
+  ///
+  /// In es, this message translates to:
+  /// **'Gestiona las tareas del hogar juntos'**
+  String get auth_subtitle;
+
+  /// Google sign-in button
+  ///
+  /// In es, this message translates to:
+  /// **'Continuar con Google'**
+  String get auth_google;
+
+  /// Apple sign-in button
+  ///
+  /// In es, this message translates to:
+  /// **'Continuar con Apple'**
+  String get auth_apple;
+
+  /// Email sign-in button
+  ///
+  /// In es, this message translates to:
+  /// **'Continuar con email'**
+  String get auth_email;
+
+  /// Email field label
+  ///
+  /// In es, this message translates to:
+  /// **'Correo electrónico'**
+  String get auth_email_label;
+
+  /// Password field label
+  ///
+  /// In es, this message translates to:
+  /// **'Contraseña'**
+  String get auth_password_label;
+
+  /// Login button
+  ///
+  /// In es, this message translates to:
+  /// **'Iniciar sesión'**
+  String get auth_login;
+
+  /// Register button
+  ///
+  /// In es, this message translates to:
+  /// **'Crear cuenta'**
+  String get auth_register;
+
+  /// Forgot password link
+  ///
+  /// In es, this message translates to:
+  /// **'¿Olvidaste tu contraseña?'**
+  String get auth_forgot_password;
+
+  /// Password reset email sent message
+  ///
+  /// In es, this message translates to:
+  /// **'Te hemos enviado un correo para restablecer tu contraseña'**
+  String get auth_reset_sent;
+
+  /// Onboarding welcome title
+  ///
+  /// In es, this message translates to:
+  /// **'Bienvenido'**
+  String get onboarding_welcome;
+
+  /// Onboarding language selection step
+  ///
+  /// In es, this message translates to:
+  /// **'Elige tu idioma'**
+  String get onboarding_select_language;
+
+  /// Onboarding create home option
+  ///
+  /// In es, this message translates to:
+  /// **'Crear un hogar'**
+  String get onboarding_create_home;
+
+  /// Onboarding join home option
+  ///
+  /// In es, this message translates to:
+  /// **'Unirme a un hogar'**
+  String get onboarding_join_home;
+
+  /// Onboarding name step
+  ///
+  /// In es, this message translates to:
+  /// **'¿Cómo te llamas?'**
+  String get onboarding_your_name;
+
+  /// Onboarding photo step
+  ///
+  /// In es, this message translates to:
+  /// **'Añadir foto (opcional)'**
+  String get onboarding_photo_optional;
+
+  /// Settings screen title
+  ///
+  /// In es, this message translates to:
+  /// **'Ajustes'**
+  String get settings_title;
+
+  /// Settings language option
+  ///
+  /// In es, this message translates to:
+  /// **'Idioma'**
+  String get settings_language;
+
+  /// Settings account option
+  ///
+  /// In es, this message translates to:
+  /// **'Cuenta'**
+  String get settings_account;
+
+  /// Settings privacy option
+  ///
+  /// In es, this message translates to:
+  /// **'Privacidad'**
+  String get settings_privacy;
+
+  /// Settings notifications option
+  ///
+  /// In es, this message translates to:
+  /// **'Notificaciones'**
+  String get settings_notifications;
+
+  /// Settings subscription option
+  ///
+  /// In es, this message translates to:
+  /// **'Suscripción'**
+  String get settings_subscription;
+
+  /// Settings logout option
+  ///
+  /// In es, this message translates to:
+  /// **'Cerrar sesión'**
+  String get settings_logout;
+
+  /// Language selection screen title
+  ///
+  /// In es, this message translates to:
+  /// **'Seleccionar idioma'**
+  String get language_select_title;
+
+  /// Language selection screen subtitle
+  ///
+  /// In es, this message translates to:
+  /// **'Elige el idioma de la aplicación'**
+  String get language_select_subtitle;
+
+  /// Confirmation message after saving language
+  ///
+  /// In es, this message translates to:
+  /// **'Idioma guardado'**
+  String get language_saved;
 }
 
 class _AppLocalizationsDelegate

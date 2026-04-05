@@ -25,3 +25,10 @@ class NetworkException implements Exception {
   @override
   String toString() => 'NetworkException: $message';
 }
+
+class LanguagesFetchException implements Exception {
+  const LanguagesFetchException([this.message = 'Failed to fetch languages']);
+  final String message;
+  @override
+  String toString() => 'LanguagesFetchException: $message';
+}

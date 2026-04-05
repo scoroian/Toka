@@ -205,4 +205,96 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get auth_send_reset_link => 'Enviar enlace';
+
+  @override
+  String get onboarding_welcome_title => 'Bienvenido a Toka';
+
+  @override
+  String get onboarding_welcome_subtitle =>
+      'Tu app cooperativa de tareas del hogar';
+
+  @override
+  String get onboarding_start => 'Empezar';
+
+  @override
+  String get onboarding_language_title => '¿En qué idioma prefieres usar Toka?';
+
+  @override
+  String get onboarding_profile_title => 'Cuéntanos sobre ti';
+
+  @override
+  String get onboarding_nickname_label => '¿Cómo te llaman?';
+
+  @override
+  String get onboarding_nickname_hint => 'Tu apodo';
+
+  @override
+  String get onboarding_nickname_required => 'El apodo es obligatorio';
+
+  @override
+  String get onboarding_nickname_max_length => 'Máximo 30 caracteres';
+
+  @override
+  String get onboarding_phone_label => 'Teléfono (opcional)';
+
+  @override
+  String get onboarding_phone_visible_label =>
+      'Mostrar mi teléfono a miembros del hogar';
+
+  @override
+  String get onboarding_home_choice_title => '¿Qué quieres hacer?';
+
+  @override
+  String get onboarding_create_home_description =>
+      'Crea tu hogar y añade a tus compañeros';
+
+  @override
+  String get onboarding_join_home_description =>
+      'Únete a un hogar con un código de invitación';
+
+  @override
+  String get onboarding_home_name_label => 'Nombre del hogar';
+
+  @override
+  String get onboarding_home_name_hint => 'Casa de los García';
+
+  @override
+  String get onboarding_home_name_required =>
+      'El nombre del hogar es obligatorio';
+
+  @override
+  String get onboarding_home_name_max_length => 'Máximo 40 caracteres';
+
+  @override
+  String get onboarding_create_home_button => 'Crear hogar';
+
+  @override
+  String get onboarding_invite_code_label => 'Código de invitación';
+
+  @override
+  String get onboarding_invite_code_hint => '6 caracteres';
+
+  @override
+  String get onboarding_invite_code_length_error =>
+      'El código debe tener 6 caracteres';
+
+  @override
+  String get onboarding_join_home_button => 'Unirme';
+
+  @override
+  String get onboarding_error_invalid_invite => 'Código de invitación inválido';
+
+  @override
+  String get onboarding_error_expired_invite =>
+      'El código de invitación ha expirado';
+
+  @override
+  String get onboarding_error_no_slots =>
+      'No tienes plazas disponibles para crear más hogares';
+
+  @override
+  String get onboarding_add_photo => 'Añadir foto';
+
+  @override
+  String get onboarding_change_photo => 'Cambiar foto';
 }

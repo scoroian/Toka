@@ -203,4 +203,92 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get auth_send_reset_link => 'Send reset link';
+
+  @override
+  String get onboarding_welcome_title => 'Welcome to Toka';
+
+  @override
+  String get onboarding_welcome_subtitle =>
+      'Your cooperative household task app';
+
+  @override
+  String get onboarding_start => 'Get started';
+
+  @override
+  String get onboarding_language_title => 'Which language do you prefer?';
+
+  @override
+  String get onboarding_profile_title => 'Tell us about you';
+
+  @override
+  String get onboarding_nickname_label => 'What do people call you?';
+
+  @override
+  String get onboarding_nickname_hint => 'Your nickname';
+
+  @override
+  String get onboarding_nickname_required => 'Nickname is required';
+
+  @override
+  String get onboarding_nickname_max_length => 'Maximum 30 characters';
+
+  @override
+  String get onboarding_phone_label => 'Phone (optional)';
+
+  @override
+  String get onboarding_phone_visible_label =>
+      'Show my phone to household members';
+
+  @override
+  String get onboarding_home_choice_title => 'What would you like to do?';
+
+  @override
+  String get onboarding_create_home_description =>
+      'Create your home and add your housemates';
+
+  @override
+  String get onboarding_join_home_description =>
+      'Join a home with an invitation code';
+
+  @override
+  String get onboarding_home_name_label => 'Home name';
+
+  @override
+  String get onboarding_home_name_hint => 'The García Home';
+
+  @override
+  String get onboarding_home_name_required => 'Home name is required';
+
+  @override
+  String get onboarding_home_name_max_length => 'Maximum 40 characters';
+
+  @override
+  String get onboarding_create_home_button => 'Create home';
+
+  @override
+  String get onboarding_invite_code_label => 'Invitation code';
+
+  @override
+  String get onboarding_invite_code_hint => '6 characters';
+
+  @override
+  String get onboarding_invite_code_length_error => 'Code must be 6 characters';
+
+  @override
+  String get onboarding_join_home_button => 'Join';
+
+  @override
+  String get onboarding_error_invalid_invite => 'Invalid invitation code';
+
+  @override
+  String get onboarding_error_expired_invite => 'Invitation code has expired';
+
+  @override
+  String get onboarding_error_no_slots => 'No home slots available';
+
+  @override
+  String get onboarding_add_photo => 'Add photo';
+
+  @override
+  String get onboarding_change_photo => 'Change photo';
 }

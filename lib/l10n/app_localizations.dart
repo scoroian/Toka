@@ -471,6 +471,174 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Enviar enlace'**
   String get auth_send_reset_link;
+
+  /// Onboarding step 1 title
+  ///
+  /// In es, this message translates to:
+  /// **'Bienvenido a Toka'**
+  String get onboarding_welcome_title;
+
+  /// Onboarding step 1 subtitle
+  ///
+  /// In es, this message translates to:
+  /// **'Tu app cooperativa de tareas del hogar'**
+  String get onboarding_welcome_subtitle;
+
+  /// Onboarding start button
+  ///
+  /// In es, this message translates to:
+  /// **'Empezar'**
+  String get onboarding_start;
+
+  /// Onboarding step 2 title
+  ///
+  /// In es, this message translates to:
+  /// **'¿En qué idioma prefieres usar Toka?'**
+  String get onboarding_language_title;
+
+  /// Onboarding step 3 title
+  ///
+  /// In es, this message translates to:
+  /// **'Cuéntanos sobre ti'**
+  String get onboarding_profile_title;
+
+  /// Nickname field label
+  ///
+  /// In es, this message translates to:
+  /// **'¿Cómo te llaman?'**
+  String get onboarding_nickname_label;
+
+  /// Nickname field hint
+  ///
+  /// In es, this message translates to:
+  /// **'Tu apodo'**
+  String get onboarding_nickname_hint;
+
+  /// Nickname required error
+  ///
+  /// In es, this message translates to:
+  /// **'El apodo es obligatorio'**
+  String get onboarding_nickname_required;
+
+  /// Nickname max length error
+  ///
+  /// In es, this message translates to:
+  /// **'Máximo 30 caracteres'**
+  String get onboarding_nickname_max_length;
+
+  /// Phone field label
+  ///
+  /// In es, this message translates to:
+  /// **'Teléfono (opcional)'**
+  String get onboarding_phone_label;
+
+  /// Phone visibility toggle label
+  ///
+  /// In es, this message translates to:
+  /// **'Mostrar mi teléfono a miembros del hogar'**
+  String get onboarding_phone_visible_label;
+
+  /// Onboarding step 4 title
+  ///
+  /// In es, this message translates to:
+  /// **'¿Qué quieres hacer?'**
+  String get onboarding_home_choice_title;
+
+  /// Create home option description
+  ///
+  /// In es, this message translates to:
+  /// **'Crea tu hogar y añade a tus compañeros'**
+  String get onboarding_create_home_description;
+
+  /// Join home option description
+  ///
+  /// In es, this message translates to:
+  /// **'Únete a un hogar con un código de invitación'**
+  String get onboarding_join_home_description;
+
+  /// Home name field label
+  ///
+  /// In es, this message translates to:
+  /// **'Nombre del hogar'**
+  String get onboarding_home_name_label;
+
+  /// Home name hint
+  ///
+  /// In es, this message translates to:
+  /// **'Casa de los García'**
+  String get onboarding_home_name_hint;
+
+  /// Home name required error
+  ///
+  /// In es, this message translates to:
+  /// **'El nombre del hogar es obligatorio'**
+  String get onboarding_home_name_required;
+
+  /// Home name max length error
+  ///
+  /// In es, this message translates to:
+  /// **'Máximo 40 caracteres'**
+  String get onboarding_home_name_max_length;
+
+  /// Create home button
+  ///
+  /// In es, this message translates to:
+  /// **'Crear hogar'**
+  String get onboarding_create_home_button;
+
+  /// Invite code field label
+  ///
+  /// In es, this message translates to:
+  /// **'Código de invitación'**
+  String get onboarding_invite_code_label;
+
+  /// Invite code hint
+  ///
+  /// In es, this message translates to:
+  /// **'6 caracteres'**
+  String get onboarding_invite_code_hint;
+
+  /// Invite code length error
+  ///
+  /// In es, this message translates to:
+  /// **'El código debe tener 6 caracteres'**
+  String get onboarding_invite_code_length_error;
+
+  /// Join home button
+  ///
+  /// In es, this message translates to:
+  /// **'Unirme'**
+  String get onboarding_join_home_button;
+
+  /// Invalid invite code error
+  ///
+  /// In es, this message translates to:
+  /// **'Código de invitación inválido'**
+  String get onboarding_error_invalid_invite;
+
+  /// Expired invite code error
+  ///
+  /// In es, this message translates to:
+  /// **'El código de invitación ha expirado'**
+  String get onboarding_error_expired_invite;
+
+  /// No home slots error
+  ///
+  /// In es, this message translates to:
+  /// **'No tienes plazas disponibles para crear más hogares'**
+  String get onboarding_error_no_slots;
+
+  /// Add photo button
+  ///
+  /// In es, this message translates to:
+  /// **'Añadir foto'**
+  String get onboarding_add_photo;
+
+  /// Change photo button
+  ///
+  /// In es, this message translates to:
+  /// **'Cambiar foto'**
+  String get onboarding_change_photo;
 }
 
 class _AppLocalizationsDelegate

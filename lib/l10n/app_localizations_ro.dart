@@ -204,4 +204,95 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get auth_send_reset_link => 'Trimiteți link-ul';
+
+  @override
+  String get onboarding_welcome_title => 'Bun venit la Toka';
+
+  @override
+  String get onboarding_welcome_subtitle =>
+      'Aplicația ta cooperativă de gestionare a sarcinilor';
+
+  @override
+  String get onboarding_start => 'Începe';
+
+  @override
+  String get onboarding_language_title => 'Ce limbă preferi?';
+
+  @override
+  String get onboarding_profile_title => 'Spune-ne despre tine';
+
+  @override
+  String get onboarding_nickname_label => 'Cum te strigă lumea?';
+
+  @override
+  String get onboarding_nickname_hint => 'Porecla ta';
+
+  @override
+  String get onboarding_nickname_required => 'Porecla este obligatorie';
+
+  @override
+  String get onboarding_nickname_max_length => 'Maximum 30 de caractere';
+
+  @override
+  String get onboarding_phone_label => 'Telefon (opțional)';
+
+  @override
+  String get onboarding_phone_visible_label =>
+      'Arată numărul meu membrilor locuinței';
+
+  @override
+  String get onboarding_home_choice_title => 'Ce vrei să faci?';
+
+  @override
+  String get onboarding_create_home_description =>
+      'Creează-ți locuința și adaugă-ți colegii';
+
+  @override
+  String get onboarding_join_home_description =>
+      'Alătură-te unei locuințe cu un cod de invitație';
+
+  @override
+  String get onboarding_home_name_label => 'Numele locuinței';
+
+  @override
+  String get onboarding_home_name_hint => 'Locuința García';
+
+  @override
+  String get onboarding_home_name_required =>
+      'Numele locuinței este obligatoriu';
+
+  @override
+  String get onboarding_home_name_max_length => 'Maximum 40 de caractere';
+
+  @override
+  String get onboarding_create_home_button => 'Creează locuința';
+
+  @override
+  String get onboarding_invite_code_label => 'Cod de invitație';
+
+  @override
+  String get onboarding_invite_code_hint => '6 caractere';
+
+  @override
+  String get onboarding_invite_code_length_error =>
+      'Codul trebuie să aibă 6 caractere';
+
+  @override
+  String get onboarding_join_home_button => 'Alătură-te';
+
+  @override
+  String get onboarding_error_invalid_invite => 'Cod de invitație invalid';
+
+  @override
+  String get onboarding_error_expired_invite => 'Codul de invitație a expirat';
+
+  @override
+  String get onboarding_error_no_slots =>
+      'Nu mai ai locuri disponibile pentru locuințe';
+
+  @override
+  String get onboarding_add_photo => 'Adaugă fotografie';
+
+  @override
+  String get onboarding_change_photo => 'Schimbă fotografia';
 }

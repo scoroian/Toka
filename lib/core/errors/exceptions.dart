@@ -47,12 +47,16 @@ class ExpiredInviteCodeException implements Exception {
   String toString() => 'ExpiredInviteCodeException: $message';
 }
 
-class NoHomeSlotsException implements Exception {
-  const NoHomeSlotsException([this.message = 'No home slots available']);
+class NoAvailableSlotsException implements Exception {
+  const NoAvailableSlotsException(
+      [this.message = 'No available home slots']);
   final String message;
   @override
-  String toString() => 'NoHomeSlotsException: $message';
+  String toString() => 'NoAvailableSlotsException: $message';
 }
+
+/// Alias for [NoAvailableSlotsException] kept for backwards compatibility.
+typedef NoHomeSlotsException = NoAvailableSlotsException;
 
 class CannotLeaveAsOwnerException implements Exception {
   const CannotLeaveAsOwnerException(
@@ -60,12 +64,4 @@ class CannotLeaveAsOwnerException implements Exception {
   final String message;
   @override
   String toString() => 'CannotLeaveAsOwnerException: $message';
-}
-
-class NoAvailableSlotsException implements Exception {
-  const NoAvailableSlotsException(
-      [this.message = 'No available home slots']);
-  final String message;
-  @override
-  String toString() => 'NoAvailableSlotsException: $message';
 }

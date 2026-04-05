@@ -19,7 +19,7 @@ class CurrentHome extends _$CurrentHome {
     );
     if (memberships.isEmpty) return null;
 
-    final repo = ref.read(homesRepositoryProvider);
+    final repo = ref.watch(homesRepositoryProvider);
     final lastId = await repo.getLastSelectedHomeId(uid);
 
     final targetId =

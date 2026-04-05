@@ -51,17 +51,23 @@ class HomesRepositoryImpl implements HomesRepository {
 
   @override
   Future<void> joinHome(String inviteCode) async {
-    final callable = _functions.httpsCallable('joinHomeByCode');
-    await callable.call<void>({'code': inviteCode});
+    try {
+      final callable = _functions.httpsCallable('joinHomeByCode');
+      await callable.call<void>({'code': inviteCode});
+    } on FirebaseFunctionsException catch (e) {
+      if (e.code == 'not-found') throw const InvalidInviteCodeException();
+      if (e.code == 'deadline-exceeded') throw const ExpiredInviteCodeException();
+      rethrow;
+    }
   }
 
   @override
   Future<void> leaveHome(String homeId, {required String uid}) async {
     final memberDoc = await _firestore
-        .collection('homes')
-        .doc(homeId)
-        .collection('members')
+        .collection('users')
         .doc(uid)
+        .collection('memberships')
+        .doc(homeId)
         .get();
 
     if (memberDoc.exists) {

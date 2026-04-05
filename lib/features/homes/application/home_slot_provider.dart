@@ -10,5 +10,5 @@ Future<int> availableSlots(AvailableSlotsRef ref) async {
   final auth = ref.watch(authProvider);
   final uid = auth.whenOrNull(authenticated: (u) => u.uid);
   if (uid == null) return 0;
-  return ref.read(homesRepositoryProvider).getAvailableSlots(uid);
+  return ref.watch(homesRepositoryProvider).getAvailableSlots(uid);
 }

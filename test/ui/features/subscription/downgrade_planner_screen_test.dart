@@ -193,4 +193,26 @@ void main() {
     expect(find.byKey(const Key('member_check_m1')), findsOneWidget);
     expect(find.byKey(const Key('member_check_m2')), findsOneWidget);
   });
+
+  testWidgets('DowngradePlannerScreen: no permite seleccionar más de 3 miembros',
+      (tester) async {
+    await tester.pumpWidget(_wrap(const DowngradePlannerScreen(), overrides: overrides));
+    await tester.pumpAndSettle();
+
+    // Initially all 5 members are checked (no limit on initialization)
+    // Uncheck m1 and m2 to get to owner + m3 + m4 = 3 selected
+    await tester.tap(find.byKey(const Key('member_check_m1')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('member_check_m2')));
+    await tester.pumpAndSettle();
+
+    // Now 3 are selected: owner, m3, m4
+    // Try to re-check m1 (would be 4th) — should be blocked
+    await tester.tap(find.byKey(const Key('member_check_m1')));
+    await tester.pumpAndSettle();
+
+    // m1 should still be unchecked (blocked by max 3 limit)
+    final m1Widget = tester.widget<CheckboxListTile>(find.byKey(const Key('member_check_m1')));
+    expect(m1Widget.value, false);
+  });
 }

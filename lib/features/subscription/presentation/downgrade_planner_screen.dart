@@ -31,7 +31,7 @@ class _DowngradePlannerScreenState extends ConsumerState<DowngradePlannerScreen>
     if (home == null) return const Scaffold(body: Center(child: CircularProgressIndicator()));
 
     final membersAsync = ref.watch(homeMembersProvider(home.id));
-    final dashAsync = ref.watch(dashboardProvider);  // <-- parameterless!
+    final dashAsync = ref.watch(dashboardProvider);
     final paywallState = ref.watch(paywallProvider);
 
     // Initialize selection on first data

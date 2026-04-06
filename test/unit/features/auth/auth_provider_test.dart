@@ -113,7 +113,7 @@ void main() {
     controller.add(user);
     await Future.microtask(() {});
 
-    expect(container.read(authProvider), AuthState.authenticated(user));
+    expect(container.read(authProvider), const AuthState.authenticated(user));
     await controller.close();
   });
 
@@ -158,7 +158,7 @@ void main() {
     container.read(authProvider);
     controller.add(user);
     await Future.microtask(() {});
-    expect(container.read(authProvider), AuthState.authenticated(user));
+    expect(container.read(authProvider), const AuthState.authenticated(user));
 
     await container.read(authProvider.notifier).signOut();
     await Future.microtask(() {});

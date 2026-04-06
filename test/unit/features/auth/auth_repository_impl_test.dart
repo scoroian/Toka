@@ -11,8 +11,6 @@ class _MockUserCredential extends Mock implements UserCredential {}
 
 class _MockUser extends Mock implements User {}
 
-class _MockUserInfo extends Mock implements UserInfo {}
-
 class _MockGoogleSignIn extends Mock implements GoogleSignIn {}
 
 class _MockGoogleSignInAccount extends Mock implements GoogleSignInAccount {}

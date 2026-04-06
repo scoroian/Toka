@@ -61,18 +61,48 @@ void main() {
     });
   });
 
-  test('MaxMembersReachedException tiene mensaje correcto', () {
-    const e = MaxMembersReachedException();
-    expect(e.toString(), contains('MaxMembersReachedException'));
+  group('MaxMembersReachedException', () {
+    test('has default message', () {
+      const e = MaxMembersReachedException();
+      expect(e.message, equals('Maximum members limit reached'));
+    });
+    test('accepts custom message', () {
+      const e = MaxMembersReachedException('custom msg');
+      expect(e.message, equals('custom msg'));
+    });
+    test('toString includes name and message', () {
+      const e = MaxMembersReachedException('oops');
+      expect(e.toString(), equals('MaxMembersReachedException: oops'));
+    });
   });
 
-  test('MaxAdminsReachedException tiene mensaje correcto', () {
-    const e = MaxAdminsReachedException();
-    expect(e.toString(), contains('MaxAdminsReachedException'));
+  group('MaxAdminsReachedException', () {
+    test('has default message', () {
+      const e = MaxAdminsReachedException();
+      expect(e.message, equals('Maximum admins limit reached (Free plan: 1 admin)'));
+    });
+    test('accepts custom message', () {
+      const e = MaxAdminsReachedException('custom msg');
+      expect(e.message, equals('custom msg'));
+    });
+    test('toString includes name and message', () {
+      const e = MaxAdminsReachedException('oops');
+      expect(e.toString(), equals('MaxAdminsReachedException: oops'));
+    });
   });
 
-  test('CannotRemoveOwnerException tiene mensaje correcto', () {
-    const e = CannotRemoveOwnerException();
-    expect(e.toString(), contains('CannotRemoveOwnerException'));
+  group('CannotRemoveOwnerException', () {
+    test('has default message', () {
+      const e = CannotRemoveOwnerException();
+      expect(e.message, equals('Cannot remove the home owner'));
+    });
+    test('accepts custom message', () {
+      const e = CannotRemoveOwnerException('custom msg');
+      expect(e.message, equals('custom msg'));
+    });
+    test('toString includes name and message', () {
+      const e = CannotRemoveOwnerException('oops');
+      expect(e.toString(), equals('CannotRemoveOwnerException: oops'));
+    });
   });
 }

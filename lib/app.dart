@@ -20,6 +20,7 @@ import 'features/onboarding/presentation/onboarding_flow_screen.dart';
 import 'features/tasks/presentation/today_screen.dart';
 import 'features/members/presentation/members_screen.dart';
 import 'features/members/presentation/member_profile_screen.dart';
+import 'features/members/presentation/vacation_screen.dart';
 import 'features/history/presentation/history_screen.dart';
 import 'features/profile/presentation/own_profile_screen.dart';
 import 'features/profile/presentation/edit_profile_screen.dart';
@@ -137,6 +138,15 @@ GoRouter appRouter(AppRouterRef ref) {
           final extra = state.extra as Map<String, dynamic>?;
           final homeId = extra?['homeId'] as String? ?? '';
           return MemberProfileScreen(homeId: homeId, memberUid: uid);
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.vacation,
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          final homeId = extra?['homeId'] as String? ?? '';
+          final uid = extra?['uid'] as String? ?? '';
+          return VacationScreen(homeId: homeId, uid: uid);
         },
       ),
       GoRoute(

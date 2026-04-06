@@ -17,6 +17,7 @@ import 'features/i18n/application/locale_provider.dart';
 import 'features/homes/presentation/home_settings_screen.dart';
 import 'features/homes/presentation/my_homes_screen.dart';
 import 'features/onboarding/presentation/onboarding_flow_screen.dart';
+import 'features/tasks/presentation/today_screen.dart';
 import 'l10n/app_localizations.dart';
 
 part 'app.g.dart';
@@ -106,7 +107,7 @@ GoRouter appRouter(AppRouterRef ref) {
       ),
       GoRoute(
         path: AppRoutes.home,
-        builder: (_, __) => const _HomePlaceholder(),
+        builder: (_, __) => const TodayScreen(),
       ),
       GoRoute(
         path: AppRoutes.myHomes,
@@ -153,17 +154,6 @@ class _SplashPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Scaffold(
       body: Center(child: CircularProgressIndicator()),
-    );
-  }
-}
-
-class _HomePlaceholder extends StatelessWidget {
-  const _HomePlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(child: Text('Home — próximamente')),
     );
   }
 }

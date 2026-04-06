@@ -462,4 +462,322 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get pass_turn_confirm_btn => 'Pasar turno';
+
+  @override
+  String get members_title => 'Miembros';
+
+  @override
+  String get members_invite_fab => 'Invitar';
+
+  @override
+  String get members_section_active => 'Activos';
+
+  @override
+  String get members_section_frozen => 'Congelados';
+
+  @override
+  String members_pending_tasks(int count) {
+    return '$count tareas pendientes';
+  }
+
+  @override
+  String members_compliance(String rate) {
+    return 'Cumplimiento: $rate%';
+  }
+
+  @override
+  String get members_role_badge_owner => 'Propietario';
+
+  @override
+  String get members_role_badge_admin => 'Admin';
+
+  @override
+  String get members_role_badge_member => 'Miembro';
+
+  @override
+  String get members_role_badge_frozen => 'Congelado';
+
+  @override
+  String get invite_sheet_title => 'Invitar miembro';
+
+  @override
+  String get invite_sheet_share_code => 'Compartir código';
+
+  @override
+  String get invite_sheet_by_email => 'Invitar por email';
+
+  @override
+  String get invite_sheet_code_label => 'Código de invitación';
+
+  @override
+  String get invite_sheet_email_hint => 'correo@ejemplo.com';
+
+  @override
+  String get invite_sheet_send => 'Enviar invitación';
+
+  @override
+  String get invite_sheet_copy_code => 'Copiar código';
+
+  @override
+  String get invite_sheet_code_copied => 'Código copiado';
+
+  @override
+  String get member_profile_tasks_completed => 'Tareas completadas';
+
+  @override
+  String get member_profile_compliance => 'Cumplimiento';
+
+  @override
+  String get member_profile_streak => 'Racha actual';
+
+  @override
+  String get member_profile_avg_score => 'Puntuación media';
+
+  @override
+  String get member_profile_history_30d => 'Últimos 30 días';
+
+  @override
+  String get member_profile_history_90d => 'Últimos 90 días';
+
+  @override
+  String get profile_title => 'Mi perfil';
+
+  @override
+  String get profile_edit => 'Editar perfil';
+
+  @override
+  String get profile_global_stats => 'Mis estadísticas globales';
+
+  @override
+  String get profile_per_home_stats => 'Estadísticas por hogar';
+
+  @override
+  String get profile_access_management => 'Gestionar acceso';
+
+  @override
+  String get profile_linked_providers => 'Proveedores vinculados';
+
+  @override
+  String get profile_change_password => 'Cambiar contraseña';
+
+  @override
+  String get profile_logout => 'Cerrar sesión';
+
+  @override
+  String get profile_nickname_label => 'Apodo';
+
+  @override
+  String get profile_bio_label => 'Bio';
+
+  @override
+  String get profile_phone_label => 'Teléfono';
+
+  @override
+  String get profile_phone_visibility_label =>
+      'Mostrar teléfono a miembros del hogar';
+
+  @override
+  String get profile_saved => 'Perfil guardado';
+
+  @override
+  String get members_error_max_members =>
+      'El hogar ha alcanzado el límite de miembros';
+
+  @override
+  String get members_error_max_admins =>
+      'El plan gratuito solo permite 1 admin';
+
+  @override
+  String get members_error_cannot_remove_owner =>
+      'No se puede eliminar al propietario del hogar';
+
+  @override
+  String get history_title => 'Historial';
+
+  @override
+  String get history_filter_all => 'Todos';
+
+  @override
+  String get history_filter_completed => 'Completadas';
+
+  @override
+  String get history_filter_passed => 'Pases';
+
+  @override
+  String get history_empty_title => 'Sin actividad';
+
+  @override
+  String get history_empty_body => 'Aún no hay eventos en el historial';
+
+  @override
+  String history_event_completed(String name) {
+    return '$name completó';
+  }
+
+  @override
+  String get history_event_pass_turn => 'pase de turno';
+
+  @override
+  String history_event_reason(String reason) {
+    return 'Motivo: $reason';
+  }
+
+  @override
+  String get history_load_more => 'Cargar más';
+
+  @override
+  String get history_premium_banner_title => 'Más historial con Premium';
+
+  @override
+  String get history_premium_banner_body => 'Accede a 90 días de historial';
+
+  @override
+  String get history_premium_banner_cta => 'Actualizar a Premium';
+
+  @override
+  String get subscription_premium => 'Premium';
+
+  @override
+  String get subscription_free => 'Gratuito';
+
+  @override
+  String get subscription_monthly => 'Mensual';
+
+  @override
+  String get subscription_annual => 'Anual';
+
+  @override
+  String get subscription_price_monthly => '3,99 €/mes';
+
+  @override
+  String get subscription_price_annual => '29,99 €/año';
+
+  @override
+  String get subscription_annual_saving => 'Ahorra 17,89 €';
+
+  @override
+  String get paywall_title => 'Haz tu hogar Premium';
+
+  @override
+  String get paywall_subtitle =>
+      'Todo lo que necesitas para gestionar tu hogar sin límites';
+
+  @override
+  String get paywall_cta_annual => 'Empezar Premium Anual';
+
+  @override
+  String get paywall_cta_monthly => 'Plan mensual';
+
+  @override
+  String get paywall_restore => 'Restaurar compras';
+
+  @override
+  String get paywall_terms => 'Ver términos y política de privacidad';
+
+  @override
+  String get paywall_feature_members => 'Hasta 10 miembros por hogar';
+
+  @override
+  String get paywall_feature_smart => 'Distribución inteligente de tareas';
+
+  @override
+  String get paywall_feature_vacations => 'Modo vacaciones';
+
+  @override
+  String get paywall_feature_reviews => 'Valoraciones privadas';
+
+  @override
+  String get paywall_feature_history => 'Historial 90 días';
+
+  @override
+  String get paywall_feature_no_ads => 'Sin publicidad';
+
+  @override
+  String rescue_banner_text(int days) {
+    return 'Premium expira en $days días';
+  }
+
+  @override
+  String get rescue_banner_renew => 'Renovar';
+
+  @override
+  String get subscription_management_title => 'Tu suscripción';
+
+  @override
+  String get subscription_status_active => 'Premium activo';
+
+  @override
+  String subscription_status_cancelled(String date) {
+    return 'Cancelado — activo hasta $date';
+  }
+
+  @override
+  String subscription_status_rescue(int days) {
+    return 'Expira en $days días';
+  }
+
+  @override
+  String get subscription_status_free => 'Plan gratuito';
+
+  @override
+  String subscription_status_restorable(String date) {
+    return 'Puede restaurarse hasta $date';
+  }
+
+  @override
+  String get subscription_restore_btn => 'Restaurar Premium';
+
+  @override
+  String get subscription_restore_success => 'Premium restaurado correctamente';
+
+  @override
+  String get subscription_restore_expired_error =>
+      'La ventana de restauración ya expiró';
+
+  @override
+  String get subscription_plan_downgrade => 'Planear downgrade';
+
+  @override
+  String get downgrade_planner_title => 'Planear downgrade';
+
+  @override
+  String get downgrade_planner_members_section => '¿Qué miembros continuarán?';
+
+  @override
+  String get downgrade_planner_tasks_section => '¿Qué tareas continuarán?';
+
+  @override
+  String get downgrade_planner_max_members_hint =>
+      'Máximo 3 miembros (owner siempre incluido)';
+
+  @override
+  String get downgrade_planner_max_tasks_hint => 'Máximo 4 tareas';
+
+  @override
+  String get downgrade_planner_auto_note =>
+      'Si no decides, se aplicará selección automática';
+
+  @override
+  String get downgrade_planner_save => 'Guardar plan';
+
+  @override
+  String get downgrade_planner_saved => 'Plan de downgrade guardado';
+
+  @override
+  String get premium_gate_title => 'Función Premium';
+
+  @override
+  String premium_gate_body(String featureName) {
+    return '$featureName requiere Premium';
+  }
+
+  @override
+  String get premium_gate_upgrade => 'Actualizar a Premium';
+
+  @override
+  String get rescue_screen_title => 'Renueva tu Premium';
+
+  @override
+  String get rescue_screen_body =>
+      'Tu suscripción Premium expira pronto. Renueva ahora para no perder acceso a tus funciones.';
 }

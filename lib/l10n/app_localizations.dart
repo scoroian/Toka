@@ -927,6 +927,588 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Pasar turno'**
   String get pass_turn_confirm_btn;
+
+  /// Members screen title
+  ///
+  /// In es, this message translates to:
+  /// **'Miembros'**
+  String get members_title;
+
+  /// FAB label on members screen
+  ///
+  /// In es, this message translates to:
+  /// **'Invitar'**
+  String get members_invite_fab;
+
+  /// Active members section
+  ///
+  /// In es, this message translates to:
+  /// **'Activos'**
+  String get members_section_active;
+
+  /// Frozen members section
+  ///
+  /// In es, this message translates to:
+  /// **'Congelados'**
+  String get members_section_frozen;
+
+  /// Pending tasks badge on member card
+  ///
+  /// In es, this message translates to:
+  /// **'{count} tareas pendientes'**
+  String members_pending_tasks(int count);
+
+  /// Compliance rate on member card
+  ///
+  /// In es, this message translates to:
+  /// **'Cumplimiento: {rate}%'**
+  String members_compliance(String rate);
+
+  /// Owner role badge
+  ///
+  /// In es, this message translates to:
+  /// **'Propietario'**
+  String get members_role_badge_owner;
+
+  /// Admin role badge
+  ///
+  /// In es, this message translates to:
+  /// **'Admin'**
+  String get members_role_badge_admin;
+
+  /// Member role badge
+  ///
+  /// In es, this message translates to:
+  /// **'Miembro'**
+  String get members_role_badge_member;
+
+  /// Frozen role badge
+  ///
+  /// In es, this message translates to:
+  /// **'Congelado'**
+  String get members_role_badge_frozen;
+
+  /// Invite member sheet title
+  ///
+  /// In es, this message translates to:
+  /// **'Invitar miembro'**
+  String get invite_sheet_title;
+
+  /// Share invite code option
+  ///
+  /// In es, this message translates to:
+  /// **'Compartir código'**
+  String get invite_sheet_share_code;
+
+  /// Invite by email option
+  ///
+  /// In es, this message translates to:
+  /// **'Invitar por email'**
+  String get invite_sheet_by_email;
+
+  /// Generated invite code label
+  ///
+  /// In es, this message translates to:
+  /// **'Código de invitación'**
+  String get invite_sheet_code_label;
+
+  /// Email field hint
+  ///
+  /// In es, this message translates to:
+  /// **'correo@ejemplo.com'**
+  String get invite_sheet_email_hint;
+
+  /// Send invite button
+  ///
+  /// In es, this message translates to:
+  /// **'Enviar invitación'**
+  String get invite_sheet_send;
+
+  /// Copy code button
+  ///
+  /// In es, this message translates to:
+  /// **'Copiar código'**
+  String get invite_sheet_copy_code;
+
+  /// Code copied snackbar
+  ///
+  /// In es, this message translates to:
+  /// **'Código copiado'**
+  String get invite_sheet_code_copied;
+
+  /// Stats: tasks completed
+  ///
+  /// In es, this message translates to:
+  /// **'Tareas completadas'**
+  String get member_profile_tasks_completed;
+
+  /// Stats: compliance rate
+  ///
+  /// In es, this message translates to:
+  /// **'Cumplimiento'**
+  String get member_profile_compliance;
+
+  /// Stats: current streak
+  ///
+  /// In es, this message translates to:
+  /// **'Racha actual'**
+  String get member_profile_streak;
+
+  /// Stats: average score
+  ///
+  /// In es, this message translates to:
+  /// **'Puntuación media'**
+  String get member_profile_avg_score;
+
+  /// History 30 days tab
+  ///
+  /// In es, this message translates to:
+  /// **'Últimos 30 días'**
+  String get member_profile_history_30d;
+
+  /// History 90 days tab
+  ///
+  /// In es, this message translates to:
+  /// **'Últimos 90 días'**
+  String get member_profile_history_90d;
+
+  /// Own profile screen title
+  ///
+  /// In es, this message translates to:
+  /// **'Mi perfil'**
+  String get profile_title;
+
+  /// Edit profile button
+  ///
+  /// In es, this message translates to:
+  /// **'Editar perfil'**
+  String get profile_edit;
+
+  /// Global stats section title
+  ///
+  /// In es, this message translates to:
+  /// **'Mis estadísticas globales'**
+  String get profile_global_stats;
+
+  /// Per-home stats accordion title
+  ///
+  /// In es, this message translates to:
+  /// **'Estadísticas por hogar'**
+  String get profile_per_home_stats;
+
+  /// Access management section title
+  ///
+  /// In es, this message translates to:
+  /// **'Gestionar acceso'**
+  String get profile_access_management;
+
+  /// Linked providers item
+  ///
+  /// In es, this message translates to:
+  /// **'Proveedores vinculados'**
+  String get profile_linked_providers;
+
+  /// Change password item
+  ///
+  /// In es, this message translates to:
+  /// **'Cambiar contraseña'**
+  String get profile_change_password;
+
+  /// Logout button
+  ///
+  /// In es, this message translates to:
+  /// **'Cerrar sesión'**
+  String get profile_logout;
+
+  /// Nickname field label
+  ///
+  /// In es, this message translates to:
+  /// **'Apodo'**
+  String get profile_nickname_label;
+
+  /// Bio field label
+  ///
+  /// In es, this message translates to:
+  /// **'Bio'**
+  String get profile_bio_label;
+
+  /// Phone field label
+  ///
+  /// In es, this message translates to:
+  /// **'Teléfono'**
+  String get profile_phone_label;
+
+  /// Phone visibility toggle
+  ///
+  /// In es, this message translates to:
+  /// **'Mostrar teléfono a miembros del hogar'**
+  String get profile_phone_visibility_label;
+
+  /// Profile saved snackbar
+  ///
+  /// In es, this message translates to:
+  /// **'Perfil guardado'**
+  String get profile_saved;
+
+  /// Max members error
+  ///
+  /// In es, this message translates to:
+  /// **'El hogar ha alcanzado el límite de miembros'**
+  String get members_error_max_members;
+
+  /// Max admins error
+  ///
+  /// In es, this message translates to:
+  /// **'El plan gratuito solo permite 1 admin'**
+  String get members_error_max_admins;
+
+  /// Cannot remove owner error
+  ///
+  /// In es, this message translates to:
+  /// **'No se puede eliminar al propietario del hogar'**
+  String get members_error_cannot_remove_owner;
+
+  /// History screen title
+  ///
+  /// In es, this message translates to:
+  /// **'Historial'**
+  String get history_title;
+
+  /// History filter: all events
+  ///
+  /// In es, this message translates to:
+  /// **'Todos'**
+  String get history_filter_all;
+
+  /// History filter: completed only
+  ///
+  /// In es, this message translates to:
+  /// **'Completadas'**
+  String get history_filter_completed;
+
+  /// History filter: passed only
+  ///
+  /// In es, this message translates to:
+  /// **'Pases'**
+  String get history_filter_passed;
+
+  /// History empty state title
+  ///
+  /// In es, this message translates to:
+  /// **'Sin actividad'**
+  String get history_empty_title;
+
+  /// History empty state body
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no hay eventos en el historial'**
+  String get history_empty_body;
+
+  /// Completed event actor label
+  ///
+  /// In es, this message translates to:
+  /// **'{name} completó'**
+  String history_event_completed(String name);
+
+  /// Pass turn label in event tile
+  ///
+  /// In es, this message translates to:
+  /// **'pase de turno'**
+  String get history_event_pass_turn;
+
+  /// Pass reason label
+  ///
+  /// In es, this message translates to:
+  /// **'Motivo: {reason}'**
+  String history_event_reason(String reason);
+
+  /// Load more button
+  ///
+  /// In es, this message translates to:
+  /// **'Cargar más'**
+  String get history_load_more;
+
+  /// Premium banner title
+  ///
+  /// In es, this message translates to:
+  /// **'Más historial con Premium'**
+  String get history_premium_banner_title;
+
+  /// Premium banner body
+  ///
+  /// In es, this message translates to:
+  /// **'Accede a 90 días de historial'**
+  String get history_premium_banner_body;
+
+  /// Premium banner CTA button
+  ///
+  /// In es, this message translates to:
+  /// **'Actualizar a Premium'**
+  String get history_premium_banner_cta;
+
+  /// Premium plan name
+  ///
+  /// In es, this message translates to:
+  /// **'Premium'**
+  String get subscription_premium;
+
+  /// Free plan name
+  ///
+  /// In es, this message translates to:
+  /// **'Gratuito'**
+  String get subscription_free;
+
+  /// Monthly billing period
+  ///
+  /// In es, this message translates to:
+  /// **'Mensual'**
+  String get subscription_monthly;
+
+  /// Annual billing period
+  ///
+  /// In es, this message translates to:
+  /// **'Anual'**
+  String get subscription_annual;
+
+  /// Monthly price
+  ///
+  /// In es, this message translates to:
+  /// **'3,99 €/mes'**
+  String get subscription_price_monthly;
+
+  /// Annual price
+  ///
+  /// In es, this message translates to:
+  /// **'29,99 €/año'**
+  String get subscription_price_annual;
+
+  /// Annual plan saving label
+  ///
+  /// In es, this message translates to:
+  /// **'Ahorra 17,89 €'**
+  String get subscription_annual_saving;
+
+  /// Paywall screen title
+  ///
+  /// In es, this message translates to:
+  /// **'Haz tu hogar Premium'**
+  String get paywall_title;
+
+  /// Paywall subtitle
+  ///
+  /// In es, this message translates to:
+  /// **'Todo lo que necesitas para gestionar tu hogar sin límites'**
+  String get paywall_subtitle;
+
+  /// Primary paywall CTA (annual)
+  ///
+  /// In es, this message translates to:
+  /// **'Empezar Premium Anual'**
+  String get paywall_cta_annual;
+
+  /// Secondary paywall CTA (monthly)
+  ///
+  /// In es, this message translates to:
+  /// **'Plan mensual'**
+  String get paywall_cta_monthly;
+
+  /// Restore purchases link
+  ///
+  /// In es, this message translates to:
+  /// **'Restaurar compras'**
+  String get paywall_restore;
+
+  /// Terms and privacy link
+  ///
+  /// In es, this message translates to:
+  /// **'Ver términos y política de privacidad'**
+  String get paywall_terms;
+
+  /// Premium feature: members
+  ///
+  /// In es, this message translates to:
+  /// **'Hasta 10 miembros por hogar'**
+  String get paywall_feature_members;
+
+  /// Premium feature: smart distribution
+  ///
+  /// In es, this message translates to:
+  /// **'Distribución inteligente de tareas'**
+  String get paywall_feature_smart;
+
+  /// Premium feature: vacations
+  ///
+  /// In es, this message translates to:
+  /// **'Modo vacaciones'**
+  String get paywall_feature_vacations;
+
+  /// Premium feature: reviews
+  ///
+  /// In es, this message translates to:
+  /// **'Valoraciones privadas'**
+  String get paywall_feature_reviews;
+
+  /// Premium feature: 90-day history
+  ///
+  /// In es, this message translates to:
+  /// **'Historial 90 días'**
+  String get paywall_feature_history;
+
+  /// Premium feature: no ads
+  ///
+  /// In es, this message translates to:
+  /// **'Sin publicidad'**
+  String get paywall_feature_no_ads;
+
+  /// Rescue banner text with days remaining
+  ///
+  /// In es, this message translates to:
+  /// **'Premium expira en {days} días'**
+  String rescue_banner_text(int days);
+
+  /// Rescue banner renew button
+  ///
+  /// In es, this message translates to:
+  /// **'Renovar'**
+  String get rescue_banner_renew;
+
+  /// Subscription management screen title
+  ///
+  /// In es, this message translates to:
+  /// **'Tu suscripción'**
+  String get subscription_management_title;
+
+  /// Active subscription status
+  ///
+  /// In es, this message translates to:
+  /// **'Premium activo'**
+  String get subscription_status_active;
+
+  /// Cancelled but active until date
+  ///
+  /// In es, this message translates to:
+  /// **'Cancelado — activo hasta {date}'**
+  String subscription_status_cancelled(String date);
+
+  /// Rescue state label
+  ///
+  /// In es, this message translates to:
+  /// **'Expira en {days} días'**
+  String subscription_status_rescue(int days);
+
+  /// Free plan status
+  ///
+  /// In es, this message translates to:
+  /// **'Plan gratuito'**
+  String get subscription_status_free;
+
+  /// Restorable until date
+  ///
+  /// In es, this message translates to:
+  /// **'Puede restaurarse hasta {date}'**
+  String subscription_status_restorable(String date);
+
+  /// Restore premium button
+  ///
+  /// In es, this message translates to:
+  /// **'Restaurar Premium'**
+  String get subscription_restore_btn;
+
+  /// Restore success snackbar
+  ///
+  /// In es, this message translates to:
+  /// **'Premium restaurado correctamente'**
+  String get subscription_restore_success;
+
+  /// Restore window expired error
+  ///
+  /// In es, this message translates to:
+  /// **'La ventana de restauración ya expiró'**
+  String get subscription_restore_expired_error;
+
+  /// Plan downgrade button
+  ///
+  /// In es, this message translates to:
+  /// **'Planear downgrade'**
+  String get subscription_plan_downgrade;
+
+  /// Downgrade planner screen title
+  ///
+  /// In es, this message translates to:
+  /// **'Planear downgrade'**
+  String get downgrade_planner_title;
+
+  /// Members section label
+  ///
+  /// In es, this message translates to:
+  /// **'¿Qué miembros continuarán?'**
+  String get downgrade_planner_members_section;
+
+  /// Tasks section label
+  ///
+  /// In es, this message translates to:
+  /// **'¿Qué tareas continuarán?'**
+  String get downgrade_planner_tasks_section;
+
+  /// Max members hint
+  ///
+  /// In es, this message translates to:
+  /// **'Máximo 3 miembros (owner siempre incluido)'**
+  String get downgrade_planner_max_members_hint;
+
+  /// Max tasks hint
+  ///
+  /// In es, this message translates to:
+  /// **'Máximo 4 tareas'**
+  String get downgrade_planner_max_tasks_hint;
+
+  /// Auto selection note
+  ///
+  /// In es, this message translates to:
+  /// **'Si no decides, se aplicará selección automática'**
+  String get downgrade_planner_auto_note;
+
+  /// Save downgrade plan button
+  ///
+  /// In es, this message translates to:
+  /// **'Guardar plan'**
+  String get downgrade_planner_save;
+
+  /// Downgrade plan saved snackbar
+  ///
+  /// In es, this message translates to:
+  /// **'Plan de downgrade guardado'**
+  String get downgrade_planner_saved;
+
+  /// Premium feature gate title
+  ///
+  /// In es, this message translates to:
+  /// **'Función Premium'**
+  String get premium_gate_title;
+
+  /// Premium feature gate body
+  ///
+  /// In es, this message translates to:
+  /// **'{featureName} requiere Premium'**
+  String premium_gate_body(String featureName);
+
+  /// Premium gate upgrade button
+  ///
+  /// In es, this message translates to:
+  /// **'Actualizar a Premium'**
+  String get premium_gate_upgrade;
+
+  /// Rescue screen title
+  ///
+  /// In es, this message translates to:
+  /// **'Renueva tu Premium'**
+  String get rescue_screen_title;
+
+  /// Rescue screen body
+  ///
+  /// In es, this message translates to:
+  /// **'Tu suscripción Premium expira pronto. Renueva ahora para no perder acceso a tus funciones.'**
+  String get rescue_screen_body;
 }
 
 class _AppLocalizationsDelegate

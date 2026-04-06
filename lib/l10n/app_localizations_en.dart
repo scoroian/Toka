@@ -456,4 +456,320 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pass_turn_confirm_btn => 'Pass turn';
+
+  @override
+  String get members_title => 'Members';
+
+  @override
+  String get members_invite_fab => 'Invite';
+
+  @override
+  String get members_section_active => 'Active';
+
+  @override
+  String get members_section_frozen => 'Frozen';
+
+  @override
+  String members_pending_tasks(int count) {
+    return '$count pending tasks';
+  }
+
+  @override
+  String members_compliance(String rate) {
+    return 'Compliance: $rate%';
+  }
+
+  @override
+  String get members_role_badge_owner => 'Owner';
+
+  @override
+  String get members_role_badge_admin => 'Admin';
+
+  @override
+  String get members_role_badge_member => 'Member';
+
+  @override
+  String get members_role_badge_frozen => 'Frozen';
+
+  @override
+  String get invite_sheet_title => 'Invite member';
+
+  @override
+  String get invite_sheet_share_code => 'Share code';
+
+  @override
+  String get invite_sheet_by_email => 'Invite by email';
+
+  @override
+  String get invite_sheet_code_label => 'Invitation code';
+
+  @override
+  String get invite_sheet_email_hint => 'email@example.com';
+
+  @override
+  String get invite_sheet_send => 'Send invitation';
+
+  @override
+  String get invite_sheet_copy_code => 'Copy code';
+
+  @override
+  String get invite_sheet_code_copied => 'Code copied';
+
+  @override
+  String get member_profile_tasks_completed => 'Tasks completed';
+
+  @override
+  String get member_profile_compliance => 'Compliance';
+
+  @override
+  String get member_profile_streak => 'Current streak';
+
+  @override
+  String get member_profile_avg_score => 'Average score';
+
+  @override
+  String get member_profile_history_30d => 'Last 30 days';
+
+  @override
+  String get member_profile_history_90d => 'Last 90 days';
+
+  @override
+  String get profile_title => 'My profile';
+
+  @override
+  String get profile_edit => 'Edit profile';
+
+  @override
+  String get profile_global_stats => 'My global stats';
+
+  @override
+  String get profile_per_home_stats => 'Stats by home';
+
+  @override
+  String get profile_access_management => 'Manage access';
+
+  @override
+  String get profile_linked_providers => 'Linked providers';
+
+  @override
+  String get profile_change_password => 'Change password';
+
+  @override
+  String get profile_logout => 'Sign out';
+
+  @override
+  String get profile_nickname_label => 'Nickname';
+
+  @override
+  String get profile_bio_label => 'Bio';
+
+  @override
+  String get profile_phone_label => 'Phone';
+
+  @override
+  String get profile_phone_visibility_label => 'Show phone to home members';
+
+  @override
+  String get profile_saved => 'Profile saved';
+
+  @override
+  String get members_error_max_members => 'Home has reached its member limit';
+
+  @override
+  String get members_error_max_admins => 'Free plan only allows 1 admin';
+
+  @override
+  String get members_error_cannot_remove_owner =>
+      'Cannot remove the home owner';
+
+  @override
+  String get history_title => 'History';
+
+  @override
+  String get history_filter_all => 'All';
+
+  @override
+  String get history_filter_completed => 'Completed';
+
+  @override
+  String get history_filter_passed => 'Passes';
+
+  @override
+  String get history_empty_title => 'No activity yet';
+
+  @override
+  String get history_empty_body => 'No events in the history yet';
+
+  @override
+  String history_event_completed(String name) {
+    return '$name completed';
+  }
+
+  @override
+  String get history_event_pass_turn => 'turn pass';
+
+  @override
+  String history_event_reason(String reason) {
+    return 'Reason: $reason';
+  }
+
+  @override
+  String get history_load_more => 'Load more';
+
+  @override
+  String get history_premium_banner_title => 'More history with Premium';
+
+  @override
+  String get history_premium_banner_body => 'Access 90 days of history';
+
+  @override
+  String get history_premium_banner_cta => 'Upgrade to Premium';
+
+  @override
+  String get subscription_premium => 'Premium';
+
+  @override
+  String get subscription_free => 'Free';
+
+  @override
+  String get subscription_monthly => 'Monthly';
+
+  @override
+  String get subscription_annual => 'Annual';
+
+  @override
+  String get subscription_price_monthly => '€3.99/month';
+
+  @override
+  String get subscription_price_annual => '€29.99/year';
+
+  @override
+  String get subscription_annual_saving => 'Save €17.89';
+
+  @override
+  String get paywall_title => 'Make your home Premium';
+
+  @override
+  String get paywall_subtitle =>
+      'Everything you need to manage your home without limits';
+
+  @override
+  String get paywall_cta_annual => 'Start Premium Annual';
+
+  @override
+  String get paywall_cta_monthly => 'Monthly plan';
+
+  @override
+  String get paywall_restore => 'Restore purchases';
+
+  @override
+  String get paywall_terms => 'Terms and privacy policy';
+
+  @override
+  String get paywall_feature_members => 'Up to 10 members per home';
+
+  @override
+  String get paywall_feature_smart => 'Smart task distribution';
+
+  @override
+  String get paywall_feature_vacations => 'Vacation mode';
+
+  @override
+  String get paywall_feature_reviews => 'Private ratings';
+
+  @override
+  String get paywall_feature_history => '90-day history';
+
+  @override
+  String get paywall_feature_no_ads => 'No ads';
+
+  @override
+  String rescue_banner_text(int days) {
+    return 'Premium expires in $days days';
+  }
+
+  @override
+  String get rescue_banner_renew => 'Renew';
+
+  @override
+  String get subscription_management_title => 'Your subscription';
+
+  @override
+  String get subscription_status_active => 'Premium active';
+
+  @override
+  String subscription_status_cancelled(String date) {
+    return 'Cancelled — active until $date';
+  }
+
+  @override
+  String subscription_status_rescue(int days) {
+    return 'Expires in $days days';
+  }
+
+  @override
+  String get subscription_status_free => 'Free plan';
+
+  @override
+  String subscription_status_restorable(String date) {
+    return 'Can be restored until $date';
+  }
+
+  @override
+  String get subscription_restore_btn => 'Restore Premium';
+
+  @override
+  String get subscription_restore_success => 'Premium successfully restored';
+
+  @override
+  String get subscription_restore_expired_error =>
+      'The restore window has expired';
+
+  @override
+  String get subscription_plan_downgrade => 'Plan downgrade';
+
+  @override
+  String get downgrade_planner_title => 'Plan downgrade';
+
+  @override
+  String get downgrade_planner_members_section =>
+      'Which members will continue?';
+
+  @override
+  String get downgrade_planner_tasks_section => 'Which tasks will continue?';
+
+  @override
+  String get downgrade_planner_max_members_hint =>
+      'Maximum 3 members (owner always included)';
+
+  @override
+  String get downgrade_planner_max_tasks_hint => 'Maximum 4 tasks';
+
+  @override
+  String get downgrade_planner_auto_note =>
+      'If you don\'t decide, automatic selection will apply';
+
+  @override
+  String get downgrade_planner_save => 'Save plan';
+
+  @override
+  String get downgrade_planner_saved => 'Downgrade plan saved';
+
+  @override
+  String get premium_gate_title => 'Premium Feature';
+
+  @override
+  String premium_gate_body(String featureName) {
+    return '$featureName requires Premium';
+  }
+
+  @override
+  String get premium_gate_upgrade => 'Upgrade to Premium';
+
+  @override
+  String get rescue_screen_title => 'Renew your Premium';
+
+  @override
+  String get rescue_screen_body =>
+      'Your Premium subscription is expiring soon. Renew now to keep access to your features.';
 }

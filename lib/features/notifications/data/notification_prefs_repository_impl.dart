@@ -26,9 +26,10 @@ class NotificationPrefsRepositoryImpl implements NotificationPrefsRepository {
 
   @override
   Future<void> savePrefs(NotificationPreferences prefs) async {
-    await _memberRef(prefs.homeId, prefs.uid).update({
-      'notificationPrefs': prefs.toMap(),
-    });
+    await _memberRef(prefs.homeId, prefs.uid).set(
+      {'notificationPrefs': prefs.toMap()},
+      SetOptions(merge: true),
+    );
   }
 
   @override

@@ -1,4 +1,6 @@
 // lib/features/notifications/application/fcm_token_service.dart
+import 'dart:async';
+
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 import '../domain/notification_prefs_repository.dart';
@@ -21,8 +23,8 @@ class FcmTokenService {
     await _repository.updateFcmToken(homeId, uid, token);
   }
 
-  void listenForTokenRefresh(String homeId, String uid) {
-    _messaging.onTokenRefresh.listen((token) {
+  StreamSubscription<String> listenForTokenRefresh(String homeId, String uid) {
+    return _messaging.onTokenRefresh.listen((token) {
       _repository.updateFcmToken(homeId, uid, token);
     });
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/constants/routes.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../homes/application/current_home_provider.dart';
 import '../application/paywall_provider.dart';
@@ -69,7 +70,7 @@ class RescueScreen extends ConsumerWidget {
             OutlinedButton(
               key: const Key('btn_plan_downgrade'),
               onPressed: () =>
-                  context.push('/subscription/downgrade-planner'),
+                  context.push(AppRoutes.downgradePlanner),
               child: Text(l10n.subscription_plan_downgrade),
             ),
           ],

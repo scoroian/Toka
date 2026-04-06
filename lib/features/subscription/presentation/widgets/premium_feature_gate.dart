@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/constants/routes.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../application/subscription_provider.dart';
 
@@ -71,7 +72,7 @@ class PremiumFeatureGate extends ConsumerWidget {
                 const SizedBox(height: 12),
                 ElevatedButton(
                   key: const Key('btn_upgrade'),
-                  onPressed: () => context.push('/subscription/paywall'),
+                  onPressed: () => context.push(AppRoutes.paywall),
                   child: Text(l10n.premium_gate_upgrade),
                 ),
               ],

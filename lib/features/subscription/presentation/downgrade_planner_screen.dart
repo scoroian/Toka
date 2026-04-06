@@ -170,7 +170,7 @@ class _MembersList extends StatelessWidget {
         return CheckboxListTile(
           key: Key('member_check_${m.uid}'),
           title: Text(m.nickname),
-          subtitle: isOwner ? const Text('Owner') : null,
+          subtitle: isOwner ? Text(AppLocalizations.of(context).members_role_badge_owner) : null,
           value: isChecked,
           onChanged: isOwner ? null : (val) => onToggle(m.uid, val ?? false),
         );

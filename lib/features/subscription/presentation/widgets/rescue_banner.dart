@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/constants/routes.dart';
 import '../../../../features/auth/application/auth_provider.dart';
 import '../../../../features/homes/application/current_home_provider.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -54,7 +55,7 @@ class RescueBanner extends ConsumerWidget {
             ),
             TextButton(
               key: const Key('rescue_banner_renew_btn'),
-              onPressed: () => context.push('/subscription/rescue'),
+              onPressed: () => context.push(AppRoutes.rescueScreen),
               child: Text(
                 l10n.rescue_banner_renew,
                 style: TextStyle(

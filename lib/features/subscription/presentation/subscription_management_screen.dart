@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/constants/routes.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../homes/application/current_home_provider.dart';
 import '../application/paywall_provider.dart';
@@ -103,7 +104,7 @@ class _ActionButtons extends ConsumerWidget {
             subState is SubscriptionPurged)
           FilledButton(
             key: const Key('btn_go_premium'),
-            onPressed: () => context.push('/subscription/paywall'),
+            onPressed: () => context.push(AppRoutes.paywall),
             child: Text(l10n.premium_gate_upgrade),
           ),
         if (subState is SubscriptionRestorable) ...[
@@ -119,14 +120,14 @@ class _ActionButtons extends ConsumerWidget {
         if (subState is SubscriptionRescue) ...[
           FilledButton(
             key: const Key('btn_renew'),
-            onPressed: () => context.push('/subscription/rescue'),
+            onPressed: () => context.push(AppRoutes.rescueScreen),
             child: Text(l10n.rescue_banner_renew),
           ),
           const SizedBox(height: 8),
           OutlinedButton(
             key: const Key('btn_plan_downgrade'),
             onPressed: () =>
-                context.push('/subscription/downgrade-planner'),
+                context.push(AppRoutes.downgradePlanner),
             child: Text(l10n.subscription_plan_downgrade),
           ),
         ],

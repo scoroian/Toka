@@ -10,6 +10,7 @@ part 'paywall_provider.g.dart';
 @riverpod
 class Paywall extends _$Paywall {
   StreamSubscription<List<PurchaseDetails>>? _purchaseSubscription;
+  String _pendingHomeId = '';
 
   @override
   AsyncValue<PurchaseResult?> build() {
@@ -52,7 +53,7 @@ class Paywall extends _$Paywall {
     try {
       final receiptData = _buildReceiptData(purchase);
       // homeId se pasa como applicationUserName en el purchaseParam (ver PaywallScreen)
-      final homeId = purchase.purchaseID ?? '';
+      final homeId = _pendingHomeId;
 
       await ref.read(subscriptionRepositoryProvider).syncEntitlement(
         homeId: homeId,
@@ -82,6 +83,7 @@ class Paywall extends _$Paywall {
     required String homeId,
     required String productId,
   }) async {
+    _pendingHomeId = homeId;
     state = const AsyncValue.loading();
     try {
       final repo = ref.read(subscriptionRepositoryProvider);

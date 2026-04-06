@@ -44,7 +44,10 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
       return const PurchaseResult.error(message: 'Product not found');
     }
     final product = response.productDetails.first;
-    final purchaseParam = PurchaseParam(productDetails: product);
+    final purchaseParam = PurchaseParam(
+      productDetails: product,
+      applicationUserName: homeId,
+    );
     final started = await _iap.buyNonConsumable(purchaseParam: purchaseParam);
     if (!started) {
       return const PurchaseResult.cancelled();

@@ -89,6 +89,23 @@ void main() {
       );
     });
 
+    test('HomePremiumStatus.cancelledPendingEnd → SubscriptionState.cancelledPendingEnd()', () async {
+      final endsAt = DateTime(2027, 6, 1);
+      final container = _containerWithHome(_makeHome(
+        HomePremiumStatus.cancelledPendingEnd,
+        premiumPlan: 'monthly',
+        premiumEndsAt: endsAt,
+      ));
+      addTearDown(container.dispose);
+
+      await container.read(currentHomeProvider.future);
+      final state = container.read(subscriptionStateProvider);
+      state.maybeWhen(
+        cancelledPendingEnd: (plan, _) => expect(plan, 'monthly'),
+        orElse: () => fail('Expected SubscriptionState.cancelledPendingEnd'),
+      );
+    });
+
     test('HomePremiumStatus.rescue → SubscriptionState.rescue() with daysLeft', () async {
       final endsAt = DateTime.now().add(const Duration(days: 2));
       final container = _containerWithHome(_makeHome(

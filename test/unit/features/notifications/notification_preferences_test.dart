@@ -17,6 +17,7 @@ void main() {
       expect(map['notifyOnDue'], true);
       expect(map['minutesBefore'], 30);
       expect(map['dailySummary'], false);
+      expect(map['notifyBefore'], true);
     });
 
     test('deserializa desde map con valores por defecto', () {
@@ -36,7 +37,7 @@ void main() {
       final prefs = NotificationPreferences.fromMap('h1', 'u1', {
         'silencedTypes': ['task_due', 'task_reminder'],
       });
-      expect(prefs.silencedTypes, contains('task_due'));
+      expect(prefs.silencedTypes, equals(['task_due', 'task_reminder']));
     });
   });
 }

@@ -37,13 +37,15 @@ class NotificationPreferences with _$NotificationPreferences {
     );
   }
 
-  Map<String, dynamic> toMap() => {
-    'notifyOnDue': notifyOnDue,
-    'notifyBefore': notifyBefore,
-    'minutesBefore': minutesBefore,
-    'dailySummary': dailySummary,
-    'dailySummaryTime': dailySummaryTime,
-    'silencedTypes': silencedTypes,
-    'fcmToken': fcmToken,
-  };
+  Map<String, dynamic> toMap() {
+    return {
+      'notifyOnDue': notifyOnDue,
+      'notifyBefore': notifyBefore,
+      'minutesBefore': minutesBefore,
+      'dailySummary': dailySummary,
+      'silencedTypes': silencedTypes,
+      if (dailySummaryTime != null) 'dailySummaryTime': dailySummaryTime!,
+      if (fcmToken != null) 'fcmToken': fcmToken!,
+    };
+  }
 }

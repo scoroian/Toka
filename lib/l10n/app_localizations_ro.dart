@@ -386,10 +386,14 @@ class AppLocalizationsRo extends AppLocalizations {
   String get today_screen_title => 'Azi';
 
   @override
-  String today_tasks_due(int count) => '$count sarcini pentru azi';
+  String today_tasks_due(int count) {
+    return '$count sarcini pentru azi';
+  }
 
   @override
-  String today_tasks_done_today(int count) => '$count finalizate azi';
+  String today_tasks_done_today(int count) {
+    return '$count finalizate azi';
+  }
 
   @override
   String get today_section_todo => 'De făcut';
@@ -401,14 +405,19 @@ class AppLocalizationsRo extends AppLocalizations {
   String get today_overdue => 'Întârziată';
 
   @override
-  String today_due_today(String time) => 'Azi $time';
+  String today_due_today(String time) {
+    return 'Azi $time';
+  }
 
   @override
-  String today_due_weekday(String weekday, String time) => '$weekday $time';
+  String today_due_weekday(String weekday, String time) {
+    return '$weekday $time';
+  }
 
   @override
-  String today_done_by(String name, String time) =>
-      'Finalizată de $name la $time';
+  String today_done_by(String name, String time) {
+    return 'Finalizată de $name la $time';
+  }
 
   @override
   String get today_btn_done => 'Gata';
@@ -421,4 +430,34 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get today_empty_body => 'Toate sarcinile sunt la zi';
+
+  @override
+  String get complete_task_dialog_body =>
+      'Confirmi că ai finalizat această sarcină?';
+
+  @override
+  String get complete_task_confirm_btn => 'Da, gata ✓';
+
+  @override
+  String get pass_turn_dialog_title => 'Pasezi rândul?';
+
+  @override
+  String pass_turn_compliance_warning(String before, String after) {
+    return 'Respectarea ta va scădea de la $before% la ~$after%';
+  }
+
+  @override
+  String pass_turn_next_assignee(String name) {
+    return 'Următorul responsabil: $name';
+  }
+
+  @override
+  String get pass_turn_no_candidate =>
+      'Nu există alt membru disponibil, vei rămâne responsabil';
+
+  @override
+  String get pass_turn_reason_hint => 'Motiv (opțional)';
+
+  @override
+  String get pass_turn_confirm_btn => 'Pasează rândul';
 }

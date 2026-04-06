@@ -773,58 +773,160 @@ abstract class AppLocalizations {
   String get homes_pending_tasks_badge;
 
   /// Recurrence type: hourly
+  ///
+  /// In es, this message translates to:
+  /// **'Hora'**
   String get recurrenceHourly;
 
   /// Recurrence type: daily
+  ///
+  /// In es, this message translates to:
+  /// **'Día'**
   String get recurrenceDaily;
 
   /// Recurrence type: weekly
+  ///
+  /// In es, this message translates to:
+  /// **'Semana'**
   String get recurrenceWeekly;
 
   /// Recurrence type: monthly
+  ///
+  /// In es, this message translates to:
+  /// **'Mes'**
   String get recurrenceMonthly;
 
   /// Recurrence type: yearly
+  ///
+  /// In es, this message translates to:
+  /// **'Año'**
   String get recurrenceYearly;
 
-  /// Today screen title
+  /// Title of the Today screen
+  ///
+  /// In es, this message translates to:
+  /// **'Hoy'**
   String get today_screen_title;
 
   /// Number of tasks due today
+  ///
+  /// In es, this message translates to:
+  /// **'{count} tareas para hoy'**
   String today_tasks_due(int count);
 
   /// Number of tasks done today
+  ///
+  /// In es, this message translates to:
+  /// **'{count} completadas hoy'**
   String today_tasks_done_today(int count);
 
   /// Section label: pending tasks
+  ///
+  /// In es, this message translates to:
+  /// **'Por hacer'**
   String get today_section_todo;
 
   /// Section label: done tasks
+  ///
+  /// In es, this message translates to:
+  /// **'Hechas'**
   String get today_section_done;
 
   /// Overdue chip label
+  ///
+  /// In es, this message translates to:
+  /// **'Vencida'**
   String get today_overdue;
 
-  /// Due today chip label with time
+  /// Due today chip label
+  ///
+  /// In es, this message translates to:
+  /// **'Hoy {time}'**
   String today_due_today(String time);
 
   /// Due this week chip label
+  ///
+  /// In es, this message translates to:
+  /// **'{weekday} {time}'**
   String today_due_weekday(String weekday, String time);
 
   /// Done task completion label
+  ///
+  /// In es, this message translates to:
+  /// **'Completada por {name} a las {time}'**
   String today_done_by(String name, String time);
 
   /// Mark task done button
+  ///
+  /// In es, this message translates to:
+  /// **'Hecho'**
   String get today_btn_done;
 
   /// Pass turn button
+  ///
+  /// In es, this message translates to:
+  /// **'Pasar'**
   String get today_btn_pass;
 
   /// Empty state title
+  ///
+  /// In es, this message translates to:
+  /// **'Sin tareas para hoy'**
   String get today_empty_title;
 
   /// Empty state body
+  ///
+  /// In es, this message translates to:
+  /// **'Todas las tareas están al día'**
   String get today_empty_body;
+
+  /// Complete task confirmation body
+  ///
+  /// In es, this message translates to:
+  /// **'¿Confirmas que has completado esta tarea?'**
+  String get complete_task_dialog_body;
+
+  /// Complete task confirm button
+  ///
+  /// In es, this message translates to:
+  /// **'Sí, hecha ✓'**
+  String get complete_task_confirm_btn;
+
+  /// Pass turn dialog title
+  ///
+  /// In es, this message translates to:
+  /// **'¿Pasar turno?'**
+  String get pass_turn_dialog_title;
+
+  /// Compliance drop warning
+  ///
+  /// In es, this message translates to:
+  /// **'Tu cumplimiento bajará de {before}% a ~{after}%'**
+  String pass_turn_compliance_warning(String before, String after);
+
+  /// Next assignee label
+  ///
+  /// In es, this message translates to:
+  /// **'El siguiente responsable será: {name}'**
+  String pass_turn_next_assignee(String name);
+
+  /// No other eligible member message
+  ///
+  /// In es, this message translates to:
+  /// **'No hay otro miembro disponible, seguirás siendo el responsable'**
+  String get pass_turn_no_candidate;
+
+  /// Pass reason text field hint
+  ///
+  /// In es, this message translates to:
+  /// **'Motivo (opcional)'**
+  String get pass_turn_reason_hint;
+
+  /// Pass turn confirm button
+  ///
+  /// In es, this message translates to:
+  /// **'Pasar turno'**
+  String get pass_turn_confirm_btn;
 }
 
 class _AppLocalizationsDelegate

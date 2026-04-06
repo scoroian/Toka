@@ -388,10 +388,14 @@ class AppLocalizationsEs extends AppLocalizations {
   String get today_screen_title => 'Hoy';
 
   @override
-  String today_tasks_due(int count) => '$count tareas para hoy';
+  String today_tasks_due(int count) {
+    return '$count tareas para hoy';
+  }
 
   @override
-  String today_tasks_done_today(int count) => '$count completadas hoy';
+  String today_tasks_done_today(int count) {
+    return '$count completadas hoy';
+  }
 
   @override
   String get today_section_todo => 'Por hacer';
@@ -403,14 +407,19 @@ class AppLocalizationsEs extends AppLocalizations {
   String get today_overdue => 'Vencida';
 
   @override
-  String today_due_today(String time) => 'Hoy $time';
+  String today_due_today(String time) {
+    return 'Hoy $time';
+  }
 
   @override
-  String today_due_weekday(String weekday, String time) => '$weekday $time';
+  String today_due_weekday(String weekday, String time) {
+    return '$weekday $time';
+  }
 
   @override
-  String today_done_by(String name, String time) =>
-      'Completada por $name a las $time';
+  String today_done_by(String name, String time) {
+    return 'Completada por $name a las $time';
+  }
 
   @override
   String get today_btn_done => 'Hecho';
@@ -423,4 +432,34 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get today_empty_body => 'Todas las tareas están al día';
+
+  @override
+  String get complete_task_dialog_body =>
+      '¿Confirmas que has completado esta tarea?';
+
+  @override
+  String get complete_task_confirm_btn => 'Sí, hecha ✓';
+
+  @override
+  String get pass_turn_dialog_title => '¿Pasar turno?';
+
+  @override
+  String pass_turn_compliance_warning(String before, String after) {
+    return 'Tu cumplimiento bajará de $before% a ~$after%';
+  }
+
+  @override
+  String pass_turn_next_assignee(String name) {
+    return 'El siguiente responsable será: $name';
+  }
+
+  @override
+  String get pass_turn_no_candidate =>
+      'No hay otro miembro disponible, seguirás siendo el responsable';
+
+  @override
+  String get pass_turn_reason_hint => 'Motivo (opcional)';
+
+  @override
+  String get pass_turn_confirm_btn => 'Pasar turno';
 }

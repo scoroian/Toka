@@ -382,10 +382,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get today_screen_title => 'Today';
 
   @override
-  String today_tasks_due(int count) => '$count tasks due today';
+  String today_tasks_due(int count) {
+    return '$count tasks due today';
+  }
 
   @override
-  String today_tasks_done_today(int count) => '$count done today';
+  String today_tasks_done_today(int count) {
+    return '$count done today';
+  }
 
   @override
   String get today_section_todo => 'To do';
@@ -397,13 +401,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get today_overdue => 'Overdue';
 
   @override
-  String today_due_today(String time) => 'Today $time';
+  String today_due_today(String time) {
+    return 'Today $time';
+  }
 
   @override
-  String today_due_weekday(String weekday, String time) => '$weekday $time';
+  String today_due_weekday(String weekday, String time) {
+    return '$weekday $time';
+  }
 
   @override
-  String today_done_by(String name, String time) => 'Done by $name at $time';
+  String today_done_by(String name, String time) {
+    return 'Done by $name at $time';
+  }
 
   @override
   String get today_btn_done => 'Done';
@@ -416,4 +426,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get today_empty_body => 'All tasks are up to date';
+
+  @override
+  String get complete_task_dialog_body =>
+      'Confirm you have completed this task?';
+
+  @override
+  String get complete_task_confirm_btn => 'Yes, done ✓';
+
+  @override
+  String get pass_turn_dialog_title => 'Pass turn?';
+
+  @override
+  String pass_turn_compliance_warning(String before, String after) {
+    return 'Your compliance will drop from $before% to ~$after%';
+  }
+
+  @override
+  String pass_turn_next_assignee(String name) {
+    return 'Next responsible: $name';
+  }
+
+  @override
+  String get pass_turn_no_candidate =>
+      'No other member available, you will remain responsible';
+
+  @override
+  String get pass_turn_reason_hint => 'Reason (optional)';
+
+  @override
+  String get pass_turn_confirm_btn => 'Pass turn';
 }

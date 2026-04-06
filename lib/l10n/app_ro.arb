@@ -232,5 +232,62 @@
   "homes_role_member": "Membru",
   "@homes_role_member": { "description": "Member role label" },
   "homes_pending_tasks_badge": "Ai sarcini în așteptare",
-  "@homes_pending_tasks_badge": { "description": "Pending tasks badge in home selector" }
+  "@homes_pending_tasks_badge": { "description": "Pending tasks badge in home selector" },
+  "recurrenceHourly": "Orar",
+  "@recurrenceHourly": { "description": "Recurrence type: hourly" },
+  "recurrenceDaily": "Zilnic",
+  "@recurrenceDaily": { "description": "Recurrence type: daily" },
+  "recurrenceWeekly": "Săptămânal",
+  "@recurrenceWeekly": { "description": "Recurrence type: weekly" },
+  "recurrenceMonthly": "Lunar",
+  "@recurrenceMonthly": { "description": "Recurrence type: monthly" },
+  "recurrenceYearly": "Anual",
+  "@recurrenceYearly": { "description": "Recurrence type: yearly" },
+  "today_screen_title": "Azi",
+  "@today_screen_title": { "description": "Title of the Today screen" },
+  "today_tasks_due": "{count} sarcini pentru azi",
+  "@today_tasks_due": {
+    "description": "Number of tasks due today",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "today_tasks_done_today": "{count} finalizate azi",
+  "@today_tasks_done_today": {
+    "description": "Number of tasks done today",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "today_section_todo": "De făcut",
+  "@today_section_todo": { "description": "Section label: pending tasks" },
+  "today_section_done": "Finalizate",
+  "@today_section_done": { "description": "Section label: done tasks" },
+  "today_overdue": "Întârziată",
+  "@today_overdue": { "description": "Overdue chip label" },
+  "today_due_today": "Azi {time}",
+  "@today_due_today": {
+    "description": "Due today chip label",
+    "placeholders": { "time": { "type": "String" } }
+  },
+  "today_due_weekday": "{weekday} {time}",
+  "@today_due_weekday": {
+    "description": "Due this week chip label",
+    "placeholders": {
+      "weekday": { "type": "String" },
+      "time": { "type": "String" }
+    }
+  },
+  "today_done_by": "Finalizată de {name} la {time}",
+  "@today_done_by": {
+    "description": "Done task completion label",
+    "placeholders": {
+      "name": { "type": "String" },
+      "time": { "type": "String" }
+    }
+  },
+  "today_btn_done": "Gata",
+  "@today_btn_done": { "description": "Mark task done button" },
+  "today_btn_pass": "Pasă",
+  "@today_btn_pass": { "description": "Pass turn button" },
+  "today_empty_title": "Nicio sarcină pentru azi",
+  "@today_empty_title": { "description": "Empty state title" },
+  "today_empty_body": "Toate sarcinile sunt la zi",
+  "@today_empty_body": { "description": "Empty state body" }
 }

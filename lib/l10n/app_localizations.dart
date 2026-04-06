@@ -765,6 +765,66 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Miembro'**
   String get homes_role_member;
+
+  /// Pending tasks badge in home selector
+  ///
+  /// In es, this message translates to:
+  /// **'Tienes tareas pendientes'**
+  String get homes_pending_tasks_badge;
+
+  /// Recurrence type: hourly
+  String get recurrenceHourly;
+
+  /// Recurrence type: daily
+  String get recurrenceDaily;
+
+  /// Recurrence type: weekly
+  String get recurrenceWeekly;
+
+  /// Recurrence type: monthly
+  String get recurrenceMonthly;
+
+  /// Recurrence type: yearly
+  String get recurrenceYearly;
+
+  /// Today screen title
+  String get today_screen_title;
+
+  /// Number of tasks due today
+  String today_tasks_due(int count);
+
+  /// Number of tasks done today
+  String today_tasks_done_today(int count);
+
+  /// Section label: pending tasks
+  String get today_section_todo;
+
+  /// Section label: done tasks
+  String get today_section_done;
+
+  /// Overdue chip label
+  String get today_overdue;
+
+  /// Due today chip label with time
+  String today_due_today(String time);
+
+  /// Due this week chip label
+  String today_due_weekday(String weekday, String time);
+
+  /// Done task completion label
+  String today_done_by(String name, String time);
+
+  /// Mark task done button
+  String get today_btn_done;
+
+  /// Pass turn button
+  String get today_btn_pass;
+
+  /// Empty state title
+  String get today_empty_title;
+
+  /// Empty state body
+  String get today_empty_body;
 }
 
 class _AppLocalizationsDelegate

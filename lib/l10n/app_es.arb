@@ -232,5 +232,62 @@
   "homes_role_member": "Miembro",
   "@homes_role_member": { "description": "Member role label" },
   "homes_pending_tasks_badge": "Tienes tareas pendientes",
-  "@homes_pending_tasks_badge": { "description": "Pending tasks badge in home selector" }
+  "@homes_pending_tasks_badge": { "description": "Pending tasks badge in home selector" },
+  "recurrenceHourly": "Hora",
+  "@recurrenceHourly": { "description": "Recurrence type: hourly" },
+  "recurrenceDaily": "Día",
+  "@recurrenceDaily": { "description": "Recurrence type: daily" },
+  "recurrenceWeekly": "Semana",
+  "@recurrenceWeekly": { "description": "Recurrence type: weekly" },
+  "recurrenceMonthly": "Mes",
+  "@recurrenceMonthly": { "description": "Recurrence type: monthly" },
+  "recurrenceYearly": "Año",
+  "@recurrenceYearly": { "description": "Recurrence type: yearly" },
+  "today_screen_title": "Hoy",
+  "@today_screen_title": { "description": "Title of the Today screen" },
+  "today_tasks_due": "{count} tareas para hoy",
+  "@today_tasks_due": {
+    "description": "Number of tasks due today",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "today_tasks_done_today": "{count} completadas hoy",
+  "@today_tasks_done_today": {
+    "description": "Number of tasks done today",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "today_section_todo": "Por hacer",
+  "@today_section_todo": { "description": "Section label: pending tasks" },
+  "today_section_done": "Hechas",
+  "@today_section_done": { "description": "Section label: done tasks" },
+  "today_overdue": "Vencida",
+  "@today_overdue": { "description": "Overdue chip label" },
+  "today_due_today": "Hoy {time}",
+  "@today_due_today": {
+    "description": "Due today chip label",
+    "placeholders": { "time": { "type": "String" } }
+  },
+  "today_due_weekday": "{weekday} {time}",
+  "@today_due_weekday": {
+    "description": "Due this week chip label",
+    "placeholders": {
+      "weekday": { "type": "String" },
+      "time": { "type": "String" }
+    }
+  },
+  "today_done_by": "Completada por {name} a las {time}",
+  "@today_done_by": {
+    "description": "Done task completion label",
+    "placeholders": {
+      "name": { "type": "String" },
+      "time": { "type": "String" }
+    }
+  },
+  "today_btn_done": "Hecho",
+  "@today_btn_done": { "description": "Mark task done button" },
+  "today_btn_pass": "Pasar",
+  "@today_btn_pass": { "description": "Pass turn button" },
+  "today_empty_title": "Sin tareas para hoy",
+  "@today_empty_title": { "description": "Empty state title" },
+  "today_empty_body": "Todas las tareas están al día",
+  "@today_empty_body": { "description": "Empty state body" }
 }

@@ -317,7 +317,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get homes_plan_premium => 'Premium';
 
   @override
-  String homes_plan_ends(String date) => 'Vence el $date';
+  String homes_plan_ends(String date) {
+    return 'Vence el $date';
+  }
 
   @override
   String get homes_manage_subscription => 'Gestionar suscripción';
@@ -363,4 +365,62 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get homes_role_member => 'Miembro';
+
+  @override
+  String get homes_pending_tasks_badge => 'Tienes tareas pendientes';
+
+  @override
+  String get recurrenceHourly => 'Hora';
+
+  @override
+  String get recurrenceDaily => 'Día';
+
+  @override
+  String get recurrenceWeekly => 'Semana';
+
+  @override
+  String get recurrenceMonthly => 'Mes';
+
+  @override
+  String get recurrenceYearly => 'Año';
+
+  @override
+  String get today_screen_title => 'Hoy';
+
+  @override
+  String today_tasks_due(int count) => '$count tareas para hoy';
+
+  @override
+  String today_tasks_done_today(int count) => '$count completadas hoy';
+
+  @override
+  String get today_section_todo => 'Por hacer';
+
+  @override
+  String get today_section_done => 'Hechas';
+
+  @override
+  String get today_overdue => 'Vencida';
+
+  @override
+  String today_due_today(String time) => 'Hoy $time';
+
+  @override
+  String today_due_weekday(String weekday, String time) => '$weekday $time';
+
+  @override
+  String today_done_by(String name, String time) =>
+      'Completada por $name a las $time';
+
+  @override
+  String get today_btn_done => 'Hecho';
+
+  @override
+  String get today_btn_pass => 'Pasar';
+
+  @override
+  String get today_empty_title => 'Sin tareas para hoy';
+
+  @override
+  String get today_empty_body => 'Todas las tareas están al día';
 }

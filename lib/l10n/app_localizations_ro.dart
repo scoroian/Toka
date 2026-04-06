@@ -315,7 +315,9 @@ class AppLocalizationsRo extends AppLocalizations {
   String get homes_plan_premium => 'Premium';
 
   @override
-  String homes_plan_ends(String date) => 'Expiră pe $date';
+  String homes_plan_ends(String date) {
+    return 'Expiră pe $date';
+  }
 
   @override
   String get homes_manage_subscription => 'Gestionează abonamentul';
@@ -361,4 +363,62 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get homes_role_member => 'Membru';
+
+  @override
+  String get homes_pending_tasks_badge => 'Ai sarcini în așteptare';
+
+  @override
+  String get recurrenceHourly => 'Orar';
+
+  @override
+  String get recurrenceDaily => 'Zilnic';
+
+  @override
+  String get recurrenceWeekly => 'Săptămânal';
+
+  @override
+  String get recurrenceMonthly => 'Lunar';
+
+  @override
+  String get recurrenceYearly => 'Anual';
+
+  @override
+  String get today_screen_title => 'Azi';
+
+  @override
+  String today_tasks_due(int count) => '$count sarcini pentru azi';
+
+  @override
+  String today_tasks_done_today(int count) => '$count finalizate azi';
+
+  @override
+  String get today_section_todo => 'De făcut';
+
+  @override
+  String get today_section_done => 'Finalizate';
+
+  @override
+  String get today_overdue => 'Întârziată';
+
+  @override
+  String today_due_today(String time) => 'Azi $time';
+
+  @override
+  String today_due_weekday(String weekday, String time) => '$weekday $time';
+
+  @override
+  String today_done_by(String name, String time) =>
+      'Finalizată de $name la $time';
+
+  @override
+  String get today_btn_done => 'Gata';
+
+  @override
+  String get today_btn_pass => 'Pasă';
+
+  @override
+  String get today_empty_title => 'Nicio sarcină pentru azi';
+
+  @override
+  String get today_empty_body => 'Toate sarcinile sunt la zi';
 }

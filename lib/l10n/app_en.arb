@@ -232,5 +232,62 @@
   "homes_role_member": "Member",
   "@homes_role_member": { "description": "Member role label" },
   "homes_pending_tasks_badge": "You have pending tasks",
-  "@homes_pending_tasks_badge": { "description": "Pending tasks badge in home selector" }
+  "@homes_pending_tasks_badge": { "description": "Pending tasks badge in home selector" },
+  "recurrenceHourly": "Hour",
+  "@recurrenceHourly": { "description": "Recurrence type: hourly" },
+  "recurrenceDaily": "Day",
+  "@recurrenceDaily": { "description": "Recurrence type: daily" },
+  "recurrenceWeekly": "Week",
+  "@recurrenceWeekly": { "description": "Recurrence type: weekly" },
+  "recurrenceMonthly": "Month",
+  "@recurrenceMonthly": { "description": "Recurrence type: monthly" },
+  "recurrenceYearly": "Year",
+  "@recurrenceYearly": { "description": "Recurrence type: yearly" },
+  "today_screen_title": "Today",
+  "@today_screen_title": { "description": "Title of the Today screen" },
+  "today_tasks_due": "{count} tasks due today",
+  "@today_tasks_due": {
+    "description": "Number of tasks due today",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "today_tasks_done_today": "{count} done today",
+  "@today_tasks_done_today": {
+    "description": "Number of tasks done today",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "today_section_todo": "To do",
+  "@today_section_todo": { "description": "Section label: pending tasks" },
+  "today_section_done": "Done",
+  "@today_section_done": { "description": "Section label: done tasks" },
+  "today_overdue": "Overdue",
+  "@today_overdue": { "description": "Overdue chip label" },
+  "today_due_today": "Today {time}",
+  "@today_due_today": {
+    "description": "Due today chip label",
+    "placeholders": { "time": { "type": "String" } }
+  },
+  "today_due_weekday": "{weekday} {time}",
+  "@today_due_weekday": {
+    "description": "Due this week chip label",
+    "placeholders": {
+      "weekday": { "type": "String" },
+      "time": { "type": "String" }
+    }
+  },
+  "today_done_by": "Done by {name} at {time}",
+  "@today_done_by": {
+    "description": "Done task completion label",
+    "placeholders": {
+      "name": { "type": "String" },
+      "time": { "type": "String" }
+    }
+  },
+  "today_btn_done": "Done",
+  "@today_btn_done": { "description": "Mark task done button" },
+  "today_btn_pass": "Pass",
+  "@today_btn_pass": { "description": "Pass turn button" },
+  "today_empty_title": "No tasks for today",
+  "@today_empty_title": { "description": "Empty state title" },
+  "today_empty_body": "All tasks are up to date",
+  "@today_empty_body": { "description": "Empty state body" }
 }

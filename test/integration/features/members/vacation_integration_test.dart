@@ -104,6 +104,7 @@ void main() {
           .get();
       // isAbsent is false because startDate is in the future
       expect(doc.data()!['status'], 'active');
+      expect(doc.data()!['vacation']['isActive'], true);
     });
   });
 }

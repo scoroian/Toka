@@ -18,6 +18,10 @@ import 'features/homes/presentation/home_settings_screen.dart';
 import 'features/homes/presentation/my_homes_screen.dart';
 import 'features/onboarding/presentation/onboarding_flow_screen.dart';
 import 'features/tasks/presentation/today_screen.dart';
+import 'features/members/presentation/members_screen.dart';
+import 'features/members/presentation/member_profile_screen.dart';
+import 'features/profile/presentation/own_profile_screen.dart';
+import 'features/profile/presentation/edit_profile_screen.dart';
 import 'l10n/app_localizations.dart';
 
 part 'app.g.dart';
@@ -116,6 +120,27 @@ GoRouter appRouter(AppRouterRef ref) {
       GoRoute(
         path: AppRoutes.homeSettings,
         builder: (_, __) => const HomeSettingsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.members,
+        builder: (_, __) => const MembersScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.memberProfile,
+        builder: (context, state) {
+          final uid = state.pathParameters['uid']!;
+          final extra = state.extra as Map<String, dynamic>?;
+          final homeId = extra?['homeId'] as String? ?? '';
+          return MemberProfileScreen(homeId: homeId, memberUid: uid);
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.profile,
+        builder: (_, __) => const OwnProfileScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.editProfile,
+        builder: (_, __) => const EditProfileScreen(),
       ),
     ],
   );

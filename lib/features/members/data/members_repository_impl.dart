@@ -5,6 +5,7 @@ import '../../../core/errors/exceptions.dart';
 import '../data/member_model.dart';
 import '../domain/member.dart';
 import '../domain/members_repository.dart';
+import '../domain/vacation.dart';
 
 class MembersRepositoryImpl implements MembersRepository {
   MembersRepositoryImpl({
@@ -103,6 +104,36 @@ class MembersRepositoryImpl implements MembersRepository {
     await _functions.httpsCallable('transferOwnership').call({
       'homeId': homeId,
       'newOwnerUid': newOwnerUid,
+    });
+  }
+
+  @override
+  Future<void> saveVacation(String homeId, String uid, Vacation vacation) async {
+    final memberRef = _firestore
+        .collection('homes')
+        .doc(homeId)
+        .collection('members')
+        .doc(uid);
+    await memberRef.update({
+      'vacation': vacation.toMap(),
+      'status': vacation.isAbsent ? 'absent' : 'active',
+    });
+  }
+
+  @override
+  Stream<Vacation?> watchVacation(String homeId, String uid) {
+    return _firestore
+        .collection('homes')
+        .doc(homeId)
+        .collection('members')
+        .doc(uid)
+        .snapshots()
+        .map((snap) {
+      if (!snap.exists) return null;
+      final data = snap.data()!;
+      final vacMap = data['vacation'] as Map<String, dynamic>?;
+      if (vacMap == null) return null;
+      return Vacation.fromMap(uid, homeId, vacMap);
     });
   }
 }

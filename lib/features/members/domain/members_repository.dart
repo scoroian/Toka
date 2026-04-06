@@ -1,5 +1,6 @@
 import '../../../core/errors/exceptions.dart';
 import 'member.dart';
+import 'vacation.dart';
 
 export '../../../core/errors/exceptions.dart'
     show
@@ -35,4 +36,10 @@ abstract interface class MembersRepository {
   /// Transfiere propiedad al nuevo uid (vía CF).
   /// El owner anterior pasa a ser admin.
   Future<void> transferOwnership(String homeId, String newOwnerUid);
+
+  /// Guarda las vacaciones de un miembro.
+  Future<void> saveVacation(String homeId, String uid, Vacation vacation);
+
+  /// Observa las vacaciones de un miembro.
+  Stream<Vacation?> watchVacation(String homeId, String uid);
 }

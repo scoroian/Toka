@@ -535,5 +535,24 @@
   "rescue_screen_title": "Renueva tu Premium",
   "@rescue_screen_title": { "description": "Rescue screen title" },
   "rescue_screen_body": "Tu suscripción Premium expira pronto. Renueva ahora para no perder acceso a tus funciones.",
-  "@rescue_screen_body": { "description": "Rescue screen body" }
+  "@rescue_screen_body": { "description": "Rescue screen body" },
+  "vacation_title": "Vacaciones / Ausencia",
+  "@vacation_title": { "description": "Vacation screen title" },
+  "vacation_toggle_label": "Estoy de vacaciones / ausente",
+  "@vacation_toggle_label": { "description": "Vacation toggle label" },
+  "vacation_start_date": "Fecha de inicio (opcional)",
+  "@vacation_start_date": { "description": "Vacation start date label" },
+  "vacation_end_date": "Fecha de fin (opcional)",
+  "@vacation_end_date": { "description": "Vacation end date label" },
+  "vacation_reason": "Motivo (opcional)",
+  "@vacation_reason": { "description": "Vacation reason label" },
+  "vacation_save": "Guardar cambios",
+  "@vacation_save": { "description": "Save vacation button" },
+  "vacation_chip_until": "De vacaciones hasta {date}",
+  "@vacation_chip_until": {
+    "description": "Vacation chip with end date",
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "vacation_chip_indefinite": "De vacaciones",
+  "@vacation_chip_indefinite": { "description": "Vacation chip without end date" }
 }

@@ -535,5 +535,24 @@
   "rescue_screen_title": "Reînnoiește-ți Premium",
   "@rescue_screen_title": { "description": "Rescue screen title" },
   "rescue_screen_body": "Abonamentul tău Premium expiră în curând. Reînnoiește acum pentru a păstra accesul la funcții.",
-  "@rescue_screen_body": { "description": "Rescue screen body" }
+  "@rescue_screen_body": { "description": "Rescue screen body" },
+  "vacation_title": "Concediu / Absență",
+  "@vacation_title": { "description": "Vacation screen title" },
+  "vacation_toggle_label": "Sunt în concediu / absent",
+  "@vacation_toggle_label": { "description": "Vacation toggle label" },
+  "vacation_start_date": "Data de început (opțional)",
+  "@vacation_start_date": { "description": "Vacation start date label" },
+  "vacation_end_date": "Data de sfârșit (opțional)",
+  "@vacation_end_date": { "description": "Vacation end date label" },
+  "vacation_reason": "Motiv (opțional)",
+  "@vacation_reason": { "description": "Vacation reason label" },
+  "vacation_save": "Salvează modificările",
+  "@vacation_save": { "description": "Save vacation button" },
+  "vacation_chip_until": "În concediu până pe {date}",
+  "@vacation_chip_until": {
+    "description": "Vacation chip with end date",
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "vacation_chip_indefinite": "În concediu",
+  "@vacation_chip_indefinite": { "description": "Vacation chip without end date" }
 }

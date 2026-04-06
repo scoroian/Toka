@@ -535,5 +535,24 @@
   "rescue_screen_title": "Renew your Premium",
   "@rescue_screen_title": { "description": "Rescue screen title" },
   "rescue_screen_body": "Your Premium subscription is expiring soon. Renew now to keep access to your features.",
-  "@rescue_screen_body": { "description": "Rescue screen body" }
+  "@rescue_screen_body": { "description": "Rescue screen body" },
+  "vacation_title": "Vacation / Absence",
+  "@vacation_title": { "description": "Vacation screen title" },
+  "vacation_toggle_label": "I'm on vacation / absent",
+  "@vacation_toggle_label": { "description": "Vacation toggle label" },
+  "vacation_start_date": "Start date (optional)",
+  "@vacation_start_date": { "description": "Vacation start date label" },
+  "vacation_end_date": "End date (optional)",
+  "@vacation_end_date": { "description": "Vacation end date label" },
+  "vacation_reason": "Reason (optional)",
+  "@vacation_reason": { "description": "Vacation reason label" },
+  "vacation_save": "Save changes",
+  "@vacation_save": { "description": "Save vacation button" },
+  "vacation_chip_until": "On vacation until {date}",
+  "@vacation_chip_until": {
+    "description": "Vacation chip with end date",
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "vacation_chip_indefinite": "On vacation",
+  "@vacation_chip_indefinite": { "description": "Vacation chip without end date" }
 }

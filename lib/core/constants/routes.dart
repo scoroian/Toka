@@ -18,6 +18,7 @@ abstract class AppRoutes {
   static const String editProfile = '/profile/edit';
   static const String members = '/members';
   static const String memberProfile = '/member/:uid';
+  static const String vacation = '/vacation';
   static const String history = '/history';
 
   static const List<String> all = [
@@ -40,6 +41,7 @@ abstract class AppRoutes {
     editProfile,
     members,
     memberProfile,
+    vacation,
     history,
   ];
 }

@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:toka/core/errors/exceptions.dart';
 import 'package:toka/features/homes/domain/home_membership.dart';
 import 'package:toka/features/members/domain/member.dart';
 import 'package:toka/features/members/domain/members_repository.dart';

@@ -10,11 +10,15 @@ abstract class AppRoutes {
   static const String profile = '/profile';
   static const String settings = '/settings';
   static const String subscription = '/subscription';
+  static const String paywall = '/subscription/paywall';
+  static const String rescueScreen = '/subscription/rescue';
+  static const String downgradePlanner = '/subscription/downgrade-planner';
   static const String myHomes = '/my-homes';
   static const String homeSettings = '/home-settings';
   static const String editProfile = '/profile/edit';
   static const String members = '/members';
   static const String memberProfile = '/member/:uid';
+  static const String history = '/history';
 
   static const List<String> all = [
     splash,
@@ -28,10 +32,14 @@ abstract class AppRoutes {
     profile,
     settings,
     subscription,
+    paywall,
+    rescueScreen,
+    downgradePlanner,
     myHomes,
     homeSettings,
     editProfile,
     members,
     memberProfile,
+    history,
   ];
 }

@@ -20,8 +20,13 @@ import 'features/onboarding/presentation/onboarding_flow_screen.dart';
 import 'features/tasks/presentation/today_screen.dart';
 import 'features/members/presentation/members_screen.dart';
 import 'features/members/presentation/member_profile_screen.dart';
+import 'features/history/presentation/history_screen.dart';
 import 'features/profile/presentation/own_profile_screen.dart';
 import 'features/profile/presentation/edit_profile_screen.dart';
+import 'features/subscription/presentation/paywall_screen.dart';
+import 'features/subscription/presentation/subscription_management_screen.dart';
+import 'features/subscription/presentation/rescue_screen.dart';
+import 'features/subscription/presentation/downgrade_planner_screen.dart';
 import 'l10n/app_localizations.dart';
 
 part 'app.g.dart';
@@ -135,12 +140,32 @@ GoRouter appRouter(AppRouterRef ref) {
         },
       ),
       GoRoute(
+        path: AppRoutes.history,
+        builder: (_, __) => const HistoryScreen(),
+      ),
+      GoRoute(
         path: AppRoutes.profile,
         builder: (_, __) => const OwnProfileScreen(),
       ),
       GoRoute(
         path: AppRoutes.editProfile,
         builder: (_, __) => const EditProfileScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.subscription,
+        builder: (_, __) => const SubscriptionManagementScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.paywall,
+        builder: (_, __) => const PaywallScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.rescueScreen,
+        builder: (_, __) => const RescueScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.downgradePlanner,
+        builder: (_, __) => const DowngradePlannerScreen(),
       ),
     ],
   );

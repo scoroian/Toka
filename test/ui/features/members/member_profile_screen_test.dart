@@ -9,6 +9,7 @@ import 'package:toka/features/homes/domain/home_membership.dart';
 import 'package:toka/features/members/application/members_provider.dart';
 import 'package:toka/features/members/domain/member.dart';
 import 'package:toka/features/members/domain/members_repository.dart';
+import 'package:toka/features/members/domain/vacation.dart';
 import 'package:toka/features/members/presentation/member_profile_screen.dart';
 import 'package:toka/l10n/app_localizations.dart';
 
@@ -35,6 +36,12 @@ class _MockMembersRepo implements MembersRepository {
   Future<void> demoteFromAdmin(String homeId, String uid) async {}
   @override
   Future<void> transferOwnership(String homeId, String newOwnerUid) async {}
+  @override
+  Future<void> saveVacation(
+          String homeId, String uid, Vacation vacation) async {}
+  @override
+  Stream<Vacation?> watchVacation(String homeId, String uid) =>
+      Stream.value(null);
 }
 
 const _viewerUser = AuthUser(

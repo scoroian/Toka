@@ -65,3 +65,27 @@ class CannotLeaveAsOwnerException implements Exception {
   @override
   String toString() => 'CannotLeaveAsOwnerException: $message';
 }
+
+class MaxMembersReachedException implements Exception {
+  const MaxMembersReachedException(
+      [this.message = 'Maximum members limit reached']);
+  final String message;
+  @override
+  String toString() => 'MaxMembersReachedException: $message';
+}
+
+class MaxAdminsReachedException implements Exception {
+  const MaxAdminsReachedException(
+      [this.message = 'Maximum admins limit reached (Free plan: 1 admin)']);
+  final String message;
+  @override
+  String toString() => 'MaxAdminsReachedException: $message';
+}
+
+class CannotRemoveOwnerException implements Exception {
+  const CannotRemoveOwnerException(
+      [this.message = 'Cannot remove the home owner']);
+  final String message;
+  @override
+  String toString() => 'CannotRemoveOwnerException: $message';
+}

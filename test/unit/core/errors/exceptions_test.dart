@@ -60,4 +60,19 @@ void main() {
       expect(e.toString(), equals('LanguagesFetchException: network error'));
     });
   });
+
+  test('MaxMembersReachedException tiene mensaje correcto', () {
+    const e = MaxMembersReachedException();
+    expect(e.toString(), contains('MaxMembersReachedException'));
+  });
+
+  test('MaxAdminsReachedException tiene mensaje correcto', () {
+    const e = MaxAdminsReachedException();
+    expect(e.toString(), contains('MaxAdminsReachedException'));
+  });
+
+  test('CannotRemoveOwnerException tiene mensaje correcto', () {
+    const e = CannotRemoveOwnerException();
+    expect(e.toString(), contains('CannotRemoveOwnerException'));
+  });
 }

@@ -28,7 +28,7 @@ class TaskPreview with _$TaskPreview {
         currentAssigneeUid: map['currentAssigneeUid'] as String?,
         currentAssigneeName: map['currentAssigneeName'] as String?,
         currentAssigneePhoto: map['currentAssigneePhoto'] as String?,
-        nextDueAt: (map['nextDueAt'] as Timestamp).toDate(),
+        nextDueAt: (map['nextDueAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
         isOverdue: map['isOverdue'] as bool? ?? false,
         status: map['status'] as String? ?? 'active',
       );
@@ -57,7 +57,7 @@ class DoneTaskPreview with _$DoneTaskPreview {
         completedByUid: map['completedByUid'] as String,
         completedByName: map['completedByName'] as String,
         completedByPhoto: map['completedByPhoto'] as String?,
-        completedAt: (map['completedAt'] as Timestamp).toDate(),
+        completedAt: (map['completedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       );
 }
 
@@ -197,18 +197,17 @@ class HomeDashboard with _$HomeDashboard {
             .map(MemberPreview.fromMap)
             .toList();
 
+    Map<String, dynamic> asStringMap(dynamic value) =>
+        (value as Map?)?.cast<String, dynamic>() ?? {};
+
     return HomeDashboard(
       activeTasksPreview: activeList,
       doneTasksPreview: doneList,
-      counters: DashboardCounters.fromMap(
-          (data['counters'] as Map<String, dynamic>?) ?? {}),
+      counters: DashboardCounters.fromMap(asStringMap(data['counters'])),
       memberPreview: memberList,
-      premiumFlags: PremiumFlags.fromMap(
-          (data['premiumFlags'] as Map<String, dynamic>?) ?? {}),
-      adFlags: AdFlags.fromMap(
-          (data['adFlags'] as Map<String, dynamic>?) ?? {}),
-      rescueFlags: RescueFlags.fromMap(
-          (data['rescueFlags'] as Map<String, dynamic>?) ?? {}),
+      premiumFlags: PremiumFlags.fromMap(asStringMap(data['premiumFlags'])),
+      adFlags: AdFlags.fromMap(asStringMap(data['adFlags'])),
+      rescueFlags: RescueFlags.fromMap(asStringMap(data['rescueFlags'])),
       updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
     );
   }

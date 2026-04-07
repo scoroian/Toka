@@ -181,10 +181,10 @@ GoRouter appRouter(AppRouterRef ref) {
       GoRoute(
         path: AppRoutes.notificationSettings,
         builder: (context, state) {
-          final extra = state.extra as Map<String, String>;
+          final extra = state.extra as Map<String, dynamic>?;
           return NotificationSettingsScreen(
-            homeId: extra['homeId']!,
-            uid: extra['uid']!,
+            homeId: extra?['homeId'] as String? ?? '',
+            uid: extra?['uid'] as String? ?? '',
           );
         },
       ),

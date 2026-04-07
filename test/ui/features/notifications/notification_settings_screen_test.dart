@@ -38,5 +38,7 @@ void main() {
     await t.pumpAndSettle();
     final sw = t.widget<SwitchListTile>(find.byKey(const Key('toggle_notify_before')));
     expect(sw.onChanged, isNull);
+    final sw2 = t.widget<SwitchListTile>(find.byKey(const Key('toggle_daily_summary')));
+    expect(sw2.onChanged, isNull);
   });
 }

@@ -4,8 +4,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/routes.dart';
 import '../../../features/auth/application/auth_provider.dart';
+import '../../../features/homes/application/current_home_provider.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/loading_widget.dart';
+import '../application/member_radar_provider.dart';
 import '../application/profile_provider.dart';
 import 'widgets/access_management_section.dart';
 import 'widgets/radar_chart_widget.dart';
@@ -22,6 +24,7 @@ class OwnProfileScreen extends ConsumerWidget {
     final hasEmailPassword = auth.whenOrNull(
             authenticated: (u) => u.providers.contains('password')) ??
         false;
+    final homeId = ref.watch(currentHomeProvider).valueOrNull?.id ?? '';
 
     if (uid.isEmpty) {
       return Scaffold(
@@ -31,6 +34,9 @@ class OwnProfileScreen extends ConsumerWidget {
     }
 
     final profileAsync = ref.watch(userProfileProvider(uid));
+    final radarAsync = homeId.isNotEmpty
+        ? ref.watch(memberRadarProvider(homeId: homeId, uid: uid))
+        : const AsyncData<List<RadarEntry>>([]);
 
     return Scaffold(
       appBar: AppBar(
@@ -100,7 +106,11 @@ class OwnProfileScreen extends ConsumerWidget {
             ),
 
             const SizedBox(height: 24),
-            const RadarChartWidget(entries: []),
+            radarAsync.when(
+              data: (entries) => RadarChartWidget(entries: entries),
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (_, __) => const RadarChartWidget(entries: []),
+            ),
 
             const Divider(height: 32),
 

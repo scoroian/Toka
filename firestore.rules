@@ -80,6 +80,10 @@ service cloud.firestore {
       // Miembros del hogar
       match /members/{uid} {
         allow read: if isMemberOfHome(homeId);
+        // Members may only update their own notificationPrefs and vacation fields
+        allow update: if isUser(uid) && isMemberOfHome(homeId) &&
+                         request.resource.data.diff(resource.data).affectedKeys()
+                         .hasOnly(['notificationPrefs', 'vacation']);
         allow write: if false; // Solo via Functions
       }
       

@@ -70,6 +70,14 @@
         { "fieldPath": "uid", "order": "ASCENDING" },
         { "fieldPath": "completionCount", "order": "DESCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "memberTaskStats",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "uid", "order": "ASCENDING" },
+        { "fieldPath": "avgScore", "order": "DESCENDING" }
+      ]
     }
   ],
   "fieldOverrides": [

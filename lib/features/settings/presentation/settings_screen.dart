@@ -6,6 +6,8 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../../core/constants/routes.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../auth/application/auth_provider.dart';
+import '../../homes/application/current_home_provider.dart';
 import '../../subscription/application/subscription_provider.dart';
 import '../../subscription/domain/subscription_state.dart';
 
@@ -79,7 +81,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             key: const Key('settings_notifications'),
             leading: const Icon(Icons.notifications_outlined),
             title: Text(l10n.settings_section_notifications),
-            onTap: () {},
+            onTap: () {
+              final home = ref.read(currentHomeProvider).valueOrNull;
+              final uid = ref.read(authProvider).whenOrNull(authenticated: (u) => u.uid);
+              if (home != null && uid != null) {
+                context.push(AppRoutes.notificationSettings, extra: {
+                  'homeId': home.id,
+                  'uid': uid,
+                });
+              }
+            },
           ),
           const Divider(),
 

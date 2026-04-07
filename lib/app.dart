@@ -28,6 +28,7 @@ import 'features/subscription/presentation/paywall_screen.dart';
 import 'features/subscription/presentation/subscription_management_screen.dart';
 import 'features/subscription/presentation/rescue_screen.dart';
 import 'features/subscription/presentation/downgrade_planner_screen.dart';
+import 'features/notifications/application/notification_prefs_provider.dart';
 import 'features/notifications/presentation/notification_settings_screen.dart';
 import 'features/settings/presentation/settings_screen.dart';
 import 'l10n/app_localizations.dart';
@@ -202,6 +203,7 @@ class TokaApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(fcmTokenInitProvider);
     final locale = ref.watch(localeNotifierProvider);
     final router = ref.watch(appRouterProvider);
 

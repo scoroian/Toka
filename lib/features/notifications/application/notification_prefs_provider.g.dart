@@ -199,6 +199,22 @@ class _NotificationPrefsProviderElement
   String get uid => (origin as NotificationPrefsProvider).uid;
 }
 
+String _$fcmTokenInitHash() => r'3828ee03ca43a1bfa59c998f2b0878a964bea1e8';
+
+/// See also [fcmTokenInit].
+@ProviderFor(fcmTokenInit)
+final fcmTokenInitProvider = Provider<void>.internal(
+  fcmTokenInit,
+  name: r'fcmTokenInitProvider',
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product') ? null : _$fcmTokenInitHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef FcmTokenInitRef = ProviderRef<void>;
 String _$notificationPrefsNotifierHash() =>
     r'16ac310942a5e4d4e590d010a5a19fba917a62f7';
 

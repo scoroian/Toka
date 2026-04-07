@@ -13,11 +13,11 @@ service cloud.firestore {
     }
     
     function isMemberOfHome(homeId) {
-      return isAuth() && exists(/databases/$(database)/documents/homes/$(homeId)/members/$(request.auth.uid));
+      return isAuth() && exists(/databases/$(database)/documents/users/$(request.auth.uid)/memberships/$(homeId));
     }
-    
+
     function getMembership(homeId) {
-      return get(/databases/$(database)/documents/homes/$(homeId)/members/$(request.auth.uid)).data;
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)/memberships/$(homeId)).data;
     }
     
     function isActiveMember(homeId) {

@@ -21,13 +21,6 @@
       "collectionGroup": "taskEvents",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "createdAt", "order": "DESCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "taskEvents",
-      "queryScope": "COLLECTION",
-      "fields": [
         { "fieldPath": "taskId", "order": "ASCENDING" },
         { "fieldPath": "createdAt", "order": "DESCENDING" }
       ]
@@ -57,10 +50,11 @@
       ]
     },
     {
-      "collectionGroup": "memberships",
+      "collectionGroup": "languages",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "status", "order": "ASCENDING" }
+        { "fieldPath": "enabled", "order": "ASCENDING" },
+        { "fieldPath": "sort_order", "order": "ASCENDING" }
       ]
     },
     {

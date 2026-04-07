@@ -18,22 +18,24 @@ class DefaultFirebaseOptions {
     }
   }
 
-  // TODO: Replace with real values from flutterfire configure
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'REPLACE_ME',
-    appId: 'REPLACE_ME',
-    messagingSenderId: 'REPLACE_ME',
-    projectId: 'toka-dev',
-    storageBucket: 'toka-dev.appspot.com',
+    apiKey: 'AIzaSyC1-Vni1CbxQKeZsjFggZBxckLPzPZT8kI',
+    appId: '1:1053657394907:android:203f31de6eac49244666fe',
+    messagingSenderId: '1053657394907',
+    projectId: 'toka-dd241',
+    storageBucket: 'toka-dd241.firebasestorage.app',
   );
 
+  // TODO: Replace with real values from flutterfire configure
+
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'REPLACE_ME',
-    appId: 'REPLACE_ME',
-    messagingSenderId: 'REPLACE_ME',
-    projectId: 'toka-dev',
-    storageBucket: 'toka-dev.appspot.com',
-    iosClientId: 'REPLACE_ME',
-    iosBundleId: 'com.toka',
+    apiKey: 'AIzaSyBX4KnoaQC66dXynrTLBptkM1cKmPpC4D0',
+    appId: '1:1053657394907:ios:70a8f5ad16b4ee444666fe',
+    messagingSenderId: '1053657394907',
+    projectId: 'toka-dd241',
+    storageBucket: 'toka-dd241.firebasestorage.app',
+    iosClientId: '1053657394907-kgg8fgcmrn4gfht8uvpchk775k483ktn.apps.googleusercontent.com',
+    iosBundleId: 'com.toka.toka',
   );
+
 }

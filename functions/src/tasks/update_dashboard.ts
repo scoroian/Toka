@@ -56,25 +56,30 @@ export async function updateHomeDashboard(homeId: string): Promise<void> {
     });
   }
 
-  // --- 3. Leer completados de hoy ---
-  const completedSnap = await homeRef.collection("task_completions")
+  // --- 3. Leer completados de hoy desde taskEvents ---
+  const eventsSnap = await homeRef.collection("taskEvents")
+    .where("eventType", "==", "completed")
     .where("completedAt", ">=", admin.firestore.Timestamp.fromDate(todayStart))
     .where("completedAt", "<", admin.firestore.Timestamp.fromDate(todayEnd))
     .get();
 
   const doneTasksPreview: Record<string, unknown>[] = [];
-  for (const doc of completedSnap.docs) {
-    const c = doc.data();
+  for (const doc of eventsSnap.docs) {
+    const ev = doc.data();
+    const actorUid = (ev["actorUid"] as string) ?? "";
+    const memberDoc = await homeRef.collection("members").doc(actorUid).get();
+    const m = memberDoc.data() ?? {};
+    const visualSnapshot = (ev["taskVisualSnapshot"] as Record<string, string>) ?? {};
     doneTasksPreview.push({
-      taskId: c["taskId"] ?? doc.id,
-      title: c["title"] ?? "",
-      visualKind: c["visualKind"] ?? "emoji",
-      visualValue: c["visualValue"] ?? "",
-      recurrenceType: c["recurrenceType"] ?? "daily",
-      completedByUid: c["completedByUid"] ?? "",
-      completedByName: c["completedByName"] ?? "",
-      completedByPhoto: c["completedByPhoto"] ?? null,
-      completedAt: c["completedAt"],
+      taskId: ev["taskId"] ?? doc.id,
+      title: ev["taskTitleSnapshot"] ?? "",
+      visualKind: visualSnapshot["kind"] ?? "emoji",
+      visualValue: visualSnapshot["value"] ?? "",
+      recurrenceType: "daily",
+      completedByUid: actorUid,
+      completedByName: (m["name"] as string) ?? "",
+      completedByPhoto: m["photoUrl"] ?? null,
+      completedAt: ev["completedAt"],
     });
   }
 

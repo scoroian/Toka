@@ -1,11 +1,17 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/app_localizations.dart';
 import '../../auth/application/auth_provider.dart';
+import '../../homes/application/current_home_provider.dart';
 import '../../homes/application/dashboard_provider.dart';
+import '../application/task_completion_provider.dart';
+import '../application/task_pass_provider.dart';
 import '../domain/home_dashboard.dart';
 import '../domain/recurrence_order.dart';
+import 'widgets/complete_task_dialog.dart';
+import 'widgets/pass_turn_dialog.dart';
 import 'widgets/today_empty_state.dart';
 import 'widgets/today_header_counters.dart';
 import 'widgets/today_skeleton_loader.dart';
@@ -64,12 +70,94 @@ Map<String, RecurrenceGroup> groupByRecurrence(
 class TodayScreen extends ConsumerWidget {
   const TodayScreen({super.key});
 
+  Future<void> _onDone(
+    BuildContext context,
+    WidgetRef ref,
+    TaskPreview task,
+    String homeId,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => CompleteTaskDialog(
+        task: task,
+        onConfirm: () {},
+      ),
+    );
+    if (confirmed == true && context.mounted) {
+      await ref
+          .read(taskCompletionProvider.notifier)
+          .completeTask(homeId, task.taskId);
+    }
+  }
+
+  Future<void> _onPass(
+    BuildContext context,
+    WidgetRef ref,
+    TaskPreview task,
+    String homeId,
+    String? currentUid,
+  ) async {
+    if (currentUid == null) return;
+
+    // Leer stats del miembro para mostrar impacto en compliance
+    double complianceBefore = 1.0;
+    double estimatedAfter = 1.0;
+
+    try {
+      final snap = await FirebaseFirestore.instance
+          .collection('homes')
+          .doc(homeId)
+          .collection('members')
+          .doc(currentUid)
+          .get();
+      final data = snap.data() ?? {};
+      final completed = (data['completedCount'] as int?) ?? 0;
+      final passed = (data['passedCount'] as int?) ?? 0;
+      complianceBefore = (data['complianceRate'] as double?) ??
+          completed / (completed + passed).clamp(1, double.maxFinite);
+      estimatedAfter = PassTurnDialog.calcEstimatedCompliance(
+        completedCount: completed,
+        passedCount: passed,
+      );
+    } catch (_) {
+      // Si falla la lectura, usar defaults conservadores
+    }
+
+    if (!context.mounted) return;
+
+    String? capturedReason;
+    bool confirmed = false;
+
+    await showDialog<void>(
+      context: context,
+      builder: (_) => PassTurnDialog(
+        task: task,
+        currentComplianceRate: complianceBefore,
+        estimatedComplianceAfter: estimatedAfter,
+        nextAssigneeName: null, // assignmentOrder no está en el dashboard
+        onConfirm: (reason) {
+          confirmed = true;
+          capturedReason = reason;
+        },
+      ),
+    );
+
+    if (confirmed && context.mounted) {
+      await ref.read(taskPassProvider.notifier).passTurn(
+            homeId,
+            task.taskId,
+            reason: capturedReason,
+          );
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final dashboardAsync = ref.watch(dashboardProvider);
     final auth = ref.watch(authProvider);
     final currentUid = auth.whenOrNull(authenticated: (u) => u.uid);
+    final homeId = ref.watch(currentHomeProvider).valueOrNull?.id;
 
     return Scaffold(
       appBar: AppBar(
@@ -110,6 +198,13 @@ class TodayScreen extends ConsumerWidget {
                     todos: grouped[recurrenceType]!.todos,
                     dones: grouped[recurrenceType]!.dones,
                     currentUid: currentUid,
+                    onDone: homeId != null
+                        ? (task) => _onDone(context, ref, task, homeId)
+                        : null,
+                    onPass: homeId != null
+                        ? (task) =>
+                            _onPass(context, ref, task, homeId, currentUid)
+                        : null,
                   ),
                 ],
               if (data.adFlags.showBanner)

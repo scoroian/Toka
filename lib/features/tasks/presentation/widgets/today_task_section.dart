@@ -12,6 +12,8 @@ class TodayTaskSection extends StatelessWidget {
   final List<TaskPreview> todos;
   final List<DoneTaskPreview> dones;
   final String? currentUid;
+  final void Function(TaskPreview)? onDone;
+  final void Function(TaskPreview)? onPass;
 
   const TodayTaskSection({
     super.key,
@@ -19,6 +21,8 @@ class TodayTaskSection extends StatelessWidget {
     required this.todos,
     required this.dones,
     required this.currentUid,
+    this.onDone,
+    this.onPass,
   });
 
   @override
@@ -54,10 +58,15 @@ class TodayTaskSection extends StatelessWidget {
           ),
           SliverList.builder(
             itemCount: todos.length,
-            itemBuilder: (context, index) => TodayTaskCardTodo(
-              task: todos[index],
-              currentUid: currentUid,
-            ),
+            itemBuilder: (context, index) {
+              final task = todos[index];
+              return TodayTaskCardTodo(
+                task: task,
+                currentUid: currentUid,
+                onDone: onDone != null ? () => onDone!(task) : null,
+                onPass: onPass != null ? () => onPass!(task) : null,
+              );
+            },
           ),
         ],
         if (dones.isNotEmpty) ...[

@@ -885,4 +885,73 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get review_submit_error => 'Error submitting review';
+
+  @override
+  String get settings_section_account => 'Account';
+
+  @override
+  String get settings_edit_profile => 'Edit profile';
+
+  @override
+  String get settings_change_password => 'Change password';
+
+  @override
+  String get settings_delete_account => 'Delete account';
+
+  @override
+  String get settings_section_language => 'Language';
+
+  @override
+  String get settings_section_notifications => 'Notifications';
+
+  @override
+  String get settings_section_privacy => 'Privacy';
+
+  @override
+  String get settings_phone_visibility => 'Phone visibility';
+
+  @override
+  String get settings_section_subscription => 'Subscription';
+
+  @override
+  String get settings_view_plan => 'View current plan';
+
+  @override
+  String get settings_restore_purchases => 'Restore purchases';
+
+  @override
+  String get settings_manage_subscription => 'Manage subscription';
+
+  @override
+  String get settings_section_home => 'Home';
+
+  @override
+  String get settings_home_settings => 'Home settings';
+
+  @override
+  String get settings_invite_code => 'Invite code';
+
+  @override
+  String get settings_leave_home => 'Leave home';
+
+  @override
+  String get settings_close_home => 'Close home';
+
+  @override
+  String get settings_section_about => 'About';
+
+  @override
+  String get settings_app_version => 'App version';
+
+  @override
+  String get settings_terms => 'Terms of use';
+
+  @override
+  String get settings_privacy_policy => 'Privacy policy';
+
+  @override
+  String get settings_plan_free => 'Free plan';
+
+  @override
+  String get settings_plan_premium => 'Premium plan';
 }

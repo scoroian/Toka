@@ -895,4 +895,73 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get review_submit_error => 'Error al enviar valoración';
+
+  @override
+  String get settings_section_account => 'Cuenta';
+
+  @override
+  String get settings_edit_profile => 'Editar perfil';
+
+  @override
+  String get settings_change_password => 'Cambiar contraseña';
+
+  @override
+  String get settings_delete_account => 'Eliminar cuenta';
+
+  @override
+  String get settings_section_language => 'Idioma';
+
+  @override
+  String get settings_section_notifications => 'Notificaciones';
+
+  @override
+  String get settings_section_privacy => 'Privacidad';
+
+  @override
+  String get settings_phone_visibility => 'Visibilidad del teléfono';
+
+  @override
+  String get settings_section_subscription => 'Suscripción';
+
+  @override
+  String get settings_view_plan => 'Ver plan actual';
+
+  @override
+  String get settings_restore_purchases => 'Restaurar compras';
+
+  @override
+  String get settings_manage_subscription => 'Gestionar suscripción';
+
+  @override
+  String get settings_section_home => 'Hogar';
+
+  @override
+  String get settings_home_settings => 'Ajustes del hogar';
+
+  @override
+  String get settings_invite_code => 'Código de invitación';
+
+  @override
+  String get settings_leave_home => 'Abandonar hogar';
+
+  @override
+  String get settings_close_home => 'Cerrar hogar';
+
+  @override
+  String get settings_section_about => 'Acerca de';
+
+  @override
+  String get settings_app_version => 'Versión de la app';
+
+  @override
+  String get settings_terms => 'Términos de uso';
+
+  @override
+  String get settings_privacy_policy => 'Política de privacidad';
+
+  @override
+  String get settings_plan_free => 'Plan gratuito';
+
+  @override
+  String get settings_plan_premium => 'Plan Premium';
 }

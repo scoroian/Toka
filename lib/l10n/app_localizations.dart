@@ -1719,6 +1719,144 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Error al enviar valoración'**
   String get review_submit_error;
+
+  /// Account settings section
+  ///
+  /// In es, this message translates to:
+  /// **'Cuenta'**
+  String get settings_section_account;
+
+  /// Edit profile option
+  ///
+  /// In es, this message translates to:
+  /// **'Editar perfil'**
+  String get settings_edit_profile;
+
+  /// Change password option
+  ///
+  /// In es, this message translates to:
+  /// **'Cambiar contraseña'**
+  String get settings_change_password;
+
+  /// Delete account option
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar cuenta'**
+  String get settings_delete_account;
+
+  /// Language settings
+  ///
+  /// In es, this message translates to:
+  /// **'Idioma'**
+  String get settings_section_language;
+
+  /// Notifications settings
+  ///
+  /// In es, this message translates to:
+  /// **'Notificaciones'**
+  String get settings_section_notifications;
+
+  /// Privacy settings section
+  ///
+  /// In es, this message translates to:
+  /// **'Privacidad'**
+  String get settings_section_privacy;
+
+  /// Phone visibility option
+  ///
+  /// In es, this message translates to:
+  /// **'Visibilidad del teléfono'**
+  String get settings_phone_visibility;
+
+  /// Subscription section
+  ///
+  /// In es, this message translates to:
+  /// **'Suscripción'**
+  String get settings_section_subscription;
+
+  /// View current plan
+  ///
+  /// In es, this message translates to:
+  /// **'Ver plan actual'**
+  String get settings_view_plan;
+
+  /// Restore purchases
+  ///
+  /// In es, this message translates to:
+  /// **'Restaurar compras'**
+  String get settings_restore_purchases;
+
+  /// Manage subscription
+  ///
+  /// In es, this message translates to:
+  /// **'Gestionar suscripción'**
+  String get settings_manage_subscription;
+
+  /// Home settings section
+  ///
+  /// In es, this message translates to:
+  /// **'Hogar'**
+  String get settings_section_home;
+
+  /// Home settings
+  ///
+  /// In es, this message translates to:
+  /// **'Ajustes del hogar'**
+  String get settings_home_settings;
+
+  /// Invite code
+  ///
+  /// In es, this message translates to:
+  /// **'Código de invitación'**
+  String get settings_invite_code;
+
+  /// Leave home option
+  ///
+  /// In es, this message translates to:
+  /// **'Abandonar hogar'**
+  String get settings_leave_home;
+
+  /// Close home option
+  ///
+  /// In es, this message translates to:
+  /// **'Cerrar hogar'**
+  String get settings_close_home;
+
+  /// About section
+  ///
+  /// In es, this message translates to:
+  /// **'Acerca de'**
+  String get settings_section_about;
+
+  /// App version
+  ///
+  /// In es, this message translates to:
+  /// **'Versión de la app'**
+  String get settings_app_version;
+
+  /// Terms of use
+  ///
+  /// In es, this message translates to:
+  /// **'Términos de uso'**
+  String get settings_terms;
+
+  /// Privacy policy
+  ///
+  /// In es, this message translates to:
+  /// **'Política de privacidad'**
+  String get settings_privacy_policy;
+
+  /// Free plan label
+  ///
+  /// In es, this message translates to:
+  /// **'Plan gratuito'**
+  String get settings_plan_free;
+
+  /// Premium plan label
+  ///
+  /// In es, this message translates to:
+  /// **'Plan Premium'**
+  String get settings_plan_premium;
 }
 
 class _AppLocalizationsDelegate

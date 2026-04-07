@@ -890,4 +890,73 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get review_submit_error => 'Eroare la trimiterea evaluării';
+
+  @override
+  String get settings_section_account => 'Cont';
+
+  @override
+  String get settings_edit_profile => 'Editează profilul';
+
+  @override
+  String get settings_change_password => 'Schimbă parola';
+
+  @override
+  String get settings_delete_account => 'Șterge contul';
+
+  @override
+  String get settings_section_language => 'Limbă';
+
+  @override
+  String get settings_section_notifications => 'Notificări';
+
+  @override
+  String get settings_section_privacy => 'Confidențialitate';
+
+  @override
+  String get settings_phone_visibility => 'Vizibilitatea telefonului';
+
+  @override
+  String get settings_section_subscription => 'Abonament';
+
+  @override
+  String get settings_view_plan => 'Vezi planul curent';
+
+  @override
+  String get settings_restore_purchases => 'Restaurează achizițiile';
+
+  @override
+  String get settings_manage_subscription => 'Gestionează abonamentul';
+
+  @override
+  String get settings_section_home => 'Acasă';
+
+  @override
+  String get settings_home_settings => 'Setări casă';
+
+  @override
+  String get settings_invite_code => 'Cod de invitație';
+
+  @override
+  String get settings_leave_home => 'Părăsește casa';
+
+  @override
+  String get settings_close_home => 'Închide casa';
+
+  @override
+  String get settings_section_about => 'Despre';
+
+  @override
+  String get settings_app_version => 'Versiunea aplicației';
+
+  @override
+  String get settings_terms => 'Termeni de utilizare';
+
+  @override
+  String get settings_privacy_policy => 'Politica de confidențialitate';
+
+  @override
+  String get settings_plan_free => 'Plan gratuit';
+
+  @override
+  String get settings_plan_premium => 'Plan Premium';
 }

@@ -33,4 +33,7 @@ abstract interface class HomesRepository {
 
   /// Lee el lastSelectedHomeId del usuario desde Firestore.
   Future<String?> getLastSelectedHomeId(String uid);
+
+  /// Actualiza el campo `name` del hogar en `homes/{homeId}`.
+  Future<void> updateHomeName(String homeId, String name);
 }

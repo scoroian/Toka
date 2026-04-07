@@ -116,4 +116,9 @@ class HomesRepositoryImpl implements HomesRepository {
     if (!doc.exists) return null;
     return doc.data()?['lastSelectedHomeId'] as String?;
   }
+
+  @override
+  Future<void> updateHomeName(String homeId, String name) async {
+    await _firestore.collection('homes').doc(homeId).update({'name': name});
+  }
 }

@@ -1,16 +1,12 @@
+// lib/features/homes/presentation/home_settings_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
 import '../../../core/constants/routes.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/loading_widget.dart';
-import '../../auth/application/auth_provider.dart';
-import '../application/current_home_provider.dart';
-import '../application/homes_provider.dart';
-import '../domain/home.dart';
-import '../domain/home_membership.dart';
+import '../application/home_settings_view_model.dart';
 import '../domain/homes_repository.dart';
 
 class HomeSettingsScreen extends ConsumerStatefulWidget {
@@ -36,25 +32,10 @@ class _HomeSettingsScreenState extends ConsumerState<HomeSettingsScreen> {
     super.dispose();
   }
 
-  String _planLabel(Home home, AppLocalizations l10n) {
-    if (home.premiumStatus == HomePremiumStatus.free ||
-        home.premiumStatus == HomePremiumStatus.expiredFree) {
-      return l10n.homes_plan_free;
-    }
-    final endsAt = home.premiumEndsAt;
-    if (endsAt != null) {
-      final formatted = DateFormat.yMd().format(endsAt);
-      return '${l10n.homes_plan_premium} · ${l10n.homes_plan_ends(formatted)}';
-    }
-    return l10n.homes_plan_premium;
-  }
-
   Future<void> _confirmLeave(
     BuildContext context,
     AppLocalizations l10n,
-    String homeId,
-    String uid,
-    HomesRepository repo,
+    HomeSettingsViewModel vm,
   ) async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -75,7 +56,7 @@ class _HomeSettingsScreenState extends ConsumerState<HomeSettingsScreen> {
     );
     if (confirmed != true) return;
     try {
-      await repo.leaveHome(homeId, uid: uid);
+      await vm.leaveHome();
       if (context.mounted) Navigator.of(context).pop();
     } on CannotLeaveAsOwnerException {
       if (context.mounted) {
@@ -89,8 +70,7 @@ class _HomeSettingsScreenState extends ConsumerState<HomeSettingsScreen> {
   Future<void> _confirmClose(
     BuildContext context,
     AppLocalizations l10n,
-    String homeId,
-    HomesRepository repo,
+    HomeSettingsViewModel vm,
   ) async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -110,59 +90,33 @@ class _HomeSettingsScreenState extends ConsumerState<HomeSettingsScreen> {
       ),
     );
     if (confirmed != true) return;
-    await repo.closeHome(homeId);
+    await vm.closeHome();
     if (context.mounted) Navigator.of(context).pop();
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final currentHomeAsync = ref.watch(currentHomeProvider);
-    final auth = ref.watch(authProvider);
-    final uid = auth.whenOrNull(authenticated: (u) => u.uid) ?? '';
+    final vm = ref.watch(homeSettingsViewModelProvider(l10n));
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.homes_settings_title)),
-      body: currentHomeAsync.when(
+      body: vm.viewData.when(
         loading: () => const LoadingWidget(),
         error: (_, __) => Center(child: Text(l10n.error_generic)),
-        data: (home) {
-          if (home == null) {
-            return Center(child: Text(l10n.error_generic));
-          }
+        data: (data) {
+          if (data == null) return Center(child: Text(l10n.error_generic));
 
-          // Initialize name controller once we have data
           if (!_nameInitialized) {
-            _nameController.text = home.name;
+            _nameController.text = data.homeName;
             _nameInitialized = true;
           }
 
-          final membershipsAsync = uid.isNotEmpty
-              ? ref.watch(userMembershipsProvider(uid))
-              : null;
-          final memberships = membershipsAsync?.valueOrNull ?? [];
-          final myMembership = memberships.isEmpty
-              ? null
-              : memberships
-                  .where((m) => m.homeId == home.id)
-                  .cast<HomeMembership?>()
-                  .firstOrNull;
-
-          final myRole = myMembership?.role;
-          final isOwner = myRole == MemberRole.owner;
-          final canEdit = isOwner || myRole == MemberRole.admin;
-          final isCurrentPayer = myMembership?.billingState ==
-              BillingState.currentPayer;
-          final canManageSubscription = isOwner || isCurrentPayer;
-
-          final repo = ref.read(homesRepositoryProvider);
-
           return ListView(
             children: [
-              // 1. Name field
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                child: canEdit
+                child: data.canEdit
                     ? TextField(
                         key: const Key('home_name_field'),
                         controller: _nameController,
@@ -170,82 +124,58 @@ class _HomeSettingsScreenState extends ConsumerState<HomeSettingsScreen> {
                           labelText: l10n.homes_name_label,
                           border: const OutlineInputBorder(),
                         ),
+                        onSubmitted: (v) => vm.updateHomeName(v),
                       )
                     : ListTile(
                         title: Text(l10n.homes_name_label),
-                        subtitle: Text(home.name),
+                        subtitle: Text(data.homeName),
                       ),
               ),
-
               const Divider(),
-
-              // 2. Plan
               ListTile(
                 key: const Key('home_plan_tile'),
-                title: Text(_planLabel(home, l10n)),
+                title: Text(data.planLabel),
               ),
-
-              // 3. Manage subscription (owner or currentPayer only)
-              if (canManageSubscription)
+              if (data.canManageSubscription)
                 ListTile(
                   key: const Key('manage_subscription_tile'),
                   title: Text(l10n.homes_manage_subscription),
                   trailing: const Icon(Icons.chevron_right),
-                  onTap: () {
-                    // TODO: navigate to subscription screen
-                  },
+                  onTap: () {},
                 ),
-
               const Divider(),
-
-              // 4. Members
               ListTile(
                 key: const Key('members_tile'),
                 title: Text(l10n.homes_members),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => context.push(AppRoutes.members),
               ),
-
-              // 5. Invite code
               ListTile(
                 key: const Key('invite_code_tile'),
                 title: Text(l10n.homes_invite_code),
                 trailing: TextButton(
                   key: const Key('generate_code_button'),
-                  onPressed: () {
-                    // TODO: generate code
-                  },
+                  onPressed: () {},
                   child: Text(l10n.homes_generate_code),
                 ),
               ),
-
               const Divider(),
-
-              // 6. Leave home
               ListTile(
                 key: const Key('leave_home_tile'),
                 title: Text(
                   l10n.homes_leave_home,
                   style: const TextStyle(color: Colors.orange),
                 ),
-                onTap: () => _confirmLeave(
-                  context,
-                  l10n,
-                  home.id,
-                  uid,
-                  repo,
-                ),
+                onTap: () => _confirmLeave(context, l10n, vm),
               ),
-
-              // 7. Close home (owner only)
-              if (isOwner)
+              if (data.isOwner)
                 ListTile(
                   key: const Key('close_home_tile'),
                   title: Text(
                     l10n.homes_close_home,
                     style: const TextStyle(color: Colors.red),
                   ),
-                  onTap: () => _confirmClose(context, l10n, home.id, repo),
+                  onTap: () => _confirmClose(context, l10n, vm),
                 ),
             ],
           );

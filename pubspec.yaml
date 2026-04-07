@@ -41,6 +41,7 @@ dependencies:
   google_fonts: ^6.2.1
   cached_network_image: ^3.4.1
   image_picker: ^1.1.2
+  fl_chart: ^0.68.0
 
   # Auth social
   google_sign_in: ^6.2.2

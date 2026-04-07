@@ -23,6 +23,7 @@ export const openRescueWindow = onSchedule("0 9 * * *", async () => {
   logger.info(`openRescueWindow: ${snapshot.size} homes to update`);
 
   const batch = db.batch();
+  const homesToNotify: Array<{ homeId: string; daysLeft: number }> = [];
   for (const doc of snapshot.docs) {
     const data = doc.data();
     const rescueFlags = data["rescueFlags"] as { isInRescue?: boolean } | undefined;
@@ -48,11 +49,15 @@ export const openRescueWindow = onSchedule("0 9 * * *", async () => {
       { merge: true }
     );
 
-    sendRescueAlerts(doc.id, daysLeft).catch((err) =>
-      logger.warn(`sendRescueAlerts failed for home ${doc.id}:`, err)
-    );
+    homesToNotify.push({ homeId: doc.id, daysLeft });
   }
 
   await batch.commit();
   logger.info("openRescueWindow: batch committed");
+
+  for (const { homeId, daysLeft } of homesToNotify) {
+    sendRescueAlerts(homeId, daysLeft).catch((err) =>
+      logger.warn(`sendRescueAlerts failed for home ${homeId}:`, err)
+    );
+  }
 });

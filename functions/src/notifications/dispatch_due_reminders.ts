@@ -45,7 +45,9 @@ export const dispatchDueReminders = onSchedule("*/15 * * * *", async () => {
 
       if (!fcmToken || !notifyOnDue) continue;
 
-      const notifKey = `${taskDoc.id}_${now.toISOString().slice(0, 13)}`;
+      // Deduplicate per 15-min bucket: round minutes to 0, 15, 30, or 45
+      const bucket = Math.floor(now.getMinutes() / 15) * 15;
+      const notifKey = `${taskDoc.id}_${now.toISOString().slice(0, 11)}${String(now.getHours()).padStart(2, '0')}${String(bucket).padStart(2, '0')}`;
       const sentRef = db.collection("homes").doc(homeId)
         .collection("sentNotifications").doc(notifKey);
       const sentSnap = await sentRef.get();

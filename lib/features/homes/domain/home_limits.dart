@@ -6,5 +6,6 @@ part 'home_limits.freezed.dart';
 class HomeLimits with _$HomeLimits {
   const factory HomeLimits({
     required int maxMembers,
+    @Default(false) bool isPremium,
   }) = _HomeLimits;
 }

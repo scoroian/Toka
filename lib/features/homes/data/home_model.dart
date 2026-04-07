@@ -21,6 +21,10 @@ class HomeModel {
       autoRenewEnabled: data['autoRenewEnabled'] as bool? ?? false,
       limits: HomeLimits(
         maxMembers: (data['limits']?['maxMembers'] as int?) ?? 5,
+        isPremium: (() {
+          final s = data['premiumStatus'] as String? ?? 'free';
+          return s == 'active' || s == 'cancelledPendingEnd' || s == 'rescue';
+        })(),
       ),
       createdAt: (data['createdAt'] as Timestamp).toDate(),
       updatedAt: (data['updatedAt'] as Timestamp).toDate(),

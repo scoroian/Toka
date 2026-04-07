@@ -17,6 +17,7 @@ final _privateConstructorUsedError = UnsupportedError(
 /// @nodoc
 mixin _$HomeLimits {
   int get maxMembers => throw _privateConstructorUsedError;
+  bool get isPremium => throw _privateConstructorUsedError;
 
   /// Create a copy of HomeLimits
   /// with the given fields replaced by the non-null parameter values.
@@ -31,7 +32,7 @@ abstract class $HomeLimitsCopyWith<$Res> {
           HomeLimits value, $Res Function(HomeLimits) then) =
       _$HomeLimitsCopyWithImpl<$Res, HomeLimits>;
   @useResult
-  $Res call({int maxMembers});
+  $Res call({int maxMembers, bool isPremium});
 }
 
 /// @nodoc
@@ -50,12 +51,17 @@ class _$HomeLimitsCopyWithImpl<$Res, $Val extends HomeLimits>
   @override
   $Res call({
     Object? maxMembers = null,
+    Object? isPremium = null,
   }) {
     return _then(_value.copyWith(
       maxMembers: null == maxMembers
           ? _value.maxMembers
           : maxMembers // ignore: cast_nullable_to_non_nullable
               as int,
+      isPremium: null == isPremium
+          ? _value.isPremium
+          : isPremium // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 }
@@ -68,7 +74,7 @@ abstract class _$$HomeLimitsImplCopyWith<$Res>
       __$$HomeLimitsImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({int maxMembers});
+  $Res call({int maxMembers, bool isPremium});
 }
 
 /// @nodoc
@@ -85,12 +91,17 @@ class __$$HomeLimitsImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? maxMembers = null,
+    Object? isPremium = null,
   }) {
     return _then(_$HomeLimitsImpl(
       maxMembers: null == maxMembers
           ? _value.maxMembers
           : maxMembers // ignore: cast_nullable_to_non_nullable
               as int,
+      isPremium: null == isPremium
+          ? _value.isPremium
+          : isPremium // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -98,14 +109,17 @@ class __$$HomeLimitsImplCopyWithImpl<$Res>
 /// @nodoc
 
 class _$HomeLimitsImpl implements _HomeLimits {
-  const _$HomeLimitsImpl({required this.maxMembers});
+  const _$HomeLimitsImpl({required this.maxMembers, this.isPremium = false});
 
   @override
   final int maxMembers;
+  @override
+  @JsonKey()
+  final bool isPremium;
 
   @override
   String toString() {
-    return 'HomeLimits(maxMembers: $maxMembers)';
+    return 'HomeLimits(maxMembers: $maxMembers, isPremium: $isPremium)';
   }
 
   @override
@@ -114,11 +128,13 @@ class _$HomeLimitsImpl implements _HomeLimits {
         (other.runtimeType == runtimeType &&
             other is _$HomeLimitsImpl &&
             (identical(other.maxMembers, maxMembers) ||
-                other.maxMembers == maxMembers));
+                other.maxMembers == maxMembers) &&
+            (identical(other.isPremium, isPremium) ||
+                other.isPremium == isPremium));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, maxMembers);
+  int get hashCode => Object.hash(runtimeType, maxMembers, isPremium);
 
   /// Create a copy of HomeLimits
   /// with the given fields replaced by the non-null parameter values.
@@ -130,10 +146,13 @@ class _$HomeLimitsImpl implements _HomeLimits {
 }
 
 abstract class _HomeLimits implements HomeLimits {
-  const factory _HomeLimits({required final int maxMembers}) = _$HomeLimitsImpl;
+  const factory _HomeLimits(
+      {required final int maxMembers, final bool isPremium}) = _$HomeLimitsImpl;
 
   @override
   int get maxMembers;
+  @override
+  bool get isPremium;
 
   /// Create a copy of HomeLimits
   /// with the given fields replaced by the non-null parameter values.

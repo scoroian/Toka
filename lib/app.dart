@@ -29,6 +29,7 @@ import 'features/subscription/presentation/subscription_management_screen.dart';
 import 'features/subscription/presentation/rescue_screen.dart';
 import 'features/subscription/presentation/downgrade_planner_screen.dart';
 import 'features/notifications/presentation/notification_settings_screen.dart';
+import 'features/settings/presentation/settings_screen.dart';
 import 'l10n/app_localizations.dart';
 
 part 'app.g.dart';
@@ -187,6 +188,10 @@ GoRouter appRouter(AppRouterRef ref) {
             uid: extra?['uid'] as String? ?? '',
           );
         },
+      ),
+      GoRoute(
+        path: AppRoutes.settings,
+        builder: (_, __) => const SettingsScreen(),
       ),
     ],
   );

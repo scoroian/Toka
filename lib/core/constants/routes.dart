@@ -9,6 +9,7 @@ abstract class AppRoutes {
   static const String tasks = '/tasks';
   static const String createTask = '/tasks/new';
   static const String taskDetail = '/task/:id';
+  static const String editTask = '/task/:id/edit';
   static const String profile = '/profile';
   static const String settings = '/settings';
   static const String subscription = '/subscription';

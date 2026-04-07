@@ -2,6 +2,7 @@
 import * as admin from "firebase-admin";
 import * as logger from "firebase-functions/logger";
 import { onSchedule } from "firebase-functions/v2/scheduler";
+import { sendRescueAlerts } from "../notifications/send_rescue_alerts";
 
 /**
  * Job diario a las 09:00 UTC.
@@ -45,6 +46,10 @@ export const openRescueWindow = onSchedule("0 9 * * *", async () => {
         updatedAt: FieldValue.serverTimestamp(),
       },
       { merge: true }
+    );
+
+    sendRescueAlerts(doc.id, daysLeft).catch((err) =>
+      logger.warn(`sendRescueAlerts failed for home ${doc.id}:`, err)
     );
   }
 

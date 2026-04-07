@@ -596,5 +596,7 @@
   "radar_no_data": "Fără evaluări încă",
   "@radar_no_data": { "description": "No radar data message" },
   "radar_other_tasks": "Alte sarcini evaluate",
-  "@radar_other_tasks": { "description": "Overflow tasks section title" }
+  "@radar_other_tasks": { "description": "Overflow tasks section title" },
+  "review_submit_error": "Eroare la trimiterea evaluării",
+  "@review_submit_error": { "description": "Generic review submission error" }
 }

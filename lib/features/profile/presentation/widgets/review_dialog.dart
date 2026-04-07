@@ -57,8 +57,9 @@ class _ReviewDialogState extends State<ReviewDialog> {
       if (mounted) Navigator.of(context).pop();
     } on FirebaseFunctionsException catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.message ?? 'Error al enviar valoración')),
+          SnackBar(content: Text(e.message ?? l10n.review_submit_error)),
         );
       }
     } finally {
@@ -86,7 +87,10 @@ class _ReviewDialogState extends State<ReviewDialog> {
         title: Text(l10n.review_dialog_title),
         content: Padding(
           padding: const EdgeInsets.all(16),
-          child: Text(l10n.review_own_task),
+          child: Text(
+            l10n.review_own_task,
+            key: const Key('self_review_message'),
+          ),
         ),
       );
     }

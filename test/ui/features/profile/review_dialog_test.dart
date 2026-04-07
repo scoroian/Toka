@@ -50,7 +50,7 @@ void main() {
     ));
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('btn_submit_review')), findsNothing);
-    expect(find.text('No puedes valorar tus propias tareas'), findsOneWidget);
+    expect(find.byKey(const Key('self_review_message')), findsOneWidget);
   });
 
   testWidgets('En plan Free muestra mensaje de upgrade', (tester) async {

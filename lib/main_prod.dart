@@ -1,13 +1,37 @@
+import 'dart:async';
+
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'app.dart';
 import 'firebase_options.dart';
+import 'shared/services/crashlytics_service.dart';
+import 'shared/services/remote_config_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const ProviderScope(child: TokaApp()));
+
+  // Inicializar observabilidad antes de runApp
+  final crashlyticsService = CrashlyticsService(FirebaseCrashlytics.instance);
+  await crashlyticsService.init();
+
+  final remoteConfigService = RemoteConfigService(FirebaseRemoteConfig.instance);
+  await remoteConfigService.init();
+
+  // Capturar errores no manejados de Dart
+  runZonedGuarded(
+    () => runApp(const ProviderScope(
+      child: TokaApp(),
+    )),
+    (error, stack) {
+      crashlyticsService.recordError(error, stack, fatal: true);
+    },
+  );
 }

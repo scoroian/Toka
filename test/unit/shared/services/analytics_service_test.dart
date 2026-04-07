@@ -74,4 +74,34 @@ void main() {
       expect(() => service.logScreenView('HomeScreen'), returnsNormally);
     });
   });
+
+  group('AnalyticsService event methods', () {
+    test('logTaskCompleted llama logEvent con task_completed', () async {
+      when(() => mockAnalytics.logEvent(
+            name: any(named: 'name'),
+            parameters: any(named: 'parameters'),
+          )).thenAnswer((_) async {});
+
+      await service.logTaskCompleted(homeId: 'h1', taskId: 't1');
+
+      verify(() => mockAnalytics.logEvent(
+            name: 'task_completed',
+            parameters: any(named: 'parameters'),
+          )).called(1);
+    });
+
+    test('logPremiumPurchaseStarted llama logEvent con premium_purchase_started', () async {
+      when(() => mockAnalytics.logEvent(
+            name: any(named: 'name'),
+            parameters: any(named: 'parameters'),
+          )).thenAnswer((_) async {});
+
+      await service.logPremiumPurchaseStarted(plan: 'monthly');
+
+      verify(() => mockAnalytics.logEvent(
+            name: 'premium_purchase_started',
+            parameters: any(named: 'parameters'),
+          )).called(1);
+    });
+  });
 }

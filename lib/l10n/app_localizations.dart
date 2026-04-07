@@ -1857,6 +1857,84 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Plan Premium'**
   String get settings_plan_premium;
+
+  // ── Tasks ──────────────────────────────────────────────────────────
+  String get tasks_title;
+  String get tasks_empty_title;
+  String get tasks_empty_body;
+  String get tasks_empty_cta;
+  String get tasks_create_title;
+  String get tasks_edit_title;
+  String get tasks_field_visual;
+  String get tasks_field_title_hint;
+  String get tasks_field_description_hint;
+  String get tasks_field_recurrence;
+  String get tasks_field_assignment_mode;
+  String get tasks_field_difficulty;
+  String get tasks_assignment_basic_rotation;
+  String get tasks_assignment_smart;
+  String get tasks_assignment_members;
+  String get tasks_recurrence_every;
+  String get tasks_recurrence_hours;
+  String get tasks_recurrence_days;
+  String get tasks_recurrence_start_time;
+  String get tasks_recurrence_end_time;
+  String get tasks_recurrence_time;
+  String get tasks_recurrence_day_of_month;
+  String get tasks_recurrence_week_of_month;
+  String get tasks_recurrence_weekday;
+  String get tasks_recurrence_month;
+  String get tasks_recurrence_timezone;
+  String get tasks_recurrence_upcoming;
+  String get tasks_recurrence_hourly_label;
+  String get tasks_recurrence_daily_label;
+  String get tasks_recurrence_weekly_label;
+  String get tasks_recurrence_monthly_fixed_label;
+  String get tasks_recurrence_monthly_nth_label;
+  String get tasks_recurrence_yearly_fixed_label;
+  String get tasks_recurrence_yearly_nth_label;
+  String get tasks_section_active;
+  String get tasks_section_frozen;
+  String get tasks_action_edit;
+  String get tasks_action_freeze;
+  String get tasks_action_unfreeze;
+  String get tasks_action_delete;
+  String get tasks_delete_confirm_title;
+  String get tasks_delete_confirm_body;
+  String get tasks_delete_confirm_btn;
+  String get tasks_freeze_success;
+  String get tasks_unfreeze_success;
+  String get tasks_save_error;
+  String get tasks_detail_next_occurrences;
+  String get tasks_detail_assignment_order;
+  String get tasks_validation_title_empty;
+  String get tasks_validation_title_too_long;
+  String get tasks_validation_no_assignees;
+  String get tasks_validation_difficulty_range;
+  String get tasks_validation_recurrence_required;
+  String get weekday_mon;
+  String get weekday_tue;
+  String get weekday_wed;
+  String get weekday_thu;
+  String get weekday_fri;
+  String get weekday_sat;
+  String get weekday_sun;
+  String get tasks_week_1st;
+  String get tasks_week_2nd;
+  String get tasks_week_3rd;
+  String get tasks_week_4th;
+  String get month_jan;
+  String get month_feb;
+  String get month_mar;
+  String get month_apr;
+  String get month_may;
+  String get month_jun;
+  String get month_jul;
+  String get month_aug;
+  String get month_sep;
+  String get month_oct;
+  String get month_nov;
+  String get month_dec;
 }
 
 class _AppLocalizationsDelegate

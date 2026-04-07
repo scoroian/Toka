@@ -1,8 +1,9 @@
+// lib/features/auth/presentation/forgot_password_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/app_localizations.dart';
-import '../application/auth_provider.dart';
+import '../application/forgot_password_view_model.dart';
 
 class ForgotPasswordScreen extends ConsumerStatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -15,9 +16,6 @@ class ForgotPasswordScreen extends ConsumerStatefulWidget {
 class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailCtrl = TextEditingController();
-  bool _sent = false;
-  bool _loading = false;
-
   static final _emailRegex = RegExp(r'^[\w\-\.]+@[\w\-]+\.[a-z]{2,}$');
 
   @override
@@ -28,33 +26,27 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
 
   Future<void> _send() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
-    setState(() => _loading = true);
     await ref
-        .read(authProvider.notifier)
+        .read(forgotPasswordViewModelProvider)
         .sendPasswordReset(_emailCtrl.text.trim());
-    if (mounted) {
-      setState(() {
-        _sent = true;
-        _loading = false;
-      });
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final vm = ref.watch(forgotPasswordViewModelProvider);
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.auth_forgot_password_title)),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
-          child: _sent
+          child: vm.resetSent
               ? _ConfirmationView(l10n: l10n)
               : _FormView(
                   formKey: _formKey,
                   emailCtrl: _emailCtrl,
-                  loading: _loading,
+                  loading: vm.isLoading,
                   onSend: _send,
                   l10n: l10n,
                   emailRegex: _emailRegex,

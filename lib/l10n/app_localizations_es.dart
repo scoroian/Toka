@@ -780,4 +780,66 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get rescue_screen_body =>
       'Tu suscripción Premium expira pronto. Renueva ahora para no perder acceso a tus funciones.';
+
+  @override
+  String get vacation_title => 'Vacaciones / Ausencia';
+
+  @override
+  String get vacation_toggle_label => 'Estoy de vacaciones / ausente';
+
+  @override
+  String get vacation_start_date => 'Fecha de inicio (opcional)';
+
+  @override
+  String get vacation_end_date => 'Fecha de fin (opcional)';
+
+  @override
+  String get vacation_reason => 'Motivo (opcional)';
+
+  @override
+  String get vacation_save => 'Guardar cambios';
+
+  @override
+  String vacation_chip_until(String date) {
+    return 'De vacaciones hasta $date';
+  }
+
+  @override
+  String get vacation_chip_indefinite => 'De vacaciones';
+
+  @override
+  String get notification_settings_title => 'Notificaciones';
+
+  @override
+  String get notification_on_due_label => 'Avisar al vencer';
+
+  @override
+  String get notification_before_label => 'Avisar antes de vencer';
+
+  @override
+  String get notification_minutes_before_label => 'Tiempo de antelación';
+
+  @override
+  String get notification_daily_summary_label => 'Resumen diario';
+
+  @override
+  String get notification_summary_time_label => 'Hora del resumen';
+
+  @override
+  String get notification_silenced_types_label => 'Silenciar tipos de tarea';
+
+  @override
+  String get notification_premium_only => 'Solo Premium';
+
+  @override
+  String get notification_15min => '15 minutos';
+
+  @override
+  String get notification_30min => '30 minutos';
+
+  @override
+  String get notification_1h => '1 hora';
+
+  @override
+  String get notification_2h => '2 horas';
 }

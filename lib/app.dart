@@ -28,6 +28,7 @@ import 'features/subscription/presentation/paywall_screen.dart';
 import 'features/subscription/presentation/subscription_management_screen.dart';
 import 'features/subscription/presentation/rescue_screen.dart';
 import 'features/subscription/presentation/downgrade_planner_screen.dart';
+import 'features/notifications/presentation/notification_settings_screen.dart';
 import 'l10n/app_localizations.dart';
 
 part 'app.g.dart';
@@ -176,6 +177,16 @@ GoRouter appRouter(AppRouterRef ref) {
       GoRoute(
         path: AppRoutes.downgradePlanner,
         builder: (_, __) => const DowngradePlannerScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.notificationSettings,
+        builder: (context, state) {
+          final extra = state.extra as Map<String, String>;
+          return NotificationSettingsScreen(
+            homeId: extra['homeId']!,
+            uid: extra['uid']!,
+          );
+        },
       ),
     ],
   );

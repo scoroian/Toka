@@ -1509,6 +1509,126 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Tu suscripción Premium expira pronto. Renueva ahora para no perder acceso a tus funciones.'**
   String get rescue_screen_body;
+
+  /// Vacation screen title
+  ///
+  /// In es, this message translates to:
+  /// **'Vacaciones / Ausencia'**
+  String get vacation_title;
+
+  /// Vacation toggle label
+  ///
+  /// In es, this message translates to:
+  /// **'Estoy de vacaciones / ausente'**
+  String get vacation_toggle_label;
+
+  /// Vacation start date label
+  ///
+  /// In es, this message translates to:
+  /// **'Fecha de inicio (opcional)'**
+  String get vacation_start_date;
+
+  /// Vacation end date label
+  ///
+  /// In es, this message translates to:
+  /// **'Fecha de fin (opcional)'**
+  String get vacation_end_date;
+
+  /// Vacation reason label
+  ///
+  /// In es, this message translates to:
+  /// **'Motivo (opcional)'**
+  String get vacation_reason;
+
+  /// Save vacation button
+  ///
+  /// In es, this message translates to:
+  /// **'Guardar cambios'**
+  String get vacation_save;
+
+  /// Vacation chip with end date
+  ///
+  /// In es, this message translates to:
+  /// **'De vacaciones hasta {date}'**
+  String vacation_chip_until(String date);
+
+  /// Vacation chip without end date
+  ///
+  /// In es, this message translates to:
+  /// **'De vacaciones'**
+  String get vacation_chip_indefinite;
+
+  /// Notification settings screen title
+  ///
+  /// In es, this message translates to:
+  /// **'Notificaciones'**
+  String get notification_settings_title;
+
+  /// Notify on due toggle
+  ///
+  /// In es, this message translates to:
+  /// **'Avisar al vencer'**
+  String get notification_on_due_label;
+
+  /// Notify before due toggle
+  ///
+  /// In es, this message translates to:
+  /// **'Avisar antes de vencer'**
+  String get notification_before_label;
+
+  /// Minutes before label
+  ///
+  /// In es, this message translates to:
+  /// **'Tiempo de antelación'**
+  String get notification_minutes_before_label;
+
+  /// Daily summary toggle
+  ///
+  /// In es, this message translates to:
+  /// **'Resumen diario'**
+  String get notification_daily_summary_label;
+
+  /// Daily summary time label
+  ///
+  /// In es, this message translates to:
+  /// **'Hora del resumen'**
+  String get notification_summary_time_label;
+
+  /// Silenced types section label
+  ///
+  /// In es, this message translates to:
+  /// **'Silenciar tipos de tarea'**
+  String get notification_silenced_types_label;
+
+  /// Premium-only badge
+  ///
+  /// In es, this message translates to:
+  /// **'Solo Premium'**
+  String get notification_premium_only;
+
+  /// 15 minutes option
+  ///
+  /// In es, this message translates to:
+  /// **'15 minutos'**
+  String get notification_15min;
+
+  /// 30 minutes option
+  ///
+  /// In es, this message translates to:
+  /// **'30 minutos'**
+  String get notification_30min;
+
+  /// 1 hour option
+  ///
+  /// In es, this message translates to:
+  /// **'1 hora'**
+  String get notification_1h;
+
+  /// 2 hours option
+  ///
+  /// In es, this message translates to:
+  /// **'2 horas'**
+  String get notification_2h;
 }
 
 class _AppLocalizationsDelegate

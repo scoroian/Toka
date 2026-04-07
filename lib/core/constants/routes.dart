@@ -20,6 +20,7 @@ abstract class AppRoutes {
   static const String memberProfile = '/member/:uid';
   static const String vacation = '/vacation';
   static const String history = '/history';
+  static const String notificationSettings = '/notification-settings';
 
   static const List<String> all = [
     splash,
@@ -43,5 +44,6 @@ abstract class AppRoutes {
     memberProfile,
     vacation,
     history,
+    notificationSettings,
   ];
 }

@@ -776,4 +776,67 @@ class AppLocalizationsRo extends AppLocalizations {
   @override
   String get rescue_screen_body =>
       'Abonamentul tău Premium expiră în curând. Reînnoiește acum pentru a păstra accesul la funcții.';
+
+  @override
+  String get vacation_title => 'Concediu / Absență';
+
+  @override
+  String get vacation_toggle_label => 'Sunt în concediu / absent';
+
+  @override
+  String get vacation_start_date => 'Data de început (opțional)';
+
+  @override
+  String get vacation_end_date => 'Data de sfârșit (opțional)';
+
+  @override
+  String get vacation_reason => 'Motiv (opțional)';
+
+  @override
+  String get vacation_save => 'Salvează modificările';
+
+  @override
+  String vacation_chip_until(String date) {
+    return 'În concediu până pe $date';
+  }
+
+  @override
+  String get vacation_chip_indefinite => 'În concediu';
+
+  @override
+  String get notification_settings_title => 'Notificări';
+
+  @override
+  String get notification_on_due_label => 'Notifică la scadență';
+
+  @override
+  String get notification_before_label => 'Notifică înainte de scadență';
+
+  @override
+  String get notification_minutes_before_label => 'Timp de avans';
+
+  @override
+  String get notification_daily_summary_label => 'Rezumat zilnic';
+
+  @override
+  String get notification_summary_time_label => 'Ora rezumatului';
+
+  @override
+  String get notification_silenced_types_label =>
+      'Silențiează tipuri de sarcini';
+
+  @override
+  String get notification_premium_only => 'Doar Premium';
+
+  @override
+  String get notification_15min => '15 minute';
+
+  @override
+  String get notification_30min => '30 de minute';
+
+  @override
+  String get notification_1h => '1 oră';
+
+  @override
+  String get notification_2h => '2 ore';
 }

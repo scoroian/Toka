@@ -6,6 +6,8 @@ abstract class AppRoutes {
   static const String verifyEmail = '/verify-email';
   static const String onboarding = '/onboarding';
   static const String home = '/home';
+  static const String tasks = '/tasks';
+  static const String createTask = '/tasks/new';
   static const String taskDetail = '/task/:id';
   static const String profile = '/profile';
   static const String settings = '/settings';

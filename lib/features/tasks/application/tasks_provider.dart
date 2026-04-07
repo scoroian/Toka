@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../homes/application/current_home_provider.dart';
 import '../data/tasks_repository_impl.dart';
 import '../domain/task.dart';
 import '../domain/tasks_repository.dart';
@@ -14,8 +13,6 @@ TasksRepository tasksRepository(TasksRepositoryRef ref) {
 }
 
 @riverpod
-Stream<List<Task>> homeTasks(HomeTasksRef ref) {
-  final homeId = ref.watch(currentHomeProvider).valueOrNull?.id;
-  if (homeId == null) return const Stream.empty();
+Stream<List<Task>> homeTasks(HomeTasksRef ref, String homeId) {
   return ref.watch(tasksRepositoryProvider).watchHomeTasks(homeId);
 }

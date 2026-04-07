@@ -842,4 +842,33 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get notification_2h => '2 horas';
+
+  @override
+  String get review_dialog_title => 'Valorar tarea';
+
+  @override
+  String get review_score_label => 'Puntuación (1-10)';
+
+  @override
+  String get review_note_label =>
+      'Nota privada (opcional, máx. 300 caracteres)';
+
+  @override
+  String get review_submit => 'Enviar valoración';
+
+  @override
+  String get review_premium_required =>
+      'Las valoraciones son exclusivas de Premium';
+
+  @override
+  String get review_own_task => 'No puedes valorar tus propias tareas';
+
+  @override
+  String get radar_chart_title => 'Puntos fuertes';
+
+  @override
+  String get radar_no_data => 'Sin valoraciones todavía';
+
+  @override
+  String get radar_other_tasks => 'Otras tareas evaluadas';
 }

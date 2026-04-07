@@ -834,4 +834,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notification_2h => '2 hours';
+
+  @override
+  String get review_dialog_title => 'Rate task';
+
+  @override
+  String get review_score_label => 'Score (1-10)';
+
+  @override
+  String get review_note_label => 'Private note (optional, max 300 chars)';
+
+  @override
+  String get review_submit => 'Submit review';
+
+  @override
+  String get review_premium_required => 'Reviews are a Premium feature';
+
+  @override
+  String get review_own_task => 'You cannot rate your own tasks';
+
+  @override
+  String get radar_chart_title => 'Strengths';
+
+  @override
+  String get radar_no_data => 'No ratings yet';
+
+  @override
+  String get radar_other_tasks => 'Other rated tasks';
 }

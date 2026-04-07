@@ -1629,6 +1629,60 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'2 horas'**
   String get notification_2h;
+
+  /// Review dialog title
+  ///
+  /// In es, this message translates to:
+  /// **'Valorar tarea'**
+  String get review_dialog_title;
+
+  /// Review score label
+  ///
+  /// In es, this message translates to:
+  /// **'Puntuación (1-10)'**
+  String get review_score_label;
+
+  /// Review note label
+  ///
+  /// In es, this message translates to:
+  /// **'Nota privada (opcional, máx. 300 caracteres)'**
+  String get review_note_label;
+
+  /// Submit review button
+  ///
+  /// In es, this message translates to:
+  /// **'Enviar valoración'**
+  String get review_submit;
+
+  /// Premium required for reviews
+  ///
+  /// In es, this message translates to:
+  /// **'Las valoraciones son exclusivas de Premium'**
+  String get review_premium_required;
+
+  /// Cannot review own task message
+  ///
+  /// In es, this message translates to:
+  /// **'No puedes valorar tus propias tareas'**
+  String get review_own_task;
+
+  /// Radar chart section title
+  ///
+  /// In es, this message translates to:
+  /// **'Puntos fuertes'**
+  String get radar_chart_title;
+
+  /// No radar data message
+  ///
+  /// In es, this message translates to:
+  /// **'Sin valoraciones todavía'**
+  String get radar_no_data;
+
+  /// Overflow tasks section title
+  ///
+  /// In es, this message translates to:
+  /// **'Otras tareas evaluadas'**
+  String get radar_other_tasks;
 }
 
 class _AppLocalizationsDelegate

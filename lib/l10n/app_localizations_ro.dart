@@ -839,4 +839,31 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get notification_2h => '2 ore';
+
+  @override
+  String get review_dialog_title => 'Evaluează sarcina';
+
+  @override
+  String get review_score_label => 'Punctaj (1-10)';
+
+  @override
+  String get review_note_label => 'Notă privată (opțional, max 300 caractere)';
+
+  @override
+  String get review_submit => 'Trimite evaluarea';
+
+  @override
+  String get review_premium_required => 'Evaluările sunt o funcție Premium';
+
+  @override
+  String get review_own_task => 'Nu îți poți evalua propriile sarcini';
+
+  @override
+  String get radar_chart_title => 'Puncte forte';
+
+  @override
+  String get radar_no_data => 'Fără evaluări încă';
+
+  @override
+  String get radar_other_tasks => 'Alte sarcini evaluate';
 }

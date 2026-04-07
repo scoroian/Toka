@@ -17,6 +17,9 @@ import 'features/i18n/application/locale_provider.dart';
 import 'features/homes/presentation/home_settings_screen.dart';
 import 'features/homes/presentation/my_homes_screen.dart';
 import 'features/onboarding/presentation/onboarding_flow_screen.dart';
+import 'features/tasks/presentation/all_tasks_screen.dart';
+import 'features/tasks/presentation/create_edit_task_screen.dart';
+import 'features/tasks/presentation/task_detail_screen.dart';
 import 'features/tasks/presentation/today_screen.dart';
 import 'features/members/presentation/members_screen.dart';
 import 'features/members/presentation/member_profile_screen.dart';
@@ -32,6 +35,7 @@ import 'features/notifications/application/notification_prefs_provider.dart';
 import 'features/notifications/presentation/notification_settings_screen.dart';
 import 'features/settings/presentation/settings_screen.dart';
 import 'l10n/app_localizations.dart';
+import 'shared/widgets/main_shell.dart';
 
 part 'app.g.dart';
 
@@ -118,9 +122,52 @@ GoRouter appRouter(AppRouterRef ref) {
         path: AppRoutes.onboarding,
         builder: (_, __) => const OnboardingFlowScreen(),
       ),
+
+      // ── Shell principal con NavigationBar ──────────────────────────
+      ShellRoute(
+        builder: (context, state, child) => MainShell(child: child),
+        routes: [
+          GoRoute(
+            path: AppRoutes.home,
+            builder: (_, __) => const TodayScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.history,
+            builder: (_, __) => const HistoryScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.members,
+            builder: (_, __) => const MembersScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.tasks,
+            builder: (_, __) => const AllTasksScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.settings,
+            builder: (_, __) => const SettingsScreen(),
+          ),
+        ],
+      ),
+
+      // ── Pantallas fuera del shell (sin NavigationBar) ──────────────
       GoRoute(
-        path: AppRoutes.home,
-        builder: (_, __) => const TodayScreen(),
+        path: AppRoutes.createTask,
+        builder: (_, __) => const CreateEditTaskScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.taskDetail,
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return TaskDetailScreen(taskId: id);
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.editTask,
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return CreateEditTaskScreen(editTaskId: id);
+        },
       ),
       GoRoute(
         path: AppRoutes.myHomes,
@@ -129,10 +176,6 @@ GoRouter appRouter(AppRouterRef ref) {
       GoRoute(
         path: AppRoutes.homeSettings,
         builder: (_, __) => const HomeSettingsScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.members,
-        builder: (_, __) => const MembersScreen(),
       ),
       GoRoute(
         path: AppRoutes.memberProfile,
@@ -151,10 +194,6 @@ GoRouter appRouter(AppRouterRef ref) {
           final uid = extra?['uid'] as String? ?? '';
           return VacationScreen(homeId: homeId, uid: uid);
         },
-      ),
-      GoRoute(
-        path: AppRoutes.history,
-        builder: (_, __) => const HistoryScreen(),
       ),
       GoRoute(
         path: AppRoutes.profile,
@@ -189,10 +228,6 @@ GoRouter appRouter(AppRouterRef ref) {
             uid: extra?['uid'] as String? ?? '',
           );
         },
-      ),
-      GoRoute(
-        path: AppRoutes.settings,
-        builder: (_, __) => const SettingsScreen(),
       ),
     ],
   );

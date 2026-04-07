@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../l10n/app_localizations.dart';
@@ -83,11 +84,8 @@ class TaskDetailScreen extends ConsumerWidget {
                     IconButton(
                       key: const Key('edit_task_button'),
                       icon: const Icon(Icons.edit),
-                      onPressed: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => const SizedBox.shrink(), // replaced by router
-                        ),
-                      ),
+                      onPressed: () =>
+                          context.go('/task/$taskId/edit'),
                     ),
                 ],
               ),

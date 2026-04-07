@@ -9,8 +9,21 @@ import '../../../l10n/app_localizations.dart';
 import '../../subscription/application/subscription_provider.dart';
 import '../../subscription/domain/subscription_state.dart';
 
-class SettingsScreen extends ConsumerWidget {
+class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
+
+  @override
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends ConsumerState<SettingsScreen> {
+  late final Future<PackageInfo> _packageInfoFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _packageInfoFuture = PackageInfo.fromPlatform();
+  }
 
   bool _isPremium(SubscriptionState state) {
     return state.map(
@@ -25,7 +38,7 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final isPremium = _isPremium(ref.watch(subscriptionStateProvider));
 
@@ -71,7 +84,7 @@ class SettingsScreen extends ConsumerWidget {
           const Divider(),
 
           // ── Privacidad ────────────────────────────────────────────────
-          _SectionHeader(title: l10n.settings_section_privacy),
+          _SectionHeader(key: const Key('settings_section_privacy'), title: l10n.settings_section_privacy),
           ListTile(
             leading: const Icon(Icons.phone_outlined),
             title: Text(l10n.settings_phone_visibility),
@@ -85,7 +98,7 @@ class SettingsScreen extends ConsumerWidget {
             key: const Key('subscription_status_label'),
             leading: Icon(
               isPremium ? Icons.star : Icons.star_border,
-              color: isPremium ? Colors.amber : null,
+              color: isPremium ? Colors.amber : null, // TODO: move to AppColors
             ),
             title: Text(isPremium ? l10n.settings_plan_premium : l10n.settings_plan_free),
             onTap: () => context.push(AppRoutes.subscription),
@@ -98,7 +111,7 @@ class SettingsScreen extends ConsumerWidget {
           const Divider(),
 
           // ── Hogar ─────────────────────────────────────────────────────
-          _SectionHeader(title: l10n.settings_section_home),
+          _SectionHeader(key: const Key('settings_section_home'), title: l10n.settings_section_home),
           ListTile(
             leading: const Icon(Icons.home_outlined),
             title: Text(l10n.settings_home_settings),
@@ -110,9 +123,9 @@ class SettingsScreen extends ConsumerWidget {
             onTap: () {},
           ),
           ListTile(
-            leading: const Icon(Icons.exit_to_app, color: Colors.red),
+            leading: const Icon(Icons.exit_to_app, color: Colors.red), // TODO: move to AppColors
             title: Text(l10n.settings_leave_home,
-                style: const TextStyle(color: Colors.red)),
+                style: const TextStyle(color: Colors.red)), // TODO: move to AppColors
             onTap: () {},
           ),
           const Divider(),
@@ -120,7 +133,7 @@ class SettingsScreen extends ConsumerWidget {
           // ── Acerca de ─────────────────────────────────────────────────
           _SectionHeader(key: const Key('settings_section_about'), title: l10n.settings_section_about),
           FutureBuilder<PackageInfo>(
-            future: PackageInfo.fromPlatform(),
+            future: _packageInfoFuture,
             builder: (ctx, snap) {
               final version = snap.data?.version ?? '—';
               final build = snap.data?.buildNumber ?? '';

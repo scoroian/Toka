@@ -36,6 +36,7 @@ Widget _wrap({SubscriptionState? subscription}) => ProviderScope(
       child: MaterialApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('es'),
         home: const SettingsScreen(),
       ),
     );
@@ -65,6 +66,14 @@ void main() {
     ));
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('subscription_status_label')), findsOneWidget);
+    expect(find.text('Plan Premium'), findsOneWidget);
+  });
+
+  testWidgets('SettingsScreen muestra "Plan gratuito" cuando no hay Premium', (tester) async {
+    await tester.pumpWidget(_wrap());
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('subscription_status_label')), findsOneWidget);
+    expect(find.text('Plan gratuito'), findsOneWidget);
   });
 
   testWidgets('SettingsScreen renderiza sección Acerca de', (tester) async {

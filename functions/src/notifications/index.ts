@@ -1,2 +1,2 @@
 // Notification functions — implemented in spec-11
-export {};
+export { dispatchDueReminders } from "./dispatch_due_reminders";

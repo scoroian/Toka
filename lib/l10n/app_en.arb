@@ -618,8 +618,6 @@
   "@radar_other_tasks": { "description": "Overflow tasks section title" },
   "review_submit_error": "Error submitting review",
   "@review_submit_error": { "description": "Generic review submission error" },
-  "settings_title": "Settings",
-  "@settings_title": { "description": "Settings screen title" },
   "settings_section_account": "Account",
   "@settings_section_account": { "description": "Account settings section" },
   "settings_edit_profile": "Edit profile",

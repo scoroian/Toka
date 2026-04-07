@@ -618,8 +618,6 @@
   "@radar_other_tasks": { "description": "Overflow tasks section title" },
   "review_submit_error": "Eroare la trimiterea evaluării",
   "@review_submit_error": { "description": "Generic review submission error" },
-  "settings_title": "Setări",
-  "@settings_title": { "description": "Settings screen title" },
   "settings_section_account": "Cont",
   "@settings_section_account": { "description": "Account settings section" },
   "settings_edit_profile": "Editează profilul",

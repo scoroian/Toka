@@ -20,11 +20,11 @@ class RemoteConfigService {
 
   Future<void> init() async {
     try {
-      await _remoteConfig.setDefaults(_defaults.map((k, v) => MapEntry(k, v)));
       await _remoteConfig.setConfigSettings(RemoteConfigSettings(
         fetchTimeout: const Duration(seconds: 10),
         minimumFetchInterval: const Duration(hours: 1),
       ));
+      await _remoteConfig.setDefaults(_defaults);
       await _remoteConfig.fetchAndActivate();
     } catch (e, st) {
       AppLogger.error('RemoteConfig init failed — using defaults', e, st);

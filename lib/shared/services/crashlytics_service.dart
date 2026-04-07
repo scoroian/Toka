@@ -15,6 +15,10 @@ class CrashlyticsService {
       FlutterError.onError = (errorDetails) {
         _crashlytics.recordFlutterFatalError(errorDetails);
       };
+      PlatformDispatcher.instance.onError = (error, stack) {
+        _crashlytics.recordError(error, stack, fatal: true);
+        return true;
+      };
     } catch (e, st) {
       AppLogger.error('Crashlytics init failed', e, st);
     }

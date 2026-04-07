@@ -7,6 +7,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/loading_widget.dart';
 import '../application/members_provider.dart';
 import '../domain/member.dart';
+import '../../profile/presentation/widgets/radar_chart_widget.dart';
 import 'widgets/member_role_badge.dart';
 
 part 'member_profile_screen.g.dart';
@@ -126,6 +127,8 @@ class MemberProfileScreen extends ConsumerWidget {
                 label: l10n.member_profile_avg_score,
                 value: '${member.averageScore.toStringAsFixed(1)}/10',
               ),
+              const SizedBox(height: 24),
+              const RadarChartWidget(entries: []),
             ],
           );
         },

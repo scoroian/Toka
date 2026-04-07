@@ -8,6 +8,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/loading_widget.dart';
 import '../application/profile_provider.dart';
 import 'widgets/access_management_section.dart';
+import 'widgets/radar_chart_widget.dart';
 import 'widgets/stats_section.dart';
 
 class OwnProfileScreen extends ConsumerWidget {
@@ -97,6 +98,9 @@ class OwnProfileScreen extends ConsumerWidget {
               totalCompleted: 0,
               globalCompliance: 0.0,
             ),
+
+            const SizedBox(height: 24),
+            const RadarChartWidget(entries: []),
 
             const Divider(height: 32),
 

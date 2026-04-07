@@ -516,6 +516,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get invite_sheet_code_copied => 'Code copied';
 
   @override
+  String get member_profile_home_stats => 'Stats in this home';
+
+  @override
   String get member_profile_tasks_completed => 'Tasks completed';
 
   @override
@@ -611,6 +614,24 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String history_event_reason(String reason) {
     return 'Reason: $reason';
+  }
+
+  @override
+  String get history_time_now => 'just now';
+
+  @override
+  String history_time_minutes_ago(int minutes) {
+    return '$minutes min ago';
+  }
+
+  @override
+  String history_time_hours_ago(int hours) {
+    return '$hours h ago';
+  }
+
+  @override
+  String history_time_days_ago(int days) {
+    return '$days days ago';
   }
 
   @override
@@ -861,4 +882,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get radar_other_tasks => 'Other rated tasks';
+
+  @override
+  String get review_submit_error => 'Error submitting review';
 }

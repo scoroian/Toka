@@ -6,6 +6,15 @@ import '../../../../l10n/app_localizations.dart';
 import '../../domain/task_event.dart';
 import '../../../profile/presentation/widgets/review_dialog.dart';
 
+String _formatRelativeTime(AppLocalizations l10n, DateTime dt) {
+  final diff = DateTime.now().difference(dt);
+  if (diff.inMinutes < 1) return l10n.history_time_now;
+  if (diff.inHours < 1) return l10n.history_time_minutes_ago(diff.inMinutes);
+  if (diff.inHours < 24) return l10n.history_time_hours_ago(diff.inHours);
+  if (diff.inDays < 7) return l10n.history_time_days_ago(diff.inDays);
+  return DateFormat('EEE d MMM, HH:mm').format(dt);
+}
+
 class HistoryEventTile extends StatelessWidget {
   const HistoryEventTile({
     super.key,
@@ -26,15 +35,6 @@ class HistoryEventTile extends StatelessWidget {
   final String? currentUid;
   final bool isPremium;
 
-  static String formatRelativeTime(DateTime dt) {
-    final diff = DateTime.now().difference(dt);
-    if (diff.inMinutes < 1) return 'ahora';
-    if (diff.inHours < 1) return 'hace ${diff.inMinutes} min';
-    if (diff.inHours < 24) return 'hace ${diff.inHours} h';
-    if (diff.inDays < 7) return 'hace ${diff.inDays} días';
-    return DateFormat('EEE d MMM, HH:mm', 'es').format(dt);
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -43,7 +43,7 @@ class HistoryEventTile extends StatelessWidget {
         event: e,
         actorName: actorName,
         actorPhotoUrl: actorPhotoUrl,
-        timestamp: formatRelativeTime(e.createdAt),
+        timestamp: _formatRelativeTime(l10n, e.createdAt),
         l10n: l10n,
         homeId: homeId,
         currentUid: currentUid,
@@ -54,7 +54,7 @@ class HistoryEventTile extends StatelessWidget {
         actorName: actorName,
         actorPhotoUrl: actorPhotoUrl,
         toName: toName ?? e.toUid,
-        timestamp: formatRelativeTime(e.createdAt),
+        timestamp: _formatRelativeTime(l10n, e.createdAt),
         l10n: l10n,
       ),
     );

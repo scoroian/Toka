@@ -357,6 +357,8 @@
   "@invite_sheet_copy_code": { "description": "Copy code button" },
   "invite_sheet_code_copied": "Código copiado",
   "@invite_sheet_code_copied": { "description": "Code copied snackbar" },
+  "member_profile_home_stats": "Estadísticas en este hogar",
+  "@member_profile_home_stats": { "description": "Section header: home statistics" },
   "member_profile_tasks_completed": "Tareas completadas",
   "@member_profile_tasks_completed": { "description": "Stats: tasks completed" },
   "member_profile_compliance": "Cumplimiento",
@@ -424,6 +426,23 @@
   "@history_event_reason": {
     "description": "Pass reason label",
     "placeholders": { "reason": { "type": "String" } }
+  },
+  "history_time_now": "ahora",
+  "@history_time_now": { "description": "Relative time: just now" },
+  "history_time_minutes_ago": "hace {minutes} min",
+  "@history_time_minutes_ago": {
+    "description": "Relative time: N minutes ago",
+    "placeholders": { "minutes": { "type": "int" } }
+  },
+  "history_time_hours_ago": "hace {hours} h",
+  "@history_time_hours_ago": {
+    "description": "Relative time: N hours ago",
+    "placeholders": { "hours": { "type": "int" } }
+  },
+  "history_time_days_ago": "hace {days} días",
+  "@history_time_days_ago": {
+    "description": "Relative time: N days ago",
+    "placeholders": { "days": { "type": "int" } }
   },
   "history_load_more": "Cargar más",
   "@history_load_more": { "description": "Load more button" },

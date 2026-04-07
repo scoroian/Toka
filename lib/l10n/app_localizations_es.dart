@@ -522,6 +522,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get invite_sheet_code_copied => 'Código copiado';
 
   @override
+  String get member_profile_home_stats => 'Estadísticas en este hogar';
+
+  @override
   String get member_profile_tasks_completed => 'Tareas completadas';
 
   @override
@@ -620,6 +623,24 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String history_event_reason(String reason) {
     return 'Motivo: $reason';
+  }
+
+  @override
+  String get history_time_now => 'ahora';
+
+  @override
+  String history_time_minutes_ago(int minutes) {
+    return 'hace $minutes min';
+  }
+
+  @override
+  String history_time_hours_ago(int hours) {
+    return 'hace $hours h';
+  }
+
+  @override
+  String history_time_days_ago(int days) {
+    return 'hace $days días';
   }
 
   @override
@@ -871,4 +892,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get radar_other_tasks => 'Otras tareas evaluadas';
+
+  @override
+  String get review_submit_error => 'Error al enviar valoración';
 }

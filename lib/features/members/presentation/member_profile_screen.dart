@@ -103,7 +103,7 @@ class MemberProfileScreen extends ConsumerWidget {
 
               // Estadísticas del hogar compartido
               Text(
-                'Estadísticas en este hogar',
+                l10n.member_profile_home_stats,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 12),

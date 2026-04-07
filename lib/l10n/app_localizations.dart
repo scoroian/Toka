@@ -1036,6 +1036,12 @@ abstract class AppLocalizations {
   /// **'Código copiado'**
   String get invite_sheet_code_copied;
 
+  /// Section header: home statistics
+  ///
+  /// In es, this message translates to:
+  /// **'Estadísticas en este hogar'**
+  String get member_profile_home_stats;
+
   /// Stats: tasks completed
   ///
   /// In es, this message translates to:
@@ -1221,6 +1227,30 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Motivo: {reason}'**
   String history_event_reason(String reason);
+
+  /// Relative time: just now
+  ///
+  /// In es, this message translates to:
+  /// **'ahora'**
+  String get history_time_now;
+
+  /// Relative time: N minutes ago
+  ///
+  /// In es, this message translates to:
+  /// **'hace {minutes} min'**
+  String history_time_minutes_ago(int minutes);
+
+  /// Relative time: N hours ago
+  ///
+  /// In es, this message translates to:
+  /// **'hace {hours} h'**
+  String history_time_hours_ago(int hours);
+
+  /// Relative time: N days ago
+  ///
+  /// In es, this message translates to:
+  /// **'hace {days} días'**
+  String history_time_days_ago(int days);
 
   /// Load more button
   ///
@@ -1683,6 +1713,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Otras tareas evaluadas'**
   String get radar_other_tasks;
+
+  /// Generic review submission error
+  ///
+  /// In es, this message translates to:
+  /// **'Error al enviar valoración'**
+  String get review_submit_error;
 }
 
 class _AppLocalizationsDelegate

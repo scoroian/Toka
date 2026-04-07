@@ -520,6 +520,9 @@ class AppLocalizationsRo extends AppLocalizations {
   String get invite_sheet_code_copied => 'Cod copiat';
 
   @override
+  String get member_profile_home_stats => 'Statistici în acest cămin';
+
+  @override
   String get member_profile_tasks_completed => 'Sarcini finalizate';
 
   @override
@@ -616,6 +619,24 @@ class AppLocalizationsRo extends AppLocalizations {
   @override
   String history_event_reason(String reason) {
     return 'Motiv: $reason';
+  }
+
+  @override
+  String get history_time_now => 'acum';
+
+  @override
+  String history_time_minutes_ago(int minutes) {
+    return 'acum $minutes min';
+  }
+
+  @override
+  String history_time_hours_ago(int hours) {
+    return 'acum $hours h';
+  }
+
+  @override
+  String history_time_days_ago(int days) {
+    return 'acum $days zile';
   }
 
   @override
@@ -866,4 +887,7 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get radar_other_tasks => 'Alte sarcini evaluate';
+
+  @override
+  String get review_submit_error => 'Eroare la trimiterea evaluării';
 }

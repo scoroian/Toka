@@ -1,7 +1,7 @@
 // test/unit/features/tasks/dashboard_grouping_test.dart
 import 'package:flutter_test/flutter_test.dart';
 import 'package:toka/features/tasks/domain/home_dashboard.dart';
-import 'package:toka/features/tasks/presentation/today_screen.dart';
+import 'package:toka/features/tasks/application/today_view_model.dart';
 
 TaskPreview _makeTask({
   required String taskId,

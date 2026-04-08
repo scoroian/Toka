@@ -55,7 +55,7 @@ class TaskFormNotifier extends _$TaskFormNotifier {
   }
 
   void setTitle(String v) => state = state.copyWith(title: v, fieldErrors: {
-        ...state.fieldErrors..remove('title'),
+        ...Map.of(state.fieldErrors)..remove('title'),
       });
 
   void setDescription(String v) => state = state.copyWith(description: v);
@@ -65,7 +65,7 @@ class TaskFormNotifier extends _$TaskFormNotifier {
 
   void setRecurrenceRule(RecurrenceRule rule) =>
       state = state.copyWith(recurrenceRule: rule, fieldErrors: {
-        ...state.fieldErrors..remove('recurrence'),
+        ...Map.of(state.fieldErrors)..remove('recurrence'),
       });
 
   void setAssignmentMode(String mode) =>
@@ -73,7 +73,7 @@ class TaskFormNotifier extends _$TaskFormNotifier {
 
   void setAssignmentOrder(List<String> order) =>
       state = state.copyWith(assignmentOrder: order, fieldErrors: {
-        ...state.fieldErrors..remove('assignees'),
+        ...Map.of(state.fieldErrors)..remove('assignees'),
       });
 
   void setDifficultyWeight(double v) =>

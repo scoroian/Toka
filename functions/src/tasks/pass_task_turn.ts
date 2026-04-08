@@ -4,23 +4,10 @@ import * as logger from "firebase-functions/logger";
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { updateHomeDashboard } from "./update_dashboard";
 import { sendPassNotification } from "../notifications/send_pass_notification";
+import { getNextEligibleMember } from "./pass_turn_helpers";
 
 const db = admin.firestore();
 const FieldValue = admin.firestore.FieldValue;
-
-function getNextEligibleMember(
-  order: string[],
-  currentUid: string,
-  frozenUids: string[]
-): string {
-  if (!order.length) return currentUid;
-  const currentIdx = order.indexOf(currentUid);
-  for (let i = 1; i < order.length; i++) {
-    const candidate = order[(currentIdx + i) % order.length];
-    if (!frozenUids.includes(candidate)) return candidate;
-  }
-  return currentUid;
-}
 
 export const passTaskTurn = onCall(async (request) => {
   if (!request.auth) {

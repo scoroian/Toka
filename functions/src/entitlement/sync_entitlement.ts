@@ -4,6 +4,7 @@ import * as logger from "firebase-functions/logger";
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { FieldValue, Timestamp } from "firebase-admin/firestore";
 import { unlockSlotIfEligible } from "./slot_ledger";
+import { parseReceiptData } from "./sync_entitlement_helpers";
 
 const db = () => admin.firestore();
 
@@ -92,30 +93,6 @@ export const syncEntitlement = onCall(async (request) => {
 
   return { success: true, premiumStatus: status };
 });
-
-function parseReceiptData(receiptData: string): {
-  status: string;
-  plan: string;
-  endsAt: Date | null;
-  autoRenewEnabled: boolean;
-} {
-  try {
-    const parsed = JSON.parse(receiptData) as {
-      status?: string;
-      plan?: string;
-      endsAt?: string;
-      autoRenewEnabled?: boolean;
-    };
-    return {
-      status: parsed.status ?? "active",
-      plan: parsed.plan ?? "monthly",
-      endsAt: parsed.endsAt ? new Date(parsed.endsAt) : null,
-      autoRenewEnabled: parsed.autoRenewEnabled ?? true,
-    };
-  } catch {
-    throw new HttpsError("invalid-argument", "Invalid receipt data format");
-  }
-}
 
 async function updatePremiumFlagsInDashboard(
   firestore: admin.firestore.Firestore,

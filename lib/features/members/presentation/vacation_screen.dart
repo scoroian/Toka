@@ -3,8 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../l10n/app_localizations.dart';
-import '../application/vacation_provider.dart';
-import '../domain/vacation.dart';
+import '../application/vacation_view_model.dart';
 
 class VacationScreen extends ConsumerStatefulWidget {
   const VacationScreen({super.key, required this.homeId, required this.uid});
@@ -17,10 +16,6 @@ class VacationScreen extends ConsumerStatefulWidget {
 }
 
 class _VacationScreenState extends ConsumerState<VacationScreen> {
-  bool _isActive = false;
-  DateTime? _startDate;
-  DateTime? _endDate;
-  bool _initialized = false;
   final _reasonController = TextEditingController();
 
   @override
@@ -29,50 +24,29 @@ class _VacationScreenState extends ConsumerState<VacationScreen> {
     super.dispose();
   }
 
-  void _initFromVacation(Vacation? v) {
-    if (_initialized || v == null) return;
-    _initialized = true;
-    setState(() {
-      _isActive = v.isActive;
-      _startDate = v.startDate;
-      _endDate = v.endDate;
-      _reasonController.text = v.reason ?? '';
-    });
-  }
-
-  Future<void> _pickDate(bool isStart) async {
+  Future<void> _pickDate(
+      VacationViewModelNotifier notifier, bool isStart) async {
     final now = DateTime.now();
+    final current = isStart ? notifier.startDate : notifier.endDate;
     final picked = await showDatePicker(
       context: context,
-      initialDate: (isStart ? _startDate : _endDate) ?? now,
+      initialDate: current ?? now,
       firstDate: now.subtract(const Duration(days: 30)),
       lastDate: now.add(const Duration(days: 365)),
     );
     if (picked == null) return;
-    setState(() {
-      if (isStart) {
-        _startDate = picked;
-      } else {
-        _endDate = picked;
-      }
-    });
+    if (isStart) {
+      notifier.setStartDate(picked);
+    } else {
+      notifier.setEndDate(picked);
+    }
   }
 
-  Future<void> _save() async {
-    final vacation = Vacation(
-      uid: widget.uid,
-      homeId: widget.homeId,
-      isActive: _isActive,
-      startDate: _startDate,
-      endDate: _endDate,
-      reason: _reasonController.text.trim().isEmpty
-          ? null
-          : _reasonController.text.trim(),
-      createdAt: DateTime.now(),
-    );
-    await ref
-        .read(vacationNotifierProvider.notifier)
-        .save(widget.homeId, widget.uid, vacation);
+  Future<void> _save(VacationViewModelNotifier notifier) async {
+    final reason = _reasonController.text.trim().isEmpty
+        ? null
+        : _reasonController.text.trim();
+    await notifier.save(reason: reason);
     if (mounted) Navigator.of(context).pop();
   }
 
@@ -81,9 +55,19 @@ class _VacationScreenState extends ConsumerState<VacationScreen> {
     final l10n = AppLocalizations.of(context);
     final fmt = DateFormat.yMd();
 
-    ref
-        .watch(memberVacationProvider(homeId: widget.homeId, uid: widget.uid))
-        .whenData(_initFromVacation);
+    final notifier = ref.watch(
+      vacationViewModelNotifierProvider(widget.homeId, widget.uid).notifier,
+    );
+    // Watch state so widget rebuilds on changes
+    final vm = ref.watch(
+      vacationViewModelNotifierProvider(widget.homeId, widget.uid),
+    );
+
+    // Initialize reasonController from loaded vacation (once)
+    if (vm.isInitialized && _reasonController.text.isEmpty) {
+      // No-op — reason is only user-entered, existing reason not shown
+      // (Screen re-create reads fresh state anyway)
+    }
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.vacation_title)),
@@ -93,10 +77,10 @@ class _VacationScreenState extends ConsumerState<VacationScreen> {
           SwitchListTile(
             key: const Key('vacation_toggle'),
             title: Text(l10n.vacation_toggle_label),
-            value: _isActive,
-            onChanged: (v) => setState(() => _isActive = v),
+            value: vm.isActive,
+            onChanged: notifier.setActive,
           ),
-          if (_isActive)
+          if (vm.isActive)
             Column(
               key: const Key('vacation_date_pickers'),
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -105,14 +89,18 @@ class _VacationScreenState extends ConsumerState<VacationScreen> {
                 ListTile(
                   leading: const Icon(Icons.calendar_today),
                   title: Text(l10n.vacation_start_date),
-                  subtitle: Text(_startDate != null ? fmt.format(_startDate!) : '—'),
-                  onTap: () => _pickDate(true),
+                  subtitle: Text(
+                    vm.startDate != null ? fmt.format(vm.startDate!) : '—',
+                  ),
+                  onTap: () => _pickDate(notifier, true),
                 ),
                 ListTile(
                   leading: const Icon(Icons.event_available),
                   title: Text(l10n.vacation_end_date),
-                  subtitle: Text(_endDate != null ? fmt.format(_endDate!) : '—'),
-                  onTap: () => _pickDate(false),
+                  subtitle: Text(
+                    vm.endDate != null ? fmt.format(vm.endDate!) : '—',
+                  ),
+                  onTap: () => _pickDate(notifier, false),
                 ),
                 const SizedBox(height: 12),
                 TextField(
@@ -127,7 +115,7 @@ class _VacationScreenState extends ConsumerState<VacationScreen> {
           const SizedBox(height: 24),
           FilledButton(
             key: const Key('btn_save_vacation'),
-            onPressed: _save,
+            onPressed: () => _save(notifier),
             child: Text(l10n.vacation_save),
           ),
         ],

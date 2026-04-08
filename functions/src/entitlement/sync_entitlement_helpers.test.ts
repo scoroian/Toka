@@ -1,5 +1,6 @@
 // functions/src/entitlement/sync_entitlement_helpers.test.ts
 import { parseReceiptData } from "./sync_entitlement_helpers";
+import { HttpsError } from "firebase-functions/v2/https";
 
 describe("parseReceiptData", () => {
   it("parsea recibo válido con todos los campos", () => {
@@ -25,7 +26,23 @@ describe("parseReceiptData", () => {
   });
 
   it("lanza HttpsError para JSON inválido", () => {
-    expect(() => parseReceiptData("not-json")).toThrow();
+    try {
+      parseReceiptData("not-json");
+      fail("should have thrown");
+    } catch (e) {
+      expect(e).toBeInstanceOf(HttpsError);
+      expect((e as HttpsError).code).toBe("invalid-argument");
+    }
+  });
+
+  it("lanza HttpsError para endsAt con fecha inválida", () => {
+    try {
+      parseReceiptData(JSON.stringify({ endsAt: "not-a-date" }));
+      fail("should have thrown");
+    } catch (e) {
+      expect(e).toBeInstanceOf(HttpsError);
+      expect((e as HttpsError).code).toBe("invalid-argument");
+    }
   });
 
   it("endsAt null cuando no se provee", () => {

@@ -17,7 +17,12 @@ export function parseReceiptData(receiptData: string): {
     return {
       status: parsed.status ?? "active",
       plan: parsed.plan ?? "monthly",
-      endsAt: parsed.endsAt ? new Date(parsed.endsAt) : null,
+      endsAt: (() => {
+        if (!parsed.endsAt) return null;
+        const d = new Date(parsed.endsAt);
+        if (isNaN(d.getTime())) throw new HttpsError("invalid-argument", "Invalid receipt data format");
+        return d;
+      })(),
       autoRenewEnabled: parsed.autoRenewEnabled ?? true,
     };
   } catch {

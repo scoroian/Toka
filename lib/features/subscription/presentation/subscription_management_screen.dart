@@ -5,9 +5,8 @@ import 'package:intl/intl.dart';
 
 import '../../../core/constants/routes.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../homes/application/current_home_provider.dart';
 import '../application/paywall_provider.dart';
-import '../application/subscription_provider.dart';
+import '../application/subscription_management_view_model.dart';
 import '../domain/subscription_state.dart';
 
 class SubscriptionManagementScreen extends ConsumerWidget {
@@ -16,10 +15,7 @@ class SubscriptionManagementScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final subState = ref.watch(subscriptionStateProvider);
-    final homeAsync = ref.watch(currentHomeProvider);
-    final homeId = homeAsync.valueOrNull?.id ?? '';
-    final paywallState = ref.watch(paywallProvider);
+    final vm = ref.watch(subscriptionManagementViewModelProvider);
 
     ref.listen<AsyncValue<dynamic>>(paywallProvider, (_, next) {
       next.whenOrNull(
@@ -40,16 +36,20 @@ class SubscriptionManagementScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.subscription_management_title)),
-      body: paywallState.isLoading
+      body: vm.isLoading
           ? const Center(child: CircularProgressIndicator())
           : Padding(
               padding: const EdgeInsets.all(24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _StatusTile(subState: subState),
+                  _StatusTile(subState: vm.subscriptionState),
                   const SizedBox(height: 24),
-                  _ActionButtons(subState: subState, homeId: homeId),
+                  _ActionButtons(
+                    subState: vm.subscriptionState,
+                    homeId: vm.homeId,
+                    vm: vm,
+                  ),
                 ],
               ),
             ),
@@ -88,13 +88,18 @@ class _StatusTile extends StatelessWidget {
   }
 }
 
-class _ActionButtons extends ConsumerWidget {
-  const _ActionButtons({required this.subState, required this.homeId});
+class _ActionButtons extends StatelessWidget {
+  const _ActionButtons({
+    required this.subState,
+    required this.homeId,
+    required this.vm,
+  });
   final SubscriptionState subState;
   final String homeId;
+  final SubscriptionManagementViewModel vm;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -110,9 +115,7 @@ class _ActionButtons extends ConsumerWidget {
         if (subState is SubscriptionRestorable) ...[
           FilledButton(
             key: const Key('btn_restore_premium'),
-            onPressed: () => ref
-                .read(paywallProvider.notifier)
-                .restorePremium(homeId: homeId),
+            onPressed: () => vm.restorePremium(),
             child: Text(l10n.subscription_restore_btn),
           ),
           const SizedBox(height: 8),
@@ -126,8 +129,7 @@ class _ActionButtons extends ConsumerWidget {
           const SizedBox(height: 8),
           OutlinedButton(
             key: const Key('btn_plan_downgrade'),
-            onPressed: () =>
-                context.push(AppRoutes.downgradePlanner),
+            onPressed: () => context.push(AppRoutes.downgradePlanner),
             child: Text(l10n.subscription_plan_downgrade),
           ),
         ],

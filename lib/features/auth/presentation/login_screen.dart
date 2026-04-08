@@ -1,3 +1,4 @@
+// lib/features/auth/presentation/login_screen.dart
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -7,8 +8,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/routes.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../i18n/presentation/language_selector_widget.dart';
-import '../application/auth_provider.dart';
-import '../application/auth_state.dart';
+import '../application/login_view_model.dart';
 import '../domain/failures/auth_failure.dart';
 import 'widgets/email_auth_form.dart';
 import 'widgets/social_auth_button.dart';
@@ -19,17 +19,19 @@ class LoginScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final authState = ref.watch(authProvider);
-    final isLoading =
-        authState.maybeWhen(loading: () => true, orElse: () => false);
+    final vm = ref.watch(loginViewModelProvider);
 
-    ref.listen<AuthState>(authProvider, (_, next) {
-      next.maybeWhen(
-        error: (failure) => ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(_failureMessage(failure, l10n))),
-        ),
-        orElse: () {},
-      );
+    ref.listen<LoginViewModel>(loginViewModelProvider, (_, next) {
+      if (next.isAuthenticated) {
+        context.go(AppRoutes.home);
+        return;
+      }
+      if (next.error != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(_failureMessage(next.error!, l10n))),
+        );
+        next.clearError();
+      }
     });
 
     return Scaffold(
@@ -66,9 +68,8 @@ class LoginScreen extends ConsumerWidget {
               SocialAuthButton(
                 label: l10n.auth_google,
                 icon: const Icon(Icons.g_mobiledata, size: 24),
-                isLoading: isLoading,
-                onPressed: () =>
-                    ref.read(authProvider.notifier).signInWithGoogle(),
+                isLoading: vm.isLoading,
+                onPressed: () => vm.signInWithGoogle(),
               ),
               if (Platform.isIOS || Platform.isMacOS) ...[
                 const SizedBox(height: 12),
@@ -76,9 +77,8 @@ class LoginScreen extends ConsumerWidget {
                   key: const Key('apple_button'),
                   label: l10n.auth_apple,
                   icon: const Icon(Icons.apple, size: 24),
-                  isLoading: isLoading,
-                  onPressed: () =>
-                      ref.read(authProvider.notifier).signInWithApple(),
+                  isLoading: vm.isLoading,
+                  onPressed: () => vm.signInWithApple(),
                 ),
               ],
               const SizedBox(height: 24),
@@ -95,11 +95,10 @@ class LoginScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 24),
               EmailAuthForm(
-                isLoading: isLoading,
+                isLoading: vm.isLoading,
                 submitLabel: l10n.auth_login,
-                onSubmit: (email, password) => ref
-                    .read(authProvider.notifier)
-                    .signInWithEmail(email, password),
+                onSubmit: (email, password) =>
+                    vm.signInWithEmail(email, password),
               ),
               const SizedBox(height: 8),
               TextButton(

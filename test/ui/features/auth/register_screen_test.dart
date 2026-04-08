@@ -1,14 +1,15 @@
+// test/ui/features/auth/register_screen_test.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-import 'package:toka/features/auth/application/auth_provider.dart';
-import 'package:toka/features/auth/application/auth_state.dart';
-import 'package:toka/features/auth/domain/auth_repository.dart';
-import 'package:toka/features/auth/domain/auth_user.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:toka/features/auth/application/register_view_model.dart';
 import 'package:toka/features/auth/presentation/register_screen.dart';
 import 'package:toka/l10n/app_localizations.dart';
+
+class _MockRegisterViewModel extends Mock implements RegisterViewModel {}
 
 GoRouter _fakeRouter() => GoRouter(
       initialLocation: '/register',
@@ -19,86 +20,50 @@ GoRouter _fakeRouter() => GoRouter(
       ],
     );
 
-class _FakeAuthNotifier extends Auth {
-  _FakeAuthNotifier(this._state);
-  final AuthState _state;
-
-  @override
-  AuthState build() => _state;
-
-  @override
-  Future<void> signInWithGoogle() async {}
-
-  @override
-  Future<void> signInWithApple() async {}
-
-  @override
-  Future<void> signInWithEmail(String email, String password) async {}
-
-  @override
-  Future<void> register(String email, String password) async {}
-
-  @override
-  Future<void> sendPasswordReset(String email) async {}
-
-  @override
-  Future<void> signOut() async {}
+_MockRegisterViewModel _defaultMock() {
+  final m = _MockRegisterViewModel();
+  when(() => m.isLoading).thenReturn(false);
+  when(() => m.error).thenReturn(null);
+  when(() => m.registrationComplete).thenReturn(false);
+  when(() => m.register(any(), any())).thenAnswer((_) async {});
+  when(() => m.clearError()).thenReturn(null);
+  return m;
 }
 
-class _FakeRepo implements AuthRepository {
-  @override
-  Stream<AuthUser?> get authStateChanges => const Stream.empty();
-  @override
-  AuthUser? get currentUser => null;
-  @override
-  Future<void> signOut() async {}
-  @override
-  Future<AuthUser> signInWithGoogle() => throw UnimplementedError();
-  @override
-  Future<AuthUser> signInWithApple() => throw UnimplementedError();
-  @override
-  Future<AuthUser> signInWithEmailPassword(String e, String p) =>
-      throw UnimplementedError();
-  @override
-  Future<AuthUser> registerWithEmailPassword(String e, String p) =>
-      throw UnimplementedError();
-  @override
-  Future<void> sendPasswordResetEmail(String e) => throw UnimplementedError();
-  @override
-  Future<void> sendEmailVerification() => throw UnimplementedError();
-  @override
-  Future<void> linkWithGoogle() => throw UnimplementedError();
-  @override
-  Future<void> linkWithApple() => throw UnimplementedError();
-  @override
-  Future<void> linkWithEmailPassword(String e, String p) =>
-      throw UnimplementedError();
-  @override
-  Future<void> updatePassword(String c, String n) =>
-      throw UnimplementedError();
-}
-
-Widget _wrap({AuthState authState = const AuthState.unauthenticated()}) {
-  return ProviderScope(
-    overrides: [
-      authProvider.overrideWith(() => _FakeAuthNotifier(authState)),
-      authStateChangesProvider.overrideWith((ref) => const Stream.empty()),
-      authRepositoryProvider.overrideWithValue(_FakeRepo()),
-    ],
-    child: MaterialApp.router(
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
+Widget _wrap({_MockRegisterViewModel? vm}) => ProviderScope(
+      overrides: [
+        registerViewModelProvider.overrideWithValue(vm ?? _defaultMock()),
       ],
-      supportedLocales: const [Locale('es')],
-      routerConfig: _fakeRouter(),
-    ),
-  );
-}
+      child: MaterialApp.router(
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: const [Locale('es')],
+        routerConfig: _fakeRouter(),
+      ),
+    );
 
 void main() {
+  testWidgets('renders email and password fields', (tester) async {
+    await tester.pumpWidget(_wrap());
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('email_field')), findsOneWidget);
+    expect(find.byKey(const Key('password_field')), findsOneWidget);
+  });
+
+  testWidgets('shows spinner when loading', (tester) async {
+    final m = _MockRegisterViewModel();
+    when(() => m.isLoading).thenReturn(true);
+    when(() => m.error).thenReturn(null);
+    when(() => m.registrationComplete).thenReturn(false);
+    await tester.pumpWidget(_wrap(vm: m));
+    await tester.pump();
+    expect(find.byType(CircularProgressIndicator), findsWidgets);
+  });
+
   testWidgets('shows email validation error for invalid email', (tester) async {
     await tester.pumpWidget(_wrap());
     await tester.pumpAndSettle();

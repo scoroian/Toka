@@ -2,47 +2,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../../core/constants/routes.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../auth/application/auth_provider.dart';
-import '../../homes/application/current_home_provider.dart';
-import '../../subscription/application/subscription_provider.dart';
-import '../../subscription/domain/subscription_state.dart';
+import '../application/settings_view_model.dart';
 
-class SettingsScreen extends ConsumerStatefulWidget {
+class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
   @override
-  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
-}
-
-class _SettingsScreenState extends ConsumerState<SettingsScreen> {
-  late final Future<PackageInfo> _packageInfoFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    _packageInfoFuture = PackageInfo.fromPlatform();
-  }
-
-  bool _isPremium(SubscriptionState state) {
-    return state.map(
-      free: (_) => false,
-      active: (_) => true,
-      cancelledPendingEnd: (_) => true,
-      rescue: (_) => true,
-      expiredFree: (_) => false,
-      restorable: (_) => false,
-      purged: (_) => false,
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final isPremium = _isPremium(ref.watch(subscriptionStateProvider));
+    final vm = ref.watch(settingsViewModelProvider);
+    final isPremium = vm.viewData.isPremium;
+    final homeId = vm.viewData.homeId;
+    final uid = vm.viewData.uid;
+    final appVersion = vm.viewData.appVersion;
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.settings_title)),
@@ -82,11 +57,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             leading: const Icon(Icons.notifications_outlined),
             title: Text(l10n.settings_section_notifications),
             onTap: () {
-              final home = ref.read(currentHomeProvider).valueOrNull;
-              final uid = ref.read(authProvider).whenOrNull(authenticated: (u) => u.uid);
-              if (home != null && uid != null) {
+              if (homeId.isNotEmpty && uid.isNotEmpty) {
                 context.push(AppRoutes.notificationSettings, extra: {
-                  'homeId': home.id,
+                  'homeId': homeId,
                   'uid': uid,
                 });
               }
@@ -143,17 +116,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
           // ── Acerca de ─────────────────────────────────────────────────
           _SectionHeader(key: const Key('settings_section_about'), title: l10n.settings_section_about),
-          FutureBuilder<PackageInfo>(
-            future: _packageInfoFuture,
-            builder: (ctx, snap) {
-              final version = snap.data?.version ?? '—';
-              final build = snap.data?.buildNumber ?? '';
-              return ListTile(
-                leading: const Icon(Icons.info_outline),
-                title: Text(l10n.settings_app_version),
-                subtitle: Text('$version ($build)'),
-              );
-            },
+          ListTile(
+            leading: const Icon(Icons.info_outline),
+            title: Text(l10n.settings_app_version),
+            subtitle: Text(appVersion ?? '—'),
           ),
           ListTile(
             leading: const Icon(Icons.description_outlined),

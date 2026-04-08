@@ -1,50 +1,18 @@
-import 'dart:async';
-
+// lib/features/auth/presentation/verify_email_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/app_localizations.dart';
-import '../application/auth_provider.dart';
+import '../application/verify_email_view_model.dart';
 
-class VerifyEmailScreen extends ConsumerStatefulWidget {
+class VerifyEmailScreen extends ConsumerWidget {
   const VerifyEmailScreen({super.key});
 
   @override
-  ConsumerState<VerifyEmailScreen> createState() => _VerifyEmailScreenState();
-}
-
-class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
-  static const _cooldownSeconds = 60;
-  int _remainingSeconds = 0;
-  Timer? _timer;
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
-  }
-
-  void _startCooldown() {
-    setState(() => _remainingSeconds = _cooldownSeconds);
-    _timer = Timer.periodic(const Duration(seconds: 1), (t) {
-      if (_remainingSeconds <= 1) {
-        t.cancel();
-        setState(() => _remainingSeconds = 0);
-      } else {
-        setState(() => _remainingSeconds--);
-      }
-    });
-  }
-
-  Future<void> _resend() async {
-    await ref.read(authRepositoryProvider).sendEmailVerification();
-    _startCooldown();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final email = ref.read(authRepositoryProvider).currentUser?.email ?? '';
+    final vm = ref.watch(verifyEmailViewModelProvider);
+    final isDisabled = vm.isSending || vm.resendCooldownSeconds > 0;
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.auth_verify_email_title)),
@@ -64,15 +32,15 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
               ),
               const SizedBox(height: 16),
               Text(
-                l10n.auth_verify_email_body(email),
+                l10n.auth_verify_email_body(vm.email),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
               FilledButton(
-                onPressed: _remainingSeconds > 0 ? null : _resend,
+                onPressed: isDisabled ? null : vm.resendVerification,
                 child: Text(
-                  _remainingSeconds > 0
-                      ? l10n.auth_resend_cooldown(_remainingSeconds)
+                  vm.resendCooldownSeconds > 0
+                      ? l10n.auth_resend_cooldown(vm.resendCooldownSeconds)
                       : l10n.auth_resend_email,
                 ),
               ),

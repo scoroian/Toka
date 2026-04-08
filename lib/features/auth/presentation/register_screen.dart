@@ -1,11 +1,11 @@
+// lib/features/auth/presentation/register_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/routes.dart';
 import '../../../l10n/app_localizations.dart';
-import '../application/auth_provider.dart';
-import '../application/auth_state.dart';
+import '../application/register_view_model.dart';
 import '../domain/failures/auth_failure.dart';
 import 'widgets/email_auth_form.dart';
 
@@ -15,18 +15,19 @@ class RegisterScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final authState = ref.watch(authProvider);
-    final isLoading =
-        authState.maybeWhen(loading: () => true, orElse: () => false);
+    final vm = ref.watch(registerViewModelProvider);
 
-    ref.listen<AuthState>(authProvider, (_, next) {
-      next.maybeWhen(
-        authenticated: (_) => context.go(AppRoutes.verifyEmail),
-        error: (failure) => ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(_failureMessage(failure, l10n))),
-        ),
-        orElse: () {},
-      );
+    ref.listen<RegisterViewModel>(registerViewModelProvider, (_, next) {
+      if (next.registrationComplete) {
+        context.go(AppRoutes.verifyEmail);
+        return;
+      }
+      if (next.error != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(_failureMessage(next.error!, l10n))),
+        );
+        next.clearError();
+      }
     });
 
     return Scaffold(
@@ -39,10 +40,9 @@ class RegisterScreen extends ConsumerWidget {
             children: [
               EmailAuthForm(
                 showPasswordConfirm: true,
-                isLoading: isLoading,
+                isLoading: vm.isLoading,
                 submitLabel: l10n.auth_register,
-                onSubmit: (email, password) =>
-                    ref.read(authProvider.notifier).register(email, password),
+                onSubmit: (email, password) => vm.register(email, password),
               ),
               const SizedBox(height: 8),
               TextButton(

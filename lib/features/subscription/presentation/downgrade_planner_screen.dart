@@ -5,58 +5,32 @@ import 'package:go_router/go_router.dart';
 
 import '../../../l10n/app_localizations.dart';
 import '../../homes/application/current_home_provider.dart';
-import '../../homes/domain/home_membership.dart';
+import '../../homes/application/dashboard_provider.dart';
 import '../../members/application/members_provider.dart';
 import '../../members/domain/member.dart';
-import '../../homes/application/dashboard_provider.dart';
-import '../application/paywall_provider.dart';
+import '../../homes/domain/home_membership.dart';
+import '../application/downgrade_planner_view_model.dart';
 
-class DowngradePlannerScreen extends ConsumerStatefulWidget {
+class DowngradePlannerScreen extends ConsumerWidget {
   const DowngradePlannerScreen({super.key});
 
   @override
-  ConsumerState<DowngradePlannerScreen> createState() => _DowngradePlannerScreenState();
-}
-
-class _DowngradePlannerScreenState extends ConsumerState<DowngradePlannerScreen> {
-  Set<String> _selectedMemberIds = {};
-  Set<String> _selectedTaskIds = {};
-  bool _initialized = false;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
+    final vm = ref.watch(downgradePlannerViewModelProvider);
     final homeAsync = ref.watch(currentHomeProvider);
     final home = homeAsync.valueOrNull;
-    if (home == null) return const Scaffold(body: Center(child: CircularProgressIndicator()));
+
+    if (home == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
 
     final membersAsync = ref.watch(homeMembersProvider(home.id));
     final dashAsync = ref.watch(dashboardProvider);
-    final paywallState = ref.watch(paywallProvider);
-
-    // Initialize selection on first data
-    if (!_initialized) {
-      membersAsync.whenData((members) {
-        dashAsync.whenData((dash) {
-          if (dash != null && mounted) {
-            setState(() {
-              _selectedMemberIds = members
-                  .where((m) => m.status == MemberStatus.active)
-                  .map((m) => m.uid)
-                  .toSet();
-              _selectedTaskIds = dash.activeTasksPreview
-                  .map((t) => t.taskId)
-                  .toSet();
-              _initialized = true;
-            });
-          }
-        });
-      });
-    }
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.downgrade_planner_title)),
-      body: paywallState.isLoading
+      body: vm.isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
               padding: const EdgeInsets.all(16),
@@ -74,17 +48,11 @@ class _DowngradePlannerScreenState extends ConsumerState<DowngradePlannerScreen>
                       members: members
                           .where((m) => m.status == MemberStatus.active)
                           .toList(),
-                      selected: _selectedMemberIds,
+                      selected: vm.selectedMemberIds,
                       ownerId: home.ownerUid,
-                      onToggle: (uid, checked) {
-                        final newSelected = Set<String>.from(_selectedMemberIds);
-                        if (checked) {
-                          if (newSelected.length < 3) newSelected.add(uid);
-                        } else {
-                          newSelected.remove(uid);
-                        }
-                        setState(() => _selectedMemberIds = newSelected);
-                      },
+                      onToggle: (uid, checked) =>
+                          ref.read(downgradePlannerViewModelNotifierProvider.notifier)
+                              .toggleMember(uid, checked),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -101,16 +69,10 @@ class _DowngradePlannerScreenState extends ConsumerState<DowngradePlannerScreen>
                             tasks: dash.activeTasksPreview
                                 .map((t) => (t.taskId, t.title))
                                 .toList(),
-                            selected: _selectedTaskIds,
-                            onToggle: (id, checked) {
-                              final newSelected = Set<String>.from(_selectedTaskIds);
-                              if (checked) {
-                                if (newSelected.length < 4) newSelected.add(id);
-                              } else {
-                                newSelected.remove(id);
-                              }
-                              setState(() => _selectedTaskIds = newSelected);
-                            },
+                            selected: vm.selectedTaskIds,
+                            onToggle: (id, checked) =>
+                                ref.read(downgradePlannerViewModelNotifierProvider.notifier)
+                                    .toggleTask(id, checked),
                           ),
                   ),
                   const SizedBox(height: 8),
@@ -126,11 +88,7 @@ class _DowngradePlannerScreenState extends ConsumerState<DowngradePlannerScreen>
                     child: FilledButton(
                       key: const Key('btn_save_plan'),
                       onPressed: () async {
-                        await ref.read(paywallProvider.notifier).saveDowngradePlan(
-                              homeId: home.id,
-                              memberIds: _selectedMemberIds.toList(),
-                              taskIds: _selectedTaskIds.toList(),
-                            );
+                        await vm.savePlan();
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text(l10n.downgrade_planner_saved)),

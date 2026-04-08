@@ -1,23 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../features/auth/application/auth_provider.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/loading_widget.dart';
-import '../application/members_provider.dart';
-import '../domain/member.dart';
-import '../../profile/application/member_radar_provider.dart';
 import '../../profile/presentation/widgets/radar_chart_widget.dart';
+import '../application/member_profile_view_model.dart';
 import 'widgets/member_role_badge.dart';
-
-part 'member_profile_screen.g.dart';
-
-@riverpod
-Future<Member> memberDetail(
-    MemberDetailRef ref, String homeId, String uid) async {
-  return ref.watch(membersRepositoryProvider).fetchMember(homeId, uid);
-}
 
 class MemberProfileScreen extends ConsumerWidget {
   const MemberProfileScreen({
@@ -32,22 +20,20 @@ class MemberProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final auth = ref.watch(authProvider);
-    final currentUid = auth.whenOrNull(authenticated: (u) => u.uid) ?? '';
-    final isSelf = currentUid == memberUid;
-
-    final memberAsync = ref.watch(memberDetailProvider(homeId, memberUid));
-    final radarAsync = ref.watch(memberRadarProvider(homeId: homeId, uid: memberUid));
+    final vm = ref.watch(
+      memberProfileViewModelProvider(homeId: homeId, memberUid: memberUid),
+    );
 
     return Scaffold(
       appBar: AppBar(),
-      body: memberAsync.when(
+      body: vm.viewData.when(
         loading: () => const LoadingWidget(),
         error: (_, __) => Center(child: Text(l10n.error_generic)),
-        data: (member) {
-          final visiblePhone = member.phoneForViewer(isSelf: isSelf);
-          final compliancePct =
-              (member.complianceRate * 100).toStringAsFixed(1);
+        data: (data) {
+          if (data == null) {
+            return Center(child: Text(l10n.error_generic));
+          }
+          final member = data.member;
 
           return ListView(
             padding: const EdgeInsets.all(16),
@@ -92,12 +78,12 @@ class MemberProfileScreen extends ConsumerWidget {
               ),
 
               // Teléfono (solo si visible)
-              if (visiblePhone != null) ...[
+              if (data.visiblePhone != null) ...[
                 const SizedBox(height: 12),
                 ListTile(
                   key: const Key('member_phone_tile'),
                   leading: const Icon(Icons.phone),
-                  title: Text(visiblePhone),
+                  title: Text(data.visiblePhone!),
                 ),
               ],
 
@@ -117,7 +103,7 @@ class MemberProfileScreen extends ConsumerWidget {
               _StatRow(
                 key: const Key('stat_compliance'),
                 label: l10n.member_profile_compliance,
-                value: '$compliancePct%',
+                value: '${data.compliancePct}%',
               ),
               _StatRow(
                 key: const Key('stat_streak'),
@@ -130,11 +116,7 @@ class MemberProfileScreen extends ConsumerWidget {
                 value: '${member.averageScore.toStringAsFixed(1)}/10',
               ),
               const SizedBox(height: 24),
-              radarAsync.when(
-                data: (entries) => RadarChartWidget(entries: entries),
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (_, __) => const RadarChartWidget(entries: []),
-              ),
+              RadarChartWidget(entries: data.radarEntries),
             ],
           );
         },

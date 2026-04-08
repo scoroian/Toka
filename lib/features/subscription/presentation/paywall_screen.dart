@@ -3,9 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../l10n/app_localizations.dart';
-import '../../homes/application/current_home_provider.dart';
-import '../application/paywall_provider.dart';
-import '../domain/purchase_result.dart';
+import '../application/paywall_view_model.dart';
 import 'widgets/plan_comparison_card.dart';
 
 const _kMonthlyId = 'toka_premium_monthly';
@@ -17,25 +15,21 @@ class PaywallScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final paywallState = ref.watch(paywallProvider);
-    final homeAsync = ref.watch(currentHomeProvider);
-    final homeId = homeAsync.valueOrNull?.id ?? '';
+    final vm = ref.watch(paywallViewModelProvider);
 
-    ref.listen<AsyncValue<PurchaseResult?>>(paywallProvider, (_, next) {
-      next.whenOrNull(
-        data: (result) {
-          if (result is PurchaseResultSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(l10n.subscription_restore_success)),
-            );
-            context.pop();
-          } else if (result is PurchaseResultError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(result.message)),
-            );
-          }
-        },
-      );
+    ref.listen<PaywallViewModel>(paywallViewModelProvider, (_, next) {
+      if (next.purchasedSuccessfully) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.subscription_restore_success)),
+        );
+        ref.read(paywallViewModelNotifierProvider.notifier).clearPurchaseResult();
+        context.pop();
+      } else if (next.purchaseError != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(next.purchaseError!)),
+        );
+        ref.read(paywallViewModelNotifierProvider.notifier).clearPurchaseResult();
+      }
     });
 
     return Scaffold(
@@ -44,7 +38,7 @@ class PaywallScreen extends ConsumerWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
-      body: paywallState.isLoading
+      body: vm.isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
               padding: const EdgeInsets.only(bottom: 32),
@@ -78,14 +72,9 @@ class PaywallScreen extends ConsumerWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: FilledButton(
                       key: const Key('btn_cta_annual'),
-                      onPressed: paywallState.isLoading
+                      onPressed: vm.isLoading
                           ? null
-                          : () => ref
-                              .read(paywallProvider.notifier)
-                              .startPurchase(
-                                homeId: homeId,
-                                productId: _kAnnualId,
-                              ),
+                          : () => vm.startPurchase(_kAnnualId),
                       child: Text(l10n.paywall_cta_annual),
                     ),
                   ),
@@ -94,14 +83,9 @@ class PaywallScreen extends ConsumerWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: OutlinedButton(
                       key: const Key('btn_cta_monthly'),
-                      onPressed: paywallState.isLoading
+                      onPressed: vm.isLoading
                           ? null
-                          : () => ref
-                              .read(paywallProvider.notifier)
-                              .startPurchase(
-                                homeId: homeId,
-                                productId: _kMonthlyId,
-                              ),
+                          : () => vm.startPurchase(_kMonthlyId),
                       child: Text(l10n.paywall_cta_monthly),
                     ),
                   ),
@@ -109,9 +93,7 @@ class PaywallScreen extends ConsumerWidget {
                   Center(
                     child: TextButton(
                       key: const Key('btn_restore'),
-                      onPressed: () => ref
-                          .read(paywallProvider.notifier)
-                          .restorePremium(homeId: homeId),
+                      onPressed: () => vm.restorePremium(),
                       child: Text(l10n.paywall_restore),
                     ),
                   ),

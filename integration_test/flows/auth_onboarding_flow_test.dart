@@ -4,16 +4,24 @@
 //
 // Prerequisites:
 //   - Firebase Auth emulator running on localhost:9099
-//   - A test user already seeded: test@toka.dev / Test1234!
+//   - Firebase Firestore emulator running on localhost:8080
+//
+// The test user (test@toka.dev / Test1234!) is created automatically
+// in setUpAll() via the Auth emulator REST API.
 //
 // Run with:
-//   patrol test -d emulator-5554 integration_test/flows/auth_onboarding_flow_test.dart
+//   C:\Users\sebas\AppData\Local\Pub\Cache\bin\patrol.bat test ^
+//     -d emulator-5554 ^
+//     --target lib/main_dev.dart ^
+//     integration_test/flows/auth_onboarding_flow_test.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
+import '../helpers/test_setup.dart';
 
 void main() {
+  setUpAll(ensureTestUser);
   // ────────────────────────────────────────────────────────────────────
   // Test 1 — Login with email/password → home screen shown
   // ────────────────────────────────────────────────────────────────────

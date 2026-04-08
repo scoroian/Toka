@@ -4,16 +4,23 @@
 //
 // Prerequisites:
 //   - Firebase Auth emulator on localhost:9099
-//   - Firestore emulator on localhost:8080
-//   - A test user seeded: test@toka.dev / Test1234!
-//   - The user must already belong to a home (completed onboarding)
+//   - Firebase Firestore emulator on localhost:8080
+//
+// The test user (test@toka.dev / Test1234!) is created automatically
+// in setUpAll() via the Auth emulator REST API.
+// Note: after login the user will go through onboarding (create a home)
+// before the task screens become available.
 //
 // Run with:
-//   patrol test -d emulator-5554 integration_test/flows/task_completion_flow_test.dart
+//   C:\Users\sebas\AppData\Local\Pub\Cache\bin\patrol.bat test ^
+//     -d emulator-5554 ^
+//     --target lib/main_dev.dart ^
+//     integration_test/flows/task_completion_flow_test.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
+import '../helpers/test_setup.dart';
 
 const _testEmail = 'test@toka.dev';
 const _testPassword = 'Test1234!';
@@ -47,6 +54,8 @@ Future<void> _goToTodayTab(PatrolIntegrationTester $) async {
 }
 
 void main() {
+  setUpAll(ensureTestUser);
+
   // ────────────────────────────────────────────────────────────────────
   // Test 1 — Authenticate, go to tasks, create 'Tarea E2E Test'
   // ────────────────────────────────────────────────────────────────────

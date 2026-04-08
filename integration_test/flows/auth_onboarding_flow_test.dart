@@ -21,7 +21,7 @@ import 'package:patrol/patrol.dart';
 import '../helpers/test_setup.dart';
 
 void main() {
-  setUpAll(ensureTestUser);
+  setUpAll(setupE2EEnvironment);
   // ────────────────────────────────────────────────────────────────────
   // Test 1 — Login with email/password → home screen shown
   // ────────────────────────────────────────────────────────────────────

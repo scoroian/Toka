@@ -54,7 +54,7 @@ Future<void> _goToTodayTab(PatrolIntegrationTester $) async {
 }
 
 void main() {
-  setUpAll(ensureTestUser);
+  setUpAll(setupE2EEnvironment);
 
   // ────────────────────────────────────────────────────────────────────
   // Test 1 — Authenticate, go to tasks, create 'Tarea E2E Test'

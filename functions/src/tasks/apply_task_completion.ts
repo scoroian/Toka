@@ -3,59 +3,16 @@ import * as admin from "firebase-admin";
 import * as logger from "firebase-functions/logger";
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { updateHomeDashboard } from "./update_dashboard";
+import {
+  MemberLoadData,
+  scoreOf,
+  getNextAssigneeRoundRobin,
+  getNextAssigneeSmart,
+  addRecurrenceInterval,
+} from "./task_assignment_helpers";
 
 const db = admin.firestore();
 const FieldValue = admin.firestore.FieldValue;
-
-interface MemberLoadData {
-  completionsRecent: number;
-  difficultyWeight: number;
-  daysSinceLastExecution: number;
-}
-
-function scoreOf(data: MemberLoadData): number {
-  return data.completionsRecent * data.difficultyWeight + data.daysSinceLastExecution * -0.1;
-}
-
-function getNextAssigneeRoundRobin(
-  order: string[],
-  currentUid: string,
-  excludedUids: string[]
-): string | null {
-  if (!order.length) return null;
-  const eligible = order.filter((uid) => !excludedUids.includes(uid));
-  if (!eligible.length) return currentUid;
-  const idx = eligible.indexOf(currentUid);
-  const nextIdx = (idx + 1) % eligible.length;
-  return eligible[nextIdx];
-}
-
-function getNextAssigneeSmart(
-  order: string[],
-  currentUid: string,
-  excludedUids: string[],
-  loadData: Map<string, MemberLoadData>
-): string {
-  const eligible = order.filter((uid) => !excludedUids.includes(uid));
-  if (!eligible.length) return currentUid;
-  return eligible.reduce((a, b) => {
-    const aData = loadData.get(a) ?? { completionsRecent: 0, difficultyWeight: 1.0, daysSinceLastExecution: 0 };
-    const bData = loadData.get(b) ?? { completionsRecent: 0, difficultyWeight: 1.0, daysSinceLastExecution: 0 };
-    return scoreOf(aData) <= scoreOf(bData) ? a : b;
-  });
-}
-
-function addRecurrenceInterval(base: Date, recurrenceType: string): Date {
-  const d = new Date(base);
-  switch (recurrenceType) {
-    case "hourly":  d.setHours(d.getHours() + 1); break;
-    case "daily":   d.setDate(d.getDate() + 1); break;
-    case "weekly":  d.setDate(d.getDate() + 7); break;
-    case "monthly": d.setMonth(d.getMonth() + 1); break;
-    case "yearly":  d.setFullYear(d.getFullYear() + 1); break;
-  }
-  return d;
-}
 
 export const applyTaskCompletion = onCall(async (request) => {
   if (!request.auth) {

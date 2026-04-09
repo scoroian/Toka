@@ -11,7 +11,6 @@ import {
   setDoc,
   updateDoc,
   deleteDoc,
-  collection,
 } from 'firebase/firestore';
 import { readFileSync } from 'fs';
 import * as path from 'path';

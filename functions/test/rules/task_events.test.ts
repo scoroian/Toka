@@ -48,7 +48,7 @@ beforeEach(async () => {
     await setDoc(doc(db, `users/${OWNER_UID}/memberships/${HOME1}`), { status: 'active', role: 'owner' });
     await setDoc(doc(db, `users/${ADMIN_UID}/memberships/${HOME1}`), { status: 'active', role: 'admin' });
     await setDoc(doc(db, `users/${MEMBER_UID}/memberships/${HOME1}`), { status: 'active', role: 'member' });
-    await setDoc(doc(db, `users/${FROZEN_UID}/memberships/${HOME1}`), { status: 'frozen', role: 'member' });
+    await setDoc(doc(db, `users/${FROZEN_UID}/memberships/${HOME1}`), { status: 'frozen', role: 'admin' });
   });
 });
 
@@ -89,7 +89,7 @@ describe('taskEvents — read', () => {
 // ─── WRITE (todos denegados — solo Functions) ───────────────────────────────────
 
 describe('taskEvents — write (siempre denegado)', () => {
-  const newEvent = { eventType: 'completed', taskId: 'task1' };
+  const newEvent = { eventType: 'completed', taskId: 'task1', performerUid: MEMBER_UID };
 
   it('owner NO puede crear taskEvent directamente', async () => {
     const ctx = testEnv.authenticatedContext(OWNER_UID);
@@ -119,5 +119,10 @@ describe('taskEvents — write (siempre denegado)', () => {
   it('no autenticado NO puede escribir taskEvent', async () => {
     const ctx = testEnv.unauthenticatedContext();
     await assertFails(setDoc(doc(ctx.firestore(), `homes/${HOME1}/taskEvents/event5`), newEvent));
+  });
+
+  it('outsider autenticado NO puede borrar taskEvent', async () => {
+    const ctx = testEnv.authenticatedContext(OUTSIDER_UID);
+    await assertFails(deleteDoc(doc(ctx.firestore(), `homes/${HOME1}/taskEvents/event1`)));
   });
 });

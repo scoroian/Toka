@@ -5,7 +5,7 @@ import {
   assertFails,
   RulesTestEnvironment,
 } from '@firebase/rules-unit-testing';
-import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { readFileSync } from 'fs';
 import * as path from 'path';
 
@@ -97,6 +97,11 @@ describe('views/dashboard — write (siempre denegado)', () => {
   it('member NO puede escribir dashboard directamente', async () => {
     const ctx = testEnv.authenticatedContext(MEMBER_UID);
     await assertFails(updateDoc(doc(ctx.firestore(), `homes/${HOME1}/views/dashboard`), { tasksTodo: 0 }));
+  });
+
+  it('owner NO puede borrar dashboard directamente', async () => {
+    const ctx = testEnv.authenticatedContext(OWNER_UID);
+    await assertFails(deleteDoc(doc(ctx.firestore(), `homes/${HOME1}/views/dashboard`)));
   });
 
   it('no autenticado NO puede escribir dashboard directamente', async () => {

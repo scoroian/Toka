@@ -1,13 +1,11 @@
 // functions/test/integration/manual_reassign.test.ts
-import * as functionsTest from 'firebase-functions-test';
 import {
   cleanAll, createUser, createHome, addMemberToHome,
   createTask, getDb, makeCallableRequest,
 } from './helpers/setup';
 import { manualReassign } from '../../src/tasks/manual_reassign';
 
-const testEnv = functionsTest({ projectId: process.env.GCLOUD_PROJECT });
-const wrapped = testEnv.wrap(manualReassign) as (req: any) => Promise<any>;
+const wrapped = (req: any): Promise<any> => (manualReassign as any).run(req);
 
 const HOME = 'home-reassign';
 const OWNER = 'owner-reassign';
@@ -28,7 +26,6 @@ beforeAll(async () => {
   await createTask(HOME, 'task1', MEMBER);
 });
 
-afterAll(() => testEnv.cleanup());
 
 describe('manualReassign — happy path', () => {
   it('admin reasigna tarea a otro member activo', async () => {

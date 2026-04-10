@@ -10,6 +10,9 @@ module.exports = {
   transform: {
     '^.+\\.ts$': ['ts-jest', { tsconfig: 'tsconfig.test.json' }],
   },
-  testEnvironmentOptions: {},
-  globalSetup: './test/integration/helpers/global_setup.js',
+  // setupFiles corre en el worker ANTES de cargar módulos de test,
+  // garantizando que firebase-admin esté inicializado cuando los imports evalúan
+  // archivos fuente que llaman admin.firestore() a nivel de módulo.
+  setupFiles: ['./test/integration/helpers/setup_env.js'],
+  testTimeout: 30000,
 };

@@ -1,14 +1,12 @@
 // functions/test/integration/apply_downgrade_plan.test.ts
 import * as admin from 'firebase-admin';
-import * as functionsTest from 'firebase-functions-test';
 import {
   cleanAll, createUser, createHome, addMemberToHome,
   createTask, getDb,
 } from './helpers/setup';
 import { applyDowngradeJob } from '../../src/entitlement/apply_downgrade_plan';
 
-const testEnv = functionsTest({ projectId: process.env.GCLOUD_PROJECT });
-const wrapped = testEnv.wrap(applyDowngradeJob) as (req: any) => Promise<any>;
+const wrapped = (data: any): Promise<any> => (applyDowngradeJob as any).run(data);
 
 const HOME_AUTO = 'home-downgrade-auto';    // sin plan manual
 const HOME_MANUAL = 'home-downgrade-manual'; // con plan manual
@@ -55,7 +53,6 @@ beforeAll(async () => {
   await createHome(HOME_ACTIVE, OWNER, { premiumStatus: 'rescue', premiumEndsAt: futureDate(5) });
 });
 
-afterAll(() => testEnv.cleanup());
 
 describe('applyDowngradeJob — downgrade automático', () => {
   it('hogar en rescue con periodo expirado → premiumStatus = restorable', async () => {

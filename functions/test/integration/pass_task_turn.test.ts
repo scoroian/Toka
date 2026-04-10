@@ -1,13 +1,11 @@
 // functions/test/integration/pass_task_turn.test.ts
-import * as functionsTest from 'firebase-functions-test';
 import {
   cleanAll, createUser, createHome, addMemberToHome,
   createTask, getDb, makeCallableRequest,
 } from './helpers/setup';
 import { passTaskTurn } from '../../src/tasks/pass_task_turn';
 
-const testEnv = functionsTest({ projectId: process.env.GCLOUD_PROJECT });
-const wrapped = testEnv.wrap(passTaskTurn) as (req: any) => Promise<any>;
+const wrapped = (req: any): Promise<any> => (passTaskTurn as any).run(req);
 
 const HOME = 'home-pass';
 const OWNER = 'owner-pass';
@@ -37,7 +35,6 @@ beforeAll(async () => {
   await createTask(HOME, 'task-inactive', MEMBER_A, { status: 'completed' });
 });
 
-afterAll(() => testEnv.cleanup());
 
 describe('passTaskTurn — happy path', () => {
   it('pasa turno con múltiples elegibles → siguiente asignado', async () => {

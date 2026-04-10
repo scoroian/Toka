@@ -1,13 +1,11 @@
 // functions/test/integration/sync_entitlement.test.ts
-import * as functionsTest from 'firebase-functions-test';
 import {
   cleanAll, createUser, createHome, addMemberToHome,
   getDb, makeCallableRequest,
 } from './helpers/setup';
 import { syncEntitlement } from '../../src/entitlement/sync_entitlement';
 
-const testEnv = functionsTest({ projectId: process.env.GCLOUD_PROJECT });
-const wrapped = testEnv.wrap(syncEntitlement) as (req: any) => Promise<any>;
+const wrapped = (req: any): Promise<any> => (syncEntitlement as any).run(req);
 
 const HOME = 'home-sync';
 const OWNER = 'owner-sync';
@@ -36,7 +34,6 @@ beforeAll(async () => {
   await addMemberToHome(HOME, MEMBER, 'member', 'active');
 });
 
-afterAll(() => testEnv.cleanup());
 
 describe('syncEntitlement — happy path', () => {
   it('receipt válido activa premium en el hogar', async () => {

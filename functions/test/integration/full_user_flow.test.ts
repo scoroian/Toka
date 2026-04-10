@@ -3,7 +3,6 @@
 // Flujo completo encadenado: crea usuario → crea hogar → crea tareas
 // → completa tarea → pasa turno → invita segundo miembro → reasigna → segundo completa.
 
-import * as functionsTest from 'firebase-functions-test';
 import {
   cleanAll, createUser, createHome, addMemberToHome,
   createTask, getDb, makeCallableRequest,
@@ -12,10 +11,9 @@ import { applyTaskCompletion } from '../../src/tasks/apply_task_completion';
 import { passTaskTurn } from '../../src/tasks/pass_task_turn';
 import { manualReassign } from '../../src/tasks/manual_reassign';
 
-const testEnv = functionsTest({ projectId: process.env.GCLOUD_PROJECT });
-const wrappedCompletion = testEnv.wrap(applyTaskCompletion) as (req: any) => Promise<any>;
-const wrappedPass = testEnv.wrap(passTaskTurn) as (req: any) => Promise<any>;
-const wrappedReassign = testEnv.wrap(manualReassign) as (req: any) => Promise<any>;
+const wrappedCompletion = (req: any): Promise<any> => (applyTaskCompletion as any).run(req);
+const wrappedPass = (req: any): Promise<any> => (passTaskTurn as any).run(req);
+const wrappedReassign = (req: any): Promise<any> => (manualReassign as any).run(req);
 
 // IDs fijos para el flujo completo
 const HOME = 'home-full-flow';
@@ -50,7 +48,6 @@ beforeAll(async () => {
   });
 });
 
-afterAll(() => testEnv.cleanup());
 
 describe('Full User Flow', () => {
   it('Paso 5 — hogar tiene 3 tareas activas', async () => {

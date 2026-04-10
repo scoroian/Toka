@@ -1,6 +1,5 @@
 // functions/test/integration/dispatch_due_reminders.test.ts
 import * as admin from 'firebase-admin';
-import * as functionsTest from 'firebase-functions-test';
 import {
   cleanAll, createUser, createHome, addMemberToHome,
   createTask,
@@ -11,8 +10,7 @@ import { dispatchDueReminders } from '../../src/notifications/dispatch_due_remin
 const mockSend = jest.fn().mockResolvedValue('mock-message-id');
 jest.spyOn(admin, 'messaging').mockReturnValue({ send: mockSend } as any);
 
-const testEnv = functionsTest({ projectId: process.env.GCLOUD_PROJECT });
-const wrapped = testEnv.wrap(dispatchDueReminders) as (req: any) => Promise<any>;
+const wrapped = (data: any): Promise<any> => (dispatchDueReminders as any).run(data);
 
 const HOME = 'home-reminders';
 const OWNER = 'owner-reminders';
@@ -78,7 +76,6 @@ beforeEach(() => {
   mockSend.mockClear();
 });
 
-afterAll(() => testEnv.cleanup());
 
 describe('dispatchDueReminders — envío de notificaciones', () => {
   it('tarea venciendo pronto con token FCM válido → send() llamado', async () => {

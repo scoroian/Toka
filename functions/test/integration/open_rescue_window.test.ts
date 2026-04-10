@@ -5,12 +5,10 @@
 // Usamos firebase-functions-test para hacer wrap del scheduled handler.
 
 import * as admin from 'firebase-admin';
-import * as functionsTest from 'firebase-functions-test';
 import { cleanAll, createUser, createHome, getDb } from './helpers/setup';
 import { openRescueWindow } from '../../src/entitlement/open_rescue_window';
 
-const testEnv = functionsTest({ projectId: process.env.GCLOUD_PROJECT });
-const wrapped = testEnv.wrap(openRescueWindow) as (req: any) => Promise<any>;
+const wrapped = (data: any): Promise<any> => (openRescueWindow as any).run(data);
 
 const HOME_NEAR = 'home-rescue-near';    // premiumEndsAt dentro de 2 días
 const HOME_FAR = 'home-rescue-far';     // premiumEndsAt dentro de 10 días
@@ -45,7 +43,6 @@ beforeAll(async () => {
   });
 });
 
-afterAll(() => testEnv.cleanup());
 
 describe('openRescueWindow — scheduled job', () => {
   it('hogar dentro de ventana de 3 días → premiumStatus cambia a rescue', async () => {

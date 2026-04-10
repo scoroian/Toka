@@ -1,5 +1,4 @@
 // functions/test/integration/apply_task_completion.test.ts
-import * as functionsTest from 'firebase-functions-test';
 import {
   cleanAll,
   createUser,
@@ -9,13 +8,11 @@ import {
   getDb,
   makeCallableRequest,
 } from './helpers/setup';
-
-// Importar el handler DESPUÉS de inicializar firebase-admin vía global_setup.js
 import { applyTaskCompletion } from '../../src/tasks/apply_task_completion';
 
-const testEnv = functionsTest({ projectId: process.env.GCLOUD_PROJECT });
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const wrapped = testEnv.wrap(applyTaskCompletion) as (req: any) => Promise<any>;
+// firebase-admin ya está inicializado en setup_env.js (setupFiles).
+// Llamamos .run() directamente para evitar problemas de tipos con functionsTest.wrap().
+const wrapped = (req: any): Promise<any> => (applyTaskCompletion as any).run(req);
 
 const HOME = 'home-completion';
 const OWNER = 'owner-completion';
@@ -35,7 +32,6 @@ beforeAll(async () => {
   await createTask(HOME, 'task-completed', MEMBER, { status: 'completed' });
 });
 
-afterAll(() => testEnv.cleanup());
 
 describe('applyTaskCompletion — happy path', () => {
   it('member completa su propia tarea → evento creado', async () => {

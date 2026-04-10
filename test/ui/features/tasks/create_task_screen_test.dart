@@ -12,6 +12,8 @@ import 'package:toka/features/homes/domain/home.dart';
 import 'package:toka/features/homes/domain/home_limits.dart';
 import 'package:toka/features/homes/domain/home_membership.dart';
 import 'package:toka/features/members/application/members_provider.dart';
+import 'package:toka/features/members/domain/member.dart';
+import 'package:toka/features/tasks/application/task_form_provider.dart';
 import 'package:toka/features/tasks/application/tasks_provider.dart';
 import 'package:toka/features/tasks/domain/recurrence_rule.dart';
 import 'package:toka/features/tasks/domain/task.dart';
@@ -33,26 +35,47 @@ class _FakeAuth extends Auth {
       providers: []));
 }
 
+final _fakeHome = Home(
+  id: 'h1',
+  name: 'Casa',
+  ownerUid: 'uid1',
+  currentPayerUid: null,
+  lastPayerUid: null,
+  premiumStatus: HomePremiumStatus.free,
+  premiumPlan: null,
+  premiumEndsAt: null,
+  restoreUntil: null,
+  autoRenewEnabled: false,
+  limits: const HomeLimits(maxMembers: 5),
+  createdAt: DateTime(2024),
+  updatedAt: DateTime(2024),
+);
+
 class _FakeCurrentHome extends CurrentHome {
   @override
-  Future<Home?> build() async => Home(
-        id: 'h1',
-        name: 'Casa',
-        ownerUid: 'uid1',
-        currentPayerUid: null,
-        lastPayerUid: null,
-        premiumStatus: HomePremiumStatus.free,
-        premiumPlan: null,
-        premiumEndsAt: null,
-        restoreUntil: null,
-        autoRenewEnabled: false,
-        limits: const HomeLimits(maxMembers: 5),
-        createdAt: DateTime(2024),
-        updatedAt: DateTime(2024),
-      );
+  Future<Home?> build() async => _fakeHome;
+
   @override
   Future<void> switchHome(String homeId) async {}
 }
+
+final _testMember = Member(
+  uid: 'uid1',
+  homeId: 'h1',
+  nickname: 'Test User',
+  photoUrl: null,
+  bio: null,
+  phone: null,
+  phoneVisibility: 'hidden',
+  role: MemberRole.owner,
+  status: MemberStatus.active,
+  joinedAt: DateTime(2024),
+  tasksCompleted: 0,
+  passedCount: 0,
+  complianceRate: 1.0,
+  currentStreak: 0,
+  averageScore: 0.0,
+);
 
 Widget _wrap(_MockTasksRepository repo) {
   return ProviderScope(
@@ -61,7 +84,7 @@ Widget _wrap(_MockTasksRepository repo) {
       currentHomeProvider.overrideWith(_FakeCurrentHome.new),
       tasksRepositoryProvider.overrideWithValue(repo),
       homeMembersProvider('h1').overrideWith(
-        (ref) => Stream.value([]),
+        (ref) => Stream.value([_testMember]),
       ),
       userMembershipsProvider('uid1').overrideWith((ref) => Stream.value([
             HomeMembership(
@@ -85,6 +108,32 @@ Widget _wrap(_MockTasksRepository repo) {
       home: CreateEditTaskScreen(),
     ),
   );
+}
+
+/// Pumps until the widget tree is fully settled, including async providers
+/// that need multiple event-loop turns to resolve (currentHomeProvider async
+/// build → homeMembersProvider stream emission).
+Future<void> _pumpUntilSettled(WidgetTester tester) async {
+  // pumpWidget already ran; run pumpAndSettle once to drain microtasks
+  // (currentHomeProvider.build() future resolves → AsyncData(_fakeHome)).
+  await tester.pumpAndSettle();
+  // One extra pump to process the Stream.value event that arrives after
+  // homeMembersProvider is first subscribed in the frame above.
+  await tester.pump();
+  // Settle any resulting rebuilds.
+  await tester.pumpAndSettle();
+}
+
+/// Sets a logical viewport large enough to avoid layout overflows in the
+/// RecurrenceForm, which uses DropdownButtonFormField widgets that need space.
+void _setLargeViewport(WidgetTester tester) {
+  tester.view.devicePixelRatio = 1.0;
+  tester.view.physicalSize = const Size(1080, 2400);
+}
+
+void _resetViewport(WidgetTester tester) {
+  tester.view.resetPhysicalSize();
+  tester.view.resetDevicePixelRatio();
 }
 
 void main() {
@@ -137,5 +186,114 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Crear tarea'), findsOneWidget);
+  });
+
+  testWidgets('AssignmentForm muestra checkbox para cada miembro del hogar',
+      (tester) async {
+    _setLargeViewport(tester);
+    addTearDown(() => _resetViewport(tester));
+
+    await tester.pumpWidget(_wrap(mockRepo));
+    await _pumpUntilSettled(tester);
+
+    expect(find.byKey(const Key('assignee_checkbox_uid1')), findsOneWidget);
+  });
+
+  testWidgets(
+      'guardar sin asignatarios muestra error de asignatarios',
+      (tester) async {
+    _setLargeViewport(tester);
+    addTearDown(() => _resetViewport(tester));
+
+    await tester.pumpWidget(_wrap(mockRepo));
+    await _pumpUntilSettled(tester);
+
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(CreateEditTaskScreen)),
+    );
+    final formNotifier = container.read(taskFormNotifierProvider.notifier);
+
+    // Set recurrence so validation proceeds past recurrence check.
+    formNotifier.setRecurrenceRule(
+      const RecurrenceRule.daily(
+          every: 1, time: '09:00', timezone: 'Europe/Madrid'),
+    );
+    // Set a non-empty title so title check passes.
+    formNotifier.setTitle('Limpiar');
+    // Leave assignmentOrder empty (default []).
+    await tester.pump();
+
+    await tester.tap(find.byKey(const Key('save_task_button')));
+    await tester.pumpAndSettle();
+
+    final formState = container.read(taskFormNotifierProvider);
+    expect(formState.fieldErrors['assignees'], equals('tasks_validation_no_assignees'));
+    expect(formState.fieldErrors['title'], isNull);
+    expect(formState.fieldErrors['recurrence'], isNull);
+  });
+
+  testWidgets(
+      'guardar sin título muestra error de título',
+      (tester) async {
+    _setLargeViewport(tester);
+    addTearDown(() => _resetViewport(tester));
+
+    await tester.pumpWidget(_wrap(mockRepo));
+    await _pumpUntilSettled(tester);
+
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(CreateEditTaskScreen)),
+    );
+    final formNotifier = container.read(taskFormNotifierProvider.notifier);
+
+    // Set recurrenceRule so that validation proceeds past recurrence check.
+    formNotifier.setRecurrenceRule(
+      const RecurrenceRule.daily(
+          every: 1, time: '09:00', timezone: 'Europe/Madrid'),
+    );
+    // Add uid1 to assignmentOrder so assignees check passes too.
+    formNotifier.setAssignmentOrder(['uid1']);
+    // Leave title empty (default '').
+    await tester.pump();
+
+    await tester.tap(find.byKey(const Key('save_task_button')));
+    await tester.pumpAndSettle();
+
+    final formState = container.read(taskFormNotifierProvider);
+    expect(formState.fieldErrors['title'], equals('tasks_validation_title_empty'));
+    expect(formState.fieldErrors['assignees'], isNull);
+    expect(formState.fieldErrors['recurrence'], isNull);
+  });
+
+  testWidgets(
+      'guardar con datos válidos llama a createTask',
+      (tester) async {
+    _setLargeViewport(tester);
+    addTearDown(() => _resetViewport(tester));
+
+    await tester.pumpWidget(_wrap(mockRepo));
+    await _pumpUntilSettled(tester);
+
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(CreateEditTaskScreen)),
+    );
+    final formNotifier = container.read(taskFormNotifierProvider.notifier);
+
+    // Set all required fields.
+    formNotifier.setRecurrenceRule(
+      const RecurrenceRule.daily(
+          every: 1, time: '09:00', timezone: 'Europe/Madrid'),
+    );
+    formNotifier.setAssignmentOrder(['uid1']);
+    await tester.pump();
+
+    await tester.enterText(
+        find.byKey(const Key('task_title_field')), 'Limpiar cocina');
+    await tester.pump();
+
+    await tester.tap(find.byKey(const Key('save_task_button')).first);
+    await tester.pumpAndSettle();
+
+    verify(() => mockRepo.createTask('h1', any(), 'uid1')).called(1);
   });
 }

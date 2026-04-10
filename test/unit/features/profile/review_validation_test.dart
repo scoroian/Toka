@@ -29,5 +29,13 @@ void main() {
     test('nota de 301 caracteres es inválida', () {
       expect(isValidReviewNote('a' * 301), false);
     });
+
+    test('score negativo es inválido', () {
+      expect(isValidReviewScore(-1), false);
+    });
+
+    test('nota vacía es válida', () {
+      expect(isValidReviewNote(''), true);
+    });
   });
 }

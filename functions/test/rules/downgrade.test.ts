@@ -77,7 +77,7 @@ describe('downgrade/current — read', () => {
 });
 
 describe('downgrade/current — write', () => {
-  const plan = { selectedMemberIds: ['owner1'], selectedTaskIds: ['task1'] };
+  const plan = { selectedMemberIds: [OWNER_UID], selectedTaskIds: ['task1'] };
 
   it('owner puede escribir el plan de downgrade manual', async () => {
     const ctx = testEnv.authenticatedContext(OWNER_UID);

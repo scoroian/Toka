@@ -124,7 +124,7 @@ service cloud.firestore {
       }
       
       // Historial de suscripciones
-      match /subscriptions/history/{chargeId} {
+      match /subscriptions/{chargeId} {
         allow read: if isMemberOfHome(homeId) && getMembership(homeId).billingState in ['currentPayer', 'formerPayer'];
         allow write: if false;
       }

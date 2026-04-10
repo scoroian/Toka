@@ -174,7 +174,7 @@ describe('members — update propio (campos prohibidos)', () => {
     await assertFails(
       updateDoc(doc(ctx.firestore(), `homes/${HOME1}/members/${MEMBER_UID}`), {
         vacation: { start: '2026-06-01', end: '2026-06-10' },
-        status: 'active',
+        status: 'frozen',
       })
     );
   });

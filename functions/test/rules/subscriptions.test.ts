@@ -39,7 +39,7 @@ beforeEach(async () => {
     const db = ctx.firestore();
 
     await setDoc(doc(db, `homes/${HOME1}`), { ownerUid: OWNER_UID });
-    await setDoc(doc(db, `homes/${HOME1}/subscriptions/history/charge1`), {
+    await setDoc(doc(db, `homes/${HOME1}/subscriptions/charge1`), {
       chargeId: 'charge1',
       plan: 'monthly',
       amount: 4.99,
@@ -62,45 +62,45 @@ beforeEach(async () => {
 
 // ─── READ ──────────────────────────────────────────────────────────────────────
 
-describe('subscriptions/history — read', () => {
+describe('subscriptions — read', () => {
   it('miembro con billingState currentPayer puede leer historial de cargos', async () => {
     const ctx = testEnv.authenticatedContext(CURRENT_PAYER_UID);
-    await assertSucceeds(getDoc(doc(ctx.firestore(), `homes/${HOME1}/subscriptions/history/charge1`)));
+    await assertSucceeds(getDoc(doc(ctx.firestore(), `homes/${HOME1}/subscriptions/charge1`)));
   });
 
   it('miembro con billingState formerPayer puede leer historial de cargos', async () => {
     const ctx = testEnv.authenticatedContext(FORMER_PAYER_UID);
-    await assertSucceeds(getDoc(doc(ctx.firestore(), `homes/${HOME1}/subscriptions/history/charge1`)));
+    await assertSucceeds(getDoc(doc(ctx.firestore(), `homes/${HOME1}/subscriptions/charge1`)));
   });
 
   it('owner con billingState currentPayer puede leer historial de cargos', async () => {
     const ctx = testEnv.authenticatedContext(OWNER_UID);
-    await assertSucceeds(getDoc(doc(ctx.firestore(), `homes/${HOME1}/subscriptions/history/charge1`)));
+    await assertSucceeds(getDoc(doc(ctx.firestore(), `homes/${HOME1}/subscriptions/charge1`)));
   });
 
   it('miembro con billingState none NO puede leer historial de cargos', async () => {
     const ctx = testEnv.authenticatedContext(PLAIN_MEMBER_UID);
-    await assertFails(getDoc(doc(ctx.firestore(), `homes/${HOME1}/subscriptions/history/charge1`)));
+    await assertFails(getDoc(doc(ctx.firestore(), `homes/${HOME1}/subscriptions/charge1`)));
   });
 
   it('outsider autenticado NO puede leer historial de cargos', async () => {
     const ctx = testEnv.authenticatedContext(OUTSIDER_UID);
-    await assertFails(getDoc(doc(ctx.firestore(), `homes/${HOME1}/subscriptions/history/charge1`)));
+    await assertFails(getDoc(doc(ctx.firestore(), `homes/${HOME1}/subscriptions/charge1`)));
   });
 
   it('no autenticado NO puede leer historial de cargos', async () => {
     const ctx = testEnv.unauthenticatedContext();
-    await assertFails(getDoc(doc(ctx.firestore(), `homes/${HOME1}/subscriptions/history/charge1`)));
+    await assertFails(getDoc(doc(ctx.firestore(), `homes/${HOME1}/subscriptions/charge1`)));
   });
 });
 
 // ─── WRITE (todos denegados) ───────────────────────────────────────────────────
 
-describe('subscriptions/history — write (siempre denegado)', () => {
+describe('subscriptions — write (siempre denegado)', () => {
   it('currentPayer NO puede escribir historial directamente', async () => {
     const ctx = testEnv.authenticatedContext(CURRENT_PAYER_UID);
     await assertFails(
-      setDoc(doc(ctx.firestore(), `homes/${HOME1}/subscriptions/history/charge2`), {
+      setDoc(doc(ctx.firestore(), `homes/${HOME1}/subscriptions/charge2`), {
         chargeId: 'charge2', plan: 'monthly',
       })
     );
@@ -109,7 +109,7 @@ describe('subscriptions/history — write (siempre denegado)', () => {
   it('owner NO puede escribir historial directamente', async () => {
     const ctx = testEnv.authenticatedContext(OWNER_UID);
     await assertFails(
-      setDoc(doc(ctx.firestore(), `homes/${HOME1}/subscriptions/history/charge3`), {
+      setDoc(doc(ctx.firestore(), `homes/${HOME1}/subscriptions/charge3`), {
         chargeId: 'charge3', plan: 'annual',
       })
     );
@@ -118,7 +118,7 @@ describe('subscriptions/history — write (siempre denegado)', () => {
   it('no autenticado NO puede escribir historial', async () => {
     const ctx = testEnv.unauthenticatedContext();
     await assertFails(
-      setDoc(doc(ctx.firestore(), `homes/${HOME1}/subscriptions/history/charge4`), {
+      setDoc(doc(ctx.firestore(), `homes/${HOME1}/subscriptions/charge4`), {
         chargeId: 'charge4', plan: 'monthly',
       })
     );

@@ -131,7 +131,7 @@ class _CreateEditTaskScreenState extends ConsumerState<CreateEditTaskScreen> {
             Padding(
               padding: const EdgeInsets.only(top: 4),
               child: Text(
-                l10n.tasks_validation_recurrence_required,
+                _recurrenceErrorText(recurrenceError, l10n) ?? recurrenceError,
                 style: TextStyle(
                     color: Theme.of(context).colorScheme.error, fontSize: 12),
                 key: const Key('recurrence_error'),
@@ -184,6 +184,13 @@ class _CreateEditTaskScreenState extends ConsumerState<CreateEditTaskScreen> {
     }
     if (code == 'tasks_validation_title_too_long') {
       return l10n.tasks_validation_title_too_long;
+    }
+    return null;
+  }
+
+  String? _recurrenceErrorText(String code, AppLocalizations l10n) {
+    if (code == 'tasks_validation_recurrence_required') {
+      return l10n.tasks_validation_recurrence_required;
     }
     return null;
   }

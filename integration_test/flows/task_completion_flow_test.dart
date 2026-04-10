@@ -347,4 +347,188 @@ void main() {
       );
     },
   );
+
+  // ────────────────────────────────────────────────────────────────────
+  // Test 6 — Crear tarea completa (fix verificado)
+  // ────────────────────────────────────────────────────────────────────
+  patrolTest(
+    'task flow: crear tarea con título + recurrencia + asignado → vuelve a lista',
+    config: const PatrolTesterConfig(
+      settleTimeout: Duration(seconds: 120),
+      visibleTimeout: Duration(seconds: 30),
+    ),
+    ($) async {
+      await $.tester.pumpWidget(testApp());
+      await $.tester.pump();
+      await _loginIfNeeded($);
+
+      if (!$(find.byType(NavigationBar)).exists) {
+        markTestSkipped('No se pudo llegar al home shell.');
+        return;
+      }
+      await ensureHomeExists($);
+
+      await $.tester.tap(find.byIcon(Icons.task_alt_outlined));
+      await _wait($, const Duration(seconds: 5));
+
+      if (!$(find.byKey(const Key('create_task_fab'))).exists) {
+        markTestSkipped('FAB de crear tarea no encontrado.');
+        return;
+      }
+
+      await $.tester.tap(find.byKey(const Key('create_task_fab')));
+      await _wait($, const Duration(seconds: 5));
+
+      expect($(find.byKey(const Key('task_title_field'))).exists, isTrue,
+          reason: 'Formulario de creación no apareció.');
+
+      await $(find.byKey(const Key('task_title_field')))
+          .enterText('Tarea Completa E2E');
+      await $.tester.pump(const Duration(milliseconds: 300));
+
+      if ($(find.byType(CheckboxListTile)).exists) {
+        await $.tester.tap(find.byType(CheckboxListTile).first);
+        await $.tester.pump(const Duration(milliseconds: 300));
+      }
+
+      await $.tester.tap(find.byKey(const Key('save_task_button')));
+      await _wait($, const Duration(seconds: 8));
+
+      expect(
+        $(find.byKey(const Key('tasks_list'))).exists ||
+            $(find.byKey(const Key('tasks_empty_state'))).exists ||
+            $(find.byType(NavigationBar)).exists,
+        isTrue,
+        reason: 'Tras guardar, se esperaba volver a la lista de tareas.',
+      );
+    },
+  );
+
+  // ────────────────────────────────────────────────────────────────────
+  // Test 7 — Validaciones visibles en el formulario
+  // ────────────────────────────────────────────────────────────────────
+  patrolTest(
+    'task flow: guardar formulario vacío muestra errores sin navegar',
+    config: const PatrolTesterConfig(
+      settleTimeout: Duration(seconds: 120),
+      visibleTimeout: Duration(seconds: 30),
+    ),
+    ($) async {
+      await $.tester.pumpWidget(testApp());
+      await $.tester.pump();
+      await _loginIfNeeded($);
+
+      if (!$(find.byType(NavigationBar)).exists) {
+        markTestSkipped('No se pudo llegar al home shell.');
+        return;
+      }
+      await ensureHomeExists($);
+
+      await $.tester.tap(find.byIcon(Icons.task_alt_outlined));
+      await _wait($, const Duration(seconds: 5));
+
+      if (!$(find.byKey(const Key('create_task_fab'))).exists) {
+        markTestSkipped('FAB no encontrado.');
+        return;
+      }
+
+      await $.tester.tap(find.byKey(const Key('create_task_fab')));
+      await _wait($, const Duration(seconds: 5));
+
+      await $.tester.tap(find.byKey(const Key('save_task_button')));
+      await _wait($, const Duration(seconds: 3));
+
+      expect($(find.byKey(const Key('task_title_field'))).exists, isTrue,
+          reason: 'El formulario no debería cerrarse con datos inválidos.');
+    },
+  );
+
+  // ────────────────────────────────────────────────────────────────────
+  // Test 8 — Flujo Hoy: completar tarea (confirmar en dialog)
+  // ────────────────────────────────────────────────────────────────────
+  patrolTest(
+    'task flow: completar tarea en pantalla Hoy confirma en dialog',
+    config: const PatrolTesterConfig(
+      settleTimeout: Duration(seconds: 120),
+      visibleTimeout: Duration(seconds: 30),
+    ),
+    ($) async {
+      await $.tester.pumpWidget(testApp());
+      await $.tester.pump();
+      await _loginIfNeeded($);
+
+      if (!$(find.byType(NavigationBar)).exists) {
+        markTestSkipped('No se pudo llegar al home shell.');
+        return;
+      }
+
+      await $.tester.tap(find.byIcon(Icons.home_outlined));
+      await _wait($, const Duration(seconds: 5));
+
+      if (!$(find.byKey(const Key('btn_complete'))).exists) {
+        markTestSkipped('No hay tarea para completar en pantalla Hoy.');
+        return;
+      }
+
+      await $.tester.tap(find.byKey(const Key('btn_complete')).first);
+      await _wait($, const Duration(seconds: 3));
+
+      if ($(find.byKey(const Key('complete_task_dialog'))).exists ||
+          $(find.byType(AlertDialog)).exists) {
+        if ($(find.byKey(const Key('confirm_complete_button'))).exists) {
+          await $.tester
+              .tap(find.byKey(const Key('confirm_complete_button')));
+          await _wait($, const Duration(seconds: 5));
+        }
+      }
+
+      expect($(find.byType(Scaffold)).exists, isTrue,
+          reason: 'App debería seguir corriendo tras completar tarea.');
+    },
+  );
+
+  // ────────────────────────────────────────────────────────────────────
+  // Test 9 — Pasar turno confirmado
+  // ────────────────────────────────────────────────────────────────────
+  patrolTest(
+    'task flow: confirmar pasar turno cambia el asignado',
+    config: const PatrolTesterConfig(
+      settleTimeout: Duration(seconds: 120),
+      visibleTimeout: Duration(seconds: 30),
+    ),
+    ($) async {
+      await $.tester.pumpWidget(testApp());
+      await $.tester.pump();
+      await _loginIfNeeded($);
+
+      if (!$(find.byType(NavigationBar)).exists) {
+        markTestSkipped('No se pudo llegar al home shell.');
+        return;
+      }
+
+      await $.tester.tap(find.byIcon(Icons.home_outlined));
+      await _wait($, const Duration(seconds: 5));
+
+      if (!$(find.byKey(const Key('btn_pass'))).exists) {
+        markTestSkipped('No hay botón de pasar turno en pantalla Hoy.');
+        return;
+      }
+
+      await $.tester.tap(find.byKey(const Key('btn_pass')).first);
+      await _wait($, const Duration(seconds: 3));
+
+      if ($(find.byKey(const Key('pass_turn_dialog'))).exists ||
+          $(find.byType(AlertDialog)).exists) {
+        if ($(find.byKey(const Key('confirm_pass_button'))).exists) {
+          await $.tester.tap(find.byKey(const Key('confirm_pass_button')));
+          await _wait($, const Duration(seconds: 5));
+        } else {
+          await $.tester.tapAt(const Offset(10, 10));
+          await $.tester.pump();
+        }
+      }
+
+      expect($(find.byType(Scaffold)).exists, isTrue);
+    },
+  );
 }

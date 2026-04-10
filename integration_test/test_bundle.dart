@@ -14,6 +14,10 @@ import 'flows/member_management_flow_test.dart' as flows__member_management_flow
 import 'flows/settings_notifications_flow_test.dart' as flows__settings_notifications_flow_test;
 import 'flows/subscription_flow_test.dart' as flows__subscription_flow_test;
 import 'flows/task_completion_flow_test.dart' as flows__task_completion_flow_test;
+import 'flows/home_management_flow_test.dart' as flows__home_management_flow_test;
+import 'flows/profile_flow_test.dart' as flows__profile_flow_test;
+import 'flows/history_flow_test.dart' as flows__history_flow_test;
+import 'flows/onboarding_registration_flow_test.dart' as flows__onboarding_registration_flow_test;
 // END: GENERATED TEST IMPORTS
 
 Future<void> main() async {
@@ -81,6 +85,10 @@ Future<void> main() async {
   group('flows.settings_notifications_flow_test', flows__settings_notifications_flow_test.main);
   group('flows.subscription_flow_test', flows__subscription_flow_test.main);
   group('flows.task_completion_flow_test', flows__task_completion_flow_test.main);
+  group('flows.home_management_flow_test', flows__home_management_flow_test.main);
+  group('flows.profile_flow_test', flows__profile_flow_test.main);
+  group('flows.history_flow_test', flows__history_flow_test.main);
+  group('flows.onboarding_registration_flow_test', flows__onboarding_registration_flow_test.main);
 // END: GENERATED TEST GROUPS
 
   final dartTestGroup = await testExplorationCompleter.future;

@@ -15,6 +15,7 @@ import 'package:toka/features/tasks/application/task_form_provider.dart';
 import 'package:toka/features/tasks/application/tasks_provider.dart';
 import 'package:toka/features/tasks/domain/recurrence_rule.dart';
 import 'package:toka/features/tasks/domain/task.dart';
+import 'package:toka/features/tasks/domain/task_status.dart';
 import 'package:toka/features/tasks/domain/tasks_repository.dart';
 
 class _MockTasksRepository extends Mock implements TasksRepository {}
@@ -142,10 +143,12 @@ void main() {
       final container = _makeContainer(repo: repo);
       addTearDown(container.dispose);
 
-      final vm = container.read(createEditTaskViewModelProvider(null));
-      // Let initCreate microtask run, then await the home provider to resolve
-      await Future.microtask(() {});
+      // Warm up the home provider so valueOrNull is non-null inside save()
       await container.read(currentHomeProvider.future);
+
+      final vm = container.read(createEditTaskViewModelProvider(null));
+      // Let initCreate microtask run
+      await Future<void>.delayed(Duration.zero);
 
       vm.setTitle('Fregar platos');
       vm.setAssignmentOrder(['uid1']);
@@ -157,10 +160,10 @@ void main() {
 
       await vm.save();
 
-      expect(
-        container.read(createEditTaskViewModelProvider(null)).savedSuccessfully,
-        isTrue,
-      );
+      verify(() => repo.createTask('h1', any(), 'uid1')).called(1);
+      // Read savedSuccessfully from the same vm instance to avoid
+      // re-triggering the auto-dispose proxy provider with a fresh notifier.
+      expect(vm.savedSuccessfully, isTrue);
     });
 
     test('save sin recurrence → savedSuccessfully = false, fieldErrors[recurrence] no null',
@@ -169,7 +172,7 @@ void main() {
       addTearDown(container.dispose);
 
       final vm = container.read(createEditTaskViewModelProvider(null));
-      await Future.microtask(() {});
+      await Future<void>.delayed(Duration.zero);
       await container.read(currentHomeProvider.future);
 
       vm.setTitle('Fregar platos');
@@ -192,7 +195,7 @@ void main() {
       addTearDown(container.dispose);
 
       final vm = container.read(createEditTaskViewModelProvider(null));
-      await Future.microtask(() {});
+      await Future<void>.delayed(Duration.zero);
       await container.read(currentHomeProvider.future);
 
       vm.setTitle('Fregar platos');
@@ -219,7 +222,7 @@ void main() {
       addTearDown(container.dispose);
 
       final vm = container.read(createEditTaskViewModelProvider(null));
-      await Future.microtask(() {});
+      await Future<void>.delayed(Duration.zero);
       await container.read(currentHomeProvider.future);
 
       // No se establece title (queda vacío)
@@ -238,6 +241,44 @@ void main() {
         container.read(createEditTaskViewModelProvider(null)).savedSuccessfully,
         isFalse,
       );
+    });
+
+    test('modo edición: initEdit pre-rellena título, asignados y recurrencia', () {
+      final container = _makeContainer();
+      addTearDown(container.dispose);
+
+      final formNotifier = container.read(taskFormNotifierProvider.notifier);
+      formNotifier.initEdit(
+        Task(
+          id: 'task1',
+          homeId: 'h1',
+          title: 'Fregar',
+          description: null,
+          visualKind: 'emoji',
+          visualValue: '🧹',
+          status: TaskStatus.active,
+          recurrenceRule: const RecurrenceRule.daily(
+            every: 1,
+            time: '09:00',
+            timezone: 'Europe/Madrid',
+          ),
+          assignmentMode: 'basicRotation',
+          assignmentOrder: const ['uid1', 'uid2'],
+          currentAssigneeUid: null,
+          nextDueAt: DateTime(2026, 4, 10),
+          difficultyWeight: 1.5,
+          completedCount90d: 0,
+          createdByUid: 'uid1',
+          createdAt: DateTime(2026, 4, 1),
+          updatedAt: DateTime(2026, 4, 1),
+        ),
+      );
+
+      final formState = container.read(taskFormNotifierProvider);
+      expect(formState.title, 'Fregar');
+      expect(formState.assignmentOrder, ['uid1', 'uid2']);
+      expect(formState.recurrenceRule, isNotNull);
+      expect(formState.difficultyWeight, 1.5);
     });
   });
 }

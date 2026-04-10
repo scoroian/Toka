@@ -133,9 +133,9 @@ service cloud.firestore {
       match /invitations/{inviteId} {
         allow read: if isAdminOrOwner(homeId) || 
                        (isAuth() && resource.data.code != null); // Lectura pública por código via Function
-        allow create: if isAdminOrOwner(homeId);
-        allow update: if isAdminOrOwner(homeId);
-        allow delete: if isAdminOrOwner(homeId);
+        allow create: if isAdminOrOwner(homeId) && isActiveMember(homeId);
+        allow update: if isAdminOrOwner(homeId) && isActiveMember(homeId);
+        allow delete: if isAdminOrOwner(homeId) && isActiveMember(homeId);
       }
       
       // Metadatos del sistema

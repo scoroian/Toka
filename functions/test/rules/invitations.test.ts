@@ -78,6 +78,11 @@ describe('invitations — read por admin/owner', () => {
 });
 
 describe('invitations — read público por code', () => {
+  it('member activo puede leer invitación que tiene code', async () => {
+    const ctx = testEnv.authenticatedContext(MEMBER_UID);
+    await assertSucceeds(getDoc(doc(ctx.firestore(), `homes/${HOME1}/invitations/inv1`)));
+  });
+
   it('outsider autenticado puede leer invitación que tiene code', async () => {
     const ctx = testEnv.authenticatedContext(OUTSIDER_UID);
     await assertSucceeds(getDoc(doc(ctx.firestore(), `homes/${HOME1}/invitations/inv1`)));
@@ -164,7 +169,7 @@ describe('invitations — delete', () => {
 
   it('admin puede eliminar invitación', async () => {
     const ctx = testEnv.authenticatedContext(ADMIN_UID);
-    await assertSucceeds(deleteDoc(doc(ctx.firestore(), `homes/${HOME1}/invitations/inv2`)));
+    await assertSucceeds(deleteDoc(doc(ctx.firestore(), `homes/${HOME1}/invitations/inv1`)));
   });
 
   it('member raso NO puede eliminar invitación', async () => {

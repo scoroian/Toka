@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/app_localizations.dart';
 import '../application/create_edit_task_view_model.dart';
+import '../../homes/application/current_home_provider.dart';
+import '../../members/application/members_provider.dart';
 import 'widgets/assignment_form.dart';
 import 'widgets/recurrence_form.dart';
 import 'widgets/task_visual_picker.dart';
@@ -39,6 +41,12 @@ class _CreateEditTaskScreenState extends ConsumerState<CreateEditTaskScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final vm = ref.watch(createEditTaskViewModelProvider(widget.editTaskId));
+    final homeId = ref.watch(currentHomeProvider).valueOrNull?.id ?? '';
+    final memberUids = ref
+        .watch(homeMembersProvider(homeId))
+        .valueOrNull
+        ?.map((m) => m.uid)
+        .toList() ?? [];
 
     ref.listen<CreateEditTaskViewModel>(
       createEditTaskViewModelProvider(widget.editTaskId),
@@ -119,7 +127,7 @@ class _CreateEditTaskScreenState extends ConsumerState<CreateEditTaskScreen> {
           const RecurrenceForm(key: Key('recurrence_form')),
           const SizedBox(height: 16),
           AssignmentForm(
-            availableMembers: const [],
+            availableMembers: memberUids,
             selectedOrder: formState.assignmentOrder,
             onChanged: vm.setAssignmentOrder,
           ),

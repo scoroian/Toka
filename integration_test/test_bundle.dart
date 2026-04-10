@@ -5,11 +5,14 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
-import 'package:patrol/src/native/contracts/contracts.dart';
+import 'package:patrol/src/platform/contracts/contracts.dart';
 import 'package:test_api/src/backend/invoker.dart';
 
 // START: GENERATED TEST IMPORTS
 import 'flows/auth_onboarding_flow_test.dart' as flows__auth_onboarding_flow_test;
+import 'flows/member_management_flow_test.dart' as flows__member_management_flow_test;
+import 'flows/settings_notifications_flow_test.dart' as flows__settings_notifications_flow_test;
+import 'flows/subscription_flow_test.dart' as flows__subscription_flow_test;
 import 'flows/task_completion_flow_test.dart' as flows__task_completion_flow_test;
 // END: GENERATED TEST IMPORTS
 
@@ -46,9 +49,11 @@ Future<void> main() async {
   // Dart test (out of which they had been created) and wait for it to complete.
   // The result of running the Dart test is the result of the native test case.
 
-  final nativeAutomator = NativeAutomator(config: NativeAutomatorConfig());
-  await nativeAutomator.initialize();
-  final binding = PatrolBinding.ensureInitialized(NativeAutomatorConfig());
+  final platformAutomator = PlatformAutomator(
+    config: PlatformAutomatorConfig.defaultConfig(),
+  );
+  await platformAutomator.initialize();
+  final binding = PatrolBinding.ensureInitialized(platformAutomator);
   final testExplorationCompleter = Completer<DartGroupEntry>();
 
   // A special test to explore the hierarchy of groups and tests. This is a hack
@@ -60,7 +65,8 @@ Future<void> main() async {
     // Maybe somewhat counterintuitively, this callback runs *after* the calls
     // to group() below.
     final topLevelGroup = Invoker.current!.liveTest.groups.first;
-    final dartTestGroup = createDartTestGroup(topLevelGroup,
+    final dartTestGroup = createDartTestGroup(
+      topLevelGroup,
       tags: null,
       excludeTags: null,
     );
@@ -69,10 +75,13 @@ Future<void> main() async {
     reportGroupStructure(dartTestGroup);
   });
 
-  // START: GENERATED TEST GROUPS
+// START: GENERATED TEST GROUPS
   group('flows.auth_onboarding_flow_test', flows__auth_onboarding_flow_test.main);
+  group('flows.member_management_flow_test', flows__member_management_flow_test.main);
+  group('flows.settings_notifications_flow_test', flows__settings_notifications_flow_test.main);
+  group('flows.subscription_flow_test', flows__subscription_flow_test.main);
   group('flows.task_completion_flow_test', flows__task_completion_flow_test.main);
-  // END: GENERATED TEST GROUPS
+// END: GENERATED TEST GROUPS
 
   final dartTestGroup = await testExplorationCompleter.future;
   final appService = PatrolAppService(topLevelDartTestGroup: dartTestGroup);
@@ -82,7 +91,7 @@ Future<void> main() async {
   // Until now, the native test runner was waiting for us, the Dart side, to
   // come alive. Now that we did, let's tell it that we're ready to be asked
   // about Dart tests.
-  await nativeAutomator.markPatrolAppServiceReady();
+  await platformAutomator.markPatrolAppServiceReady();
 
   await appService.testExecutionCompleted;
 }

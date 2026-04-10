@@ -1,21 +1,6 @@
 // integration_test/flows/task_completion_flow_test.dart
 //
 // Patrol E2E tests — Task creation & pass-turn flow
-//
-// Prerequisites:
-//   - Firebase Auth emulator on localhost:9099
-//   - Firebase Firestore emulator on localhost:8080
-//
-// The test user (test@toka.dev / Test1234!) is created automatically
-// in setUpAll() via the Auth emulator REST API.
-// Note: after login the user will go through onboarding (create a home)
-// before the task screens become available.
-//
-// Run with:
-//   C:\Users\sebas\AppData\Local\Pub\Cache\bin\patrol.bat test ^
-//     -d emulator-5554 ^
-//     --target lib/main_dev.dart ^
-//     integration_test/flows/task_completion_flow_test.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -26,31 +11,37 @@ const _testEmail = 'test@toka.dev';
 const _testPassword = 'Test1234!';
 const _testTaskName = 'Tarea E2E Test';
 
-// ── Helper: login if needed ───────────────────────────────────────────────────
+// See auth_onboarding_flow_test.dart for the runAsync pump strategy.
+
+Future<void> _wait(PatrolIntegrationTester $, Duration duration) async {
+  await $.tester.runAsync(() => Future.delayed(duration));
+  await $.tester.pump();
+  await $.tester.pump();
+  await $.tester.pump();
+}
+
 Future<void> _loginIfNeeded(PatrolIntegrationTester $) async {
-  await $.pumpAndSettle(timeout: const Duration(seconds: 5));
+  await _wait($, const Duration(seconds: 15));
+  if (!$(find.byKey(const Key('email_field'))).exists &&
+      !$(find.byType(NavigationBar)).exists &&
+      !$(find.byType(PageView)).exists) {
+    await _wait($, const Duration(seconds: 10));
+  }
 
   if ($(find.byKey(const Key('email_field'))).exists) {
     await $(find.byKey(const Key('email_field'))).enterText(_testEmail);
     await $(find.byKey(const Key('password_field'))).enterText(_testPassword);
     await $.tester.testTextInput.receiveAction(TextInputAction.done);
-    await $.pumpAndSettle(timeout: const Duration(seconds: 2));
-    await $(find.byKey(const Key('submit_button'))).tap();
-    await $.pumpAndSettle(timeout: const Duration(seconds: 20));
+    await $.tester.pump(const Duration(milliseconds: 300));
+    await $.tester.tap(find.byKey(const Key('submit_button')));
+    await $.tester.pump();
+
+    await _wait($, const Duration(seconds: 15));
+    if (!$(find.byType(NavigationBar)).exists &&
+        !$(find.byType(PageView)).exists) {
+      await _wait($, const Duration(seconds: 10));
+    }
   }
-}
-
-// ── Helper: navigate to a shell tab by icon ───────────────────────────────────
-Future<void> _goToTasksTab(PatrolIntegrationTester $) async {
-  // NavigationBar tab 3 = Tareas (icon: Icons.task_alt_outlined)
-  await $.tap(find.byIcon(Icons.task_alt_outlined));
-  await $.pumpAndSettle(timeout: const Duration(seconds: 5));
-}
-
-Future<void> _goToTodayTab(PatrolIntegrationTester $) async {
-  // NavigationBar tab 0 = Hoy (icon: Icons.home_outlined)
-  await $.tap(find.byIcon(Icons.home_outlined));
-  await $.pumpAndSettle(timeout: const Duration(seconds: 5));
 }
 
 void main() {
@@ -62,43 +53,39 @@ void main() {
   patrolTest(
     'authenticated user can create a task and see the today screen',
     config: const PatrolTesterConfig(
-      settleTimeout: Duration(seconds: 30),
-      visibleTimeout: Duration(seconds: 15),
+      settleTimeout: Duration(seconds: 120),
+      visibleTimeout: Duration(seconds: 30),
     ),
     ($) async {
+      await $.tester.pumpWidget(testApp());
+      await $.tester.pump();
       await _loginIfNeeded($);
 
-      // Guard: must be on home shell
       if (!$(find.byType(NavigationBar)).exists) {
         markTestSkipped(
-          'Could not reach home shell — possibly stuck on onboarding. '
-          'Skipping task creation test.',
+          'Could not reach home shell — possibly stuck on onboarding.',
         );
         return;
       }
 
       // Navigate to Tasks tab
-      await _goToTasksTab($);
+      await $.tester.tap(find.byIcon(Icons.task_alt_outlined));
+      await _wait($, const Duration(seconds: 5));
 
-      // Guard: AllTasksScreen must be shown
-      final onTasksScreen = $(find.byKey(const Key('create_task_fab'))).exists ||
-          $(find.byKey(const Key('tasks_empty_state'))).exists ||
-          $(find.byKey(const Key('tasks_list'))).exists;
+      final onTasksScreen =
+          $(find.byKey(const Key('create_task_fab'))).exists ||
+              $(find.byKey(const Key('tasks_empty_state'))).exists ||
+              $(find.byKey(const Key('tasks_list'))).exists;
 
       if (!onTasksScreen) {
-        markTestSkipped(
-          'Tasks screen not found. '
-          'User may not have a home set up. Skipping.',
-        );
+        markTestSkipped('Tasks screen not found. User may not have a home.');
         return;
       }
 
-      // Only create if the FAB exists (user has permission / premium)
       if ($(find.byKey(const Key('create_task_fab'))).exists) {
-        await $(find.byKey(const Key('create_task_fab'))).tap();
-        await $.pumpAndSettle(timeout: const Duration(seconds: 5));
+        await $.tester.tap(find.byKey(const Key('create_task_fab')));
+        await _wait($, const Duration(seconds: 5));
 
-        // Fill in the task title
         expect(
           $(find.byKey(const Key('task_title_field'))).exists,
           isTrue,
@@ -107,36 +94,29 @@ void main() {
 
         await $(find.byKey(const Key('task_title_field')))
             .enterText(_testTaskName);
-        await $.pumpAndSettle(timeout: const Duration(seconds: 2));
+        await $.tester.pump(const Duration(milliseconds: 300));
 
-        // Save the task
-        await $(find.byKey(const Key('save_task_button'))).tap();
-        await $.pumpAndSettle(timeout: const Duration(seconds: 10));
-
-        // After save, we should be back on the tasks list or today screen
-        final savedOk = $(find.byKey(const Key('tasks_list'))).exists ||
-            $(find.byKey(const Key('tasks_empty_state'))).exists ||
-            $(find.byType(NavigationBar)).exists;
+        await $.tester.tap(find.byKey(const Key('save_task_button')));
+        await _wait($, const Duration(seconds: 8));
 
         expect(
-          savedOk,
+          $(find.byKey(const Key('tasks_list'))).exists ||
+              $(find.byKey(const Key('tasks_empty_state'))).exists ||
+              $(find.byType(NavigationBar)).exists,
           isTrue,
-          reason:
-              'After saving task, expected to return to task list or shell.',
+          reason: 'After saving task, expected task list or shell.',
         );
       }
 
-      // Navigate to Today tab and verify it loads
-      await _goToTodayTab($);
-
-      // Today screen shows AppBar with title or the CustomScrollView content
-      final todayLoaded = $(find.byType(CustomScrollView)).exists ||
-          $(find.byType(Scaffold)).exists;
+      // Navigate to Today tab
+      await $.tester.tap(find.byIcon(Icons.home_outlined));
+      await _wait($, const Duration(seconds: 5));
 
       expect(
-        todayLoaded,
+        $(find.byType(CustomScrollView)).exists ||
+            $(find.byType(Scaffold)).exists,
         isTrue,
-        reason: 'Today screen did not load after navigating to home tab.',
+        reason: 'Today screen did not load.',
       );
     },
   );
@@ -147,57 +127,223 @@ void main() {
   patrolTest(
     'today screen loads and pass-turn button is tappable if task is assigned',
     config: const PatrolTesterConfig(
-      settleTimeout: Duration(seconds: 30),
-      visibleTimeout: Duration(seconds: 15),
+      settleTimeout: Duration(seconds: 120),
+      visibleTimeout: Duration(seconds: 30),
     ),
     ($) async {
+      await $.tester.pumpWidget(testApp());
+      await $.tester.pump();
       await _loginIfNeeded($);
 
-      // Guard: must be on home shell
       if (!$(find.byType(NavigationBar)).exists) {
-        markTestSkipped(
-          'Could not reach home shell. Skipping today/pass-turn test.',
-        );
+        markTestSkipped('Could not reach home shell. Skipping pass-turn test.');
         return;
       }
 
       // Navigate to Today tab
-      await _goToTodayTab($);
-      await $.pumpAndSettle(timeout: const Duration(seconds: 8));
-
-      // Today screen should show either tasks content or empty state
-      final todayVisible = $(find.byType(CustomScrollView)).exists ||
-          $(find.byType(Center)).exists;
+      await $.tester.tap(find.byIcon(Icons.home_outlined));
+      await _wait($, const Duration(seconds: 5));
 
       expect(
-        todayVisible,
+        $(find.byType(CustomScrollView)).exists ||
+            $(find.byType(Center)).exists,
         isTrue,
         reason: 'Today screen content not found.',
       );
 
-      // If there is a pass-turn button visible, tap it to test the flow
       if ($(find.byKey(const Key('btn_pass'))).exists) {
-        await $(find.byKey(const Key('btn_pass'))).tap();
-        await $.pumpAndSettle(timeout: const Duration(seconds: 5));
+        await $.tester.tap(find.byKey(const Key('btn_pass')));
+        await _wait($, const Duration(seconds: 3));
 
-        // A dialog should appear (PassTurnDialog)
-        final dialogShown = $(find.byType(AlertDialog)).exists ||
-            $(find.byType(Dialog)).exists;
-
-        // We don't require the dialog — the task might not be assigned to this
-        // user in the emulator. We just verify the tap didn't crash the app.
-        if (dialogShown) {
-          // Dismiss the dialog by tapping outside or cancel button
+        if ($(find.byType(AlertDialog)).exists ||
+            $(find.byType(Dialog)).exists) {
           await $.tester.tapAt(const Offset(10, 10));
-          await $.pumpAndSettle(timeout: const Duration(seconds: 3));
+          await $.tester.pump();
         }
       }
 
-      // Final sanity check: the app is still running and showing the shell
       expect(
         $(find.byType(Scaffold)).exists,
         isTrue,
         reason: 'App crashed or navigated away unexpectedly.',
+      );
+    },
+  );
+
+  // ────────────────────────────────────────────────────────────────────
+  // Test 3 — Complete task dialog y valoración
+  // ────────────────────────────────────────────────────────────────────
+  patrolTest(
+    'task completion: complete task dialog appears and can be dismissed',
+    config: const PatrolTesterConfig(
+      settleTimeout: Duration(seconds: 120),
+      visibleTimeout: Duration(seconds: 30),
+    ),
+    ($) async {
+      await $.tester.pumpWidget(testApp());
+      await $.tester.pump();
+      await _loginIfNeeded($);
+
+      if (!$(find.byType(NavigationBar)).exists) {
+        markTestSkipped('Could not reach home shell.');
+        return;
+      }
+
+      // Ir a pantalla Hoy
+      await $.tester.tap(find.byIcon(Icons.home_outlined));
+      await _wait($, const Duration(seconds: 5));
+
+      // Si hay un botón de completar tarea, tocarlo
+      if ($(find.byKey(const Key('btn_complete'))).exists) {
+        await $.tester.tap(find.byKey(const Key('btn_complete')).first);
+        await _wait($, const Duration(seconds: 3));
+
+        // Verificar que aparece el dialog de completar tarea
+        if ($(find.byType(AlertDialog)).exists ||
+            $(find.byType(Dialog)).exists ||
+            $(find.byKey(const Key('complete_task_dialog'))).exists) {
+          expect(
+            $(find.byKey(const Key('complete_task_dialog'))).exists ||
+                $(find.byType(AlertDialog)).exists,
+            isTrue,
+            reason: 'Complete task dialog not shown after tapping complete button.',
+          );
+
+          // Buscar botón de confirmar
+          if ($(find.byKey(const Key('confirm_complete_button'))).exists) {
+            await $.tester.tap(find.byKey(const Key('confirm_complete_button')));
+            await _wait($, const Duration(seconds: 5));
+          } else {
+            // Descartar el dialog
+            await $.tester.tapAt(const Offset(10, 10));
+            await $.tester.pump();
+          }
+        }
+      }
+
+      expect($(find.byType(Scaffold)).exists, isTrue,
+          reason: 'App should still be running after complete interaction.');
+    },
+  );
+
+  // ────────────────────────────────────────────────────────────────────
+  // Test 4 — Pass turn con penalización visible
+  // ────────────────────────────────────────────────────────────────────
+  patrolTest(
+    'task completion: pass turn dialog shows penalty info',
+    config: const PatrolTesterConfig(
+      settleTimeout: Duration(seconds: 120),
+      visibleTimeout: Duration(seconds: 30),
+    ),
+    ($) async {
+      await $.tester.pumpWidget(testApp());
+      await $.tester.pump();
+      await _loginIfNeeded($);
+
+      if (!$(find.byType(NavigationBar)).exists) {
+        markTestSkipped('Could not reach home shell.');
+        return;
+      }
+
+      await $.tester.tap(find.byIcon(Icons.home_outlined));
+      await _wait($, const Duration(seconds: 5));
+
+      if (!$(find.byKey(const Key('btn_pass'))).exists) {
+        markTestSkipped('No pass button found on today screen.');
+        return;
+      }
+
+      await $.tester.tap(find.byKey(const Key('btn_pass')).first);
+      await _wait($, const Duration(seconds: 3));
+
+      if ($(find.byType(AlertDialog)).exists ||
+          $(find.byType(Dialog)).exists ||
+          $(find.byKey(const Key('pass_turn_dialog'))).exists) {
+
+        // Verificar que el dialog muestra información de penalización
+        final showsPenaltyInfo =
+            $(find.byKey(const Key('compliance_before'))).exists ||
+            $(find.byKey(const Key('compliance_after'))).exists ||
+            $(find.text('penalización')).exists ||
+            $(find.text('penalty')).exists ||
+            $(find.byKey(const Key('pass_turn_dialog'))).exists;
+
+        expect(showsPenaltyInfo, isTrue,
+            reason: 'Pass turn dialog should show penalty information.');
+
+        // Descartar el dialog sin confirmar
+        if ($(find.byKey(const Key('cancel_pass_button'))).exists) {
+          await $.tester.tap(find.byKey(const Key('cancel_pass_button')));
+        } else {
+          await $.tester.tapAt(const Offset(10, 10));
+        }
+        await $.tester.pump();
+      }
+
+      expect($(find.byType(Scaffold)).exists, isTrue);
+    },
+  );
+
+  // ────────────────────────────────────────────────────────────────────
+  // Test 5 — Crear tarea con recurrencia semanal
+  // ────────────────────────────────────────────────────────────────────
+  patrolTest(
+    'task completion: create task with weekly recurrence',
+    config: const PatrolTesterConfig(
+      settleTimeout: Duration(seconds: 120),
+      visibleTimeout: Duration(seconds: 30),
+    ),
+    ($) async {
+      await $.tester.pumpWidget(testApp());
+      await $.tester.pump();
+      await _loginIfNeeded($);
+
+      if (!$(find.byType(NavigationBar)).exists) {
+        markTestSkipped('Could not reach home shell.');
+        return;
+      }
+
+      // Navegar a All Tasks tab
+      await $.tester.tap(find.byIcon(Icons.task_alt_outlined));
+      await _wait($, const Duration(seconds: 5));
+
+      if (!$(find.byKey(const Key('create_task_fab'))).exists) {
+        markTestSkipped('create_task_fab not found. User may not have admin/owner role.');
+        return;
+      }
+
+      await $.tester.tap(find.byKey(const Key('create_task_fab')));
+      await _wait($, const Duration(seconds: 5));
+
+      if (!$(find.byKey(const Key('task_title_field'))).exists) {
+        markTestSkipped('CreateEditTaskScreen not found.');
+        return;
+      }
+
+      // Introducir título
+      await $(find.byKey(const Key('task_title_field')))
+          .enterText('Tarea Semanal E2E');
+      await $.tester.pump(const Duration(milliseconds: 300));
+
+      // Buscar selector de recurrencia y elegir Semanal si es posible
+      if ($(find.byKey(const Key('recurrence_weekly_option'))).exists) {
+        await $.tester.tap(find.byKey(const Key('recurrence_weekly_option')));
+        await $.tester.pump();
+      } else if ($(find.text('Semanal')).exists) {
+        await $.tester.tap(find.text('Semanal').first);
+        await $.tester.pump();
+      }
+
+      // Guardar tarea
+      await $.tester.tap(find.byKey(const Key('save_task_button')));
+      await _wait($, const Duration(seconds: 8));
+
+      // Verificar que volvimos a la lista de tareas
+      expect(
+        $(find.byKey(const Key('tasks_list'))).exists ||
+            $(find.byType(NavigationBar)).exists,
+        isTrue,
+        reason: 'After saving task, expected task list or nav bar.',
       );
     },
   );

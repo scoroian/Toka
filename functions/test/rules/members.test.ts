@@ -145,7 +145,7 @@ describe('members — update propio (campos prohibidos)', () => {
     const ctx = testEnv.authenticatedContext(MEMBER_UID);
     await assertFails(
       updateDoc(doc(ctx.firestore(), `homes/${HOME1}/members/${MEMBER_UID}`), {
-        status: 'active',
+        status: 'frozen',
       })
     );
   });

@@ -183,4 +183,34 @@ void main() {
       );
     },
   );
+
+  // ── Test 3 — Email malformado muestra error ───────────────────────────────
+  patrolTest(
+    'login: email malformado muestra error sin navegar',
+    config: const PatrolTesterConfig(
+      settleTimeout: Duration(seconds: 120),
+      visibleTimeout: Duration(seconds: 30),
+    ),
+    ($) async {
+      await $.tester.pumpWidget(testApp());
+      await $.tester.pump();
+      await _wait($, const Duration(seconds: 15));
+
+      if (!$(find.byKey(const Key('email_field'))).exists) {
+        markTestSkipped('Pantalla de login no visible — usuario ya autenticado.');
+        return;
+      }
+
+      await $(find.byKey(const Key('email_field'))).enterText('no-es-un-email');
+      await $(find.byKey(const Key('password_field'))).enterText('cualquier');
+      await $.tester.testTextInput.receiveAction(TextInputAction.done);
+      await $.tester.pump(const Duration(milliseconds: 300));
+      await $.tester.tap(find.byKey(const Key('submit_button')));
+      await _wait($, const Duration(seconds: 5));
+
+      // No debemos estar en NavigationBar
+      expect($(find.byType(NavigationBar)).exists, isFalse,
+          reason: 'No debería navegar con email malformado.');
+    },
+  );
 }

@@ -44,6 +44,8 @@ class _RecurrenceFormState extends ConsumerState<RecurrenceForm> {
     super.initState();
     final existing = ref.read(taskFormNotifierProvider).recurrenceRule;
     if (existing != null) _loadFromRule(existing);
+    // Always commit the current (possibly default) rule after first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) => _notifyChange());
   }
 
   void _loadFromRule(RecurrenceRule rule) {

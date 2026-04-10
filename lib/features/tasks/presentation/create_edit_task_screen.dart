@@ -69,6 +69,7 @@ class _CreateEditTaskScreenState extends ConsumerState<CreateEditTaskScreen> {
     final formState = vm.formState;
     final titleError = formState.fieldErrors['title'];
     final assigneesError = formState.fieldErrors['assignees'];
+    final recurrenceError = formState.fieldErrors['recurrence'];
 
     return Scaffold(
       appBar: AppBar(
@@ -126,6 +127,16 @@ class _CreateEditTaskScreenState extends ConsumerState<CreateEditTaskScreen> {
           ),
           const SizedBox(height: 16),
           const RecurrenceForm(key: Key('recurrence_form')),
+          if (recurrenceError != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                l10n.tasks_validation_recurrence_required,
+                style: TextStyle(
+                    color: Theme.of(context).colorScheme.error, fontSize: 12),
+                key: const Key('recurrence_error'),
+              ),
+            ),
           const SizedBox(height: 16),
           AssignmentForm(
             availableMembers: memberUids,

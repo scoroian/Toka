@@ -11,6 +11,7 @@ import 'package:toka/features/homes/application/homes_provider.dart';
 import 'package:toka/features/homes/domain/home.dart';
 import 'package:toka/features/homes/domain/home_limits.dart';
 import 'package:toka/features/homes/domain/home_membership.dart';
+import 'package:toka/features/members/application/members_provider.dart';
 import 'package:toka/features/tasks/application/tasks_provider.dart';
 import 'package:toka/features/tasks/domain/recurrence_rule.dart';
 import 'package:toka/features/tasks/domain/task.dart';
@@ -59,6 +60,9 @@ Widget _wrap(_MockTasksRepository repo) {
       authProvider.overrideWith(_FakeAuth.new),
       currentHomeProvider.overrideWith(_FakeCurrentHome.new),
       tasksRepositoryProvider.overrideWithValue(repo),
+      homeMembersProvider('h1').overrideWith(
+        (ref) => Stream.value([]),
+      ),
       userMembershipsProvider('uid1').overrideWith((ref) => Stream.value([
             HomeMembership(
               homeId: 'h1',

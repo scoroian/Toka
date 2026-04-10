@@ -41,12 +41,13 @@ class _CreateEditTaskScreenState extends ConsumerState<CreateEditTaskScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final vm = ref.watch(createEditTaskViewModelProvider(widget.editTaskId));
-    final homeId = ref.watch(currentHomeProvider).valueOrNull?.id ?? '';
-    final memberUids = ref
-        .watch(homeMembersProvider(homeId))
-        .valueOrNull
-        ?.map((m) => m.uid)
-        .toList() ?? [];
+    final homeId = ref.watch(currentHomeProvider).valueOrNull?.id;
+    final memberUids = homeId == null
+        ? <String>[]
+        : ref.watch(homeMembersProvider(homeId)).valueOrNull
+                ?.map((m) => m.uid)
+                .toList() ??
+            [];
 
     ref.listen<CreateEditTaskViewModel>(
       createEditTaskViewModelProvider(widget.editTaskId),

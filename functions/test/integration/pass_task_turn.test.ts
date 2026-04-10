@@ -20,7 +20,8 @@ beforeAll(async () => {
   await createUser(MEMBER_B);
   await createUser(FROZEN);
   await createHome(HOME, OWNER);
-  await addMemberToHome(HOME, MEMBER_A, 'member', 'active');
+  // MEMBER_A con completions previas para que complianceAfter < complianceBefore sea verificable
+  await addMemberToHome(HOME, MEMBER_A, 'member', 'active', { completedCount: 5, complianceRate: 1.0 });
   await addMemberToHome(HOME, MEMBER_B, 'member', 'active');
   await addMemberToHome(HOME, FROZEN, 'member', 'frozen');
 

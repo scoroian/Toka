@@ -102,9 +102,10 @@ export const applyTaskCompletion = onCall(async (request) => {
       updatedAt: FieldValue.serverTimestamp(),
     });
 
+    // Usamos el snapshot ya leído de membersSnap para evitar read-after-write en la transacción
     const memberRef = db.collection("homes").doc(homeId).collection("members").doc(uid);
-    const memberSnap = await tx.get(memberRef);
-    const member = memberSnap.data() ?? {};
+    const memberDocInSnap = membersSnap.docs.find((d) => d.id === uid);
+    const member = memberDocInSnap?.data() ?? {};
     const newCompleted = ((member["completedCount"] as number) ?? 0) + 1;
     const newPassed: number = (member["passedCount"] as number) ?? 0;
     const newCompliance = newCompleted / (newCompleted + newPassed);

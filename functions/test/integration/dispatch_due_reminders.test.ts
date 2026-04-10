@@ -6,9 +6,10 @@ import {
 } from './helpers/setup';
 import { dispatchDueReminders } from '../../src/notifications/dispatch_due_reminders';
 
-// Mock de admin.messaging() antes de que dispatchDueReminders lo use
+// dispatch_due_reminders.ts captura `const messaging = admin.messaging()` a nivel de módulo.
+// Espiamos el método send del singleton (misma instancia que usa el handler).
 const mockSend = jest.fn().mockResolvedValue('mock-message-id');
-jest.spyOn(admin, 'messaging').mockReturnValue({ send: mockSend } as any);
+jest.spyOn(admin.messaging(), 'send').mockImplementation(mockSend);
 
 const wrapped = (data: any): Promise<any> => (dispatchDueReminders as any).run(data);
 

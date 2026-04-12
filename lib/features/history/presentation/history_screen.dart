@@ -8,7 +8,6 @@ import '../../auth/application/auth_provider.dart';
 import '../../homes/application/current_home_provider.dart';
 import '../../members/application/members_provider.dart';
 import '../../members/domain/member.dart';
-import '../application/history_provider.dart';
 import '../application/history_view_model.dart';
 import '../domain/task_event.dart';
 import 'widgets/history_empty_state.dart';
@@ -54,6 +53,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final vm = ref.watch(historyViewModelProvider);
+    final isPremium = vm.isPremium;
 
     final homeId = ref.watch(currentHomeProvider).valueOrNull?.id;
     final currentUid =
@@ -80,7 +80,6 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                 if (events.isEmpty) {
                   return const HistoryEmptyState();
                 }
-                final isPremium = vm.isPremium;
                 final showBanner = !isPremium;
                 final showLoadMore = vm.hasMore;
                 final extraItems =

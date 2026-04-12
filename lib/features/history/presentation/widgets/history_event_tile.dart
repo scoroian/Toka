@@ -53,7 +53,7 @@ class HistoryEventTile extends StatelessWidget {
         event: e,
         actorName: actorName,
         actorPhotoUrl: actorPhotoUrl,
-        toName: toName ?? e.toUid,
+        toName: toName ?? '?',
         timestamp: _formatRelativeTime(l10n, e.createdAt),
         l10n: l10n,
       ),

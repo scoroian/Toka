@@ -23,7 +23,7 @@ final membersRepositoryProvider = Provider<MembersRepository>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef MembersRepositoryRef = ProviderRef<MembersRepository>;
-String _$homeMembersHash() => r'7b703ba8e8a49d17b58c06034e9154f42c60dc02';
+String _$homeMembersHash() => r'ff2438b025773d530164d9b81f390757df6fbe57';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -89,7 +89,7 @@ class HomeMembersFamily extends Family<AsyncValue<List<Member>>> {
 }
 
 /// See also [homeMembers].
-class HomeMembersProvider extends AutoDisposeStreamProvider<List<Member>> {
+class HomeMembersProvider extends StreamProvider<List<Member>> {
   /// See also [homeMembers].
   HomeMembersProvider(
     String homeId,
@@ -141,7 +141,7 @@ class HomeMembersProvider extends AutoDisposeStreamProvider<List<Member>> {
   }
 
   @override
-  AutoDisposeStreamProviderElement<List<Member>> createElement() {
+  StreamProviderElement<List<Member>> createElement() {
     return _HomeMembersProviderElement(this);
   }
 
@@ -161,13 +161,13 @@ class HomeMembersProvider extends AutoDisposeStreamProvider<List<Member>> {
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-mixin HomeMembersRef on AutoDisposeStreamProviderRef<List<Member>> {
+mixin HomeMembersRef on StreamProviderRef<List<Member>> {
   /// The parameter `homeId` of this provider.
   String get homeId;
 }
 
-class _HomeMembersProviderElement
-    extends AutoDisposeStreamProviderElement<List<Member>> with HomeMembersRef {
+class _HomeMembersProviderElement extends StreamProviderElement<List<Member>>
+    with HomeMembersRef {
   _HomeMembersProviderElement(super.provider);
 
   @override

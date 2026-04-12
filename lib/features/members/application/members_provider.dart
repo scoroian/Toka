@@ -16,7 +16,7 @@ MembersRepository membersRepository(MembersRepositoryRef ref) {
   );
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 Stream<List<Member>> homeMembers(HomeMembersRef ref, String homeId) {
   return ref.watch(membersRepositoryProvider).watchHomeMembers(homeId);
 }

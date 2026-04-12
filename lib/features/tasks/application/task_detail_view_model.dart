@@ -17,13 +17,11 @@ part 'task_detail_view_model.g.dart';
 class TaskDetailViewData {
   const TaskDetailViewData({
     required this.task,
-    required this.canEdit,
     required this.canManage,
     required this.currentAssigneeName,
     required this.upcomingOccurrences,
   });
   final Task task;
-  final bool canEdit;
   final bool canManage;
   final String? currentAssigneeName;
   final List<DateTime> upcomingOccurrences;
@@ -110,7 +108,6 @@ TaskDetailViewModel taskDetailViewModel(
 
     return TaskDetailViewData(
       task: task,
-      canEdit: canManage,
       canManage: canManage,
       currentAssigneeName: currentAssigneeName,
       upcomingOccurrences: upcoming.take(3).toList(),

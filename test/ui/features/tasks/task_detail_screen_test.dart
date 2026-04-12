@@ -104,7 +104,6 @@ void main() {
       (tester) async {
     final vm = _DataViewModel(TaskDetailViewData(
       task: _makeTask(),
-      canEdit: false,
       canManage: false,
       currentAssigneeName: null,
       upcomingOccurrences: [],
@@ -119,7 +118,6 @@ void main() {
       (tester) async {
     final vm = _DataViewModel(TaskDetailViewData(
       task: _makeTask(),
-      canEdit: false,
       canManage: false,
       currentAssigneeName: null,
       upcomingOccurrences: [],
@@ -130,11 +128,10 @@ void main() {
     expect(find.text('🧹'), findsOneWidget);
   });
 
-  testWidgets('muestra el botón de edición cuando canEdit es true',
+  testWidgets('muestra el botón de edición cuando canManage es true',
       (tester) async {
     final vm = _DataViewModel(TaskDetailViewData(
       task: _makeTask(),
-      canEdit: true,
       canManage: true,
       currentAssigneeName: null,
       upcomingOccurrences: [],
@@ -145,11 +142,10 @@ void main() {
     expect(find.byKey(const Key('edit_task_button')), findsOneWidget);
   });
 
-  testWidgets('NO muestra el botón de edición cuando canEdit es false',
+  testWidgets('NO muestra el botón de edición cuando canManage es false',
       (tester) async {
     final vm = _DataViewModel(TaskDetailViewData(
       task: _makeTask(),
-      canEdit: false,
       canManage: false,
       currentAssigneeName: null,
       upcomingOccurrences: [],
@@ -173,7 +169,6 @@ void main() {
       (tester) async {
     final vm = _DataViewModel(TaskDetailViewData(
       task: _makeTask(),
-      canEdit: false,
       canManage: false,
       currentAssigneeName: 'Ana García',
       upcomingOccurrences: [],
@@ -189,7 +184,6 @@ void main() {
       (tester) async {
     final vm = _DataViewModel(TaskDetailViewData(
       task: _makeTask(),
-      canEdit: false,
       canManage: false,
       currentAssigneeName: null,
       upcomingOccurrences: [],

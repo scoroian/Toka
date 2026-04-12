@@ -1,3 +1,4 @@
+// test/ui/features/tasks/task_detail_screen_test.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,12 +11,16 @@ import 'package:toka/features/tasks/presentation/task_detail_screen.dart';
 import 'package:toka/l10n/app_localizations.dart';
 
 // ---------------------------------------------------------------------------
-// Fake TaskDetailViewModel implementations
+// Fakes
 // ---------------------------------------------------------------------------
 
 class _LoadingViewModel implements TaskDetailViewModel {
   @override
   AsyncValue<TaskDetailViewData?> get viewData => const AsyncLoading();
+  @override
+  Future<void> toggleFreeze() async {}
+  @override
+  Future<void> deleteTask() async {}
 }
 
 class _DataViewModel implements TaskDetailViewModel {
@@ -24,6 +29,10 @@ class _DataViewModel implements TaskDetailViewModel {
 
   @override
   AsyncValue<TaskDetailViewData?> get viewData => AsyncData(_data);
+  @override
+  Future<void> toggleFreeze() async {}
+  @override
+  Future<void> deleteTask() async {}
 }
 
 // ---------------------------------------------------------------------------
@@ -86,7 +95,6 @@ void main() {
   testWidgets('muestra CircularProgressIndicator cuando viewData está cargando',
       (tester) async {
     await tester.pumpWidget(_wrap(_LoadingViewModel()));
-    // No pumpAndSettle — loading state should be visible immediately
     await tester.pump();
 
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
@@ -97,6 +105,8 @@ void main() {
     final vm = _DataViewModel(TaskDetailViewData(
       task: _makeTask(),
       canEdit: false,
+      canManage: false,
+      currentAssigneeName: null,
       upcomingOccurrences: [],
     ));
     await tester.pumpWidget(_wrap(vm));
@@ -110,6 +120,8 @@ void main() {
     final vm = _DataViewModel(TaskDetailViewData(
       task: _makeTask(),
       canEdit: false,
+      canManage: false,
+      currentAssigneeName: null,
       upcomingOccurrences: [],
     ));
     await tester.pumpWidget(_wrap(vm));
@@ -123,6 +135,8 @@ void main() {
     final vm = _DataViewModel(TaskDetailViewData(
       task: _makeTask(),
       canEdit: true,
+      canManage: true,
+      currentAssigneeName: null,
       upcomingOccurrences: [],
     ));
     await tester.pumpWidget(_wrap(vm));
@@ -136,6 +150,8 @@ void main() {
     final vm = _DataViewModel(TaskDetailViewData(
       task: _makeTask(),
       canEdit: false,
+      canManage: false,
+      currentAssigneeName: null,
       upcomingOccurrences: [],
     ));
     await tester.pumpWidget(_wrap(vm));
@@ -149,7 +165,39 @@ void main() {
     await tester.pumpWidget(_wrap(vm));
     await tester.pumpAndSettle();
 
-    // Should show some error/empty Text widgets without crashing
     expect(find.byType(Text), findsWidgets);
+  });
+
+  testWidgets(
+      'muestra el nombre del asignado cuando currentAssigneeName no es null',
+      (tester) async {
+    final vm = _DataViewModel(TaskDetailViewData(
+      task: _makeTask(),
+      canEdit: false,
+      canManage: false,
+      currentAssigneeName: 'Ana García',
+      upcomingOccurrences: [],
+    ));
+    await tester.pumpWidget(_wrap(vm));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Ana García'), findsOneWidget);
+  });
+
+  testWidgets(
+      'muestra guión cuando currentAssigneeName es null — nunca el UID',
+      (tester) async {
+    final vm = _DataViewModel(TaskDetailViewData(
+      task: _makeTask(),
+      canEdit: false,
+      canManage: false,
+      currentAssigneeName: null,
+      upcomingOccurrences: [],
+    ));
+    await tester.pumpWidget(_wrap(vm));
+    await tester.pumpAndSettle();
+
+    expect(find.text('—'), findsOneWidget);
+    expect(find.text('uid1'), findsNothing);
   });
 }

@@ -1,11 +1,15 @@
 // lib/features/tasks/presentation/create_edit_task_screen.dart
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../l10n/app_localizations.dart';
 import '../application/create_edit_task_view_model.dart';
+import '../application/task_form_provider.dart';
 import '../../homes/application/current_home_provider.dart';
 import '../../members/application/members_provider.dart';
+import '../../members/domain/member.dart';
 import 'widgets/assignment_form.dart';
 import 'widgets/recurrence_form.dart';
 import 'widgets/task_visual_picker.dart';
@@ -22,6 +26,7 @@ class CreateEditTaskScreen extends ConsumerStatefulWidget {
 class _CreateEditTaskScreenState extends ConsumerState<CreateEditTaskScreen> {
   late TextEditingController _titleController;
   late TextEditingController _descController;
+  bool _repairAttempted = false;
 
   @override
   void initState() {
@@ -37,36 +42,84 @@ class _CreateEditTaskScreenState extends ConsumerState<CreateEditTaskScreen> {
     super.dispose();
   }
 
+  /// Llama a la Cloud Function repairMemberDocument para crear el documento
+  /// homes/{homeId}/members/{uid} si no existe (usuarios creados antes del fix).
+  Future<void> _tryRepairMemberDocument(String homeId) async {
+    if (_repairAttempted) return;
+    _repairAttempted = true;
+    try {
+      await FirebaseFunctions.instance
+          .httpsCallable('repairMemberDocument')
+          .call({'homeId': homeId});
+      // Invalidar el provider para que re-lea la subcolección
+      if (mounted) {
+        ref.invalidate(homeMembersProvider(homeId));
+      }
+    } catch (_) {
+      // Si falla la reparación no bloqueamos al usuario
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final vm = ref.watch(createEditTaskViewModelProvider(widget.editTaskId));
-    final homeId = ref.watch(currentHomeProvider).valueOrNull?.id;
-    final memberUids = homeId == null
-        ? <String>[]
-        : ref.watch(homeMembersProvider(homeId)).valueOrNull
-                ?.map((m) => m.uid)
-                .toList() ??
-            [];
 
-    ref.listen<CreateEditTaskViewModel>(
-      createEditTaskViewModelProvider(widget.editTaskId),
+    // Observamos el taskFormNotifierProvider directamente para que la pantalla
+    // se reconstruya cada vez que cambia el estado del formulario (slider,
+    // emoji picker, etc.). El wrapper createEditTaskViewModelProvider devuelve
+    // siempre la misma instancia del notifier, por lo que Riverpod no detecta
+    // cambio sin esta suscripción directa.
+    final formState = ref.watch(taskFormNotifierProvider);
+
+    final currentHomeAsync = ref.watch(currentHomeProvider);
+    final homeId = currentHomeAsync.valueOrNull?.id;
+
+    // Si currentHomeProvider todavía está cargando, propagamos ese estado
+    // de carga para que no aparezca una lista vacía de miembros mientras
+    // el provider resuelve el hogar actual.
+    final membersAsync = currentHomeAsync.isLoading
+        ? const AsyncValue<List<Member>>.loading()
+        : homeId == null
+            ? const AsyncValue<List<Member>>.data([])
+            : ref.watch(homeMembersProvider(homeId));
+    final members = membersAsync.valueOrNull ?? [];
+
+    // Auto-reparación: si el stream de miembros termina de cargar y devuelve
+    // lista vacía, significa que el documento homes/{homeId}/members/{uid}
+    // no fue creado por la Cloud Function (bug histórico). Llamamos a la
+    // función repairMemberDocument para crearlo.
+    if (homeId != null) {
+      ref.listen<AsyncValue<List<Member>>>(
+        homeMembersProvider(homeId),
+        (_, next) {
+          if (!next.isLoading && next.valueOrNull?.isEmpty == true) {
+            _tryRepairMemberDocument(homeId);
+          }
+        },
+      );
+    }
+
+    ref.listen(
+      createEditTaskViewModelNotifierProvider(widget.editTaskId),
       (prev, next) {
-        if (next.loadedTitle != null &&
-            next.loadedTitle != prev?.loadedTitle) {
-          _titleController.text = next.loadedTitle!;
+        final notifier = ref.read(
+          createEditTaskViewModelNotifierProvider(widget.editTaskId).notifier,
+        );
+        if (notifier.loadedTitle != null &&
+            _titleController.text != notifier.loadedTitle) {
+          _titleController.text = notifier.loadedTitle!;
         }
-        if (next.loadedDescription != null &&
-            next.loadedDescription != prev?.loadedDescription) {
-          _descController.text = next.loadedDescription!;
+        if (notifier.loadedDescription != null &&
+            _descController.text != notifier.loadedDescription) {
+          _descController.text = notifier.loadedDescription!;
         }
-        if (next.savedSuccessfully) {
-          Navigator.of(context).pop();
+        if (notifier.savedSuccessfully && context.canPop()) {
+          context.pop();
         }
       },
     );
 
-    final formState = vm.formState;
     final titleError = formState.fieldErrors['title'];
     final assigneesError = formState.fieldErrors['assignees'];
     final recurrenceError = formState.fieldErrors['recurrence'];
@@ -138,11 +191,19 @@ class _CreateEditTaskScreenState extends ConsumerState<CreateEditTaskScreen> {
               ),
             ),
           const SizedBox(height: 16),
-          AssignmentForm(
-            availableMembers: memberUids,
-            selectedOrder: formState.assignmentOrder,
-            onChanged: vm.setAssignmentOrder,
-          ),
+          if (membersAsync.isLoading)
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 16),
+                child: CircularProgressIndicator(),
+              ),
+            )
+          else
+            AssignmentForm(
+              availableMembers: members,
+              selectedOrder: formState.assignmentOrder,
+              onChanged: vm.setAssignmentOrder,
+            ),
           if (assigneesError != null)
             Padding(
               padding: const EdgeInsets.only(top: 4),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:toka/features/auth/application/auth_provider.dart';
 import 'package:toka/features/auth/application/auth_state.dart';
@@ -79,6 +80,16 @@ final _testMember = Member(
 );
 
 Widget _wrap(_MockTasksRepository repo) {
+  final router = GoRouter(
+    initialLocation: '/tasks/new',
+    routes: [
+      GoRoute(path: '/', builder: (_, __) => const Scaffold()),
+      GoRoute(
+        path: '/tasks/new',
+        builder: (_, __) => const CreateEditTaskScreen(),
+      ),
+    ],
+  );
   return ProviderScope(
     overrides: [
       authProvider.overrideWith(_FakeAuth.new),
@@ -98,15 +109,15 @@ Widget _wrap(_MockTasksRepository repo) {
             ),
           ])),
     ],
-    child: const MaterialApp(
-      localizationsDelegates: [
+    child: MaterialApp.router(
+      routerConfig: router,
+      localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: [Locale('es')],
-      home: CreateEditTaskScreen(),
+      supportedLocales: const [Locale('es')],
     ),
   );
 }

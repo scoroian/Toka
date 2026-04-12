@@ -19,6 +19,7 @@ import 'package:toka/features/tasks/domain/recurrence_rule.dart';
 import 'package:toka/features/tasks/domain/task.dart';
 import 'package:toka/features/tasks/domain/tasks_repository.dart';
 import 'package:toka/features/tasks/presentation/create_edit_task_screen.dart';
+import 'package:toka/features/tasks/presentation/widgets/assignment_form.dart';
 import 'package:toka/l10n/app_localizations.dart';
 
 class _MockTasksRepository extends Mock implements TasksRepository {}
@@ -295,5 +296,50 @@ void main() {
     await tester.pumpAndSettle();
 
     verify(() => mockRepo.createTask('h1', any(), 'uid1')).called(1);
+  });
+
+  group('AssignmentForm — avatar e iniciales', () {
+    testWidgets('muestra CircleAvatar con inicial del nickname', (tester) async {
+      final member = Member(
+        uid: 'uid1',
+        homeId: 'h1',
+        nickname: 'Ana García',
+        photoUrl: null,
+        bio: null,
+        phone: null,
+        phoneVisibility: 'hidden',
+        role: MemberRole.owner,
+        status: MemberStatus.active,
+        joinedAt: DateTime(2024),
+        tasksCompleted: 0,
+        passedCount: 0,
+        complianceRate: 1.0,
+        currentStreak: 0,
+        averageScore: 0.0,
+      );
+
+      await tester.pumpWidget(MaterialApp(
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: const [Locale('es')],
+        home: Scaffold(
+          body: AssignmentForm(
+            availableMembers: [member],
+            selectedOrder: const [],
+            onChanged: (_) {},
+          ),
+        ),
+      ));
+      await tester.pump();
+
+      expect(find.byType(CircleAvatar), findsOneWidget);
+      expect(find.text('A'), findsOneWidget);
+      expect(find.text('Ana García'), findsOneWidget);
+      expect(find.text('uid1'), findsNothing);
+    });
   });
 }

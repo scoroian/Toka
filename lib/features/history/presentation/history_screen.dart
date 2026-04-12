@@ -4,6 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/loading_widget.dart';
+import '../../auth/application/auth_provider.dart';
+import '../../homes/application/current_home_provider.dart';
+import '../../members/application/members_provider.dart';
+import '../../members/domain/member.dart';
 import '../application/history_provider.dart';
 import '../application/history_view_model.dart';
 import '../domain/task_event.dart';
@@ -51,6 +55,15 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     final l10n = AppLocalizations.of(context);
     final vm = ref.watch(historyViewModelProvider);
 
+    final homeId = ref.watch(currentHomeProvider).valueOrNull?.id;
+    final currentUid =
+        ref.watch(authProvider).whenOrNull(authenticated: (u) => u.uid);
+
+    final members = homeId != null
+        ? ref.watch(homeMembersProvider(homeId)).valueOrNull ?? <Member>[]
+        : <Member>[];
+    final membersByUid = {for (final m in members) m.uid: m};
+
     return Scaffold(
       appBar: AppBar(title: Text(l10n.history_title)),
       body: Column(
@@ -79,7 +92,13 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                   itemCount: events.length + extraItems,
                   itemBuilder: (context, index) {
                     if (index < events.length) {
-                      return _buildEventTile(events[index]);
+                      return _buildEventTile(
+                        events[index],
+                        membersByUid,
+                        currentUid,
+                        homeId,
+                        isPremium,
+                      );
                     }
                     final extra = index - events.length;
                     if (showBanner && extra == 0) {
@@ -106,14 +125,33 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     );
   }
 
-  Widget _buildEventTile(TaskEvent event) {
+  Widget _buildEventTile(
+    TaskEvent event,
+    Map<String, Member> membersByUid,
+    String? currentUid,
+    String? homeId,
+    bool isPremium,
+  ) {
+    final actor = membersByUid[event.actorUid];
+    final actorName =
+        (actor?.nickname.isNotEmpty == true) ? actor!.nickname : '?';
+    final actorPhotoUrl = actor?.photoUrl;
+
     String? toName;
-    if (event is PassedEvent) toName = event.toUid;
+    if (event is PassedEvent) {
+      final toMember = membersByUid[event.toUid];
+      toName =
+          (toMember?.nickname.isNotEmpty == true) ? toMember!.nickname : '?';
+    }
+
     return HistoryEventTile(
       event: event,
-      actorName: event.actorUid,
-      actorPhotoUrl: null,
+      actorName: actorName,
+      actorPhotoUrl: actorPhotoUrl,
       toName: toName,
+      homeId: homeId,
+      currentUid: currentUid,
+      isPremium: isPremium,
     );
   }
 }

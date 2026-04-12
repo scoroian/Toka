@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -134,7 +135,7 @@ class _AssigneeAvatar extends StatelessWidget {
     if (photoUrl != null) {
       return CircleAvatar(
         radius: 16,
-        backgroundImage: NetworkImage(photoUrl!),
+        backgroundImage: CachedNetworkImageProvider(photoUrl!),
       );
     }
     return CircleAvatar(

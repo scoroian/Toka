@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -45,7 +46,7 @@ class MemberProfileScreen extends ConsumerWidget {
                     CircleAvatar(
                       radius: 48,
                       backgroundImage: member.photoUrl != null
-                          ? NetworkImage(member.photoUrl!)
+                          ? CachedNetworkImageProvider(member.photoUrl!)
                           : null,
                       child: member.photoUrl == null
                           ? Text(

@@ -1,4 +1,5 @@
 // lib/features/history/presentation/widgets/history_event_tile.dart
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -71,7 +72,7 @@ class _Avatar extends StatelessWidget {
     if (photoUrl != null && photoUrl!.isNotEmpty) {
       return CircleAvatar(
         radius: 20,
-        backgroundImage: NetworkImage(photoUrl!),
+        backgroundImage: CachedNetworkImageProvider(photoUrl!),
       );
     }
     return CircleAvatar(

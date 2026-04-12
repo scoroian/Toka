@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../l10n/app_localizations.dart';
@@ -27,7 +28,7 @@ class MemberCard extends StatelessWidget {
       onTap: onTap,
       leading: CircleAvatar(
         backgroundImage: member.photoUrl != null
-            ? NetworkImage(member.photoUrl!)
+            ? CachedNetworkImageProvider(member.photoUrl!)
             : null,
         child: member.photoUrl == null
             ? Text(member.nickname.isNotEmpty

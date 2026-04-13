@@ -7,12 +7,19 @@ import '../../homes/application/current_home_provider.dart';
 import '../../homes/application/homes_provider.dart';
 import '../../homes/domain/home_membership.dart';
 import '../../members/application/members_provider.dart';
+import '../../members/domain/member.dart';
 import '../domain/task.dart';
 import '../domain/task_status.dart';
 import 'recurrence_provider.dart';
 import 'tasks_provider.dart';
 
 part 'task_detail_view_model.g.dart';
+
+class UpcomingOccurrence {
+  const UpcomingOccurrence({required this.date, this.assigneeName});
+  final DateTime date;
+  final String? assigneeName;
+}
 
 class TaskDetailViewData {
   const TaskDetailViewData({
@@ -24,7 +31,7 @@ class TaskDetailViewData {
   final Task task;
   final bool canManage;
   final String? currentAssigneeName;
-  final List<DateTime> upcomingOccurrences;
+  final List<UpcomingOccurrence> upcomingOccurrences;
 
   bool get isFrozen => task.status == TaskStatus.frozen;
 }
@@ -65,6 +72,29 @@ class _TaskDetailViewModelImpl implements TaskDetailViewModel {
   }
 }
 
+// Calcula las próximas N ocurrencias con el asignado según rotación round-robin.
+// Empieza por el siguiente después del currentAssigneeUid.
+List<UpcomingOccurrence> _computeUpcomingOccurrences(
+    Task task, List<DateTime> dates, List<Member> members) {
+  final order = task.assignmentOrder;
+  if (order.isEmpty) {
+    return dates.map((d) => UpcomingOccurrence(date: d)).toList();
+  }
+  final currentUid = task.currentAssigneeUid;
+  final currentIdx = currentUid != null ? order.indexOf(currentUid) : -1;
+  return dates.asMap().entries.map((entry) {
+    final i = entry.key;
+    final nextIdx = currentIdx >= 0
+        ? (currentIdx + 1 + i) % order.length
+        : i % order.length;
+    final uid = order[nextIdx];
+    final member = members.where((m) => m.uid == uid).cast<Member?>().firstOrNull;
+    final name =
+        (member != null && member.nickname.isNotEmpty) ? member.nickname : null;
+    return UpcomingOccurrence(date: entry.value, assigneeName: name);
+  }).toList();
+}
+
 @riverpod
 TaskDetailViewModel taskDetailViewModel(
     TaskDetailViewModelRef ref, String taskId) {
@@ -103,14 +133,16 @@ TaskDetailViewModel taskDetailViewModel(
             ? assigneeMember.nickname
             : null;
 
-    final upcoming =
+    final upcomingDates =
         ref.watch(upcomingOccurrencesProvider(task.recurrenceRule));
+    final upcomingOccurrences = _computeUpcomingOccurrences(
+        task, upcomingDates.take(3).toList(), homeMembers);
 
     return TaskDetailViewData(
       task: task,
       canManage: canManage,
       currentAssigneeName: currentAssigneeName,
-      upcomingOccurrences: upcoming.take(3).toList(),
+      upcomingOccurrences: upcomingOccurrences,
     );
   });
 

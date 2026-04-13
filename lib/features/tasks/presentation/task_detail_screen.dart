@@ -13,6 +13,34 @@ class TaskDetailScreen extends ConsumerWidget {
   const TaskDetailScreen({super.key, required this.taskId});
   final String taskId;
 
+  Future<void> _confirmDelete(
+    BuildContext context,
+    AppLocalizations l10n,
+    TaskDetailViewModel vm,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.tasks_delete_confirm_title),
+        content: Text(l10n.tasks_delete_confirm_body),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(l10n.delete),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && context.mounted) {
+      await vm.deleteTask();
+      if (context.mounted) context.pop();
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
@@ -41,12 +69,29 @@ class TaskDetailScreen extends ConsumerWidget {
           appBar: AppBar(
             title: Text(task.title),
             actions: [
-              if (data.canEdit)
+              if (data.canManage) ...[
+                IconButton(
+                  key: const Key('freeze_task_button'),
+                  icon: Icon(data.isFrozen
+                      ? Icons.play_circle_outline
+                      : Icons.pause_circle_outline),
+                  tooltip: data.isFrozen
+                      ? l10n.tasks_action_unfreeze
+                      : l10n.tasks_action_freeze,
+                  onPressed: () => vm.toggleFreeze(),
+                ),
+                IconButton(
+                  key: const Key('delete_task_button'),
+                  icon: const Icon(Icons.delete_outline),
+                  tooltip: l10n.delete,
+                  onPressed: () => _confirmDelete(context, l10n, vm),
+                ),
                 IconButton(
                   key: const Key('edit_task_button'),
                   icon: const Icon(Icons.edit),
-                  onPressed: () => context.go('/task/$taskId/edit'),
+                  onPressed: () => context.push('/task/$taskId/edit'),
                 ),
+              ],
             ],
           ),
           body: ListView(
@@ -84,7 +129,7 @@ class TaskDetailScreen extends ConsumerWidget {
                 key: const Key('current_assignee_tile'),
                 leading: const Icon(Icons.person),
                 title: Text(l10n.tasks_detail_assignment_order),
-                subtitle: Text(task.currentAssigneeUid ?? '—'),
+                subtitle: Text(data.currentAssigneeName ?? '—'),
               ),
               ListTile(
                 key: const Key('next_due_tile'),
@@ -107,11 +152,17 @@ class TaskDetailScreen extends ConsumerWidget {
                   style: Theme.of(context).textTheme.titleSmall),
               const SizedBox(height: 8),
               ...data.upcomingOccurrences.map(
-                (d) => ListTile(
+                (occ) => ListTile(
                   dense: true,
                   title: Text(
-                    DateFormat.yMMMd().add_Hm().format(d.toLocal()),
+                    DateFormat.yMMMd().add_Hm().format(occ.date.toLocal()),
                   ),
+                  trailing: occ.assigneeName != null
+                      ? Text(
+                          occ.assigneeName!,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        )
+                      : null,
                 ),
               ),
             ],

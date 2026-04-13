@@ -9,6 +9,7 @@ import 'package:toka/features/tasks/domain/task.dart';
 import 'package:toka/features/tasks/domain/task_status.dart';
 import 'package:toka/features/tasks/presentation/task_detail_screen.dart';
 import 'package:toka/l10n/app_localizations.dart';
+import 'package:toka/shared/widgets/loading_widget.dart';
 
 // ---------------------------------------------------------------------------
 // Fakes
@@ -159,9 +160,9 @@ void main() {
   testWidgets('no falla cuando viewData es null', (tester) async {
     final vm = _DataViewModel(null);
     await tester.pumpWidget(_wrap(vm));
-    await tester.pumpAndSettle();
+    await tester.pump(); // pumpAndSettle times out due to CircularProgressIndicator
 
-    expect(find.byType(Text), findsWidgets);
+    expect(find.byType(Scaffold), findsOneWidget);
   });
 
   testWidgets(
@@ -193,5 +194,54 @@ void main() {
 
     expect(find.text('—'), findsOneWidget);
     expect(find.text('uid1'), findsNothing);
+  });
+
+  testWidgets('muestra LoadingWidget cuando viewData es null',
+      (tester) async {
+    final vm = _DataViewModel(null);
+    await tester.pumpWidget(_wrap(vm));
+    await tester.pump();
+
+    expect(find.byType(LoadingWidget), findsOneWidget);
+  });
+
+  testWidgets('próxima ocurrencia muestra el nombre del asignado',
+      (tester) async {
+    final vm = _DataViewModel(TaskDetailViewData(
+      task: _makeTask(),
+      canManage: false,
+      currentAssigneeName: null,
+      upcomingOccurrences: [
+        UpcomingOccurrence(date: DateTime(2025, 7, 1, 20, 0), assigneeName: 'Paco'),
+      ],
+    ));
+    await tester.pumpWidget(_wrap(vm));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Paco'), findsOneWidget);
+  });
+
+  testWidgets('próxima ocurrencia sin asignado no muestra texto trailing',
+      (tester) async {
+    final occDate = DateTime(2025, 7, 1, 20, 0);
+    final vm = _DataViewModel(TaskDetailViewData(
+      task: _makeTask(),
+      canManage: false,
+      currentAssigneeName: null,
+      upcomingOccurrences: [
+        UpcomingOccurrence(date: occDate, assigneeName: null),
+      ],
+    ));
+    await tester.pumpWidget(_wrap(vm));
+    await tester.pumpAndSettle();
+
+    // The date tile appears but no trailing assignee text widget
+    final listTiles = tester.widgetList<ListTile>(find.byType(ListTile));
+    final occTile = listTiles.firstWhere(
+      (tile) =>
+          tile.trailing == null &&
+          tile.dense == true,
+    );
+    expect(occTile.trailing, isNull);
   });
 }

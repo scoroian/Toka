@@ -50,7 +50,7 @@ class AllTasksScreen extends ConsumerWidget {
         if (data == null) {
           return Scaffold(
             appBar: AppBar(title: Text(l10n.tasks_title)),
-            body: Center(child: Text(l10n.error_generic)),
+            body: const LoadingWidget(),
           );
         }
 
@@ -93,7 +93,7 @@ class AllTasksScreen extends ConsumerWidget {
                       },
                       child: TaskCard(
                         task: task,
-                        onTap: () => context.go('/task/${task.id}'),
+                        onTap: () => context.push('/task/${task.id}'),
                       ),
                     );
                   },
@@ -102,7 +102,7 @@ class AllTasksScreen extends ConsumerWidget {
               ? FloatingActionButton(
                   key: const Key('create_task_fab'),
                   tooltip: l10n.tasks_create_title,
-                  onPressed: () => context.go(AppRoutes.createTask),
+                  onPressed: () => context.push(AppRoutes.createTask),
                   child: const Icon(Icons.add),
                 )
               : null,

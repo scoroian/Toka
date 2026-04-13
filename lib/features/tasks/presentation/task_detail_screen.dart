@@ -120,10 +120,10 @@ class TaskDetailScreen extends ConsumerWidget {
               ),
               const Divider(height: 32),
               if (task.status == TaskStatus.frozen)
-                const Chip(
-                  key: Key('frozen_chip'),
-                  label: Text('Congelada'),
-                  avatar: Icon(Icons.pause_circle_outline),
+                Chip(
+                  key: const Key('frozen_chip'),
+                  label: Text(l10n.tasks_status_frozen),
+                  avatar: const Icon(Icons.pause_circle_outline),
                 ),
               ListTile(
                 key: const Key('current_assignee_tile'),

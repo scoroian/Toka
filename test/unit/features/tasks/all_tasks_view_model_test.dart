@@ -165,6 +165,7 @@ Future<AllTasksViewData?> _resolveViewData(
     ProviderContainer container) async {
   await container.read(currentHomeProvider.future);
   await container.read(userMembershipsProvider(_kCurrentUid).future);
+  await container.read(homeMembersProvider(_kHomeId).future);
   await container.read(homeTasksProvider(_kHomeId).future);
 
   // Dar un ciclo de microtask para que los watchers internos propaguen

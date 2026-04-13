@@ -57,10 +57,7 @@ class TaskDetailScreen extends ConsumerWidget {
       ),
       data: (data) {
         if (data == null) {
-          return Scaffold(
-            appBar: AppBar(),
-            body: Center(child: Text(l10n.error_generic)),
-          );
+          return const Scaffold(body: Center(child: LoadingWidget()));
         }
 
         final task = data.task;

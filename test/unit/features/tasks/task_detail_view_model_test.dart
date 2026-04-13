@@ -107,6 +107,26 @@ Member _makeMember(String uid, String homeId, String nickname) => Member(
       averageScore: 0.0,
     );
 
+Member _makeMemberWithRole(
+        String uid, String homeId, String nickname, MemberRole role) =>
+    Member(
+      uid: uid,
+      homeId: homeId,
+      nickname: nickname,
+      photoUrl: null,
+      bio: null,
+      phone: null,
+      phoneVisibility: 'none',
+      role: role,
+      status: MemberStatus.active,
+      joinedAt: DateTime(2024),
+      tasksCompleted: 0,
+      passedCount: 0,
+      complianceRate: 1.0,
+      currentStreak: 0,
+      averageScore: 0.0,
+    );
+
 Task _makeTask({
   required String id,
   required String homeId,
@@ -150,6 +170,9 @@ ProviderContainer _makeContainer({
   required List<Member> members,
   required List<DateTime> upcomingDates,
   MemberRole myRole = MemberRole.member,
+  // Rol que el usuario actual tiene en homeMembers (homes/{homeId}/members/{uid}).
+  // Si es null, se hereda el valor de [myRole].
+  MemberRole? myHomeMemberRole,
 }) {
   const uid = _kCurrentUid;
   final authUser = AuthUser(
@@ -161,6 +184,19 @@ ProviderContainer _makeContainer({
     providers: const [],
   );
 
+  // El miembro actual con el rol que tiene en el documento homes/{homeId}/members/{uid}
+  final effectiveHomeMemberRole = myHomeMemberRole ?? myRole;
+  final currentMember = _makeMemberWithRole(
+    uid,
+    home.id,
+    'Current User',
+    effectiveHomeMemberRole,
+  );
+  final allMembers = [
+    currentMember,
+    ...members.where((m) => m.uid != uid),
+  ];
+
   return ProviderContainer(overrides: [
     // Auth
     authProvider.overrideWith(
@@ -171,7 +207,7 @@ ProviderContainer _makeContainer({
     // Home actual
     currentHomeProvider.overrideWith(() => _FakeCurrentHomeWithData(home)),
 
-    // Membresías del usuario (para canManage)
+    // Membresías del usuario (para canManage — lee users/{uid}/memberships/{homeId})
     userMembershipsProvider(uid).overrideWith(
       (_) => Stream.value([_makeMembership(home.id, myRole)]),
     ),
@@ -181,9 +217,9 @@ ProviderContainer _makeContainer({
       (_) => Stream.value([task]),
     ),
 
-    // Miembros del hogar
+    // Miembros del hogar (homes/{homeId}/members — fuente de verdad del rol)
     homeMembersProvider(home.id).overrideWith(
-      (_) => Stream.value(members),
+      (_) => Stream.value(allMembers),
     ),
 
     // Próximas ocurrencias (fechas fijas para tests deterministas)
@@ -346,6 +382,94 @@ void main() {
       final occs = viewData!.upcomingOccurrences;
       expect(occs, hasLength(2));
       expect(occs.map((o) => o.assigneeName), everyElement(isNull));
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // canManage por rol
+  // ---------------------------------------------------------------------------
+  group('canManage por rol', () {
+    const homeId = 'home_test';
+    const taskId = 'task_test';
+
+    // Tarea mínima válida para estos tests
+    Task makeSimpleTask() => _makeTask(
+          id: taskId,
+          homeId: homeId,
+          assignmentOrder: [],
+          currentAssigneeUid: null,
+        );
+
+    test(
+        // ESTE TEST DEBE FALLAR antes de Task 4:
+        // canManage lee userMembershipsProvider (role=member, desactualizado)
+        // en lugar de homeMembersProvider (role=admin, fuente de verdad).
+        'admin en homeMembers con membresía desactualizada (member) → canManage == true',
+        () async {
+      // Given: homeMembers tiene al usuario con role=admin (fuente de verdad)
+      //        userMembershipsProvider devuelve role=member (dato obsoleto)
+      final home = _makeHome(homeId);
+      final task = makeSimpleTask();
+      final container = _makeContainer(
+        home: home,
+        task: task,
+        members: [],
+        upcomingDates: const [],
+        myRole: MemberRole.member, // userMembershipsProvider — dato desactualizado
+        myHomeMemberRole: MemberRole.admin, // homeMembers — fuente de verdad
+      );
+      addTearDown(container.dispose);
+
+      // When
+      final viewData = await _resolveViewData(container, homeId, taskId);
+
+      // Then: debe ser true porque el usuario ES admin según homeMembers
+      expect(viewData, isNotNull);
+      expect(viewData!.canManage, isTrue);
+    });
+
+    test('owner en homeMembers y en membresía → canManage == true', () async {
+      // Given: ambas fuentes coinciden en role=owner
+      final home = _makeHome(homeId);
+      final task = makeSimpleTask();
+      final container = _makeContainer(
+        home: home,
+        task: task,
+        members: [],
+        upcomingDates: const [],
+        myRole: MemberRole.owner,
+        myHomeMemberRole: MemberRole.owner,
+      );
+      addTearDown(container.dispose);
+
+      // When
+      final viewData = await _resolveViewData(container, homeId, taskId);
+
+      // Then
+      expect(viewData, isNotNull);
+      expect(viewData!.canManage, isTrue);
+    });
+
+    test('member en homeMembers y en membresía → canManage == false', () async {
+      // Given: ambas fuentes coinciden en role=member
+      final home = _makeHome(homeId);
+      final task = makeSimpleTask();
+      final container = _makeContainer(
+        home: home,
+        task: task,
+        members: [],
+        upcomingDates: const [],
+        myRole: MemberRole.member,
+        myHomeMemberRole: MemberRole.member,
+      );
+      addTearDown(container.dispose);
+
+      // When
+      final viewData = await _resolveViewData(container, homeId, taskId);
+
+      // Then
+      expect(viewData, isNotNull);
+      expect(viewData!.canManage, isFalse);
     });
   });
 }

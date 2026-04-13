@@ -20,6 +20,8 @@ import 'package:toka/features/tasks/domain/recurrence_rule.dart';
 import 'package:toka/features/tasks/domain/task.dart';
 import 'package:toka/features/tasks/domain/task_status.dart';
 
+const _kCurrentUid = 'uid_current_user';
+
 class _FakeAuth extends Auth {
   _FakeAuth(this._state);
   final AuthState _state;
@@ -149,7 +151,7 @@ ProviderContainer _makeContainer({
   required List<DateTime> upcomingDates,
   MemberRole myRole = MemberRole.member,
 }) {
-  const uid = 'uid_current_user';
+  const uid = _kCurrentUid;
   final authUser = AuthUser(
     uid: uid,
     email: 'test@test.com',
@@ -200,7 +202,7 @@ Future<TaskDetailViewData?> _resolveViewData(
 ) async {
   // Forzar la resolución de los providers async del hogar
   await container.read(currentHomeProvider.future);
-  await container.read(userMembershipsProvider('uid_current_user').future);
+  await container.read(userMembershipsProvider(_kCurrentUid).future);
   await container.read(homeTasksProvider(homeId).future);
   await container.read(homeMembersProvider(homeId).future);
 
@@ -240,7 +242,7 @@ void main() {
     ];
 
     test(
-        'Test 1: los asignados rotan round-robin empezando por el siguiente al actual',
+        'los asignados rotan round-robin empezando por el siguiente al actual',
         () async {
       // Given: assignmentOrder = [uid_a, uid_b, uid_c], currentAssigneeUid = uid_a
       const uidA = 'uid_a';
@@ -280,7 +282,7 @@ void main() {
     });
 
     test(
-        'Test 2: cuando currentAssigneeUid es null, la rotación empieza en el índice 0',
+        'cuando currentAssigneeUid es null, la rotación empieza en el índice 0',
         () async {
       // Given: assignmentOrder = [uid_a, uid_b], currentAssigneeUid = null
       const uidA = 'uid_a';
@@ -317,7 +319,7 @@ void main() {
     });
 
     test(
-        'Test 3: cuando assignmentOrder está vacío, assigneeName es null para todas las ocurrencias',
+        'cuando assignmentOrder está vacío, assigneeName es null para todas las ocurrencias',
         () async {
       // Given: assignmentOrder = [], currentAssigneeUid = null
       final home = _makeHome(homeId);
@@ -343,9 +345,7 @@ void main() {
       expect(viewData, isNotNull);
       final occs = viewData!.upcomingOccurrences;
       expect(occs, hasLength(2));
-      for (final occ in occs) {
-        expect(occ.assigneeName, isNull);
-      }
+      expect(occs.map((o) => o.assigneeName), everyElement(isNull));
     });
   });
 }

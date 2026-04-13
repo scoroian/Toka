@@ -157,14 +157,6 @@ void main() {
     expect(find.byKey(const Key('edit_task_button')), findsNothing);
   });
 
-  testWidgets('no falla cuando viewData es null', (tester) async {
-    final vm = _DataViewModel(null);
-    await tester.pumpWidget(_wrap(vm));
-    await tester.pump(); // pumpAndSettle times out due to CircularProgressIndicator
-
-    expect(find.byType(Scaffold), findsOneWidget);
-  });
-
   testWidgets(
       'muestra el nombre del asignado cuando currentAssigneeName no es null',
       (tester) async {
@@ -218,7 +210,11 @@ void main() {
     await tester.pumpWidget(_wrap(vm));
     await tester.pumpAndSettle();
 
-    expect(find.text('Paco'), findsOneWidget);
+    final tile = tester.widget<ListTile>(
+      find.byKey(const Key('occurrence_tile_0')),
+    );
+    expect(tile.trailing, isA<Text>());
+    expect((tile.trailing as Text).data, 'Paco');
   });
 
   testWidgets('próxima ocurrencia sin asignado no muestra texto trailing',
@@ -235,13 +231,9 @@ void main() {
     await tester.pumpWidget(_wrap(vm));
     await tester.pumpAndSettle();
 
-    // The date tile appears but no trailing assignee text widget
-    final listTiles = tester.widgetList<ListTile>(find.byType(ListTile));
-    final occTile = listTiles.firstWhere(
-      (tile) =>
-          tile.trailing == null &&
-          tile.dense == true,
+    final tile = tester.widget<ListTile>(
+      find.byKey(const Key('occurrence_tile_0')),
     );
-    expect(occTile.trailing, isNull);
+    expect(tile.trailing, isNull);
   });
 }

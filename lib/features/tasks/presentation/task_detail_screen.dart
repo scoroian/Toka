@@ -148,15 +148,18 @@ class TaskDetailScreen extends ConsumerWidget {
               Text(l10n.tasks_detail_next_occurrences,
                   style: Theme.of(context).textTheme.titleSmall),
               const SizedBox(height: 8),
-              ...data.upcomingOccurrences.map(
-                (occ) => ListTile(
+              ...data.upcomingOccurrences.asMap().entries.map(
+                (entry) => ListTile(
+                  key: Key('occurrence_tile_${entry.key}'),
                   dense: true,
                   title: Text(
-                    DateFormat.yMMMd().add_Hm().format(occ.date.toLocal()),
+                    DateFormat.yMMMd()
+                        .add_Hm()
+                        .format(entry.value.date.toLocal()),
                   ),
-                  trailing: occ.assigneeName != null
+                  trailing: entry.value.assigneeName != null
                       ? Text(
-                          occ.assigneeName!,
+                          entry.value.assigneeName!,
                           style: Theme.of(context).textTheme.bodySmall,
                         )
                       : null,

@@ -4,7 +4,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../auth/application/auth_provider.dart';
 import '../../homes/application/current_home_provider.dart';
-import '../../homes/application/homes_provider.dart';
 import '../../homes/domain/home_membership.dart';
 import '../../members/application/members_provider.dart';
 import '../../members/domain/member.dart';
@@ -110,19 +109,15 @@ TaskDetailViewModel taskDetailViewModel(
     final task = tasks.where((t) => t.id == taskId).cast<Task?>().firstOrNull;
     if (task == null) return null;
 
-    final membershipsAsync =
-        uid.isNotEmpty ? ref.watch(userMembershipsProvider(uid)) : null;
-    final memberships = membershipsAsync?.valueOrNull ?? [];
-    final myMembership = memberships
-        .where((m) => m.homeId == home.id)
-        .cast<HomeMembership?>()
-        .firstOrNull;
-    final myRole = myMembership?.role;
-    final canManage =
-        myRole == MemberRole.owner || myRole == MemberRole.admin;
+    final homeMembersAsync = ref.watch(homeMembersProvider(home.id));
+    final homeMembers = homeMembersAsync.valueOrNull;
+    if (homeMembers == null) return null; // still loading
 
-    final homeMembers =
-        ref.watch(homeMembersProvider(home.id)).valueOrNull ?? [];
+    final myMember =
+        homeMembers.where((m) => m.uid == uid).cast<Member?>().firstOrNull;
+    final canManage = myMember?.role == MemberRole.owner ||
+        myMember?.role == MemberRole.admin;
+
     final assigneeMember = task.currentAssigneeUid != null
         ? homeMembers
             .where((m) => m.uid == task.currentAssigneeUid)

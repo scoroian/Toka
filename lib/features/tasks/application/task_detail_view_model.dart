@@ -7,6 +7,7 @@ import '../../homes/application/current_home_provider.dart';
 import '../../homes/domain/home_membership.dart';
 import '../../members/application/members_provider.dart';
 import '../../members/domain/member.dart';
+import '../../profile/application/profile_provider.dart';
 import '../domain/task.dart';
 import '../domain/task_status.dart';
 import 'recurrence_provider.dart';
@@ -73,8 +74,9 @@ class _TaskDetailViewModelImpl implements TaskDetailViewModel {
 
 // Calcula las próximas N ocurrencias con el asignado según rotación round-robin.
 // Empieza por el siguiente después del currentAssigneeUid.
+// nameMap: uid → nombre de display (ya resuelto con fallback a perfil).
 List<UpcomingOccurrence> _computeUpcomingOccurrences(
-    Task task, List<DateTime> dates, List<Member> members) {
+    Task task, List<DateTime> dates, Map<String, String?> nameMap) {
   final order = task.assignmentOrder;
   if (order.isEmpty) {
     return dates.map((d) => UpcomingOccurrence(date: d)).toList();
@@ -87,10 +89,7 @@ List<UpcomingOccurrence> _computeUpcomingOccurrences(
         ? (currentIdx + 1 + i) % order.length
         : i % order.length;
     final uid = order[nextIdx];
-    final member = members.where((m) => m.uid == uid).cast<Member?>().firstOrNull;
-    final name =
-        (member != null && member.nickname.isNotEmpty) ? member.nickname : null;
-    return UpcomingOccurrence(date: entry.value, assigneeName: name);
+    return UpcomingOccurrence(date: entry.value, assigneeName: nameMap[uid]);
   }).toList();
 }
 
@@ -118,20 +117,34 @@ TaskDetailViewModel taskDetailViewModel(
     final canManage = myMember?.role == MemberRole.owner ||
         myMember?.role == MemberRole.admin;
 
-    final assigneeMember = task.currentAssigneeUid != null
-        ? homeMembers
-            .where((m) => m.uid == task.currentAssigneeUid)
-            .firstOrNull
-        : null;
-    final currentAssigneeName =
-        assigneeMember != null && assigneeMember.nickname.isNotEmpty
-            ? assigneeMember.nickname
+    // Construir mapa uid→nombre para currentAssignee y assignmentOrder.
+    // Primero lee el nickname del documento de miembro (homes/{homeId}/members);
+    // si está vacío, hace fallback al perfil del usuario (users/{uid}).
+    final relevantUids = <String>{
+      if (task.currentAssigneeUid != null) task.currentAssigneeUid!,
+      ...task.assignmentOrder,
+    };
+    final nameMap = <String, String?>{};
+    for (final ruid in relevantUids) {
+      final m = homeMembers.where((m) => m.uid == ruid).cast<Member?>().firstOrNull;
+      if (m != null && m.nickname.isNotEmpty) {
+        nameMap[ruid] = m.nickname;
+      } else {
+        final profile = ref.watch(userProfileProvider(ruid)).valueOrNull;
+        nameMap[ruid] = (profile != null && profile.nickname.isNotEmpty)
+            ? profile.nickname
             : null;
+      }
+    }
+
+    final currentAssigneeName = task.currentAssigneeUid != null
+        ? nameMap[task.currentAssigneeUid]
+        : null;
 
     final upcomingDates =
         ref.watch(upcomingOccurrencesProvider(task.recurrenceRule));
     final upcomingOccurrences = _computeUpcomingOccurrences(
-        task, upcomingDates.take(3).toList(), homeMembers);
+        task, upcomingDates.take(3).toList(), nameMap);
 
     return TaskDetailViewData(
       task: task,

@@ -1,5 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:toka/features/homes/data/home_model.dart';
 import 'package:toka/features/homes/domain/home.dart';
 import 'package:toka/features/homes/domain/home_limits.dart';
 import 'package:toka/features/homes/domain/home_membership.dart';
@@ -109,5 +112,57 @@ void main() {
     final home = await repo.fetchHome('h1');
     expect(home, fakeHome);
     expect(home.id, 'h1');
+  });
+
+  group('HomeModel.membershipFromFirestore', () {
+    test('lee hasPendingToday correctamente cuando es true', () async {
+      final fakeFirestore = FakeFirebaseFirestore();
+      await fakeFirestore
+          .collection('users')
+          .doc('uid1')
+          .collection('memberships')
+          .doc('home1')
+          .set({
+        'homeNameSnapshot': 'Hogar Test',
+        'role': 'member',
+        'billingState': 'none',
+        'status': 'active',
+        'joinedAt': Timestamp.fromDate(DateTime(2024)),
+        'hasPendingToday': true,
+      });
+      final docSnap = await fakeFirestore
+          .collection('users')
+          .doc('uid1')
+          .collection('memberships')
+          .doc('home1')
+          .get();
+      final membership = HomeModel.membershipFromFirestore(docSnap);
+      expect(membership.hasPendingToday, isTrue);
+    });
+
+    test('usa false por defecto si falta hasPendingToday', () async {
+      final fakeFirestore = FakeFirebaseFirestore();
+      await fakeFirestore
+          .collection('users')
+          .doc('uid1')
+          .collection('memberships')
+          .doc('home1')
+          .set({
+        'homeNameSnapshot': 'Hogar Test',
+        'role': 'member',
+        'billingState': 'none',
+        'status': 'active',
+        'joinedAt': Timestamp.fromDate(DateTime(2024)),
+        // hasPendingToday absent
+      });
+      final docSnap = await fakeFirestore
+          .collection('users')
+          .doc('uid1')
+          .collection('memberships')
+          .doc('home1')
+          .get();
+      final membership = HomeModel.membershipFromFirestore(docSnap);
+      expect(membership.hasPendingToday, isFalse);
+    });
   });
 }

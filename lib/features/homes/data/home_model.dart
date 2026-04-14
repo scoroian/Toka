@@ -51,6 +51,7 @@ class HomeModel {
       ),
       joinedAt: (data['joinedAt'] as Timestamp).toDate(),
       leftAt: (data['leftAt'] as Timestamp?)?.toDate(),
+      hasPendingToday: data['hasPendingToday'] as bool? ?? false,
     );
   }
 }

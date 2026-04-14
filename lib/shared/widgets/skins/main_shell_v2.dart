@@ -1,0 +1,133 @@
+// lib/shared/widgets/skins/main_shell_v2.dart
+import 'dart:ui';
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import '../../../core/constants/routes.dart';
+import '../../../core/theme/app_colors_v2.dart';
+import '../../../l10n/app_localizations.dart';
+
+class MainShellV2 extends StatelessWidget {
+  const MainShellV2({super.key, required this.child});
+  final Widget child;
+
+  static int _tabIndex(String location) {
+    if (location.startsWith(AppRoutes.history)) return 1;
+    if (location.startsWith(AppRoutes.members)) return 2;
+    if (location.startsWith(AppRoutes.tasks))   return 3;
+    if (location.startsWith(AppRoutes.settings)) return 4;
+    return 0;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final location = GoRouterState.of(context).matchedLocation;
+    return Scaffold(
+      extendBody: true,
+      body: Stack(
+        children: [
+          child,
+          Positioned(
+            left: 16, right: 16, bottom: 12,
+            child: _FloatingNavBar(selectedIndex: _tabIndex(location)),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FloatingNavBar extends StatelessWidget {
+  const _FloatingNavBar({required this.selectedIndex});
+  final int selectedIndex;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context);
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          height: 56,
+          decoration: BoxDecoration(
+            color: isDark
+                ? const Color(0xFF14141E).withValues(alpha: 0.88)
+                : Colors.white.withValues(alpha: 0.85),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.06)
+                  : Colors.white.withValues(alpha: 0.60),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.5 : 0.1),
+                blurRadius: isDark ? 24 : 20,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _NavItem(icon: Icons.home_outlined,    selectedIcon: Icons.home,         index: 0, sel: selectedIndex, route: AppRoutes.home,    label: l10n.today_screen_title),
+              _NavItem(icon: Icons.history_outlined, selectedIcon: Icons.history,      index: 1, sel: selectedIndex, route: AppRoutes.history, label: l10n.history_title),
+              _NavItem(icon: Icons.people_outline,   selectedIcon: Icons.people,       index: 2, sel: selectedIndex, route: AppRoutes.members, label: l10n.members_title),
+              _NavItem(icon: Icons.task_alt_outlined,selectedIcon: Icons.task_alt,     index: 3, sel: selectedIndex, route: AppRoutes.tasks,   label: l10n.tasks_title),
+              _NavItem(icon: Icons.settings_outlined,selectedIcon: Icons.settings,     index: 4, sel: selectedIndex, route: AppRoutes.settings,label: l10n.settings_title),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _NavItem extends StatelessWidget {
+  const _NavItem({
+    required this.icon, required this.selectedIcon,
+    required this.index, required this.sel,
+    required this.route, required this.label,
+  });
+  final IconData icon, selectedIcon;
+  final int index, sel;
+  final String route, label;
+
+  @override
+  Widget build(BuildContext context) {
+    final isActive = index == sel;
+    const activeColor = AppColorsV2.primary;
+    final inactiveColor = Theme.of(context).iconTheme.color?.withValues(alpha: 0.3)
+        ?? Colors.grey.withValues(alpha: 0.3);
+
+    return GestureDetector(
+      key: Key('nav_item_$index'),
+      onTap: () => context.go(route),
+      behavior: HitTestBehavior.opaque,
+      child: SizedBox(
+        width: 52,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(isActive ? selectedIcon : icon,
+                color: isActive ? activeColor : inactiveColor, size: 22),
+            if (isActive)
+              Container(
+                key: Key('nav_dot_$index'),
+                width: 4, height: 4,
+                margin: const EdgeInsets.only(top: 3),
+                decoration: BoxDecoration(
+                  color: activeColor,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              )
+            else
+              const SizedBox(height: 7),
+          ],
+        ),
+      ),
+    );
+  }
+}

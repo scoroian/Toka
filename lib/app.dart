@@ -40,6 +40,13 @@ import 'features/notifications/presentation/notification_settings_screen.dart';
 import 'features/settings/presentation/settings_screen.dart';
 import 'l10n/app_localizations.dart';
 import 'shared/widgets/main_shell.dart';
+import 'features/tasks/presentation/skins/today_screen_v2.dart';
+import 'features/tasks/presentation/skins/all_tasks_screen_v2.dart';
+import 'features/tasks/presentation/skins/task_detail_screen_v2.dart';
+import 'features/tasks/presentation/skins/create_edit_task_screen_v2.dart';
+import 'features/history/presentation/skins/history_screen_v2.dart';
+import 'features/members/presentation/skins/member_profile_screen_v2.dart';
+import 'shared/widgets/skins/main_shell_v2.dart';
 
 part 'app.g.dart';
 
@@ -149,15 +156,21 @@ GoRouter appRouter(AppRouterRef ref) {
 
       // ── Shell principal con NavigationBar ──────────────────────────
       ShellRoute(
-        builder: (context, state, child) => MainShell(child: child),
+        builder: (context, state, child) => SkinConfig.current == AppSkin.v2
+            ? MainShellV2(child: child)
+            : MainShell(child: child),
         routes: [
           GoRoute(
             path: AppRoutes.home,
-            builder: (_, __) => const TodayScreen(),
+            builder: (_, __) => SkinConfig.current == AppSkin.v2
+                ? const TodayScreenV2()
+                : const TodayScreen(),
           ),
           GoRoute(
             path: AppRoutes.history,
-            builder: (_, __) => const HistoryScreen(),
+            builder: (_, __) => SkinConfig.current == AppSkin.v2
+                ? const HistoryScreenV2()
+                : const HistoryScreen(),
           ),
           GoRoute(
             path: AppRoutes.members,
@@ -165,7 +178,9 @@ GoRouter appRouter(AppRouterRef ref) {
           ),
           GoRoute(
             path: AppRoutes.tasks,
-            builder: (_, __) => const AllTasksScreen(),
+            builder: (_, __) => SkinConfig.current == AppSkin.v2
+                ? const AllTasksScreenV2()
+                : const AllTasksScreen(),
           ),
           GoRoute(
             path: AppRoutes.settings,
@@ -177,20 +192,26 @@ GoRouter appRouter(AppRouterRef ref) {
       // ── Pantallas fuera del shell (sin NavigationBar) ──────────────
       GoRoute(
         path: AppRoutes.createTask,
-        builder: (_, __) => const CreateEditTaskScreen(),
+        builder: (_, __) => SkinConfig.current == AppSkin.v2
+            ? const CreateEditTaskScreenV2()
+            : const CreateEditTaskScreen(),
       ),
       GoRoute(
         path: AppRoutes.taskDetail,
         builder: (context, state) {
           final id = state.pathParameters['id']!;
-          return TaskDetailScreen(taskId: id);
+          return SkinConfig.current == AppSkin.v2
+              ? TaskDetailScreenV2(taskId: id)
+              : TaskDetailScreen(taskId: id);
         },
       ),
       GoRoute(
         path: AppRoutes.editTask,
         builder: (context, state) {
           final id = state.pathParameters['id']!;
-          return CreateEditTaskScreen(editTaskId: id);
+          return SkinConfig.current == AppSkin.v2
+              ? CreateEditTaskScreenV2(editTaskId: id)
+              : CreateEditTaskScreen(editTaskId: id);
         },
       ),
       GoRoute(
@@ -204,10 +225,12 @@ GoRouter appRouter(AppRouterRef ref) {
       GoRoute(
         path: AppRoutes.memberProfile,
         builder: (context, state) {
-          final uid = state.pathParameters['uid']!;
+          final uid   = state.pathParameters['uid']!;
           final extra = state.extra as Map<String, dynamic>?;
           final homeId = extra?['homeId'] as String? ?? '';
-          return MemberProfileScreen(homeId: homeId, memberUid: uid);
+          return SkinConfig.current == AppSkin.v2
+              ? MemberProfileScreenV2(homeId: homeId, memberUid: uid)
+              : MemberProfileScreen(homeId: homeId, memberUid: uid);
         },
       ),
       GoRoute(

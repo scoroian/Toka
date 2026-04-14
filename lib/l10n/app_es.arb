@@ -739,5 +739,16 @@
   "month_sep": "Septiembre",
   "month_oct": "Octubre",
   "month_nov": "Noviembre",
-  "month_dec": "Diciembre"
+  "month_dec": "Diciembre",
+  "tasks_selection_count": "{count} seleccionadas",
+  "@tasks_selection_count": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "tasks_bulk_freeze": "Congelar",
+  "tasks_bulk_delete": "Eliminar",
+  "tasks_bulk_delete_confirm_title": "¿Eliminar {count} tareas?",
+  "@tasks_bulk_delete_confirm_title": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "tasks_bulk_delete_confirm_body": "Esta acción no se puede deshacer."
 }

@@ -10,10 +10,12 @@ class TaskCard extends StatelessWidget {
     super.key,
     required this.task,
     required this.onTap,
+    this.onLongPress,
   });
 
   final Task task;
   final VoidCallback onTap;
+  final VoidCallback? onLongPress;
 
   @override
   Widget build(BuildContext context) {
@@ -34,6 +36,7 @@ class TaskCard extends StatelessWidget {
           : null,
       child: InkWell(
         onTap: onTap,
+        onLongPress: onLongPress,
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(12),

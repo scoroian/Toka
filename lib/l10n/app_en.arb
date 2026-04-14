@@ -739,5 +739,16 @@
   "month_sep": "September",
   "month_oct": "October",
   "month_nov": "November",
-  "month_dec": "December"
+  "month_dec": "December",
+  "tasks_selection_count": "{count} selected",
+  "@tasks_selection_count": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "tasks_bulk_freeze": "Freeze",
+  "tasks_bulk_delete": "Delete",
+  "tasks_bulk_delete_confirm_title": "Delete {count} tasks?",
+  "@tasks_bulk_delete_confirm_title": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "tasks_bulk_delete_confirm_body": "This action cannot be undone."
 }

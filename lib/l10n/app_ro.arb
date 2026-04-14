@@ -739,5 +739,16 @@
   "month_sep": "Septembrie",
   "month_oct": "Octombrie",
   "month_nov": "Noiembrie",
-  "month_dec": "Decembrie"
+  "month_dec": "Decembrie",
+  "tasks_selection_count": "{count} selectate",
+  "@tasks_selection_count": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "tasks_bulk_freeze": "Îngheță",
+  "tasks_bulk_delete": "Șterge",
+  "tasks_bulk_delete_confirm_title": "Șterge {count} sarcini?",
+  "@tasks_bulk_delete_confirm_title": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "tasks_bulk_delete_confirm_body": "Această acțiune nu poate fi anulată."
 }

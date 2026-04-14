@@ -7,6 +7,7 @@ import '../application/create_edit_task_view_model.dart';
 import 'widgets/assignment_form.dart';
 import 'widgets/recurrence_form.dart';
 import 'widgets/task_visual_picker.dart';
+import 'widgets/upcoming_dates_preview.dart';
 
 class CreateEditTaskScreen extends ConsumerStatefulWidget {
   const CreateEditTaskScreen({super.key, this.editTaskId});
@@ -33,6 +34,18 @@ class _CreateEditTaskScreenState extends ConsumerState<CreateEditTaskScreen> {
     _titleController.dispose();
     _descController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickTime(
+      BuildContext context, CreateEditTaskViewModel vm) async {
+    final initial = vm.fixedTime ?? TimeOfDay.now();
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: initial,
+    );
+    if (picked != null) {
+      vm.setFixedTime(picked);
+    }
   }
 
   @override
@@ -78,7 +91,7 @@ class _CreateEditTaskScreenState extends ConsumerState<CreateEditTaskScreen> {
           else
             TextButton(
               key: const Key('save_task_button'),
-              onPressed: vm.save,
+              onPressed: vm.canSave ? vm.save : null,
               child: Text(l10n.save),
             ),
         ],
@@ -86,12 +99,15 @@ class _CreateEditTaskScreenState extends ConsumerState<CreateEditTaskScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          // Visual picker
           TaskVisualPicker(
             selectedKind: formState.visualKind,
             selectedValue: formState.visualValue,
             onChanged: vm.setVisual,
           ),
           const SizedBox(height: 12),
+
+          // Título
           TextFormField(
             key: const Key('task_title_field'),
             controller: _titleController,
@@ -105,6 +121,8 @@ class _CreateEditTaskScreenState extends ConsumerState<CreateEditTaskScreen> {
             onChanged: vm.setTitle,
           ),
           const SizedBox(height: 12),
+
+          // Descripción
           TextFormField(
             key: const Key('task_desc_field'),
             controller: _descController,
@@ -116,12 +134,44 @@ class _CreateEditTaskScreenState extends ConsumerState<CreateEditTaskScreen> {
             onChanged: vm.setDescription,
           ),
           const SizedBox(height: 16),
+
+          // Recurrencia
           const RecurrenceForm(key: Key('recurrence_form')),
           const SizedBox(height: 16),
+
+          // Hora fija
+          SwitchListTile(
+            key: const Key('fixed_time_toggle'),
+            title: Text(l10n.tasks_fixed_time_label),
+            value: vm.hasFixedTime,
+            onChanged: vm.setHasFixedTime,
+          ),
+          if (vm.hasFixedTime) ...[
+            ListTile(
+              key: const Key('fixed_time_picker_tile'),
+              leading: const Icon(Icons.access_time),
+              title: Text(vm.fixedTime != null
+                  ? vm.fixedTime!.format(context)
+                  : l10n.tasks_fixed_time_pick),
+              onTap: () => _pickTime(context, vm),
+            ),
+            if (vm.showApplyToday)
+              CheckboxListTile(
+                key: const Key('apply_today_checkbox'),
+                title: Text(l10n.tasks_apply_today_label),
+                value: vm.applyToday,
+                onChanged: (v) => vm.setApplyToday(v ?? false),
+                controlAffinity: ListTileControlAffinity.leading,
+              ),
+          ],
+          const SizedBox(height: 16),
+
+          // Miembros (reordenables)
           AssignmentForm(
-            availableMembers: const [],
-            selectedOrder: formState.assignmentOrder,
-            onChanged: vm.setAssignmentOrder,
+            key: const Key('assignment_form'),
+            members: vm.orderedMembers,
+            onToggle: vm.toggleMember,
+            onReorder: vm.reorderMember,
           ),
           if (assigneesError != null)
             Padding(
@@ -133,6 +183,8 @@ class _CreateEditTaskScreenState extends ConsumerState<CreateEditTaskScreen> {
               ),
             ),
           const SizedBox(height: 16),
+
+          // Dificultad
           Text(l10n.tasks_field_difficulty,
               style: Theme.of(context).textTheme.titleSmall),
           Slider(
@@ -144,6 +196,16 @@ class _CreateEditTaskScreenState extends ConsumerState<CreateEditTaskScreen> {
             label: formState.difficultyWeight.toStringAsFixed(1),
             onChanged: vm.setDifficultyWeight,
           ),
+
+          // Fechas próximas
+          if (vm.upcomingDates.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            UpcomingDatesPreview(
+              key: const Key('upcoming_dates_preview'),
+              dates: vm.upcomingDates,
+            ),
+          ],
+
           if (formState.globalError != null)
             Padding(
               padding: const EdgeInsets.only(top: 8),

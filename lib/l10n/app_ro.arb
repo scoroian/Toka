@@ -764,5 +764,14 @@
   "member_profile_role_manage_unavailable": "Gestionarea rolurilor disponibilă în curând",
   "today_home_selector_create": "Creează cămin",
   "today_home_selector_join": "Alătură-te cu cod",
-  "today_home_selector_my_homes": "Căminele mele"
+  "today_home_selector_my_homes": "Căminele mele",
+  "tasks_fixed_time_label": "Oră fixă",
+  "tasks_fixed_time_pick": "Alege ora",
+  "tasks_apply_today_label": "Creează ocurență pentru azi",
+  "tasks_upcoming_preview_title": "Următoarele 3 date",
+  "tasks_upcoming_preview_assignee": "→ {name}",
+  "@tasks_upcoming_preview_assignee": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "tasks_assignment_drag_hint": "Trage pentru a reordona"
 }

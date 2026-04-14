@@ -764,5 +764,14 @@
   "member_profile_role_manage_unavailable": "Gestión de roles disponible próximamente",
   "today_home_selector_create": "Crear hogar",
   "today_home_selector_join": "Unirse con código",
-  "today_home_selector_my_homes": "Mis hogares"
+  "today_home_selector_my_homes": "Mis hogares",
+  "tasks_fixed_time_label": "Hora fija",
+  "tasks_fixed_time_pick": "Elegir hora",
+  "tasks_apply_today_label": "Crear ocurrencia para hoy",
+  "tasks_upcoming_preview_title": "Próximas 3 fechas",
+  "tasks_upcoming_preview_assignee": "→ {name}",
+  "@tasks_upcoming_preview_assignee": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "tasks_assignment_drag_hint": "Arrastra para reordenar"
 }

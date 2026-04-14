@@ -764,5 +764,14 @@
   "member_profile_role_manage_unavailable": "Role management coming soon",
   "today_home_selector_create": "Create home",
   "today_home_selector_join": "Join with code",
-  "today_home_selector_my_homes": "My homes"
+  "today_home_selector_my_homes": "My homes",
+  "tasks_fixed_time_label": "Fixed time",
+  "tasks_fixed_time_pick": "Pick time",
+  "tasks_apply_today_label": "Create occurrence for today",
+  "tasks_upcoming_preview_title": "Next 3 dates",
+  "tasks_upcoming_preview_assignee": "→ {name}",
+  "@tasks_upcoming_preview_assignee": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "tasks_assignment_drag_hint": "Drag to reorder"
 }

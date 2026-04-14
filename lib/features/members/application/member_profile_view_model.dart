@@ -92,7 +92,7 @@ MemberProfileViewModel memberProfileViewModel(
   final visibleRadarEntries = allRadarEntries.take(maxRadarEntries).toList();
   final overflowEntries = allRadarEntries.skip(maxRadarEntries).map((e) =>
       OverflowEntry(
-        taskId: '',
+        taskId: e.taskId,
         title: e.taskName,
         visualKind: 'emoji',
         visualValue: '',

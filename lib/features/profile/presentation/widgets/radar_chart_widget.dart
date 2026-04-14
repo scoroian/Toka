@@ -8,8 +8,13 @@ import 'strengths_list_widget.dart';
 
 /// Data model for a single task in the radar chart.
 class RadarEntry {
-  const RadarEntry({required this.taskName, required this.avgScore});
+  const RadarEntry({
+    this.taskId = '',
+    required this.taskName,
+    required this.avgScore,
+  });
 
+  final String taskId;
   final String taskName;
   final double avgScore; // 1-10
 }

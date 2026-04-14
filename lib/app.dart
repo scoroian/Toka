@@ -6,7 +6,10 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'core/constants/routes.dart';
 import 'core/services/locale_service.dart';
+import 'core/theme/app_skin.dart';
 import 'core/theme/app_theme.dart';
+import 'core/theme/app_theme_v2.dart';
+import 'core/theme/theme_mode_provider.dart';
 import 'features/auth/application/auth_provider.dart';
 import 'features/auth/application/auth_state.dart';
 import 'features/homes/application/current_home_provider.dart';
@@ -260,8 +263,9 @@ class TokaApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(fcmTokenInitProvider);
-    final locale = ref.watch(localeNotifierProvider);
-    final router = ref.watch(appRouterProvider);
+    final locale     = ref.watch(localeNotifierProvider);
+    final router     = ref.watch(appRouterProvider);
+    final themeMode  = ref.watch(themeModeNotifierProvider);
 
     return MaterialApp.router(
       onGenerateTitle: (context) => AppLocalizations.of(context).appName,
@@ -273,9 +277,9 @@ class TokaApp extends ConsumerWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      theme: AppTheme.light,
-      darkTheme: AppTheme.dark,
-      themeMode: ThemeMode.system,
+      theme:      SkinConfig.current == AppSkin.v2 ? AppThemeV2.light : AppTheme.light,
+      darkTheme:  SkinConfig.current == AppSkin.v2 ? AppThemeV2.dark  : AppTheme.dark,
+      themeMode:  themeMode,
       routerConfig: router,
     );
   }

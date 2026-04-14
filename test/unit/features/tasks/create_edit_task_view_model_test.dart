@@ -70,4 +70,71 @@ void main() {
       expect(container.read(taskFormNotifierProvider).title, 'Limpiar baño');
     });
   });
+
+  group('CreateEditTaskViewModel — showApplyToday', () {
+    test('showApplyToday false cuando no hay hora fija', () {
+      expect(
+        CreateEditTaskViewModel.computeShowApplyToday(
+          hasFixedTime: false,
+          fixedTime: null,
+          now: const TimeOfDay(hour: 9, minute: 0),
+        ),
+        isFalse,
+      );
+    });
+
+    test('showApplyToday true cuando la hora fija es posterior a ahora', () {
+      expect(
+        CreateEditTaskViewModel.computeShowApplyToday(
+          hasFixedTime: true,
+          fixedTime: const TimeOfDay(hour: 10, minute: 0),
+          now: const TimeOfDay(hour: 9, minute: 0),
+        ),
+        isTrue,
+      );
+    });
+
+    test('showApplyToday false cuando la hora fija ya pasó', () {
+      expect(
+        CreateEditTaskViewModel.computeShowApplyToday(
+          hasFixedTime: true,
+          fixedTime: const TimeOfDay(hour: 10, minute: 0),
+          now: const TimeOfDay(hour: 11, minute: 0),
+        ),
+        isFalse,
+      );
+    });
+  });
+
+  group('CreateEditTaskViewModel — canSave', () {
+    test('canSave false cuando el nombre está vacío', () {
+      expect(
+        CreateEditTaskViewModel.computeCanSave(
+          name: '',
+          assignedMemberCount: 2,
+        ),
+        isFalse,
+      );
+    });
+
+    test('canSave false cuando no hay miembros asignados', () {
+      expect(
+        CreateEditTaskViewModel.computeCanSave(
+          name: 'Barrer',
+          assignedMemberCount: 0,
+        ),
+        isFalse,
+      );
+    });
+
+    test('canSave true cuando hay nombre y al menos 1 miembro', () {
+      expect(
+        CreateEditTaskViewModel.computeCanSave(
+          name: 'Barrer',
+          assignedMemberCount: 1,
+        ),
+        isTrue,
+      );
+    });
+  });
 }

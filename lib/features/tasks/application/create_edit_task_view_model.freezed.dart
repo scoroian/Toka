@@ -19,6 +19,10 @@ mixin _$CreateEditVMState {
   bool get savedSuccessfully => throw _privateConstructorUsedError;
   String? get loadedTitle => throw _privateConstructorUsedError;
   String? get loadedDescription => throw _privateConstructorUsedError;
+  bool get hasFixedTime => throw _privateConstructorUsedError;
+  int? get fixedTimeMinutes =>
+      throw _privateConstructorUsedError; // stored as total minutes; null = no time set
+  bool get applyToday => throw _privateConstructorUsedError;
 
   /// Create a copy of _CreateEditVMState
   /// with the given fields replaced by the non-null parameter values.
@@ -34,7 +38,12 @@ abstract class _$CreateEditVMStateCopyWith<$Res> {
       __$CreateEditVMStateCopyWithImpl<$Res, _CreateEditVMState>;
   @useResult
   $Res call(
-      {bool savedSuccessfully, String? loadedTitle, String? loadedDescription});
+      {bool savedSuccessfully,
+      String? loadedTitle,
+      String? loadedDescription,
+      bool hasFixedTime,
+      int? fixedTimeMinutes,
+      bool applyToday});
 }
 
 /// @nodoc
@@ -55,6 +64,9 @@ class __$CreateEditVMStateCopyWithImpl<$Res, $Val extends _CreateEditVMState>
     Object? savedSuccessfully = null,
     Object? loadedTitle = freezed,
     Object? loadedDescription = freezed,
+    Object? hasFixedTime = null,
+    Object? fixedTimeMinutes = freezed,
+    Object? applyToday = null,
   }) {
     return _then(_value.copyWith(
       savedSuccessfully: null == savedSuccessfully
@@ -69,6 +81,18 @@ class __$CreateEditVMStateCopyWithImpl<$Res, $Val extends _CreateEditVMState>
           ? _value.loadedDescription
           : loadedDescription // ignore: cast_nullable_to_non_nullable
               as String?,
+      hasFixedTime: null == hasFixedTime
+          ? _value.hasFixedTime
+          : hasFixedTime // ignore: cast_nullable_to_non_nullable
+              as bool,
+      fixedTimeMinutes: freezed == fixedTimeMinutes
+          ? _value.fixedTimeMinutes
+          : fixedTimeMinutes // ignore: cast_nullable_to_non_nullable
+              as int?,
+      applyToday: null == applyToday
+          ? _value.applyToday
+          : applyToday // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 }
@@ -82,7 +106,12 @@ abstract class _$$_CreateEditVMStateImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {bool savedSuccessfully, String? loadedTitle, String? loadedDescription});
+      {bool savedSuccessfully,
+      String? loadedTitle,
+      String? loadedDescription,
+      bool hasFixedTime,
+      int? fixedTimeMinutes,
+      bool applyToday});
 }
 
 /// @nodoc
@@ -101,6 +130,9 @@ class __$$_CreateEditVMStateImplCopyWithImpl<$Res>
     Object? savedSuccessfully = null,
     Object? loadedTitle = freezed,
     Object? loadedDescription = freezed,
+    Object? hasFixedTime = null,
+    Object? fixedTimeMinutes = freezed,
+    Object? applyToday = null,
   }) {
     return _then(_$_CreateEditVMStateImpl(
       savedSuccessfully: null == savedSuccessfully
@@ -115,6 +147,18 @@ class __$$_CreateEditVMStateImplCopyWithImpl<$Res>
           ? _value.loadedDescription
           : loadedDescription // ignore: cast_nullable_to_non_nullable
               as String?,
+      hasFixedTime: null == hasFixedTime
+          ? _value.hasFixedTime
+          : hasFixedTime // ignore: cast_nullable_to_non_nullable
+              as bool,
+      fixedTimeMinutes: freezed == fixedTimeMinutes
+          ? _value.fixedTimeMinutes
+          : fixedTimeMinutes // ignore: cast_nullable_to_non_nullable
+              as int?,
+      applyToday: null == applyToday
+          ? _value.applyToday
+          : applyToday // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -125,7 +169,10 @@ class _$_CreateEditVMStateImpl implements __CreateEditVMState {
   const _$_CreateEditVMStateImpl(
       {this.savedSuccessfully = false,
       this.loadedTitle,
-      this.loadedDescription});
+      this.loadedDescription,
+      this.hasFixedTime = false,
+      this.fixedTimeMinutes,
+      this.applyToday = false});
 
   @override
   @JsonKey()
@@ -134,10 +181,19 @@ class _$_CreateEditVMStateImpl implements __CreateEditVMState {
   final String? loadedTitle;
   @override
   final String? loadedDescription;
+  @override
+  @JsonKey()
+  final bool hasFixedTime;
+  @override
+  final int? fixedTimeMinutes;
+// stored as total minutes; null = no time set
+  @override
+  @JsonKey()
+  final bool applyToday;
 
   @override
   String toString() {
-    return '_CreateEditVMState(savedSuccessfully: $savedSuccessfully, loadedTitle: $loadedTitle, loadedDescription: $loadedDescription)';
+    return '_CreateEditVMState(savedSuccessfully: $savedSuccessfully, loadedTitle: $loadedTitle, loadedDescription: $loadedDescription, hasFixedTime: $hasFixedTime, fixedTimeMinutes: $fixedTimeMinutes, applyToday: $applyToday)';
   }
 
   @override
@@ -150,12 +206,18 @@ class _$_CreateEditVMStateImpl implements __CreateEditVMState {
             (identical(other.loadedTitle, loadedTitle) ||
                 other.loadedTitle == loadedTitle) &&
             (identical(other.loadedDescription, loadedDescription) ||
-                other.loadedDescription == loadedDescription));
+                other.loadedDescription == loadedDescription) &&
+            (identical(other.hasFixedTime, hasFixedTime) ||
+                other.hasFixedTime == hasFixedTime) &&
+            (identical(other.fixedTimeMinutes, fixedTimeMinutes) ||
+                other.fixedTimeMinutes == fixedTimeMinutes) &&
+            (identical(other.applyToday, applyToday) ||
+                other.applyToday == applyToday));
   }
 
   @override
-  int get hashCode => Object.hash(
-      runtimeType, savedSuccessfully, loadedTitle, loadedDescription);
+  int get hashCode => Object.hash(runtimeType, savedSuccessfully, loadedTitle,
+      loadedDescription, hasFixedTime, fixedTimeMinutes, applyToday);
 
   /// Create a copy of _CreateEditVMState
   /// with the given fields replaced by the non-null parameter values.
@@ -171,7 +233,10 @@ abstract class __CreateEditVMState implements _CreateEditVMState {
   const factory __CreateEditVMState(
       {final bool savedSuccessfully,
       final String? loadedTitle,
-      final String? loadedDescription}) = _$_CreateEditVMStateImpl;
+      final String? loadedDescription,
+      final bool hasFixedTime,
+      final int? fixedTimeMinutes,
+      final bool applyToday}) = _$_CreateEditVMStateImpl;
 
   @override
   bool get savedSuccessfully;
@@ -179,6 +244,12 @@ abstract class __CreateEditVMState implements _CreateEditVMState {
   String? get loadedTitle;
   @override
   String? get loadedDescription;
+  @override
+  bool get hasFixedTime;
+  @override
+  int? get fixedTimeMinutes; // stored as total minutes; null = no time set
+  @override
+  bool get applyToday;
 
   /// Create a copy of _CreateEditVMState
   /// with the given fields replaced by the non-null parameter values.

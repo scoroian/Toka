@@ -69,7 +69,7 @@ abstract class AppThemeV2 {
         secondary: AppColorsV2.successDark,
         onSecondary: AppColorsV2.onPrimary,
         error: AppColorsV2.errorDark,
-        onError: AppColorsV2.backgroundDark,
+        onError: AppColorsV2.onErrorDark,
         surface: AppColorsV2.surfaceDark,
         onSurface: AppColorsV2.textPrimaryDark,
       ),

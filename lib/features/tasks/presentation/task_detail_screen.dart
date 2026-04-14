@@ -41,7 +41,7 @@ class TaskDetailScreen extends ConsumerWidget {
           appBar: AppBar(
             title: Text(task.title),
             actions: [
-              if (data.canEdit)
+              if (data.canManage)
                 IconButton(
                   key: const Key('edit_task_button'),
                   icon: const Icon(Icons.edit),

@@ -10,7 +10,7 @@ List<DateTime> upcomingOccurrences(
     UpcomingOccurrencesRef ref, RecurrenceRule? rule) {
   if (rule == null) return [];
   try {
-    return RecurrenceCalculator.nextNOccurrences(rule, DateTime.now(), 3);
+    return RecurrenceCalculator.nextNOccurrences(rule, DateTime.now(), 5);
   } catch (_) {
     return [];
   }

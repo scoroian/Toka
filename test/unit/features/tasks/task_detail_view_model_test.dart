@@ -108,4 +108,34 @@ void main() {
       expect(data.difficultyWeight, 1.0);
     });
   });
+
+  group('TaskDetailViewData — upcomingOccurrences', () {
+    test('upcomingOccurrences acepta lista de 5 fechas', () {
+      final task = _makeDetailTask();
+      final fiveDates = List.generate(
+        5,
+        (i) => DateTime(2026, 4, 14 + i),
+      );
+      final data = TaskDetailViewData(
+        task: task,
+        canManage: true,
+        currentAssigneeName: null,
+        upcomingOccurrences: fiveDates,
+        difficultyWeight: task.difficultyWeight,
+      );
+      expect(data.upcomingOccurrences.length, 5);
+    });
+
+    test('isFrozen es true cuando task.status == TaskStatus.frozen', () {
+      final frozenTask = _makeDetailTask().copyWith(status: TaskStatus.frozen);
+      final data = TaskDetailViewData(
+        task: frozenTask,
+        canManage: true,
+        currentAssigneeName: null,
+        upcomingOccurrences: [],
+        difficultyWeight: frozenTask.difficultyWeight,
+      );
+      expect(data.isFrozen, isTrue);
+    });
+  });
 }

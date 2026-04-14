@@ -1,5 +1,6 @@
 // test/unit/features/tasks/today_view_model_test.dart
 import 'package:flutter_test/flutter_test.dart';
+import 'package:toka/features/homes/domain/home_membership.dart';
 import 'package:toka/features/tasks/application/today_view_model.dart';
 import 'package:toka/features/tasks/domain/home_dashboard.dart';
 
@@ -170,6 +171,46 @@ void main() {
       expect(result.keys, containsAll(['weekly', 'monthly']));
       expect(result['weekly']!.todos, hasLength(1));
       expect(result['monthly']!.todos, hasLength(1));
+    });
+  });
+
+  group('TodayViewModel.homes — HomeDropdownItem', () {
+    test('hasPendingToday true cuando membresía lo indica', () {
+      final membership = HomeMembership(
+        homeId: 'h1',
+        homeNameSnapshot: 'Casa de Ana',
+        role: MemberRole.owner,
+        billingState: BillingState.none,
+        status: MemberStatus.active,
+        joinedAt: DateTime(2024),
+        hasPendingToday: true,
+      );
+      final item = HomeDropdownItem.fromMembership(
+        membership,
+        emoji: '🏠',
+        isSelected: true,
+      );
+      expect(item.hasPendingToday, isTrue);
+      expect(item.isSelected, isTrue);
+      expect(item.homeId, 'h1');
+    });
+
+    test('hasPendingToday false cuando membresía tiene false', () {
+      final membership = HomeMembership(
+        homeId: 'h2',
+        homeNameSnapshot: 'Piso',
+        role: MemberRole.member,
+        billingState: BillingState.none,
+        status: MemberStatus.active,
+        joinedAt: DateTime(2024),
+        hasPendingToday: false,
+      );
+      final item = HomeDropdownItem.fromMembership(
+        membership,
+        emoji: '🏡',
+        isSelected: false,
+      );
+      expect(item.hasPendingToday, isFalse);
     });
   });
 }

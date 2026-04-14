@@ -1858,83 +1858,521 @@ abstract class AppLocalizations {
   /// **'Plan Premium'**
   String get settings_plan_premium;
 
-  // ── Tasks ──────────────────────────────────────────────────────────
+  /// No description provided for @tasks_title.
+  ///
+  /// In es, this message translates to:
+  /// **'Tareas'**
   String get tasks_title;
+
+  /// No description provided for @tasks_empty_title.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin tareas'**
   String get tasks_empty_title;
+
+  /// No description provided for @tasks_empty_body.
+  ///
+  /// In es, this message translates to:
+  /// **'Crea tu primera tarea para empezar'**
   String get tasks_empty_body;
+
+  /// No description provided for @tasks_empty_cta.
+  ///
+  /// In es, this message translates to:
+  /// **'Crear primera tarea'**
   String get tasks_empty_cta;
+
+  /// No description provided for @tasks_create_title.
+  ///
+  /// In es, this message translates to:
+  /// **'Crear tarea'**
   String get tasks_create_title;
+
+  /// No description provided for @tasks_edit_title.
+  ///
+  /// In es, this message translates to:
+  /// **'Editar tarea'**
   String get tasks_edit_title;
+
+  /// No description provided for @tasks_field_visual.
+  ///
+  /// In es, this message translates to:
+  /// **'Icono o emoji'**
   String get tasks_field_visual;
+
+  /// No description provided for @tasks_field_title_hint.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej: Fregar los platos'**
   String get tasks_field_title_hint;
+
+  /// No description provided for @tasks_field_description_hint.
+  ///
+  /// In es, this message translates to:
+  /// **'Descripción (opcional)'**
   String get tasks_field_description_hint;
+
+  /// No description provided for @tasks_field_recurrence.
+  ///
+  /// In es, this message translates to:
+  /// **'Recurrencia'**
   String get tasks_field_recurrence;
+
+  /// No description provided for @tasks_field_assignment_mode.
+  ///
+  /// In es, this message translates to:
+  /// **'Modo de asignación'**
   String get tasks_field_assignment_mode;
+
+  /// No description provided for @tasks_field_difficulty.
+  ///
+  /// In es, this message translates to:
+  /// **'Dificultad'**
   String get tasks_field_difficulty;
+
+  /// No description provided for @tasks_assignment_basic_rotation.
+  ///
+  /// In es, this message translates to:
+  /// **'Rotación básica'**
   String get tasks_assignment_basic_rotation;
+
+  /// No description provided for @tasks_assignment_smart.
+  ///
+  /// In es, this message translates to:
+  /// **'Distribución inteligente'**
   String get tasks_assignment_smart;
+
+  /// No description provided for @tasks_assignment_members.
+  ///
+  /// In es, this message translates to:
+  /// **'Miembros asignados'**
   String get tasks_assignment_members;
+
+  /// No description provided for @tasks_recurrence_every.
+  ///
+  /// In es, this message translates to:
+  /// **'Cada'**
   String get tasks_recurrence_every;
+
+  /// No description provided for @tasks_recurrence_hours.
+  ///
+  /// In es, this message translates to:
+  /// **'horas'**
   String get tasks_recurrence_hours;
+
+  /// No description provided for @tasks_recurrence_days.
+  ///
+  /// In es, this message translates to:
+  /// **'días'**
   String get tasks_recurrence_days;
+
+  /// No description provided for @tasks_recurrence_start_time.
+  ///
+  /// In es, this message translates to:
+  /// **'Hora inicio'**
   String get tasks_recurrence_start_time;
+
+  /// No description provided for @tasks_recurrence_end_time.
+  ///
+  /// In es, this message translates to:
+  /// **'Hora fin (opcional)'**
   String get tasks_recurrence_end_time;
+
+  /// No description provided for @tasks_recurrence_time.
+  ///
+  /// In es, this message translates to:
+  /// **'Hora'**
   String get tasks_recurrence_time;
+
+  /// No description provided for @tasks_recurrence_day_of_month.
+  ///
+  /// In es, this message translates to:
+  /// **'Día del mes'**
   String get tasks_recurrence_day_of_month;
+
+  /// No description provided for @tasks_recurrence_week_of_month.
+  ///
+  /// In es, this message translates to:
+  /// **'Semana del mes'**
   String get tasks_recurrence_week_of_month;
+
+  /// No description provided for @tasks_recurrence_weekday.
+  ///
+  /// In es, this message translates to:
+  /// **'Día de la semana'**
   String get tasks_recurrence_weekday;
+
+  /// No description provided for @tasks_recurrence_month.
+  ///
+  /// In es, this message translates to:
+  /// **'Mes'**
   String get tasks_recurrence_month;
+
+  /// No description provided for @tasks_recurrence_timezone.
+  ///
+  /// In es, this message translates to:
+  /// **'Zona horaria'**
   String get tasks_recurrence_timezone;
+
+  /// No description provided for @tasks_recurrence_upcoming.
+  ///
+  /// In es, this message translates to:
+  /// **'Próximas fechas'**
   String get tasks_recurrence_upcoming;
+
+  /// No description provided for @tasks_recurrence_hourly_label.
+  ///
+  /// In es, this message translates to:
+  /// **'Cada hora'**
   String get tasks_recurrence_hourly_label;
+
+  /// No description provided for @tasks_recurrence_daily_label.
+  ///
+  /// In es, this message translates to:
+  /// **'Diario'**
   String get tasks_recurrence_daily_label;
+
+  /// No description provided for @tasks_recurrence_weekly_label.
+  ///
+  /// In es, this message translates to:
+  /// **'Semanal'**
   String get tasks_recurrence_weekly_label;
+
+  /// No description provided for @tasks_recurrence_monthly_fixed_label.
+  ///
+  /// In es, this message translates to:
+  /// **'Mensual (día fijo)'**
   String get tasks_recurrence_monthly_fixed_label;
+
+  /// No description provided for @tasks_recurrence_monthly_nth_label.
+  ///
+  /// In es, this message translates to:
+  /// **'Mensual (Nth semana)'**
   String get tasks_recurrence_monthly_nth_label;
+
+  /// No description provided for @tasks_recurrence_yearly_fixed_label.
+  ///
+  /// In es, this message translates to:
+  /// **'Anual (fecha fija)'**
   String get tasks_recurrence_yearly_fixed_label;
+
+  /// No description provided for @tasks_recurrence_yearly_nth_label.
+  ///
+  /// In es, this message translates to:
+  /// **'Anual (Nth semana)'**
   String get tasks_recurrence_yearly_nth_label;
+
+  /// No description provided for @tasks_section_active.
+  ///
+  /// In es, this message translates to:
+  /// **'Activas'**
   String get tasks_section_active;
+
+  /// No description provided for @tasks_section_frozen.
+  ///
+  /// In es, this message translates to:
+  /// **'Congeladas'**
   String get tasks_section_frozen;
+
+  /// No description provided for @tasks_action_edit.
+  ///
+  /// In es, this message translates to:
+  /// **'Editar'**
   String get tasks_action_edit;
+
+  /// No description provided for @tasks_action_freeze.
+  ///
+  /// In es, this message translates to:
+  /// **'Congelar'**
   String get tasks_action_freeze;
+
+  /// No description provided for @tasks_action_unfreeze.
+  ///
+  /// In es, this message translates to:
+  /// **'Descongelar'**
   String get tasks_action_unfreeze;
+
+  /// No description provided for @tasks_action_delete.
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar'**
   String get tasks_action_delete;
+
+  /// No description provided for @tasks_delete_confirm_title.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Eliminar tarea?'**
   String get tasks_delete_confirm_title;
+
+  /// No description provided for @tasks_delete_confirm_body.
+  ///
+  /// In es, this message translates to:
+  /// **'Esta acción no se puede deshacer.'**
   String get tasks_delete_confirm_body;
+
+  /// No description provided for @tasks_delete_confirm_btn.
+  ///
+  /// In es, this message translates to:
+  /// **'Sí, eliminar'**
   String get tasks_delete_confirm_btn;
+
+  /// No description provided for @tasks_freeze_success.
+  ///
+  /// In es, this message translates to:
+  /// **'Tarea congelada'**
   String get tasks_freeze_success;
+
+  /// No description provided for @tasks_unfreeze_success.
+  ///
+  /// In es, this message translates to:
+  /// **'Tarea activada'**
   String get tasks_unfreeze_success;
+
+  /// No description provided for @tasks_save_error.
+  ///
+  /// In es, this message translates to:
+  /// **'Error al guardar la tarea'**
   String get tasks_save_error;
+
+  /// No description provided for @tasks_detail_next_occurrences.
+  ///
+  /// In es, this message translates to:
+  /// **'Próximas fechas'**
   String get tasks_detail_next_occurrences;
+
+  /// No description provided for @tasks_detail_assignment_order.
+  ///
+  /// In es, this message translates to:
+  /// **'Orden de asignación'**
   String get tasks_detail_assignment_order;
+
+  /// No description provided for @tasks_validation_title_empty.
+  ///
+  /// In es, this message translates to:
+  /// **'El título es obligatorio'**
   String get tasks_validation_title_empty;
+
+  /// No description provided for @tasks_validation_title_too_long.
+  ///
+  /// In es, this message translates to:
+  /// **'Máximo 60 caracteres'**
   String get tasks_validation_title_too_long;
+
+  /// No description provided for @tasks_validation_no_assignees.
+  ///
+  /// In es, this message translates to:
+  /// **'Selecciona al menos un miembro'**
   String get tasks_validation_no_assignees;
+
+  /// No description provided for @tasks_validation_difficulty_range.
+  ///
+  /// In es, this message translates to:
+  /// **'El peso debe estar entre 0.5 y 3.0'**
   String get tasks_validation_difficulty_range;
+
+  /// No description provided for @tasks_validation_recurrence_required.
+  ///
+  /// In es, this message translates to:
+  /// **'Elige un tipo de recurrencia'**
   String get tasks_validation_recurrence_required;
+
+  /// No description provided for @weekday_mon.
+  ///
+  /// In es, this message translates to:
+  /// **'Lunes'**
   String get weekday_mon;
+
+  /// No description provided for @weekday_tue.
+  ///
+  /// In es, this message translates to:
+  /// **'Martes'**
   String get weekday_tue;
+
+  /// No description provided for @weekday_wed.
+  ///
+  /// In es, this message translates to:
+  /// **'Miércoles'**
   String get weekday_wed;
+
+  /// No description provided for @weekday_thu.
+  ///
+  /// In es, this message translates to:
+  /// **'Jueves'**
   String get weekday_thu;
+
+  /// No description provided for @weekday_fri.
+  ///
+  /// In es, this message translates to:
+  /// **'Viernes'**
   String get weekday_fri;
+
+  /// No description provided for @weekday_sat.
+  ///
+  /// In es, this message translates to:
+  /// **'Sábado'**
   String get weekday_sat;
+
+  /// No description provided for @weekday_sun.
+  ///
+  /// In es, this message translates to:
+  /// **'Domingo'**
   String get weekday_sun;
+
+  /// No description provided for @tasks_week_1st.
+  ///
+  /// In es, this message translates to:
+  /// **'Primera'**
   String get tasks_week_1st;
+
+  /// No description provided for @tasks_week_2nd.
+  ///
+  /// In es, this message translates to:
+  /// **'Segunda'**
   String get tasks_week_2nd;
+
+  /// No description provided for @tasks_week_3rd.
+  ///
+  /// In es, this message translates to:
+  /// **'Tercera'**
   String get tasks_week_3rd;
+
+  /// No description provided for @tasks_week_4th.
+  ///
+  /// In es, this message translates to:
+  /// **'Cuarta'**
   String get tasks_week_4th;
+
+  /// No description provided for @month_jan.
+  ///
+  /// In es, this message translates to:
+  /// **'Enero'**
   String get month_jan;
+
+  /// No description provided for @month_feb.
+  ///
+  /// In es, this message translates to:
+  /// **'Febrero'**
   String get month_feb;
+
+  /// No description provided for @month_mar.
+  ///
+  /// In es, this message translates to:
+  /// **'Marzo'**
   String get month_mar;
+
+  /// No description provided for @month_apr.
+  ///
+  /// In es, this message translates to:
+  /// **'Abril'**
   String get month_apr;
+
+  /// No description provided for @month_may.
+  ///
+  /// In es, this message translates to:
+  /// **'Mayo'**
   String get month_may;
+
+  /// No description provided for @month_jun.
+  ///
+  /// In es, this message translates to:
+  /// **'Junio'**
   String get month_jun;
+
+  /// No description provided for @month_jul.
+  ///
+  /// In es, this message translates to:
+  /// **'Julio'**
   String get month_jul;
+
+  /// No description provided for @month_aug.
+  ///
+  /// In es, this message translates to:
+  /// **'Agosto'**
   String get month_aug;
+
+  /// No description provided for @month_sep.
+  ///
+  /// In es, this message translates to:
+  /// **'Septiembre'**
   String get month_sep;
+
+  /// No description provided for @month_oct.
+  ///
+  /// In es, this message translates to:
+  /// **'Octubre'**
   String get month_oct;
+
+  /// No description provided for @month_nov.
+  ///
+  /// In es, this message translates to:
+  /// **'Noviembre'**
   String get month_nov;
+
+  /// No description provided for @month_dec.
+  ///
+  /// In es, this message translates to:
+  /// **'Diciembre'**
   String get month_dec;
+
+  /// No description provided for @tasks_selection_count.
+  ///
+  /// In es, this message translates to:
+  /// **'{count} seleccionadas'**
+  String tasks_selection_count(int count);
+
+  /// No description provided for @tasks_bulk_freeze.
+  ///
+  /// In es, this message translates to:
+  /// **'Congelar'**
+  String get tasks_bulk_freeze;
+
+  /// No description provided for @tasks_bulk_delete.
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar'**
+  String get tasks_bulk_delete;
+
+  /// No description provided for @tasks_bulk_delete_confirm_title.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Eliminar {count} tareas?'**
+  String tasks_bulk_delete_confirm_title(int count);
+
+  /// No description provided for @tasks_bulk_delete_confirm_body.
+  ///
+  /// In es, this message translates to:
+  /// **'Esta acción no se puede deshacer.'**
+  String get tasks_bulk_delete_confirm_body;
+
+  /// No description provided for @history_rate_button.
+  ///
+  /// In es, this message translates to:
+  /// **'Valorar'**
+  String get history_rate_button;
+
+  /// No description provided for @history_rate_sheet_title.
+  ///
+  /// In es, this message translates to:
+  /// **'Valorar tarea'**
+  String get history_rate_sheet_title;
+
+  /// No description provided for @history_rate_score_label.
+  ///
+  /// In es, this message translates to:
+  /// **'Puntuación: {score}'**
+  String history_rate_score_label(String score);
+
+  /// No description provided for @history_rate_note_hint.
+  ///
+  /// In es, this message translates to:
+  /// **'Nota privada (opcional)'**
+  String get history_rate_note_hint;
+
+  /// No description provided for @history_rate_submit.
+  ///
+  /// In es, this message translates to:
+  /// **'Enviar valoración'**
+  String get history_rate_submit;
 }
 
 class _AppLocalizationsDelegate

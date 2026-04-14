@@ -25,6 +25,7 @@ class HistoryEventTile extends StatelessWidget {
     this.homeId,
     this.currentUid,
     this.isPremium = false,
+    this.trailing,
   });
 
   final TaskEvent event;
@@ -34,6 +35,9 @@ class HistoryEventTile extends StatelessWidget {
   final String? homeId;
   final String? currentUid;
   final bool isPremium;
+  /// Widget opcional para el trailing del tile. Cuando se proporciona,
+  /// sobreescribe el trailing interno de cada sub-tile.
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +52,7 @@ class HistoryEventTile extends StatelessWidget {
         homeId: homeId,
         currentUid: currentUid,
         isPremium: isPremium,
+        trailingOverride: trailing,
       ),
       passed: (e) => _PassedTile(
         event: e,
@@ -56,6 +61,7 @@ class HistoryEventTile extends StatelessWidget {
         toName: toName ?? e.toUid,
         timestamp: _formatRelativeTime(l10n, e.createdAt),
         l10n: l10n,
+        trailingOverride: trailing,
       ),
     );
   }
@@ -91,6 +97,7 @@ class _CompletedTile extends StatelessWidget {
     this.homeId,
     this.currentUid,
     this.isPremium = false,
+    this.trailingOverride,
   });
   final CompletedEvent event;
   final String actorName;
@@ -100,6 +107,7 @@ class _CompletedTile extends StatelessWidget {
   final String? homeId;
   final String? currentUid;
   final bool isPremium;
+  final Widget? trailingOverride;
 
   bool get _canReview =>
       homeId != null &&
@@ -113,19 +121,9 @@ class _CompletedTile extends StatelessWidget {
         ? '${visual.value} ${event.taskTitleSnapshot}'
         : event.taskTitleSnapshot;
 
-    return ListTile(
-      key: Key('history_tile_${event.id}'),
-      leading: _Avatar(photoUrl: actorPhotoUrl, name: actorName),
-      title: Text(l10n.history_event_completed(actorName)),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(taskLabel, style: const TextStyle(fontWeight: FontWeight.w500)),
-          Text(timestamp,
-              style: const TextStyle(fontSize: 12, color: Colors.grey)),
-        ],
-      ),
-      trailing: _canReview
+    Widget? effectiveTrailing = trailingOverride;
+    if (effectiveTrailing == null) {
+      effectiveTrailing = _canReview
           ? TextButton(
               key: const Key('btn_review'),
               onPressed: () => showDialog(
@@ -143,7 +141,21 @@ class _CompletedTile extends StatelessWidget {
               ),
               child: Text(l10n.review_dialog_title),
             )
-          : const Icon(Icons.check_circle_outline, color: Colors.green),
+          : const Icon(Icons.check_circle_outline, color: Colors.green);
+    }
+    return ListTile(
+      key: Key('history_tile_${event.id}'),
+      leading: _Avatar(photoUrl: actorPhotoUrl, name: actorName),
+      title: Text(l10n.history_event_completed(actorName)),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(taskLabel, style: const TextStyle(fontWeight: FontWeight.w500)),
+          Text(timestamp,
+              style: const TextStyle(fontSize: 12, color: Colors.grey)),
+        ],
+      ),
+      trailing: effectiveTrailing,
       isThreeLine: true,
     );
   }
@@ -157,6 +169,7 @@ class _PassedTile extends StatelessWidget {
     required this.toName,
     required this.timestamp,
     required this.l10n,
+    this.trailingOverride,
   });
   final PassedEvent event;
   final String actorName;
@@ -164,6 +177,7 @@ class _PassedTile extends StatelessWidget {
   final String toName;
   final String timestamp;
   final AppLocalizations l10n;
+  final Widget? trailingOverride;
 
   @override
   Widget build(BuildContext context) {
@@ -199,7 +213,7 @@ class _PassedTile extends StatelessWidget {
               style: const TextStyle(fontSize: 12, color: Colors.grey)),
         ],
       ),
-      trailing: const Icon(Icons.swap_horiz, color: Colors.orange),
+      trailing: trailingOverride ?? const Icon(Icons.swap_horiz, color: Colors.orange),
       isThreeLine: true,
     );
   }

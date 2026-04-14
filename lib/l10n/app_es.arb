@@ -750,5 +750,13 @@
   "@tasks_bulk_delete_confirm_title": {
     "placeholders": { "count": { "type": "int" } }
   },
-  "tasks_bulk_delete_confirm_body": "Esta acción no se puede deshacer."
+  "tasks_bulk_delete_confirm_body": "Esta acción no se puede deshacer.",
+  "history_rate_button": "Valorar",
+  "history_rate_sheet_title": "Valorar tarea",
+  "history_rate_score_label": "Puntuación: {score}",
+  "@history_rate_score_label": {
+    "placeholders": { "score": { "type": "String" } }
+  },
+  "history_rate_note_hint": "Nota privada (opcional)",
+  "history_rate_submit": "Enviar valoración"
 }

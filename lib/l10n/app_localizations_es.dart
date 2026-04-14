@@ -965,80 +965,270 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get settings_plan_premium => 'Plan Premium';
 
-  @override String get tasks_title => 'Tareas';
-  @override String get tasks_empty_title => 'Sin tareas';
-  @override String get tasks_empty_body => 'Crea tu primera tarea para empezar';
-  @override String get tasks_empty_cta => 'Crear primera tarea';
-  @override String get tasks_create_title => 'Crear tarea';
-  @override String get tasks_edit_title => 'Editar tarea';
-  @override String get tasks_field_visual => 'Icono o emoji';
-  @override String get tasks_field_title_hint => 'Ej: Fregar los platos';
-  @override String get tasks_field_description_hint => 'Descripción (opcional)';
-  @override String get tasks_field_recurrence => 'Recurrencia';
-  @override String get tasks_field_assignment_mode => 'Modo de asignación';
-  @override String get tasks_field_difficulty => 'Dificultad';
-  @override String get tasks_assignment_basic_rotation => 'Rotación básica';
-  @override String get tasks_assignment_smart => 'Distribución inteligente';
-  @override String get tasks_assignment_members => 'Miembros asignados';
-  @override String get tasks_recurrence_every => 'Cada';
-  @override String get tasks_recurrence_hours => 'horas';
-  @override String get tasks_recurrence_days => 'días';
-  @override String get tasks_recurrence_start_time => 'Hora inicio';
-  @override String get tasks_recurrence_end_time => 'Hora fin (opcional)';
-  @override String get tasks_recurrence_time => 'Hora';
-  @override String get tasks_recurrence_day_of_month => 'Día del mes';
-  @override String get tasks_recurrence_week_of_month => 'Semana del mes';
-  @override String get tasks_recurrence_weekday => 'Día de la semana';
-  @override String get tasks_recurrence_month => 'Mes';
-  @override String get tasks_recurrence_timezone => 'Zona horaria';
-  @override String get tasks_recurrence_upcoming => 'Próximas fechas';
-  @override String get tasks_recurrence_hourly_label => 'Cada hora';
-  @override String get tasks_recurrence_daily_label => 'Diario';
-  @override String get tasks_recurrence_weekly_label => 'Semanal';
-  @override String get tasks_recurrence_monthly_fixed_label => 'Mensual (día fijo)';
-  @override String get tasks_recurrence_monthly_nth_label => 'Mensual (Nth semana)';
-  @override String get tasks_recurrence_yearly_fixed_label => 'Anual (fecha fija)';
-  @override String get tasks_recurrence_yearly_nth_label => 'Anual (Nth semana)';
-  @override String get tasks_section_active => 'Activas';
-  @override String get tasks_section_frozen => 'Congeladas';
-  @override String get tasks_action_edit => 'Editar';
-  @override String get tasks_action_freeze => 'Congelar';
-  @override String get tasks_action_unfreeze => 'Descongelar';
-  @override String get tasks_action_delete => 'Eliminar';
-  @override String get tasks_delete_confirm_title => '¿Eliminar tarea?';
-  @override String get tasks_delete_confirm_body => 'Esta acción no se puede deshacer.';
-  @override String get tasks_delete_confirm_btn => 'Sí, eliminar';
-  @override String get tasks_freeze_success => 'Tarea congelada';
-  @override String get tasks_unfreeze_success => 'Tarea activada';
-  @override String get tasks_save_error => 'Error al guardar la tarea';
-  @override String get tasks_detail_next_occurrences => 'Próximas fechas';
-  @override String get tasks_detail_assignment_order => 'Orden de asignación';
-  @override String get tasks_validation_title_empty => 'El título es obligatorio';
-  @override String get tasks_validation_title_too_long => 'Máximo 60 caracteres';
-  @override String get tasks_validation_no_assignees => 'Selecciona al menos un miembro';
-  @override String get tasks_validation_difficulty_range => 'El peso debe estar entre 0.5 y 3.0';
-  @override String get tasks_validation_recurrence_required => 'Elige un tipo de recurrencia';
-  @override String get weekday_mon => 'Lunes';
-  @override String get weekday_tue => 'Martes';
-  @override String get weekday_wed => 'Miércoles';
-  @override String get weekday_thu => 'Jueves';
-  @override String get weekday_fri => 'Viernes';
-  @override String get weekday_sat => 'Sábado';
-  @override String get weekday_sun => 'Domingo';
-  @override String get tasks_week_1st => 'Primera';
-  @override String get tasks_week_2nd => 'Segunda';
-  @override String get tasks_week_3rd => 'Tercera';
-  @override String get tasks_week_4th => 'Cuarta';
-  @override String get month_jan => 'Enero';
-  @override String get month_feb => 'Febrero';
-  @override String get month_mar => 'Marzo';
-  @override String get month_apr => 'Abril';
-  @override String get month_may => 'Mayo';
-  @override String get month_jun => 'Junio';
-  @override String get month_jul => 'Julio';
-  @override String get month_aug => 'Agosto';
-  @override String get month_sep => 'Septiembre';
-  @override String get month_oct => 'Octubre';
-  @override String get month_nov => 'Noviembre';
-  @override String get month_dec => 'Diciembre';
+  @override
+  String get tasks_title => 'Tareas';
+
+  @override
+  String get tasks_empty_title => 'Sin tareas';
+
+  @override
+  String get tasks_empty_body => 'Crea tu primera tarea para empezar';
+
+  @override
+  String get tasks_empty_cta => 'Crear primera tarea';
+
+  @override
+  String get tasks_create_title => 'Crear tarea';
+
+  @override
+  String get tasks_edit_title => 'Editar tarea';
+
+  @override
+  String get tasks_field_visual => 'Icono o emoji';
+
+  @override
+  String get tasks_field_title_hint => 'Ej: Fregar los platos';
+
+  @override
+  String get tasks_field_description_hint => 'Descripción (opcional)';
+
+  @override
+  String get tasks_field_recurrence => 'Recurrencia';
+
+  @override
+  String get tasks_field_assignment_mode => 'Modo de asignación';
+
+  @override
+  String get tasks_field_difficulty => 'Dificultad';
+
+  @override
+  String get tasks_assignment_basic_rotation => 'Rotación básica';
+
+  @override
+  String get tasks_assignment_smart => 'Distribución inteligente';
+
+  @override
+  String get tasks_assignment_members => 'Miembros asignados';
+
+  @override
+  String get tasks_recurrence_every => 'Cada';
+
+  @override
+  String get tasks_recurrence_hours => 'horas';
+
+  @override
+  String get tasks_recurrence_days => 'días';
+
+  @override
+  String get tasks_recurrence_start_time => 'Hora inicio';
+
+  @override
+  String get tasks_recurrence_end_time => 'Hora fin (opcional)';
+
+  @override
+  String get tasks_recurrence_time => 'Hora';
+
+  @override
+  String get tasks_recurrence_day_of_month => 'Día del mes';
+
+  @override
+  String get tasks_recurrence_week_of_month => 'Semana del mes';
+
+  @override
+  String get tasks_recurrence_weekday => 'Día de la semana';
+
+  @override
+  String get tasks_recurrence_month => 'Mes';
+
+  @override
+  String get tasks_recurrence_timezone => 'Zona horaria';
+
+  @override
+  String get tasks_recurrence_upcoming => 'Próximas fechas';
+
+  @override
+  String get tasks_recurrence_hourly_label => 'Cada hora';
+
+  @override
+  String get tasks_recurrence_daily_label => 'Diario';
+
+  @override
+  String get tasks_recurrence_weekly_label => 'Semanal';
+
+  @override
+  String get tasks_recurrence_monthly_fixed_label => 'Mensual (día fijo)';
+
+  @override
+  String get tasks_recurrence_monthly_nth_label => 'Mensual (Nth semana)';
+
+  @override
+  String get tasks_recurrence_yearly_fixed_label => 'Anual (fecha fija)';
+
+  @override
+  String get tasks_recurrence_yearly_nth_label => 'Anual (Nth semana)';
+
+  @override
+  String get tasks_section_active => 'Activas';
+
+  @override
+  String get tasks_section_frozen => 'Congeladas';
+
+  @override
+  String get tasks_action_edit => 'Editar';
+
+  @override
+  String get tasks_action_freeze => 'Congelar';
+
+  @override
+  String get tasks_action_unfreeze => 'Descongelar';
+
+  @override
+  String get tasks_action_delete => 'Eliminar';
+
+  @override
+  String get tasks_delete_confirm_title => '¿Eliminar tarea?';
+
+  @override
+  String get tasks_delete_confirm_body => 'Esta acción no se puede deshacer.';
+
+  @override
+  String get tasks_delete_confirm_btn => 'Sí, eliminar';
+
+  @override
+  String get tasks_freeze_success => 'Tarea congelada';
+
+  @override
+  String get tasks_unfreeze_success => 'Tarea activada';
+
+  @override
+  String get tasks_save_error => 'Error al guardar la tarea';
+
+  @override
+  String get tasks_detail_next_occurrences => 'Próximas fechas';
+
+  @override
+  String get tasks_detail_assignment_order => 'Orden de asignación';
+
+  @override
+  String get tasks_validation_title_empty => 'El título es obligatorio';
+
+  @override
+  String get tasks_validation_title_too_long => 'Máximo 60 caracteres';
+
+  @override
+  String get tasks_validation_no_assignees => 'Selecciona al menos un miembro';
+
+  @override
+  String get tasks_validation_difficulty_range =>
+      'El peso debe estar entre 0.5 y 3.0';
+
+  @override
+  String get tasks_validation_recurrence_required =>
+      'Elige un tipo de recurrencia';
+
+  @override
+  String get weekday_mon => 'Lunes';
+
+  @override
+  String get weekday_tue => 'Martes';
+
+  @override
+  String get weekday_wed => 'Miércoles';
+
+  @override
+  String get weekday_thu => 'Jueves';
+
+  @override
+  String get weekday_fri => 'Viernes';
+
+  @override
+  String get weekday_sat => 'Sábado';
+
+  @override
+  String get weekday_sun => 'Domingo';
+
+  @override
+  String get tasks_week_1st => 'Primera';
+
+  @override
+  String get tasks_week_2nd => 'Segunda';
+
+  @override
+  String get tasks_week_3rd => 'Tercera';
+
+  @override
+  String get tasks_week_4th => 'Cuarta';
+
+  @override
+  String get month_jan => 'Enero';
+
+  @override
+  String get month_feb => 'Febrero';
+
+  @override
+  String get month_mar => 'Marzo';
+
+  @override
+  String get month_apr => 'Abril';
+
+  @override
+  String get month_may => 'Mayo';
+
+  @override
+  String get month_jun => 'Junio';
+
+  @override
+  String get month_jul => 'Julio';
+
+  @override
+  String get month_aug => 'Agosto';
+
+  @override
+  String get month_sep => 'Septiembre';
+
+  @override
+  String get month_oct => 'Octubre';
+
+  @override
+  String get month_nov => 'Noviembre';
+
+  @override
+  String get month_dec => 'Diciembre';
+
+  @override
+  String tasks_selection_count(int count) {
+    return '$count seleccionadas';
+  }
+
+  @override
+  String get tasks_bulk_freeze => 'Congelar';
+
+  @override
+  String get tasks_bulk_delete => 'Eliminar';
+
+  @override
+  String tasks_bulk_delete_confirm_title(int count) {
+    return '¿Eliminar $count tareas?';
+  }
+
+  @override
+  String get tasks_bulk_delete_confirm_body =>
+      'Esta acción no se puede deshacer.';
+
+  @override
+  String get history_rate_button => 'Valorar';
+
+  @override
+  String get history_rate_sheet_title => 'Valorar tarea';
+
+  @override
+  String history_rate_score_label(String score) {
+    return 'Puntuación: $score';
+  }
+
+  @override
+  String get history_rate_note_hint => 'Nota privada (opcional)';
+
+  @override
+  String get history_rate_submit => 'Enviar valoración';
 }

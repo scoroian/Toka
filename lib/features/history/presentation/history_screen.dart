@@ -9,6 +9,7 @@ import '../domain/task_event.dart';
 import 'widgets/history_empty_state.dart';
 import 'widgets/history_event_tile.dart';
 import 'widgets/history_filter_bar.dart';
+import 'widgets/rate_event_sheet.dart';
 
 class HistoryScreen extends ConsumerStatefulWidget {
   const HistoryScreen({super.key});
@@ -115,6 +116,26 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
       actorName: item.actorName,
       actorPhotoUrl: item.actorPhotoUrl,
       toName: toName,
+      trailing: item.canRate
+          ? IconButton(
+              key: Key('rate_button_${item.raw.id}'),
+              icon: const Icon(Icons.star_border),
+              tooltip: AppLocalizations.of(context).history_rate_button,
+              onPressed: () => _showRateSheet(item),
+            )
+          : null,
+    );
+  }
+
+  void _showRateSheet(TaskEventItem item) {
+    final vm = ref.read(historyViewModelProvider);
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => RateEventSheet(
+        onSubmit: (rating, note) =>
+            vm.rateEvent(item.raw.id, rating, note: note),
+      ),
     );
   }
 }

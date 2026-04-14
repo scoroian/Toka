@@ -750,5 +750,13 @@
   "@tasks_bulk_delete_confirm_title": {
     "placeholders": { "count": { "type": "int" } }
   },
-  "tasks_bulk_delete_confirm_body": "This action cannot be undone."
+  "tasks_bulk_delete_confirm_body": "This action cannot be undone.",
+  "history_rate_button": "Rate",
+  "history_rate_sheet_title": "Rate task",
+  "history_rate_score_label": "Score: {score}",
+  "@history_rate_score_label": {
+    "placeholders": { "score": { "type": "String" } }
+  },
+  "history_rate_note_hint": "Private note (optional)",
+  "history_rate_submit": "Submit rating"
 }

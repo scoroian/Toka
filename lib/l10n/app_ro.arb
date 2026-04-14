@@ -750,5 +750,13 @@
   "@tasks_bulk_delete_confirm_title": {
     "placeholders": { "count": { "type": "int" } }
   },
-  "tasks_bulk_delete_confirm_body": "Această acțiune nu poate fi anulată."
+  "tasks_bulk_delete_confirm_body": "Această acțiune nu poate fi anulată.",
+  "history_rate_button": "Evaluează",
+  "history_rate_sheet_title": "Evaluează sarcina",
+  "history_rate_score_label": "Scor: {score}",
+  "@history_rate_score_label": {
+    "placeholders": { "score": { "type": "String" } }
+  },
+  "history_rate_note_hint": "Notă privată (opțional)",
+  "history_rate_submit": "Trimite evaluarea"
 }

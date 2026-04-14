@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:toka/features/tasks/application/all_tasks_view_model.dart';
 import 'package:toka/features/tasks/domain/task.dart';
@@ -47,6 +48,38 @@ void main() {
         homeId: 'home1',
       );
       expect(data.canManage, isFalse);
+    });
+  });
+
+  group('AllTasksSelectionNotifier', () {
+    test('toggle añade taskId cuando no está en el set', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      final notifier = container.read(allTasksSelectionNotifierProvider.notifier);
+
+      notifier.toggle('t1');
+      expect(container.read(allTasksSelectionNotifierProvider), contains('t1'));
+    });
+
+    test('toggle elimina taskId cuando ya está en el set', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      final notifier = container.read(allTasksSelectionNotifierProvider.notifier);
+
+      notifier.toggle('t1');
+      notifier.toggle('t1');
+      expect(container.read(allTasksSelectionNotifierProvider), isNot(contains('t1')));
+    });
+
+    test('clear vacía el set', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      final notifier = container.read(allTasksSelectionNotifierProvider.notifier);
+
+      notifier.toggle('t1');
+      notifier.toggle('t2');
+      notifier.clear();
+      expect(container.read(allTasksSelectionNotifierProvider), isEmpty);
     });
   });
 }

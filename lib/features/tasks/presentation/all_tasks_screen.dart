@@ -85,11 +85,14 @@ class _AllTasksScreenState extends ConsumerState<AllTasksScreen> {
         final appBar = isSelectionMode
             ? AppBar(
                 leading: IconButton(
-                  key: const Key('clear_selection_button'),
+                  key: const Key('exit_selection_button'),
                   icon: const Icon(Icons.close),
                   onPressed: vm.clearSelection,
                 ),
-                title: Text(l10n.tasks_selection_count(selectedIds.length)),
+                title: Text(
+                  key: const Key('selection_count_text'),
+                  l10n.tasks_selection_count(selectedIds.length),
+                ),
                 actions: [
                   if (data.canManage) ...[
                     IconButton(

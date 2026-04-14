@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../../../../l10n/app_localizations.dart';
 
@@ -24,11 +25,38 @@ class HomeJoinForm extends StatefulWidget {
 class _HomeJoinFormState extends State<HomeJoinForm> {
   final _formKey = GlobalKey<FormState>();
   final _codeCtrl = TextEditingController();
+  bool _showScanner = false;
+  MobileScannerController? _scannerCtrl;
 
   @override
   void dispose() {
+    _scannerCtrl?.dispose();
     _codeCtrl.dispose();
     super.dispose();
+  }
+
+  void _openScanner() {
+    _scannerCtrl = MobileScannerController();
+    setState(() => _showScanner = true);
+  }
+
+  void _closeScanner() {
+    _scannerCtrl?.dispose();
+    _scannerCtrl = null;
+    setState(() => _showScanner = false);
+  }
+
+  void _onDetect(BarcodeCapture capture) {
+    final code = capture.barcodes.firstOrNull?.rawValue;
+    if (code == null) return;
+    final cleaned = code.trim().toUpperCase();
+    if (RegExp(r'^[A-Z0-9]{6}$').hasMatch(cleaned)) {
+      _codeCtrl.text = cleaned;
+      _closeScanner();
+      if (_formKey.currentState?.validate() ?? false) {
+        widget.onJoin(cleaned);
+      }
+    }
   }
 
   @override
@@ -39,6 +67,32 @@ class _HomeJoinFormState extends State<HomeJoinForm> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          if (_showScanner) ...[
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: SizedBox(
+                height: 220,
+                child: MobileScanner(
+                  key: const Key('qr_scanner'),
+                  controller: _scannerCtrl,
+                  onDetect: _onDetect,
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              l10n.invite_sheet_qr_hint,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 8),
+            OutlinedButton(
+              key: const Key('btn_close_scanner'),
+              onPressed: _closeScanner,
+              child: Text(l10n.cancel),
+            ),
+            const SizedBox(height: 16),
+          ],
           TextFormField(
             key: const Key('invite_code_field'),
             controller: _codeCtrl,
@@ -51,6 +105,12 @@ class _HomeJoinFormState extends State<HomeJoinForm> {
             decoration: InputDecoration(
               labelText: l10n.onboarding_invite_code_label,
               hintText: l10n.onboarding_invite_code_hint,
+              suffixIcon: IconButton(
+                key: const Key('btn_scan_qr'),
+                icon: const Icon(Icons.qr_code_scanner),
+                tooltip: l10n.invite_sheet_scan_qr,
+                onPressed: widget.isLoading ? null : _openScanner,
+              ),
             ),
             validator: (v) {
               if (v == null || v.trim().length != 6) {

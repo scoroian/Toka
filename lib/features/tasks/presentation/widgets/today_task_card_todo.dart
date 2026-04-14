@@ -1,12 +1,14 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../profile/application/profile_provider.dart';
 import '../../domain/home_dashboard.dart';
 
-class TodayTaskCardTodo extends StatelessWidget {
+class TodayTaskCardTodo extends ConsumerWidget {
   final TaskPreview task;
   final String? currentUid;
   final VoidCallback? onDone;
@@ -41,12 +43,28 @@ class TodayTaskCardTodo extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final isAssignedToMe =
         task.currentAssigneeUid != null &&
         task.currentAssigneeUid == currentUid;
     final dueLabel = _dueDateLabel(context, l10n);
+
+    // Fallback a userProfileProvider si el dashboard no tiene nombre/foto
+    final assigneeUid = task.currentAssigneeUid;
+    String? displayName = task.currentAssigneeName;
+    String? displayPhoto = task.currentAssigneePhoto;
+    if (assigneeUid != null &&
+        (displayName == null || displayName.isEmpty || displayPhoto == null)) {
+      final profile =
+          ref.watch(userProfileProvider(assigneeUid)).valueOrNull;
+      if (profile != null) {
+        if (displayName == null || displayName.isEmpty) {
+          displayName = profile.nickname;
+        }
+        displayPhoto ??= profile.photoUrl;
+      }
+    }
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -58,15 +76,29 @@ class TodayTaskCardTodo extends StatelessWidget {
             Row(
               children: [
                 _AssigneeAvatar(
-                  name: task.currentAssigneeName,
-                  photoUrl: task.currentAssigneePhoto,
+                  name: displayName,
+                  photoUrl: displayPhoto,
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: Text(
-                    '${task.visualValue} ${task.title}',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                    overflow: TextOverflow.ellipsis,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${task.visualValue} ${task.title}',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if (displayName != null && displayName.isNotEmpty)
+                        Text(
+                          displayName,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(color: AppColors.textSecondary),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                    ],
                   ),
                 ),
                 const SizedBox(width: 8),

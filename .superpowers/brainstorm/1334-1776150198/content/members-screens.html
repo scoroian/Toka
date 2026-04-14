@@ -1,0 +1,284 @@
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  .phone-frame {
+    width: 340px;
+    background: #1a1a2e;
+    border-radius: 28px;
+    border: 2px solid #333;
+    overflow: hidden;
+    color: #f0f0f0;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+  .status-bar { background:#16213e; padding:7px 14px 3px; font-size:10px; display:flex; justify-content:space-between; color:#aaa; }
+  .app-bar { background:#16213e; padding:10px 14px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #2a2a4a; }
+  .app-title { font-size:15px; font-weight:700; }
+  .screen-body { background:#12122a; padding:10px 0; min-height:440px; }
+
+  /* --- MEMBERS LIST --- */
+  .section-header { padding:6px 14px 4px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:#7b8cb8; display:flex; align-items:center; justify-content:space-between; }
+  .member-card { margin:0 10px 7px; background:#1e1e3a; border-radius:13px; padding:10px 12px; display:flex; align-items:center; gap:10px; }
+  .avatar { border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; color:white; flex-shrink:0; }
+  .av-l { width:42px; height:42px; font-size:15px; }
+  .av-a { background:#e94560; }
+  .av-b { background:#0f3460; border:1px solid #7b8cb8; }
+  .av-c { background:#4ecca3; color:#12122a; }
+  .av-d { background:#7b2aff; }
+  .member-info { flex:1; min-width:0; }
+  .member-name { font-size:13px; font-weight:600; }
+  .member-role { font-size:10px; color:#7b8cb8; margin-top:1px; }
+  .member-stats { display:flex; align-items:center; gap:6px; margin-top:4px; }
+  .compliance-bar-bg { flex:1; height:4px; background:#2a2a5a; border-radius:2px; }
+  .compliance-bar-fill { height:4px; border-radius:2px; }
+  .compliance-pct { font-size:10px; font-weight:700; flex-shrink:0; }
+  .role-badge { padding:2px 7px; border-radius:8px; font-size:9px; font-weight:700; flex-shrink:0; }
+  .rb-owner { background:#f4a22722; color:#f4a227; border:1px solid #f4a22744; }
+  .rb-admin { background:#7b2aff22; color:#c084fc; border:1px solid #7b2aff44; }
+  .rb-member { background:#1e1e3a; color:#7b8cb8; border:1px solid #2a2a5a; }
+  .frozen-card { opacity:0.5; }
+  .frozen-badge { background:#2a2a5a; color:#7b8cb8; border:1px solid #3a3a6a; font-size:9px; padding:2px 7px; border-radius:8px; }
+  .divider { height:1px; background:#2a2a4a; margin:6px 10px 10px; }
+  .invite-btn { margin:0 10px 10px; background:#0f3460; border-radius:13px; padding:11px; text-align:center; font-size:13px; color:#7bbfff; font-weight:600; }
+
+  /* --- MEMBER DETAIL --- */
+  .detail-header { background:#16213e; padding:20px 14px 14px; text-align:center; }
+  .avatar-lg { width:70px; height:70px; font-size:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; color:white; margin:0 auto 8px; }
+  .detail-name { font-size:17px; font-weight:700; }
+  .detail-role { font-size:12px; color:#7b8cb8; margin-top:2px; }
+  .stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; padding:12px 10px; }
+  .stat-box { background:#1e1e3a; border-radius:12px; padding:10px; text-align:center; }
+  .stat-num { font-size:20px; font-weight:700; color:#e94560; }
+  .stat-num.green { color:#4ecca3; }
+  .stat-num.gold { color:#f4a227; }
+  .stat-label { font-size:9px; color:#7b8cb8; margin-top:2px; text-transform:uppercase; letter-spacing:0.5px; }
+  .radar-box { margin:0 10px 10px; background:#1e1e3a; border-radius:13px; padding:12px; }
+  .radar-title { font-size:11px; font-weight:700; color:#7b8cb8; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  /* Simple SVG radar */
+  .overflow-list { margin:0 10px 10px; background:#1e1e3a; border-radius:13px; padding:10px 12px; }
+  .overflow-title { font-size:10px; font-weight:700; color:#7b8cb8; text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
+  .overflow-item { display:flex; align-items:center; justify-content:space-between; padding:4px 0; font-size:12px; }
+  .overflow-score { font-size:12px; font-weight:700; color:#4ecca3; }
+  .score-bar { width:60px; height:5px; background:#2a2a5a; border-radius:3px; overflow:hidden; display:inline-block; vertical-align:middle; margin:0 6px; }
+  .score-fill { height:5px; background:#4ecca3; border-radius:3px; }
+  .bottom-nav { background:#16213e; display:flex; border-top:1px solid #2a2a4a; padding:8px 0 12px; }
+  .nav-item { flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; font-size:9px; color:#7b8cb8; }
+  .nav-item.active { color:#e94560; }
+  .nav-item .nav-icon { font-size:18px; }
+
+  .annotation { font-size:11px; color:#ccc; background:#1e2030; border-left:3px solid #e94560; padding:6px 10px; margin:5px 0; border-radius:0 6px 6px 0; }
+  .annotation code { color:#4ecca3; font-family:monospace; font-size:10px; }
+  .label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:#7b8cb8; margin:10px 0 4px; }
+  .gap-box { margin-top:10px; padding:10px; background:#1e2030; border-radius:8px; font-size:11px; border:1px solid #e9456040; }
+  .gap-box strong { color:#e94560; }
+  h3 { margin:0 0 6px; font-size:14px; }
+  h2 { margin:0 0 4px; }
+</style>
+
+<h2>Miembros + Detalle de miembro</h2>
+<p class="subtitle">Dos pantallas, dos ViewModels: <code style="color:#4ecca3">MembersViewModel</code> y <code style="color:#4ecca3">MemberProfileViewModel</code></p>
+
+<div style="display:flex; gap:24px; align-items:flex-start; flex-wrap:wrap;">
+
+  <!-- PHONE 1: Lista de miembros -->
+  <div>
+    <p style="text-align:center;font-size:12px;color:#7b8cb8;margin-bottom:6px">Lista de miembros</p>
+    <div class="phone-frame">
+      <div class="status-bar"><span>9:41</span><span>● ● ●</span></div>
+      <div class="app-bar">
+        <span class="app-title">Miembros</span>
+        <span style="font-size:16px">➕</span>
+      </div>
+      <div class="screen-body">
+        <!-- Activos -->
+        <div class="section-header"><span>Activos · 3</span></div>
+
+        <div class="member-card">
+          <div class="avatar av-l av-a">A</div>
+          <div class="member-info">
+            <div class="member-name">Ana García</div>
+            <div class="member-stats">
+              <div class="compliance-bar-bg"><div class="compliance-bar-fill" style="width:87%;background:#4ecca3"></div></div>
+              <div class="compliance-pct" style="color:#4ecca3">87%</div>
+            </div>
+          </div>
+          <div class="role-badge rb-owner">Propietaria</div>
+        </div>
+
+        <div class="member-card">
+          <div class="avatar av-l av-b">S</div>
+          <div class="member-info">
+            <div class="member-name">Sebas</div>
+            <div class="member-stats">
+              <div class="compliance-bar-bg"><div class="compliance-bar-fill" style="width:62%;background:#f4a227"></div></div>
+              <div class="compliance-pct" style="color:#f4a227">62%</div>
+            </div>
+          </div>
+          <div class="role-badge rb-admin">Admin</div>
+        </div>
+
+        <div class="member-card">
+          <div class="avatar av-l av-c">M</div>
+          <div class="member-info">
+            <div class="member-name">María</div>
+            <div class="member-stats">
+              <div class="compliance-bar-bg"><div class="compliance-bar-fill" style="width:95%;background:#4ecca3"></div></div>
+              <div class="compliance-pct" style="color:#4ecca3">95%</div>
+            </div>
+          </div>
+          <div class="role-badge rb-member">Miembro</div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Congelados -->
+        <div class="section-header"><span>Congelados · 1</span></div>
+
+        <div class="member-card frozen-card">
+          <div class="avatar av-l av-d">L</div>
+          <div class="member-info">
+            <div class="member-name">Luis</div>
+            <div class="member-stats">
+              <div class="compliance-bar-bg"><div class="compliance-bar-fill" style="width:45%;background:#555"></div></div>
+              <div class="compliance-pct" style="color:#555">45%</div>
+            </div>
+          </div>
+          <div class="frozen-badge">❄️ Congelado</div>
+        </div>
+
+        <div class="divider"></div>
+        <div class="invite-btn">+ Invitar miembro</div>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-item"><span class="nav-icon">🏠</span>Hoy</div>
+        <div class="nav-item"><span class="nav-icon">📋</span>Tareas</div>
+        <div class="nav-item active"><span class="nav-icon">👥</span>Miembros</div>
+        <div class="nav-item"><span class="nav-icon">🕐</span>Historial</div>
+        <div class="nav-item"><span class="nav-icon">⚙️</span>Ajustes</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHONE 2: Detalle de miembro -->
+  <div>
+    <p style="text-align:center;font-size:12px;color:#7b8cb8;margin-bottom:6px">Detalle de miembro</p>
+    <div class="phone-frame">
+      <div class="status-bar"><span>9:41</span><span>● ● ●</span></div>
+      <div class="detail-header">
+        <div class="avatar-lg av-b">S</div>
+        <div class="detail-name">Sebas</div>
+        <div class="detail-role">Administrador · Casa de Ana</div>
+      </div>
+      <div class="screen-body" style="overflow-y:auto;max-height:460px">
+        <!-- Estadísticas -->
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="stat-num">34</div>
+            <div class="stat-label">Completadas</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-num green">62%</div>
+            <div class="stat-label">Cumplimiento</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-num gold">🔥 7</div>
+            <div class="stat-label">Racha actual</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-num green">8.2</div>
+            <div class="stat-label">Puntuación media</div>
+          </div>
+        </div>
+
+        <!-- Gráfica radar -->
+        <div class="radar-box">
+          <div class="radar-title">Distribución por tarea</div>
+          <div style="text-align:center;padding:4px 0;">
+            <svg width="180" height="150" viewBox="-90 -75 180 150">
+              <!-- Grid hexagon lines -->
+              <polygon points="0,-55 47.6,-27.5 47.6,27.5 0,55 -47.6,27.5 -47.6,-27.5" fill="none" stroke="#2a2a5a" stroke-width="1"/>
+              <polygon points="0,-36 31.2,-18 31.2,18 0,36 -31.2,18 -31.2,-18" fill="none" stroke="#2a2a5a" stroke-width="1"/>
+              <polygon points="0,-18 15.6,-9 15.6,9 0,18 -15.6,9 -15.6,-9" fill="none" stroke="#2a2a5a" stroke-width="1"/>
+              <!-- Axes -->
+              <line x1="0" y1="0" x2="0" y2="-55" stroke="#3a3a6a" stroke-width="1"/>
+              <line x1="0" y1="0" x2="47.6" y2="-27.5" stroke="#3a3a6a" stroke-width="1"/>
+              <line x1="0" y1="0" x2="47.6" y2="27.5" stroke="#3a3a6a" stroke-width="1"/>
+              <line x1="0" y1="0" x2="0" y2="55" stroke="#3a3a6a" stroke-width="1"/>
+              <line x1="0" y1="0" x2="-47.6" y2="27.5" stroke="#3a3a6a" stroke-width="1"/>
+              <line x1="0" y1="0" x2="-47.6" y2="-27.5" stroke="#3a3a6a" stroke-width="1"/>
+              <!-- Data polygon (6 tasks shown in radar) -->
+              <polygon points="0,-44 38,-19 35,22 0,40 -28,22 -40,-20"
+                fill="#e9456033" stroke="#e94560" stroke-width="1.5"/>
+              <!-- Labels -->
+              <text x="0" y="-60" text-anchor="middle" fill="#aaa" font-size="8">🧹 Barrer</text>
+              <text x="55" y="-30" text-anchor="start" fill="#aaa" font-size="8">🍽️ Platos</text>
+              <text x="55" y="34" text-anchor="start" fill="#aaa" font-size="8">🛒 Compra</text>
+              <text x="0" y="67" text-anchor="middle" fill="#aaa" font-size="8">☕ Café</text>
+              <text x="-55" y="34" text-anchor="end" fill="#aaa" font-size="8">💡 Luz</text>
+              <text x="-55" y="-30" text-anchor="end" fill="#aaa" font-size="8">🗑️ Basura</text>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Overflow: tareas fuera del radar (>10 o <3 límite) -->
+        <div class="overflow-list">
+          <div class="overflow-title">Otras tareas (texto)</div>
+          <div class="overflow-item">
+            <span>🪟 Limpiar ventanas</span>
+            <span>
+              <div class="score-bar"><div class="score-fill" style="width:70%"></div></div>
+              <span class="overflow-score">7.0</span>
+            </span>
+          </div>
+          <div class="overflow-item">
+            <span>🌿 Regar plantas</span>
+            <span>
+              <div class="score-bar"><div class="score-fill" style="width:90%"></div></div>
+              <span class="overflow-score">9.0</span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Anotaciones -->
+  <div style="flex:1;min-width:240px;">
+    <h3>Contratos de las dos pantallas</h3>
+
+    <div class="label">MembersViewData — ya existe, añadir:</div>
+    <div class="annotation">
+      <code>activeMembers</code> y <code>frozenMembers</code> — ya existen ✓<br>
+      Cada <code>Member</code> necesita:<br>
+      <code>complianceRate: double</code> — ya existe ✓<br>
+      <code>role: MemberRole</code> — ya existe ✓<br>
+      <code>photoUrl: String?</code> — ya existe ✓<br>
+      <code>canInvite: bool</code> — ya existe ✓
+    </div>
+
+    <div class="label">MemberProfileViewData — añadir:</div>
+    <div class="annotation">
+      <code>completedCount: int</code> ← <strong>FALTA</strong><br>
+      <code>compliancePct: String</code> — ya existe ✓<br>
+      <code>streakCount: int</code> — racha sin pasar ← <strong>FALTA</strong><br>
+      <code>averageScore: double</code> — puntuación media de valoraciones ← <strong>FALTA</strong><br>
+      <code>radarEntries: List&lt;RadarEntry&gt;</code> — ya existe ✓<br>
+      <code>overflowEntries: List&lt;OverflowEntry&gt;</code> — tareas fuera del radar ← <strong>FALTA</strong>
+    </div>
+
+    <div class="label">Lógica del radar (regla de negocio)</div>
+    <div class="annotation">
+      Si tareas asignadas <strong>3–10</strong> → mostrar radar<br>
+      Si <strong>&lt; 3</strong> → solo lista de texto con puntuación<br>
+      Si <strong>&gt; 10</strong> → radar con las 10 principales + resto en lista overflow<br>
+      Criterio de "10 principales": ¿las más frecuentes? ¿las mejor valoradas?
+    </div>
+
+    <div class="gap-box">
+      <strong>Pregunta:</strong> Para el radar, cuando hay más de 10 tareas, ¿cuáles 10 van al radar?<br><br>
+      A) Las 10 más frecuentes (más ocurrencias)<br>
+      B) Las 10 con más valoraciones<br>
+      C) Las 10 con mayor puntuación media<br>
+      D) Tú decides el orden al crear/editar la tarea
+    </div>
+  </div>
+
+</div>

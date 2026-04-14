@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/routes.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../auth/application/auth_provider.dart';
 import '../application/settings_view_model.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -130,6 +131,34 @@ class SettingsScreen extends ConsumerWidget {
             leading: const Icon(Icons.privacy_tip_outlined),
             title: Text(l10n.settings_privacy_policy),
             onTap: () {},
+          ),
+          // ── Cerrar sesión ─────────────────────────────────────────────
+          const Divider(),
+          ListTile(
+            key: const Key('settings_sign_out'),
+            leading: const Icon(Icons.logout),
+            title: Text(l10n.settings_sign_out),
+            onTap: () async {
+              final confirmed = await showDialog<bool>(
+                context: context,
+                builder: (dialogCtx) => AlertDialog(
+                  title: Text(l10n.settings_sign_out_confirm),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(dialogCtx).pop(false),
+                      child: Text(l10n.cancel),
+                    ),
+                    FilledButton(
+                      onPressed: () => Navigator.of(dialogCtx).pop(true),
+                      child: Text(l10n.settings_sign_out),
+                    ),
+                  ],
+                ),
+              );
+              if (confirmed == true && context.mounted) {
+                await ref.read(authProvider.notifier).signOut();
+              }
+            },
           ),
           const SizedBox(height: 32),
         ],

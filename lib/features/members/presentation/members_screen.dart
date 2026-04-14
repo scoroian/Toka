@@ -5,7 +5,10 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/routes.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/loading_widget.dart';
+import '../../profile/application/profile_provider.dart';
+import '../../profile/domain/user_profile.dart';
 import '../application/members_view_model.dart';
+import '../domain/member.dart';
 import 'widgets/invite_member_sheet.dart';
 import 'widgets/member_card.dart';
 
@@ -31,6 +34,32 @@ class MembersScreen extends ConsumerWidget {
           return Scaffold(
             appBar: AppBar(title: Text(l10n.members_title)),
             body: Center(child: Text(l10n.error_generic)),
+          );
+        }
+
+        // Para miembros cuyo documento homes/{homeId}/members/{uid} no tiene
+        // nickname/photoUrl (cuando el CF no los denormalizó), hacemos fallback
+        // al perfil del usuario en users/{uid}.
+        final allMembers = [
+          ...data.activeMembers,
+          ...data.frozenMembers,
+        ];
+        final profileFallback = <String, UserProfile>{};
+        for (final m in allMembers) {
+          if (m.nickname.isEmpty || m.photoUrl == null) {
+            final profile = ref.watch(userProfileProvider(m.uid)).valueOrNull;
+            if (profile != null) profileFallback[m.uid] = profile;
+          }
+        }
+
+        Member enrich(Member m) {
+          final profile = profileFallback[m.uid];
+          if (profile == null) return m;
+          return m.copyWith(
+            nickname: m.nickname.isEmpty && profile.nickname.isNotEmpty
+                ? profile.nickname
+                : m.nickname,
+            photoUrl: m.photoUrl ?? profile.photoUrl,
           );
         }
 
@@ -61,7 +90,7 @@ class MembersScreen extends ConsumerWidget {
                   ),
                 ),
                 ...data.activeMembers.map((m) => MemberCard(
-                      member: m,
+                      member: enrich(m),
                       onTap: () => context.push(
                         AppRoutes.memberProfile.replaceFirst(':uid', m.uid),
                         extra: {'homeId': data.homeId},
@@ -78,7 +107,7 @@ class MembersScreen extends ConsumerWidget {
                   ),
                 ),
                 ...data.frozenMembers.map((m) => MemberCard(
-                      member: m,
+                      member: enrich(m),
                       onTap: () => context.push(
                         AppRoutes.memberProfile.replaceFirst(':uid', m.uid),
                         extra: {'homeId': data.homeId},

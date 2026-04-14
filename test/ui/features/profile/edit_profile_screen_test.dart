@@ -22,6 +22,8 @@ class _FakeEditProfileVM implements EditProfileViewModel {
     this.initialNickname,
     this.initialBio,
     this.initialPhone,
+    this.initialPhotoUrl,
+    this.selectedPhotoPath,
   });
 
   @override
@@ -38,9 +40,16 @@ class _FakeEditProfileVM implements EditProfileViewModel {
   final String? initialBio;
   @override
   final String? initialPhone;
+  @override
+  final String? initialPhotoUrl;
+  @override
+  final String? selectedPhotoPath;
 
   @override
   void setPhoneVisible(bool v) {}
+
+  @override
+  void setPhoto(String? path) {}
 
   @override
   Future<void> save({

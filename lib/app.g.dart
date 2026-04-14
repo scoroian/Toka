@@ -6,7 +6,7 @@ part of 'app.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$appRouterHash() => r'40bf801d773f3580c48faba1a1c5572a3feabfaf';
+String _$appRouterHash() => r'72ef36009d5c0ca6c58aaf926fe1e83e4348f06e';
 
 /// See also [appRouter].
 @ProviderFor(appRouter)
@@ -22,7 +22,7 @@ final appRouterProvider = Provider<GoRouter>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef AppRouterRef = ProviderRef<GoRouter>;
-String _$routerNotifierHash() => r'0b669806275288a784e1dd79e4d24d844e84a2e5';
+String _$routerNotifierHash() => r'62428c5d1d4e929188a2e813b398e936c5e5aab1';
 
 /// See also [RouterNotifier].
 @ProviderFor(RouterNotifier)

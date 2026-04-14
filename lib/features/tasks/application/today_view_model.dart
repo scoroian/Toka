@@ -7,11 +7,16 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../auth/application/auth_provider.dart';
 import '../../homes/application/current_home_provider.dart';
 import '../../homes/application/dashboard_provider.dart';
+import '../../members/application/members_provider.dart';
 import '../domain/home_dashboard.dart';
 import '../domain/recurrence_order.dart';
+import '../domain/recurrence_rule.dart';
+import '../domain/task.dart';
+import '../domain/task_status.dart';
 import '../presentation/widgets/pass_turn_dialog.dart';
 import 'task_completion_provider.dart';
 import 'task_pass_provider.dart';
+import 'tasks_provider.dart';
 
 part 'today_view_model.g.dart';
 
@@ -157,6 +162,41 @@ class _TodayViewModelImpl implements TodayViewModel {
   void retry() => ref.invalidate(dashboardProvider);
 }
 
+/// Convierte una [Task] en [TaskPreview] usando los miembros para resolver el nombre y foto.
+TaskPreview _taskToPreview(
+  Task task,
+  Map<String, String> memberNames,
+  Map<String, String?> memberPhotos,
+) {
+  final now = DateTime.now();
+  final todayStart = DateTime(now.year, now.month, now.day);
+  final isOverdue = task.nextDueAt.isBefore(todayStart);
+  final recurrenceType = switch (task.recurrenceRule) {
+    HourlyRule _ => 'hourly',
+    DailyRule _ => 'daily',
+    WeeklyRule _ => 'weekly',
+    MonthlyFixedRule _ || MonthlyNthRule _ => 'monthly',
+    YearlyFixedRule _ || YearlyNthRule _ => 'yearly',
+  };
+  return TaskPreview(
+    taskId: task.id,
+    title: task.title,
+    visualKind: task.visualKind,
+    visualValue: task.visualValue,
+    recurrenceType: recurrenceType,
+    currentAssigneeUid: task.currentAssigneeUid,
+    currentAssigneeName: task.currentAssigneeUid != null
+        ? memberNames[task.currentAssigneeUid]
+        : null,
+    currentAssigneePhoto: task.currentAssigneeUid != null
+        ? memberPhotos[task.currentAssigneeUid]
+        : null,
+    nextDueAt: task.nextDueAt,
+    isOverdue: isOverdue,
+    status: task.status.name,
+  );
+}
+
 @riverpod
 TodayViewModel todayViewModel(TodayViewModelRef ref) {
   final dashboardAsync = ref.watch(dashboardProvider);
@@ -165,12 +205,53 @@ TodayViewModel todayViewModel(TodayViewModelRef ref) {
   final homeId = ref.watch(currentHomeProvider).valueOrNull?.id ?? '';
 
   final viewData = dashboardAsync.whenData((data) {
-    if (data == null) return null;
+    // Dashboard disponible → usarlo directamente
+    if (data != null) {
+      return TodayViewData(
+        grouped: groupByRecurrence(data.activeTasksPreview, data.doneTasksPreview),
+        counters: data.counters,
+        showAdBanner: data.adFlags.showBanner,
+        adBannerUnit: data.adFlags.bannerUnit,
+        currentUid: currentUid,
+        homeId: homeId,
+        recurrenceOrder: RecurrenceOrder.all,
+      );
+    }
+
+    // Dashboard null (no construido aún) → fallback a tareas de Firestore
+    if (homeId.isEmpty) return null;
+
+    final tasksAsync = ref.watch(homeTasksProvider(homeId));
+    final tasks = tasksAsync.valueOrNull ?? [];
+    final activeTasks = tasks
+        .where((t) => t.status == TaskStatus.active)
+        .toList();
+    if (activeTasks.isEmpty) return null;
+
+    final members = ref.watch(homeMembersProvider(homeId)).valueOrNull ?? [];
+    final memberNames = {for (final m in members) m.uid: m.nickname};
+    final memberPhotos = {for (final m in members) m.uid: m.photoUrl};
+
+    final previews = activeTasks
+        .map((t) => _taskToPreview(t, memberNames, memberPhotos))
+        .toList();
+
     return TodayViewData(
-      grouped: groupByRecurrence(data.activeTasksPreview, data.doneTasksPreview),
-      counters: data.counters,
-      showAdBanner: data.adFlags.showBanner,
-      adBannerUnit: data.adFlags.bannerUnit,
+      grouped: groupByRecurrence(previews, []),
+      counters: DashboardCounters(
+        totalActiveTasks: activeTasks.length,
+        totalMembers: members.length,
+        tasksDueToday: previews.where((t) => t.isOverdue || (() {
+          final now = DateTime.now();
+          final start = DateTime(now.year, now.month, now.day);
+          final end = start.add(const Duration(days: 1));
+          return t.nextDueAt.isAfter(start.subtract(const Duration(seconds: 1))) &&
+              t.nextDueAt.isBefore(end);
+        })()).length,
+        tasksDoneToday: 0,
+      ),
+      showAdBanner: false,
+      adBannerUnit: '',
       currentUid: currentUid,
       homeId: homeId,
       recurrenceOrder: RecurrenceOrder.all,

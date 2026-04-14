@@ -6,7 +6,7 @@ part of 'profile_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$profileRepositoryHash() => r'da8ba5752cc8e2ed29c67760d5e591585b924db8';
+String _$profileRepositoryHash() => r'81a6fd36bb59fc963ee16176acc1d54b36ec552c';
 
 /// See also [profileRepository].
 @ProviderFor(profileRepository)
@@ -174,7 +174,7 @@ class _UserProfileProviderElement
   String get uid => (origin as UserProfileProvider).uid;
 }
 
-String _$profileEditorHash() => r'79e1c1e564d8684483686384a06939e18994bb0c';
+String _$profileEditorHash() => r'2be70e5fc0d19bb640fba576d58c9b8ca46a812b';
 
 /// See also [ProfileEditor].
 @ProviderFor(ProfileEditor)

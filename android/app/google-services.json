@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "1053657394907",
+    "project_id": "toka-dd241",
+    "storage_bucket": "toka-dd241.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1053657394907:android:203f31de6eac49244666fe",
+        "android_client_info": {
+          "package_name": "com.toka.toka"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1053657394907-v6tqk1bok6hpsr37r9i515vn5jn9qlhh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.toka.toka",
+            "certificate_hash": "4cb25875961a8187acf2de06ea61ce1f0899659d"
+          }
+        },
+        {
+          "client_id": "1053657394907-9n9fubr9cbrp0d9h2r723jtotl225etd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC1-Vni1CbxQKeZsjFggZBxckLPzPZT8kI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1053657394907-9n9fubr9cbrp0d9h2r723jtotl225etd.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1053657394907-kgg8fgcmrn4gfht8uvpchk775k483ktn.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.toka.toka"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

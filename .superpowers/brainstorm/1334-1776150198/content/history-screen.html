@@ -1,0 +1,208 @@
+<style>
+  .phone-frame {
+    width: 360px;
+    background: #1a1a2e;
+    border-radius: 32px;
+    border: 2px solid #333;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: #f0f0f0;
+    margin: 0 auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+  .status-bar { background:#16213e; padding:8px 16px 4px; font-size:11px; display:flex; justify-content:space-between; color:#aaa; }
+  .app-bar { background:#16213e; padding:12px 16px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #2a2a4a; }
+  .app-title { font-size:16px; font-weight:700; }
+  .filter-row { background:#16213e; padding:8px 12px 10px; display:flex; gap:8px; }
+  .filter-btn { flex:1; padding:7px 0; border-radius:20px; font-size:12px; font-weight:600; text-align:center; cursor:pointer; }
+  .filter-btn.active { background:#e94560; color:white; }
+  .filter-btn.inactive { background:#1e1e3a; color:#7b8cb8; border:1px solid #2a2a5a; }
+  .screen-body { background:#12122a; padding:10px 0; min-height:430px; }
+
+  .event-card { margin:0 12px 8px; background:#1e1e3a; border-radius:14px; padding:10px 12px; display:flex; align-items:center; gap:10px; }
+  .event-card.passed { border-left:3px solid #f4a227; }
+  .event-card.completed { border-left:3px solid #4ecca3; }
+
+  .avatar { width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; color:white; flex-shrink:0; }
+  .av-a { background:#e94560; }
+  .av-b { background:#0f3460; border:1px solid #7b8cb8; }
+  .av-c { background:#4ecca3; color:#12122a; }
+
+  .event-info { flex:1; min-width:0; }
+  .event-task { font-size:13px; font-weight:600; display:flex; align-items:center; gap:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .event-task .task-icon { font-size:16px; }
+  .event-who { font-size:11px; color:#7b8cb8; margin-top:2px; }
+  .event-ago { font-size:10px; color:#555; }
+
+  .action-btn { padding:5px 10px; border-radius:10px; font-size:10px; font-weight:700; flex-shrink:0; white-space:nowrap; }
+  .btn-rate { background:#0f3460; color:#7bbfff; border:1px solid #2a5a9a; }
+  .btn-self-done { background:#1a3a2a; color:#4ecca3; border:1px solid #2a6a4a; display:flex; align-items:center; gap:4px; }
+  .btn-self-passed { background:#3a2a10; color:#f4a227; border:1px solid #6a4a20; display:flex; align-items:center; gap:4px; }
+
+  .premium-banner {
+    margin:12px 12px 4px;
+    background: linear-gradient(135deg,#2a1a3a,#1a1a2e);
+    border:1px solid #7b2aff44;
+    border-radius:14px;
+    padding:14px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .premium-icon { font-size:28px; }
+  .premium-text { flex:1; }
+  .premium-text .t1 { font-size:13px; font-weight:700; color:#c084fc; }
+  .premium-text .t2 { font-size:11px; color:#7b8cb8; margin-top:2px; }
+  .btn-premium { background:#7b2aff; color:white; border-radius:20px; padding:6px 12px; font-size:11px; font-weight:700; white-space:nowrap; flex-shrink:0; }
+
+  .date-separator { padding:6px 16px 2px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:#555; }
+
+  .bottom-nav { background:#16213e; display:flex; border-top:1px solid #2a2a4a; padding:8px 0 12px; }
+  .nav-item { flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; font-size:9px; color:#7b8cb8; }
+  .nav-item.active { color:#e94560; }
+  .nav-item .nav-icon { font-size:20px; }
+
+  .annotation { font-size:11px; color:#ccc; background:#1e2030; border-left:3px solid #e94560; padding:6px 10px; margin:6px 0; border-radius:0 6px 6px 0; }
+  .annotation code { color:#4ecca3; font-family:monospace; font-size:10px; }
+  .label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:#7b8cb8; margin-bottom:6px; margin-top:12px; }
+  .gap-box { margin-top:12px; padding:12px; background:#1e2030; border-radius:8px; font-size:12px; border:1px solid #e9456040; }
+  .gap-box strong { color:#e94560; }
+</style>
+
+<h2>Pantalla Historial — Mockup de contrato <span style="background:#e94560;color:white;font-size:9px;padding:1px 6px;border-radius:4px;font-family:monospace">HistoryViewModel</span></h2>
+<p class="subtitle">Filtros Todas / Completadas / Pasadas — banner premium — botón valorar</p>
+
+<div style="display:flex;gap:32px;align-items:flex-start;flex-wrap:wrap;">
+
+  <div class="phone-frame">
+    <div class="status-bar"><span>9:41</span><span>● ● ●</span></div>
+    <div class="app-bar">
+      <span class="app-title">Historial</span>
+      <span style="font-size:18px">🔔</span>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filter-row">
+      <div class="filter-btn active">Todas</div>
+      <div class="filter-btn inactive">Completadas</div>
+      <div class="filter-btn inactive">Pasadas</div>
+    </div>
+
+    <div class="screen-body">
+
+      <!-- Banner premium (no-premium) -->
+      <div class="premium-banner">
+        <div class="premium-icon">👑</div>
+        <div class="premium-text">
+          <div class="t1">Historial completo</div>
+          <div class="t2">Solo los últimos 7 días. Hazte Premium para ver todo.</div>
+        </div>
+        <div class="btn-premium">Ver planes</div>
+      </div>
+
+      <div class="date-separator">Hoy</div>
+
+      <!-- Evento completado por otro → botón Valorar -->
+      <div class="event-card completed">
+        <div class="avatar av-a">A</div>
+        <div class="event-info">
+          <div class="event-task"><span class="task-icon">🧹</span>Barrer el salón</div>
+          <div class="event-who">Ana · hace 2h</div>
+        </div>
+        <div class="action-btn btn-rate">⭐ Valorar</div>
+      </div>
+
+      <!-- Evento completado por mí mismo -->
+      <div class="event-card completed">
+        <div class="avatar av-b">S</div>
+        <div class="event-info">
+          <div class="event-task"><span class="task-icon">🍽️</span>Fregar platos</div>
+          <div class="event-who">Tú · hace 4h</div>
+        </div>
+        <div class="action-btn btn-self-done"><span>✓</span>Hecha</div>
+      </div>
+
+      <!-- Evento pasado por otro → botón Valorar (pase tiene valoración?) -->
+      <div class="event-card passed">
+        <div class="avatar av-c">M</div>
+        <div class="event-info">
+          <div class="event-task"><span class="task-icon">🛒</span>Compra semanal</div>
+          <div class="event-who">María · hace 5h</div>
+        </div>
+        <div class="action-btn btn-rate">⭐ Valorar</div>
+      </div>
+
+      <!-- Evento pasado por mí mismo -->
+      <div class="event-card passed">
+        <div class="avatar av-b">S</div>
+        <div class="event-info">
+          <div class="event-task"><span class="task-icon">💡</span>Pagar facturas</div>
+          <div class="event-who">Tú · hace 6h</div>
+        </div>
+        <div class="action-btn btn-self-passed"><span>↩</span>Pasada</div>
+      </div>
+
+      <div class="date-separator">Ayer</div>
+
+      <div class="event-card completed">
+        <div class="avatar av-a">A</div>
+        <div class="event-info">
+          <div class="event-task"><span class="task-icon">☕</span>Preparar café</div>
+          <div class="event-who">Ana · ayer 8:30</div>
+        </div>
+        <div class="action-btn btn-rate">⭐ Valorar</div>
+      </div>
+
+    </div>
+
+    <div class="bottom-nav">
+      <div class="nav-item"><span class="nav-icon">🏠</span>Hoy</div>
+      <div class="nav-item"><span class="nav-icon">📋</span>Tareas</div>
+      <div class="nav-item"><span class="nav-icon">👥</span>Miembros</div>
+      <div class="nav-item active"><span class="nav-icon">🕐</span>Historial</div>
+      <div class="nav-item"><span class="nav-icon">⚙️</span>Ajustes</div>
+    </div>
+  </div>
+
+  <!-- Anotaciones -->
+  <div style="flex:1;min-width:260px;">
+    <h3>Contrato <code style="font-size:13px;color:#4ecca3">HistoryViewModel</code></h3>
+
+    <div class="label">Estado actual (ya existe)</div>
+    <div class="annotation">
+      <code>events: AsyncValue&lt;List&lt;TaskEvent&gt;&gt;</code><br>
+      <code>filter: HistoryFilter</code> — Todas / Completadas / Pasadas<br>
+      <code>hasMore: bool</code>, <code>isPremium: bool</code><br>
+      <code>loadMore()</code>, <code>applyFilter(HistoryFilter)</code>
+    </div>
+
+    <div class="label">Qué falta en TaskEvent</div>
+    <div class="annotation">
+      <code>actorPhotoUrl: String?</code> — foto de quien lo hizo ← <strong>FALTA</strong><br>
+      <code>actorName: String</code> — nombre del actor ← <strong>FALTA</strong><br>
+      <code>taskIconKind: String</code> — emoji o icono ← <strong>FALTA</strong><br>
+      <code>taskIconValue: String</code><br>
+      <code>isOwnEvent: bool</code> — si el actor es el usuario logueado ← <strong>FALTA</strong><br>
+      <code>isRated: bool</code> — si ya se valoró ← <strong>FALTA</strong> (¿ocultar botón si ya se valoró?)
+    </div>
+
+    <div class="label">Banner premium</div>
+    <div class="annotation">
+      <code>isPremium: bool</code> — ya existe<br>
+      Si <code>false</code>, el screen muestra el banner encima de la lista.
+    </div>
+
+    <div class="label">Acción valorar</div>
+    <div class="annotation">
+      El botón "Valorar" abre un diálogo en el screen.<br>
+      El ViewModel expone: <code>rateEvent(eventId, rating, note?)</code><br>
+      Una vez valorado, <code>isRated</code> pasa a <code>true</code> y el botón desaparece/cambia.
+    </div>
+
+    <div class="gap-box">
+      <strong>Pregunta abierta:</strong><br><br>
+      ¿Los eventos de tipo <strong>Pasada</strong> también se pueden valorar (botón "Valorar"),
+      o solo los de tipo <strong>Completada</strong>?<br><br>
+      En el mockup se muestra "Valorar" para ambos tipos cuando el actor es otro miembro.
+      ¿Es correcto?
+    </div>
+  </div>
+</div>

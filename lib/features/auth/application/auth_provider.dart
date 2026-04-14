@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -31,16 +33,27 @@ class Auth extends _$Auth {
 
   @override
   AuthState build() {
+    // Si Firebase Auth no emite en 15 s (p.ej. GMS roto), ir al login.
+    final timer = Timer(const Duration(seconds: 15), () {
+      if (state.maybeWhen(initial: () => true, orElse: () => false)) {
+        state = const AuthState.unauthenticated();
+      }
+    });
+    ref.onDispose(timer.cancel);
+
     ref.listen<AsyncValue<AuthUser?>>(
       authStateChangesProvider,
-      (_, next) => next.whenData((user) {
-        if (user != null) {
-          state = AuthState.authenticated(user);
-          ref.read(localeNotifierProvider.notifier).initialize(user.uid);
-        } else {
-          state = const AuthState.unauthenticated();
-        }
-      }),
+      (_, next) {
+        timer.cancel();
+        next.whenData((user) {
+          if (user != null) {
+            state = AuthState.authenticated(user);
+            ref.read(localeNotifierProvider.notifier).initialize(user.uid);
+          } else {
+            state = const AuthState.unauthenticated();
+          }
+        });
+      },
     );
     return const AuthState.initial();
   }

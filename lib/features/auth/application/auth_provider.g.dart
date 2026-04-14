@@ -40,7 +40,7 @@ final authStateChangesProvider = StreamProvider<AuthUser?>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef AuthStateChangesRef = StreamProviderRef<AuthUser?>;
-String _$authHash() => r'cc1c7d5d55f1d5c71149181601056e95f519fc38';
+String _$authHash() => r'9cba246b049ac31235577cfdb34a6eca4d38a6bd';
 
 /// See also [Auth].
 @ProviderFor(Auth)

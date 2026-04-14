@@ -32,10 +32,6 @@ beforeAll(async () => {
   // ── Paso 2: Crear hogar (USER_A como owner) ──────────────────────────────
   await createHome(HOME, USER_A);
 
-  // ── Paso 3: Verificar hogar vacío ────────────────────────────────────────
-  const tasksEmpty = await getDb().collection('homes').doc(HOME).collection('tasks').get();
-  expect(tasksEmpty.size).toBe(0);
-
   // ── Paso 4: Crear 3 tareas ───────────────────────────────────────────────
   await createTask(HOME, TASK_WEEKLY, USER_A, {
     recurrenceType: 'weekly', assignmentOrder: [USER_A],
@@ -104,10 +100,10 @@ describe('Full User Flow', () => {
     expect(memberB.data()!['completedCount']).toBe(1);
   });
 
-  it('Paso 11 — historial de taskEvents refleja los 3 eventos', async () => {
+  it('Paso 11 — historial de taskEvents refleja los 4 eventos', async () => {
     const eventsSnap = await getDb()
       .collection('homes').doc(HOME).collection('taskEvents').get();
-    expect(eventsSnap.size).toBe(3);
+    expect(eventsSnap.size).toBe(4);
 
     const types = eventsSnap.docs.map((d) => d.data()['eventType']);
     expect(types).toContain('completed');

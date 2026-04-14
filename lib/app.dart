@@ -9,6 +9,7 @@ import 'core/services/locale_service.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/application/auth_provider.dart';
 import 'features/auth/application/auth_state.dart';
+import 'features/homes/application/current_home_provider.dart';
 import 'features/auth/presentation/forgot_password_screen.dart';
 import 'features/auth/presentation/login_screen.dart';
 import 'features/auth/presentation/register_screen.dart';
@@ -45,11 +46,19 @@ class RouterNotifier extends _$RouterNotifier implements Listenable {
 
   @override
   void build() {
-    ref.listen<AuthState>(authProvider, (_, __) {
+    void notify() {
       for (final l in _listeners) {
         l();
       }
-    });
+    }
+
+    ref.listen<AuthState>(authProvider, (_, __) => notify());
+
+    // También escuchar currentHomeProvider para que el router se re-evalúe
+    // cuando el hogar termina de cargar (loading → data). Sin esto, la primera
+    // vez que el usuario se autentica, currentHomeProvider todavía está en
+    // AsyncLoading y el redirect va a /onboarding aunque ya tenga hogar.
+    ref.listen<AsyncValue<dynamic>>(currentHomeProvider, (_, __) => notify());
   }
 
   @override
@@ -74,6 +83,18 @@ class RouterNotifier extends _$RouterNotifier implements Listenable {
       loading: () => location == AppRoutes.splash ? null : AppRoutes.splash,
       authenticated: (_) {
         if (authScreens.contains(location) || location == AppRoutes.splash) {
+          final homeAsync = ref.read(currentHomeProvider);
+          // Todavía cargando → esperar en la splash para no mostrar onboarding
+          // a usuarios que ya tienen hogar. RouterNotifier escucha
+          // currentHomeProvider y re-evaluará el redirect cuando resuelva.
+          if (homeAsync.isLoading) {
+            return location == AppRoutes.splash ? null : AppRoutes.splash;
+          }
+          // Hogar confirmado en Firestore → ir directo a home.
+          if (homeAsync.valueOrNull != null) {
+            return AppRoutes.home;
+          }
+          // Hogar confirmado nulo → usuario nuevo, ir a onboarding.
           return AppRoutes.onboarding;
         }
         return null;

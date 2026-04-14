@@ -368,6 +368,59 @@ class AppLocalizationsRo extends AppLocalizations {
   String get homes_pending_tasks_badge => 'Ai sarcini în așteptare';
 
   @override
+  String get homes_add_home => 'Adaugă cămin';
+
+  @override
+  String get homes_add_create => 'Creează un cămin';
+
+  @override
+  String get homes_add_join => 'Alătură-te unui cămin';
+
+  @override
+  String get homes_add_join_by_code => 'Introdu codul';
+
+  @override
+  String get homes_add_join_by_qr => 'Scanează QR';
+
+  @override
+  String get homes_create_name_hint => 'Numele căminului';
+
+  @override
+  String get homes_create_button => 'Creează';
+
+  @override
+  String get homes_join_code_title => 'Alătură-te cu cod';
+
+  @override
+  String get homes_join_button => 'Alătură-te';
+
+  @override
+  String get homes_max_reached_title => 'Limită de cămine atinsă';
+
+  @override
+  String get homes_max_reached_body =>
+      'Ești deja în numărul maxim de 5 cămine posibile.';
+
+  @override
+  String get homes_upgrade_title => 'Vrei un alt cămin?';
+
+  @override
+  String get homes_upgrade_body =>
+      'Abonează-te la Premium pentru a debloca un slot suplimentar.';
+
+  @override
+  String get homes_upgrade_button => 'Vezi planuri';
+
+  @override
+  String get homes_error_no_slots => 'Nu există locuri disponibile';
+
+  @override
+  String get homes_error_invalid_code => 'Cod invalid';
+
+  @override
+  String get homes_error_expired_code => 'Codul a expirat';
+
+  @override
   String get recurrenceHourly => 'Orar';
 
   @override
@@ -517,6 +570,12 @@ class AppLocalizationsRo extends AppLocalizations {
   String get invite_sheet_copy_code => 'Copiază cod';
 
   @override
+  String get invite_sheet_scan_qr => 'Scanează QR';
+
+  @override
+  String get invite_sheet_qr_hint => 'Îndreaptă camera spre codul QR';
+
+  @override
   String get invite_sheet_code_copied => 'Cod copiat';
 
   @override
@@ -539,6 +598,28 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get member_profile_history_90d => 'Ultimele 90 zile';
+
+  @override
+  String get member_profile_promote_admin => 'Fă administrator';
+
+  @override
+  String get member_profile_demote_admin => 'Elimină administrator';
+
+  @override
+  String member_profile_promote_admin_confirm(String name) {
+    return 'Faci din $name un administrator al acestei case?';
+  }
+
+  @override
+  String member_profile_demote_admin_confirm(String name) {
+    return 'Elimini rolul de administrator al lui $name?';
+  }
+
+  @override
+  String get member_profile_promoted_ok => 'Membru promovat la administrator';
+
+  @override
+  String get member_profile_demoted_ok => 'Administrator retrogradat la membru';
 
   @override
   String get profile_title => 'Profilul meu';
@@ -955,85 +1036,248 @@ class AppLocalizationsRo extends AppLocalizations {
   String get settings_privacy_policy => 'Politica de confidențialitate';
 
   @override
+  String get settings_sign_out => 'Deconectare';
+
+  @override
+  String get settings_sign_out_confirm => 'Te deconectezi?';
+
+  @override
   String get settings_plan_free => 'Plan gratuit';
 
   @override
   String get settings_plan_premium => 'Plan Premium';
 
-  @override String get tasks_title => 'Sarcini';
-  @override String get tasks_empty_title => 'Nicio sarcină';
-  @override String get tasks_empty_body => 'Creează prima ta sarcină pentru a începe';
-  @override String get tasks_empty_cta => 'Creează prima sarcină';
-  @override String get tasks_create_title => 'Creează sarcină';
-  @override String get tasks_edit_title => 'Editează sarcina';
-  @override String get tasks_field_visual => 'Icoană sau emoji';
-  @override String get tasks_field_title_hint => 'Ex: Spălat vasele';
-  @override String get tasks_field_description_hint => 'Descriere (opțional)';
-  @override String get tasks_field_recurrence => 'Recurență';
-  @override String get tasks_field_assignment_mode => 'Mod de atribuire';
-  @override String get tasks_field_difficulty => 'Dificultate';
-  @override String get tasks_assignment_basic_rotation => 'Rotație de bază';
-  @override String get tasks_assignment_smart => 'Distribuție inteligentă';
-  @override String get tasks_assignment_members => 'Membri atribuiți';
-  @override String get tasks_recurrence_every => 'La fiecare';
-  @override String get tasks_recurrence_hours => 'ore';
-  @override String get tasks_recurrence_days => 'zile';
-  @override String get tasks_recurrence_start_time => 'Ora de început';
-  @override String get tasks_recurrence_end_time => 'Ora de sfârșit (opțional)';
-  @override String get tasks_recurrence_time => 'Oră';
-  @override String get tasks_recurrence_day_of_month => 'Ziua lunii';
-  @override String get tasks_recurrence_week_of_month => 'Săptămâna lunii';
-  @override String get tasks_recurrence_weekday => 'Ziua săptămânii';
-  @override String get tasks_recurrence_month => 'Lună';
-  @override String get tasks_recurrence_timezone => 'Fus orar';
-  @override String get tasks_recurrence_upcoming => 'Date viitoare';
-  @override String get tasks_recurrence_hourly_label => 'La fiecare oră';
-  @override String get tasks_recurrence_daily_label => 'Zilnic';
-  @override String get tasks_recurrence_weekly_label => 'Săptămânal';
-  @override String get tasks_recurrence_monthly_fixed_label => 'Lunar (zi fixă)';
-  @override String get tasks_recurrence_monthly_nth_label => 'Lunar (a N-a săptămână)';
-  @override String get tasks_recurrence_yearly_fixed_label => 'Anual (dată fixă)';
-  @override String get tasks_recurrence_yearly_nth_label => 'Anual (a N-a săptămână)';
-  @override String get tasks_section_active => 'Active';
-  @override String get tasks_section_frozen => 'Înghețate';
-  @override String get tasks_action_edit => 'Editează';
-  @override String get tasks_action_freeze => 'Îngheață';
-  @override String get tasks_action_unfreeze => 'Dezgheață';
-  @override String get tasks_action_delete => 'Șterge';
-  @override String get tasks_delete_confirm_title => 'Ștergi sarcina?';
-  @override String get tasks_delete_confirm_body => 'Această acțiune nu poate fi anulată.';
-  @override String get tasks_delete_confirm_btn => 'Da, șterge';
-  @override String get tasks_freeze_success => 'Sarcină înghețată';
-  @override String get tasks_unfreeze_success => 'Sarcină activată';
-  @override String get tasks_save_error => 'Eroare la salvarea sarcinii';
-  @override String get tasks_detail_next_occurrences => 'Date viitoare';
-  @override String get tasks_detail_assignment_order => 'Ordinea atribuirii';
-  @override String get tasks_validation_title_empty => 'Titlul este obligatoriu';
-  @override String get tasks_validation_title_too_long => 'Maximum 60 de caractere';
-  @override String get tasks_validation_no_assignees => 'Selectează cel puțin un membru';
-  @override String get tasks_validation_difficulty_range => 'Greutatea trebuie să fie între 0.5 și 3.0';
-  @override String get tasks_validation_recurrence_required => 'Alege un tip de recurență';
-  @override String get weekday_mon => 'Luni';
-  @override String get weekday_tue => 'Marți';
-  @override String get weekday_wed => 'Miercuri';
-  @override String get weekday_thu => 'Joi';
-  @override String get weekday_fri => 'Vineri';
-  @override String get weekday_sat => 'Sâmbătă';
-  @override String get weekday_sun => 'Duminică';
-  @override String get tasks_week_1st => 'Prima';
-  @override String get tasks_week_2nd => 'A doua';
-  @override String get tasks_week_3rd => 'A treia';
-  @override String get tasks_week_4th => 'A patra';
-  @override String get month_jan => 'Ianuarie';
-  @override String get month_feb => 'Februarie';
-  @override String get month_mar => 'Martie';
-  @override String get month_apr => 'Aprilie';
-  @override String get month_may => 'Mai';
-  @override String get month_jun => 'Iunie';
-  @override String get month_jul => 'Iulie';
-  @override String get month_aug => 'August';
-  @override String get month_sep => 'Septembrie';
-  @override String get month_oct => 'Octombrie';
-  @override String get month_nov => 'Noiembrie';
-  @override String get month_dec => 'Decembrie';
+  @override
+  String get tasks_title => 'Sarcini';
+
+  @override
+  String get tasks_empty_title => 'Nicio sarcină';
+
+  @override
+  String get tasks_empty_body => 'Creează prima ta sarcină pentru a începe';
+
+  @override
+  String get tasks_empty_cta => 'Creează prima sarcină';
+
+  @override
+  String get tasks_create_title => 'Creează sarcină';
+
+  @override
+  String get tasks_edit_title => 'Editează sarcina';
+
+  @override
+  String get tasks_field_visual => 'Icoană sau emoji';
+
+  @override
+  String get tasks_field_title_hint => 'Ex: Spălat vasele';
+
+  @override
+  String get tasks_field_description_hint => 'Descriere (opțional)';
+
+  @override
+  String get tasks_field_recurrence => 'Recurență';
+
+  @override
+  String get tasks_field_assignment_mode => 'Mod de atribuire';
+
+  @override
+  String get tasks_field_difficulty => 'Dificultate';
+
+  @override
+  String get tasks_assignment_basic_rotation => 'Rotație de bază';
+
+  @override
+  String get tasks_assignment_smart => 'Distribuție inteligentă';
+
+  @override
+  String get tasks_assignment_members => 'Membri atribuiți';
+
+  @override
+  String get tasks_recurrence_every => 'La fiecare';
+
+  @override
+  String get tasks_recurrence_hours => 'ore';
+
+  @override
+  String get tasks_recurrence_days => 'zile';
+
+  @override
+  String get tasks_recurrence_start_time => 'Ora de început';
+
+  @override
+  String get tasks_recurrence_end_time => 'Ora de sfârșit (opțional)';
+
+  @override
+  String get tasks_recurrence_time => 'Oră';
+
+  @override
+  String get tasks_recurrence_day_of_month => 'Ziua lunii';
+
+  @override
+  String get tasks_recurrence_week_of_month => 'Săptămâna lunii';
+
+  @override
+  String get tasks_recurrence_weekday => 'Ziua săptămânii';
+
+  @override
+  String get tasks_recurrence_month => 'Lună';
+
+  @override
+  String get tasks_recurrence_timezone => 'Fus orar';
+
+  @override
+  String get tasks_recurrence_upcoming => 'Date viitoare';
+
+  @override
+  String get tasks_recurrence_hourly_label => 'La fiecare oră';
+
+  @override
+  String get tasks_recurrence_daily_label => 'Zilnic';
+
+  @override
+  String get tasks_recurrence_weekly_label => 'Săptămânal';
+
+  @override
+  String get tasks_recurrence_monthly_fixed_label => 'Lunar (zi fixă)';
+
+  @override
+  String get tasks_recurrence_monthly_nth_label => 'Lunar (a N-a săptămână)';
+
+  @override
+  String get tasks_recurrence_yearly_fixed_label => 'Anual (dată fixă)';
+
+  @override
+  String get tasks_recurrence_yearly_nth_label => 'Anual (a N-a săptămână)';
+
+  @override
+  String get tasks_section_active => 'Active';
+
+  @override
+  String get tasks_section_frozen => 'Înghețate';
+
+  @override
+  String get tasks_status_frozen => 'Înghețată';
+
+  @override
+  String get tasks_action_edit => 'Editează';
+
+  @override
+  String get tasks_action_freeze => 'Îngheață';
+
+  @override
+  String get tasks_action_unfreeze => 'Dezgheață';
+
+  @override
+  String get tasks_action_delete => 'Șterge';
+
+  @override
+  String get tasks_delete_confirm_title => 'Ștergi sarcina?';
+
+  @override
+  String get tasks_delete_confirm_body =>
+      'Această acțiune nu poate fi anulată.';
+
+  @override
+  String get tasks_delete_confirm_btn => 'Da, șterge';
+
+  @override
+  String get tasks_freeze_success => 'Sarcină înghețată';
+
+  @override
+  String get tasks_unfreeze_success => 'Sarcină activată';
+
+  @override
+  String get tasks_save_error => 'Eroare la salvarea sarcinii';
+
+  @override
+  String get tasks_detail_next_occurrences => 'Date viitoare';
+
+  @override
+  String get tasks_detail_assignment_order => 'Ordinea atribuirii';
+
+  @override
+  String get tasks_validation_title_empty => 'Titlul este obligatoriu';
+
+  @override
+  String get tasks_validation_title_too_long => 'Maximum 60 de caractere';
+
+  @override
+  String get tasks_validation_no_assignees => 'Selectează cel puțin un membru';
+
+  @override
+  String get tasks_validation_difficulty_range =>
+      'Greutatea trebuie să fie între 0.5 și 3.0';
+
+  @override
+  String get tasks_validation_recurrence_required =>
+      'Alege un tip de recurență';
+
+  @override
+  String get weekday_mon => 'Luni';
+
+  @override
+  String get weekday_tue => 'Marți';
+
+  @override
+  String get weekday_wed => 'Miercuri';
+
+  @override
+  String get weekday_thu => 'Joi';
+
+  @override
+  String get weekday_fri => 'Vineri';
+
+  @override
+  String get weekday_sat => 'Sâmbătă';
+
+  @override
+  String get weekday_sun => 'Duminică';
+
+  @override
+  String get tasks_week_1st => 'Prima';
+
+  @override
+  String get tasks_week_2nd => 'A doua';
+
+  @override
+  String get tasks_week_3rd => 'A treia';
+
+  @override
+  String get tasks_week_4th => 'A patra';
+
+  @override
+  String get month_jan => 'Ianuarie';
+
+  @override
+  String get month_feb => 'Februarie';
+
+  @override
+  String get month_mar => 'Martie';
+
+  @override
+  String get month_apr => 'Aprilie';
+
+  @override
+  String get month_may => 'Mai';
+
+  @override
+  String get month_jun => 'Iunie';
+
+  @override
+  String get month_jul => 'Iulie';
+
+  @override
+  String get month_aug => 'August';
+
+  @override
+  String get month_sep => 'Septembrie';
+
+  @override
+  String get month_oct => 'Octombrie';
+
+  @override
+  String get month_nov => 'Noiembrie';
+
+  @override
+  String get month_dec => 'Decembrie';
 }

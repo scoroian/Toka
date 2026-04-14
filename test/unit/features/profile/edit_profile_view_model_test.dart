@@ -44,6 +44,7 @@ class _FakeProfileEditor extends ProfileEditor {
     String? bio,
     String? phone,
     String? phoneVisibility,
+    String? photoLocalPath,
   }) async {}
 }
 

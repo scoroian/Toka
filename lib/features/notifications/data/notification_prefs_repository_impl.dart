@@ -26,17 +26,19 @@ class NotificationPrefsRepositoryImpl implements NotificationPrefsRepository {
 
   @override
   Future<void> savePrefs(NotificationPreferences prefs) async {
-    await _memberRef(prefs.homeId, prefs.uid).set(
+    // Usa update() para evitar crear el documento si no existe.
+    // El documento members/{uid} solo lo crea una Cloud Function.
+    await _memberRef(prefs.homeId, prefs.uid).update(
       {'notificationPrefs': prefs.toMap()},
-      SetOptions(merge: true),
     );
   }
 
   @override
   Future<void> updateFcmToken(String homeId, String uid, String token) async {
-    await _memberRef(homeId, uid).set(
-      {'notificationPrefs': {'fcmToken': token}},
-      SetOptions(merge: true),
+    // Usa notación de punto para actualizar solo el campo fcmToken
+    // sin sobrescribir otros campos de notificationPrefs.
+    await _memberRef(homeId, uid).update(
+      {'notificationPrefs.fcmToken': token},
     );
   }
 }

@@ -23,6 +23,8 @@ mixin _$EditProfileVMState {
   String? get initialNickname => throw _privateConstructorUsedError;
   String? get initialBio => throw _privateConstructorUsedError;
   String? get initialPhone => throw _privateConstructorUsedError;
+  String? get initialPhotoUrl => throw _privateConstructorUsedError;
+  String? get selectedPhotoPath => throw _privateConstructorUsedError;
 
   /// Create a copy of _EditProfileVMState
   /// with the given fields replaced by the non-null parameter values.
@@ -44,7 +46,9 @@ abstract class _$EditProfileVMStateCopyWith<$Res> {
       bool savedSuccessfully,
       String? initialNickname,
       String? initialBio,
-      String? initialPhone});
+      String? initialPhone,
+      String? initialPhotoUrl,
+      String? selectedPhotoPath});
 }
 
 /// @nodoc
@@ -69,6 +73,8 @@ class __$EditProfileVMStateCopyWithImpl<$Res, $Val extends _EditProfileVMState>
     Object? initialNickname = freezed,
     Object? initialBio = freezed,
     Object? initialPhone = freezed,
+    Object? initialPhotoUrl = freezed,
+    Object? selectedPhotoPath = freezed,
   }) {
     return _then(_value.copyWith(
       isInitialized: null == isInitialized
@@ -99,6 +105,14 @@ class __$EditProfileVMStateCopyWithImpl<$Res, $Val extends _EditProfileVMState>
           ? _value.initialPhone
           : initialPhone // ignore: cast_nullable_to_non_nullable
               as String?,
+      initialPhotoUrl: freezed == initialPhotoUrl
+          ? _value.initialPhotoUrl
+          : initialPhotoUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
+      selectedPhotoPath: freezed == selectedPhotoPath
+          ? _value.selectedPhotoPath
+          : selectedPhotoPath // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -118,7 +132,9 @@ abstract class _$$_EditProfileVMStateImplCopyWith<$Res>
       bool savedSuccessfully,
       String? initialNickname,
       String? initialBio,
-      String? initialPhone});
+      String? initialPhone,
+      String? initialPhotoUrl,
+      String? selectedPhotoPath});
 }
 
 /// @nodoc
@@ -141,6 +157,8 @@ class __$$_EditProfileVMStateImplCopyWithImpl<$Res>
     Object? initialNickname = freezed,
     Object? initialBio = freezed,
     Object? initialPhone = freezed,
+    Object? initialPhotoUrl = freezed,
+    Object? selectedPhotoPath = freezed,
   }) {
     return _then(_$_EditProfileVMStateImpl(
       isInitialized: null == isInitialized
@@ -171,6 +189,14 @@ class __$$_EditProfileVMStateImplCopyWithImpl<$Res>
           ? _value.initialPhone
           : initialPhone // ignore: cast_nullable_to_non_nullable
               as String?,
+      initialPhotoUrl: freezed == initialPhotoUrl
+          ? _value.initialPhotoUrl
+          : initialPhotoUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
+      selectedPhotoPath: freezed == selectedPhotoPath
+          ? _value.selectedPhotoPath
+          : selectedPhotoPath // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -185,7 +211,9 @@ class _$_EditProfileVMStateImpl implements __EditProfileVMState {
       this.savedSuccessfully = false,
       this.initialNickname,
       this.initialBio,
-      this.initialPhone});
+      this.initialPhone,
+      this.initialPhotoUrl,
+      this.selectedPhotoPath});
 
   @override
   @JsonKey()
@@ -205,10 +233,14 @@ class _$_EditProfileVMStateImpl implements __EditProfileVMState {
   final String? initialBio;
   @override
   final String? initialPhone;
+  @override
+  final String? initialPhotoUrl;
+  @override
+  final String? selectedPhotoPath;
 
   @override
   String toString() {
-    return '_EditProfileVMState(isInitialized: $isInitialized, phoneVisible: $phoneVisible, isLoading: $isLoading, savedSuccessfully: $savedSuccessfully, initialNickname: $initialNickname, initialBio: $initialBio, initialPhone: $initialPhone)';
+    return '_EditProfileVMState(isInitialized: $isInitialized, phoneVisible: $phoneVisible, isLoading: $isLoading, savedSuccessfully: $savedSuccessfully, initialNickname: $initialNickname, initialBio: $initialBio, initialPhone: $initialPhone, initialPhotoUrl: $initialPhotoUrl, selectedPhotoPath: $selectedPhotoPath)';
   }
 
   @override
@@ -229,12 +261,25 @@ class _$_EditProfileVMStateImpl implements __EditProfileVMState {
             (identical(other.initialBio, initialBio) ||
                 other.initialBio == initialBio) &&
             (identical(other.initialPhone, initialPhone) ||
-                other.initialPhone == initialPhone));
+                other.initialPhone == initialPhone) &&
+            (identical(other.initialPhotoUrl, initialPhotoUrl) ||
+                other.initialPhotoUrl == initialPhotoUrl) &&
+            (identical(other.selectedPhotoPath, selectedPhotoPath) ||
+                other.selectedPhotoPath == selectedPhotoPath));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, isInitialized, phoneVisible,
-      isLoading, savedSuccessfully, initialNickname, initialBio, initialPhone);
+  int get hashCode => Object.hash(
+      runtimeType,
+      isInitialized,
+      phoneVisible,
+      isLoading,
+      savedSuccessfully,
+      initialNickname,
+      initialBio,
+      initialPhone,
+      initialPhotoUrl,
+      selectedPhotoPath);
 
   /// Create a copy of _EditProfileVMState
   /// with the given fields replaced by the non-null parameter values.
@@ -254,7 +299,9 @@ abstract class __EditProfileVMState implements _EditProfileVMState {
       final bool savedSuccessfully,
       final String? initialNickname,
       final String? initialBio,
-      final String? initialPhone}) = _$_EditProfileVMStateImpl;
+      final String? initialPhone,
+      final String? initialPhotoUrl,
+      final String? selectedPhotoPath}) = _$_EditProfileVMStateImpl;
 
   @override
   bool get isInitialized;
@@ -270,6 +317,10 @@ abstract class __EditProfileVMState implements _EditProfileVMState {
   String? get initialBio;
   @override
   String? get initialPhone;
+  @override
+  String? get initialPhotoUrl;
+  @override
+  String? get selectedPhotoPath;
 
   /// Create a copy of _EditProfileVMState
   /// with the given fields replaced by the non-null parameter values.

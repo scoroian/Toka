@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../data/profile_repository_impl.dart';
@@ -9,7 +10,10 @@ part 'profile_provider.g.dart';
 
 @Riverpod(keepAlive: true)
 ProfileRepository profileRepository(ProfileRepositoryRef ref) {
-  return ProfileRepositoryImpl(firestore: FirebaseFirestore.instance);
+  return ProfileRepositoryImpl(
+    firestore: FirebaseFirestore.instance,
+    storage: FirebaseStorage.instance,
+  );
 }
 
 @riverpod
@@ -28,6 +32,7 @@ class ProfileEditor extends _$ProfileEditor {
     String? bio,
     String? phone,
     String? phoneVisibility,
+    String? photoLocalPath,
   }) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(
@@ -37,6 +42,7 @@ class ProfileEditor extends _$ProfileEditor {
             bio: bio,
             phone: phone,
             phoneVisibility: phoneVisibility,
+            photoLocalPath: photoLocalPath,
           ),
     );
   }

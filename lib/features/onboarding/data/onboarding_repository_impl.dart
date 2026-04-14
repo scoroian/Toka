@@ -35,10 +35,10 @@ class OnboardingRepositoryImpl implements OnboardingRepository {
     final data = <String, dynamic>{
       'nickname': nickname,
       'locale': locale,
-      'phoneVisibility': phoneVisible ? 'members' : 'hidden',
+      'phoneVisibility': phoneVisible ? 'sameHomeMembers' : 'hidden',
     };
     if (phoneNumber != null && phoneNumber.isNotEmpty) {
-      data['phoneNumber'] = phoneNumber;
+      data['phone'] = phoneNumber;
     }
     if (photoUrl != null) {
       data['photoUrl'] = photoUrl;

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/routes.dart';
+import '../application/onboarding_provider.dart';
 import '../application/onboarding_view_model.dart';
 import 'steps/home_choice_step.dart';
 import 'steps/language_step.dart';
@@ -20,7 +21,14 @@ class OnboardingFlowScreen extends ConsumerStatefulWidget {
 }
 
 class _OnboardingFlowScreenState extends ConsumerState<OnboardingFlowScreen> {
-  final _pageController = PageController();
+  late final PageController _pageController;
+
+  @override
+  void initState() {
+    super.initState();
+    final step = ref.read(onboardingNotifierProvider).currentStep;
+    _pageController = PageController(initialPage: step);
+  }
 
   @override
   void dispose() {
@@ -40,19 +48,30 @@ class _OnboardingFlowScreenState extends ConsumerState<OnboardingFlowScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Watch notifier state directly para que el widget reconstruya cuando cambia.
+    // onboardingViewModelProvider devuelve siempre el mismo objeto notifier
+    // (misma referencia), por lo que Riverpod no notifica por sí solo.
+    final vmState = ref.watch(onboardingViewModelNotifierProvider);
+    final onboardingState = ref.watch(onboardingNotifierProvider);
     final vm = ref.watch(onboardingViewModelProvider);
 
-    ref.listen<OnboardingViewModel>(onboardingViewModelProvider, (_, next) {
-      if (next.shouldNavigateHome) context.go(AppRoutes.home);
-    });
+    // Navegar a home en el post-frame para evitar setState durante build.
+    if (vmState.shouldNavigateHome) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) context.go(AppRoutes.home);
+      });
+    }
 
-    ref.listen<OnboardingViewModel>(onboardingViewModelProvider, (prev, next) {
-      if (prev?.currentStep != next.currentStep) {
-        _goToPage(next.currentStep);
-      }
-    });
+    // Sincronizar PageController con el paso actual.
+    final targetStep = onboardingState.currentStep;
+    if (_pageController.hasClients &&
+        _pageController.page?.round() != targetStep) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _goToPage(targetStep);
+      });
+    }
 
-    if (!vm.isInitialized && !vm.shouldNavigateHome) {
+    if (!vmState.isInitialized && !vmState.shouldNavigateHome) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
       );
@@ -62,8 +81,8 @@ class _OnboardingFlowScreenState extends ConsumerState<OnboardingFlowScreen> {
       body: Column(
         children: [
           OnboardingProgressBar(
-            currentStep: vm.currentStep,
-            totalSteps: vm.totalSteps,
+            currentStep: onboardingState.currentStep,
+            totalSteps: onboardingState.totalSteps,
           ),
           Expanded(
             child: PageView(

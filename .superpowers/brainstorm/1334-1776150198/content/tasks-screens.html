@@ -1,0 +1,385 @@
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  .phone-frame { width:330px; background:#1a1a2e; border-radius:28px; border:2px solid #333; overflow:hidden; color:#f0f0f0; box-shadow:0 20px 60px rgba(0,0,0,0.5); }
+  .status-bar { background:#16213e; padding:7px 14px 3px; font-size:10px; display:flex; justify-content:space-between; color:#aaa; }
+  .app-bar { background:#16213e; padding:10px 14px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #2a2a4a; }
+  .app-title { font-size:15px; font-weight:700; }
+  .screen-body { background:#12122a; padding:8px 0; }
+  .filter-row { background:#16213e; padding:8px 10px; display:flex; gap:7px; }
+  .filter-btn { flex:1; padding:6px 0; border-radius:18px; font-size:11px; font-weight:600; text-align:center; }
+  .filter-btn.active { background:#e94560; color:white; }
+  .filter-btn.inactive { background:#1e1e3a; color:#7b8cb8; border:1px solid #2a2a5a; }
+
+  /* ALL TASKS */
+  .task-row { margin:0 9px 6px; background:#1e1e3a; border-radius:12px; padding:9px 11px; display:flex; align-items:center; gap:9px; }
+  .task-row.selected { border:1px solid #e94560; }
+  .task-icon-box { width:38px; height:38px; background:#2a2a5a; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+  .task-info { flex:1; min-width:0; }
+  .task-name { font-size:12px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .task-due { font-size:10px; color:#7b8cb8; margin-top:2px; }
+  .task-due.overdue { color:#e94560; }
+  .edit-btn { width:28px; height:28px; background:#0f3460; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:13px; flex-shrink:0; }
+  .check-box { width:22px; height:22px; border-radius:6px; border:2px solid #e94560; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; }
+  .check-box.checked { background:#e94560; }
+  .bulk-bar { background:#0f3460; margin:0 9px 8px; border-radius:12px; padding:8px 12px; display:flex; gap:8px; align-items:center; }
+  .bulk-btn { flex:1; padding:6px; border-radius:8px; font-size:11px; font-weight:600; text-align:center; }
+  .bulk-del { background:#e9456033; color:#e94560; border:1px solid #e9456066; }
+  .bulk-freeze { background:#7b2aff22; color:#c084fc; border:1px solid #7b2aff44; }
+  .bulk-count { font-size:11px; color:#7b8cb8; }
+  .fab { margin:8px 9px; background:#e94560; border-radius:12px; padding:11px; text-align:center; font-size:13px; color:white; font-weight:700; }
+
+  /* CREATE/EDIT TASK */
+  .icon-preview { background:#16213e; padding:20px 14px 14px; text-align:center; border-bottom:1px solid #2a2a4a; }
+  .icon-display { width:70px; height:70px; background:#2a2a5a; border-radius:18px; display:flex; align-items:center; justify-content:center; font-size:38px; margin:0 auto; }
+  .tab-row { display:flex; background:#16213e; border-bottom:1px solid #2a2a4a; }
+  .tab { flex:1; padding:9px; text-align:center; font-size:12px; font-weight:600; color:#7b8cb8; }
+  .tab.active { color:#e94560; border-bottom:2px solid #e94560; }
+  .emoji-grid { display:flex; flex-wrap:wrap; gap:4px; padding:8px; }
+  .emoji-item { width:36px; height:36px; background:#1e1e3a; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:18px; }
+  .emoji-item.sel { border:2px solid #e94560; background:#2a1a2a; }
+  .form-section { padding:8px 12px; }
+  .form-label { font-size:10px; color:#7b8cb8; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:4px; margin-top:10px; }
+  .form-input { background:#1e1e3a; border-radius:10px; padding:9px 12px; font-size:13px; color:#f0f0f0; border:1px solid #2a2a5a; width:100%; box-sizing:border-box; }
+  .recurrence-chips { display:flex; gap:5px; flex-wrap:wrap; }
+  .chip { padding:5px 10px; border-radius:16px; font-size:11px; font-weight:600; }
+  .chip.active { background:#e94560; color:white; }
+  .chip.inactive { background:#1e1e3a; color:#7b8cb8; border:1px solid #2a2a5a; }
+  .time-row { display:flex; align-items:center; gap:8px; margin-top:6px; }
+  .toggle { width:36px; height:20px; background:#0f3460; border-radius:10px; display:flex; align-items:center; padding:2px; flex-shrink:0; }
+  .toggle-knob { width:16px; height:16px; background:#7b8cb8; border-radius:50%; }
+  .toggle.on { background:#e94560; justify-content:flex-end; }
+  .toggle.on .toggle-knob { background:white; }
+  .dates-preview { background:#1e1e3a; border-radius:10px; padding:8px 12px; margin-top:6px; }
+  .date-item { font-size:11px; color:#7b8cb8; padding:3px 0; display:flex; justify-content:space-between; }
+  .date-item .assignee-name { color:#4ecca3; font-size:10px; }
+  .member-order-list { margin-top:6px; }
+  .member-order-item { display:flex; align-items:center; gap:8px; background:#1e1e3a; border-radius:9px; padding:7px 10px; margin-bottom:4px; }
+  .order-num { width:20px; height:20px; background:#0f3460; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; flex-shrink:0; }
+  .av-sm { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:white; flex-shrink:0; }
+  .av-a{background:#e94560;} .av-b{background:#0f3460;border:1px solid #7b8cb8;} .av-c{background:#4ecca3;color:#12122a;}
+  .drag-handle { color:#555; font-size:16px; margin-left:auto; }
+  .difficulty-row { display:flex; gap:5px; margin-top:6px; }
+  .diff-btn { flex:1; padding:7px 0; border-radius:9px; font-size:11px; font-weight:600; text-align:center; }
+  .diff-btn.active { background:#f4a227; color:#12122a; }
+  .diff-btn.inactive { background:#1e1e3a; color:#7b8cb8; border:1px solid #2a2a5a; }
+  .apply-today-row { display:flex; align-items:center; gap:10px; background:#1e1e3a; border-radius:10px; padding:9px 12px; margin-top:6px; }
+  .apply-today-text { flex:1; font-size:12px; }
+  .apply-today-sub { font-size:10px; color:#7b8cb8; margin-top:2px; }
+
+  /* TASK DETAIL */
+  .detail-hero { background:#16213e; padding:16px 14px 12px; border-bottom:1px solid #2a2a4a; }
+  .detail-icon-row { display:flex; align-items:center; gap:10px; }
+  .detail-icon { width:48px; height:48px; background:#2a2a5a; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:24px; flex-shrink:0; }
+  .detail-title { font-size:16px; font-weight:700; }
+  .detail-sub { font-size:11px; color:#7b8cb8; margin-top:2px; }
+  .action-bar { display:flex; gap:7px; padding:10px 10px 6px; }
+  .action-btn2 { flex:1; padding:8px; border-radius:10px; font-size:11px; font-weight:600; text-align:center; }
+  .btn-freeze { background:#2a2a5a; color:#c084fc; border:1px solid #3a3a7a; }
+  .btn-delete { background:#2a1a1a; color:#e94560; border:1px solid #5a2a2a; }
+  .btn-edit2 { background:#0f3460; color:#7bbfff; border:1px solid #2a5a9a; }
+  .info-section { padding:6px 10px; }
+  .info-row { display:flex; align-items:center; gap:8px; background:#1e1e3a; border-radius:10px; padding:9px 11px; margin-bottom:6px; }
+  .info-icon { font-size:16px; flex-shrink:0; width:22px; text-align:center; }
+  .info-label { font-size:10px; color:#7b8cb8; }
+  .info-value { font-size:13px; font-weight:600; }
+  .assignment-list { background:#1e1e3a; border-radius:10px; padding:8px 11px; margin-bottom:6px; }
+  .assign-item { display:flex; align-items:center; gap:8px; padding:5px 0; }
+  .assign-item.current { background:#0f346033; border-radius:8px; padding:5px 8px; margin:-2px -5px; }
+  .assign-badge { font-size:10px; color:#4ecca3; flex-shrink:0; }
+  .upcoming-list { background:#1e1e3a; border-radius:10px; padding:8px 11px; margin-bottom:6px; }
+  .upcoming-item { display:flex; justify-content:space-between; align-items:center; padding:5px 0; border-bottom:1px solid #2a2a4a; font-size:11px; }
+  .upcoming-item:last-child { border-bottom:none; }
+  .upcoming-date { color:#7b8cb8; }
+  .upcoming-who { color:#4ecca3; font-weight:600; }
+
+  .annotation { font-size:11px; color:#ccc; background:#1e2030; border-left:3px solid #e94560; padding:6px 10px; margin:5px 0; border-radius:0 6px 6px 0; }
+  .annotation code { color:#4ecca3; font-family:monospace; font-size:10px; }
+  .label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:#7b8cb8; margin:10px 0 4px; }
+  .gap-box { margin-top:8px; padding:10px; background:#1e2030; border-radius:8px; font-size:11px; border:1px solid #e9456040; }
+  .gap-box strong { color:#e94560; }
+  .ok-box { margin-top:8px; padding:10px; background:#1a2a1a; border-radius:8px; font-size:11px; border:1px solid #4ecca340; }
+  .ok-box strong { color:#4ecca3; }
+  h3 { margin:0 0 6px; font-size:13px; }
+</style>
+
+<h2>Tareas — tres pantallas</h2>
+<p class="subtitle">Lista de tareas · Crear/Editar tarea · Detalle de tarea</p>
+
+<div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;">
+
+  <!-- PHONE 1: All Tasks -->
+  <div>
+    <p style="text-align:center;font-size:11px;color:#7b8cb8;margin-bottom:5px">Lista + selección múltiple</p>
+    <div class="phone-frame">
+      <div class="status-bar"><span>9:41</span><span>● ● ●</span></div>
+      <div class="app-bar">
+        <span class="app-title">Tareas</span>
+        <span style="font-size:13px;color:#7b8cb8">2 sel.</span>
+      </div>
+      <div class="filter-row">
+        <div class="filter-btn active">Activas</div>
+        <div class="filter-btn inactive">Congeladas</div>
+      </div>
+      <!-- Bulk action bar (visible en selección múltiple) -->
+      <div class="bulk-bar">
+        <span class="bulk-count">2 seleccionadas</span>
+        <div class="bulk-btn bulk-del">🗑 Borrar</div>
+        <div class="bulk-btn bulk-freeze">❄️ Congelar</div>
+      </div>
+      <div class="screen-body" style="min-height:370px;">
+        <div class="task-row selected">
+          <div class="check-box checked">✓</div>
+          <div class="task-icon-box">🧹</div>
+          <div class="task-info">
+            <div class="task-name">Barrer el salón</div>
+            <div class="task-due overdue">⏰ Hoy 10:00 — atrasada</div>
+          </div>
+          <div class="edit-btn">✏️</div>
+        </div>
+        <div class="task-row selected">
+          <div class="check-box checked">✓</div>
+          <div class="task-icon-box">🍽️</div>
+          <div class="task-info">
+            <div class="task-name">Fregar platos</div>
+            <div class="task-due">📅 Hoy 14:00</div>
+          </div>
+          <div class="edit-btn">✏️</div>
+        </div>
+        <div class="task-row">
+          <div class="check-box"></div>
+          <div class="task-icon-box">🛒</div>
+          <div class="task-info">
+            <div class="task-name">Compra semanal</div>
+            <div class="task-due">📅 Vie 16 abr · Sin hora</div>
+          </div>
+          <div class="edit-btn">✏️</div>
+        </div>
+        <div class="task-row">
+          <div class="check-box"></div>
+          <div class="task-icon-box">💡</div>
+          <div class="task-info">
+            <div class="task-name">Pagar facturas</div>
+            <div class="task-due">📅 1 may · Sin hora</div>
+          </div>
+          <div class="edit-btn">✏️</div>
+        </div>
+        <div class="fab">+ Nueva tarea</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHONE 2: Create/Edit Task -->
+  <div>
+    <p style="text-align:center;font-size:11px;color:#7b8cb8;margin-bottom:5px">Crear / Editar tarea</p>
+    <div class="phone-frame" style="max-height:620px;overflow:hidden;">
+      <div class="status-bar"><span>9:41</span><span>● ● ●</span></div>
+      <div class="icon-preview">
+        <div class="icon-display">🧹</div>
+        <div style="font-size:10px;color:#7b8cb8;margin-top:6px">Icono seleccionado (fijo)</div>
+      </div>
+      <!-- Scrolleable desde aquí -->
+      <div style="overflow-y:auto;max-height:520px;">
+        <div class="tab-row">
+          <div class="tab active">😀 Emoji</div>
+          <div class="tab inactive">🎨 Icono</div>
+        </div>
+        <div class="emoji-grid">
+          <div class="emoji-item sel">🧹</div>
+          <div class="emoji-item">🍽️</div><div class="emoji-item">🛒</div>
+          <div class="emoji-item">☕</div><div class="emoji-item">💡</div>
+          <div class="emoji-item">🗑️</div><div class="emoji-item">🌿</div>
+          <div class="emoji-item">🪟</div><div class="emoji-item">🛁</div>
+          <div class="emoji-item">🐶</div>
+        </div>
+        <div class="form-section">
+          <div class="form-label">Nombre</div>
+          <div class="form-input">Barrer el salón</div>
+          <div class="form-label">Descripción (opcional)</div>
+          <div class="form-input" style="color:#555">Sin descripción</div>
+          <div class="form-label">Recurrencia</div>
+          <div class="recurrence-chips">
+            <div class="chip inactive">Por hora</div>
+            <div class="chip active">Diaria</div>
+            <div class="chip inactive">Semanal</div>
+            <div class="chip inactive">Mensual</div>
+            <div class="chip inactive">Anual</div>
+          </div>
+          <div class="time-row">
+            <div class="toggle on"><div class="toggle-knob"></div></div>
+            <span style="font-size:12px">Hora fija</span>
+            <div class="form-input" style="width:80px;padding:6px 10px;font-size:13px;flex-shrink:0;">10:00</div>
+          </div>
+          <div class="form-label">Aplicar también hoy</div>
+          <div class="apply-today-row">
+            <div>
+              <div class="apply-today-text">Incluir hoy</div>
+              <div class="apply-today-sub">Creada a las 9:05, toca a las 10:00</div>
+            </div>
+            <div class="toggle on"><div class="toggle-knob"></div></div>
+          </div>
+          <div class="form-label">Próximas fechas</div>
+          <div class="dates-preview">
+            <div class="date-item"><span>Hoy 14 abr · 10:00</span><span class="assignee-name">Ana</span></div>
+            <div class="date-item"><span>Mié 15 abr · 10:00</span><span class="assignee-name">Sebas</span></div>
+            <div class="date-item"><span>Jue 16 abr · 10:00</span><span class="assignee-name">María</span></div>
+          </div>
+          <div class="form-label">Miembros y orden</div>
+          <div class="member-order-list">
+            <div class="member-order-item">
+              <div class="order-num">1</div>
+              <div class="av-sm av-a">A</div>
+              <span style="font-size:12px">Ana</span>
+              <div class="drag-handle">⠿</div>
+            </div>
+            <div class="member-order-item">
+              <div class="order-num">2</div>
+              <div class="av-sm av-b">S</div>
+              <span style="font-size:12px">Sebas</span>
+              <div class="drag-handle">⠿</div>
+            </div>
+            <div class="member-order-item" style="opacity:0.4">
+              <div class="order-num" style="background:#2a2a5a;color:#555">—</div>
+              <div class="av-sm av-c">M</div>
+              <span style="font-size:12px;color:#7b8cb8">María (no asignada)</span>
+              <div class="drag-handle" style="opacity:0">⠿</div>
+            </div>
+          </div>
+          <div class="form-label">Dificultad</div>
+          <div class="difficulty-row">
+            <div class="diff-btn inactive">😌 Fácil</div>
+            <div class="diff-btn active">💪 Media</div>
+            <div class="diff-btn inactive">🔥 Difícil</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHONE 3: Task Detail -->
+  <div>
+    <p style="text-align:center;font-size:11px;color:#7b8cb8;margin-bottom:5px">Detalle de tarea</p>
+    <div class="phone-frame" style="max-height:620px;overflow:hidden;">
+      <div class="status-bar"><span>9:41</span><span>● ● ●</span></div>
+      <div class="detail-hero">
+        <div class="detail-icon-row">
+          <div class="detail-icon">🧹</div>
+          <div>
+            <div class="detail-title">Barrer el salón</div>
+            <div class="detail-sub">Diaria · 10:00 · Dificultad media</div>
+          </div>
+        </div>
+      </div>
+      <div style="overflow-y:auto;max-height:520px;">
+        <!-- Botones de acción (solo si canManage) -->
+        <div class="action-bar">
+          <div class="action-btn2 btn-edit2">✏️ Editar</div>
+          <div class="action-btn2 btn-freeze">❄️ Congelar</div>
+          <div class="action-btn2 btn-delete">🗑 Eliminar</div>
+        </div>
+        <div class="info-section">
+          <!-- Próxima fecha -->
+          <div class="info-row">
+            <div class="info-icon">📅</div>
+            <div>
+              <div class="info-label">Próxima fecha</div>
+              <div class="info-value">Hoy · 10:00</div>
+            </div>
+          </div>
+          <!-- Orden de asignación -->
+          <div class="assignment-list">
+            <div class="info-label" style="margin-bottom:6px">Orden de asignación</div>
+            <div class="assign-item">
+              <div class="av-sm av-a">A</div>
+              <span style="font-size:12px">Ana</span>
+              <span style="font-size:10px;color:#555;margin-left:auto">1º</span>
+            </div>
+            <div class="assign-item current">
+              <div class="av-sm av-b">S</div>
+              <span style="font-size:12px;font-weight:700">Sebas</span>
+              <span class="assign-badge" style="margin-left:auto">← Turno actual</span>
+            </div>
+            <div class="assign-item">
+              <div class="av-sm av-c">M</div>
+              <span style="font-size:12px">María</span>
+              <span style="font-size:10px;color:#555;margin-left:auto">3º</span>
+            </div>
+          </div>
+          <!-- Próximas 5 fechas -->
+          <div class="upcoming-list">
+            <div class="info-label" style="margin-bottom:6px">Próximas 5 fechas</div>
+            <div class="upcoming-item">
+              <span class="upcoming-date">Hoy 14 abr · 10:00</span>
+              <span class="upcoming-who">Sebas</span>
+            </div>
+            <div class="upcoming-item">
+              <span class="upcoming-date">Mié 15 abr · 10:00</span>
+              <span class="upcoming-who">María</span>
+            </div>
+            <div class="upcoming-item">
+              <span class="upcoming-date">Jue 16 abr · 10:00</span>
+              <span class="upcoming-who">Ana</span>
+            </div>
+            <div class="upcoming-item">
+              <span class="upcoming-date">Vie 17 abr · 10:00</span>
+              <span class="upcoming-who">Sebas</span>
+            </div>
+            <div class="upcoming-item">
+              <span class="upcoming-date">Sáb 18 abr · 10:00</span>
+              <span class="upcoming-who">María</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Anotaciones -->
+  <div style="flex:1;min-width:240px;">
+    <h3 style="color:#4ecca3">AllTasksViewModel — gaps</h3>
+    <div class="annotation">
+      <code>selectedTaskIds: Set&lt;String&gt;</code> ← FALTA<br>
+      <code>toggleSelection(taskId)</code> ← FALTA<br>
+      <code>isSelectionMode: bool</code> ← FALTA<br>
+      <code>bulkDelete()</code> ← FALTA<br>
+      <code>bulkFreeze()</code> ← FALTA<br>
+      <code>canManage: bool</code> — ya existe como <code>canCreate</code>, renombrar
+    </div>
+    <div class="ok-box">
+      <strong>Ya existe:</strong> filtro activas/congeladas, <code>toggleFreeze</code>, <code>deleteTask</code>
+    </div>
+
+    <h3 style="color:#4ecca3;margin-top:14px">CreateEditTaskViewModel — nuevo</h3>
+    <div class="annotation">
+      <code>selectedVisual: ({kind, value})</code> — icono/emoji fijo arriba<br>
+      <code>activeTab: VisualTab</code> — emoji o icono<br>
+      <code>name, description: String</code><br>
+      <code>recurrenceRule: RecurrenceRule</code><br>
+      <code>hasFixedTime: bool</code>, <code>fixedTime: TimeOfDay?</code><br>
+      <code>applyToday: bool</code> — toggle "incluir hoy"<br>
+      <code>showApplyToday: bool</code> — visible solo si la hora aún no ha pasado<br>
+      <code>upcomingDates: List&lt;({date, assigneeName})&gt;</code><br>
+      <code>orderedMembers: List&lt;MemberOrderItem&gt;</code> — con <code>isAssigned</code><br>
+      <code>reorderMember(from, to)</code> — drag & drop<br>
+      <code>toggleMember(uid)</code> — marcar/desmarcar<br>
+      <code>difficulty: TaskDifficulty</code><br>
+      <code>canSave: bool</code><br>
+      <code>save()</code>
+    </div>
+
+    <h3 style="color:#4ecca3;margin-top:14px">TaskDetailViewModel — gaps</h3>
+    <div class="annotation">
+      <code>upcomingOccurrences</code> — ya existe, pero solo 3 ← ampliar a 5<br>
+      <code>difficulty: TaskDifficulty</code> ← FALTA en <code>TaskDetailViewData</code><br>
+      Ya existe: <code>canManage</code>, <code>toggleFreeze</code>, <code>deleteTask</code>, orden de asignación
+    </div>
+
+    <div class="gap-box" style="margin-top:10px;">
+      <strong>Pregunta — "incluir hoy":</strong><br><br>
+      El toggle <em>Aplicar hoy</em> se muestra solo cuando la tarea tiene hora fija
+      y la hora <strong>aún no ha pasado</strong> al momento de crear.<br><br>
+      ¿Y en edición de una tarea existente? Si se edita la hora de una tarea que
+      hoy ya debería ejecutarse, ¿aparece también el toggle?
+    </div>
+  </div>
+
+</div>

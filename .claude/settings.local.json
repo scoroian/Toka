@@ -1,0 +1,39 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/sebas/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.7/skills/subagent-driven-development/**)",
+      "Bash(flutter create:*)",
+      "Bash(flutter analyze:*)",
+      "Bash(dart pub:*)",
+      "Bash(node -e ':*)",
+      "Bash(flutter pub:*)",
+      "Bash(flutter gen-l10n:*)",
+      "Bash(ls -la lib/l10n/app*.arb)",
+      "Bash(flutter test:*)",
+      "Bash(dart run:*)",
+      "Read(//c/Users/sebas/AppData/Local/Pub/Cache/hosted/pub.dev/analyzer_plugin-0.12.0/**)",
+      "Read(//c/Users/sebas/AppData/Local/Pub/Cache/hosted/pub.dev/analyzer_plugin-0.11.3/**)",
+      "Read(//c/Users/sebas/AppData/Local/Pub/Cache/hosted/pub.dev/custom_lint_builder-0.7.3/**)",
+      "Read(//c/Users/sebas/AppData/Local/Pub/Cache/hosted/pub.dev/analyzer-7.7.1/**)",
+      "Read(//c/Users/sebas/AppData/Local/Pub/Cache/hosted/pub.dev/analyzer-8.2.0/**)",
+      "Read(//c/Users/sebas/AppData/Local/Pub/Cache/hosted/pub.dev/freezed-2.5.7/**)",
+      "Read(//c/Users/sebas/AppData/Local/Pub/Cache/hosted/pub.dev/riverpod_generator-2.6.4/**)",
+      "Read(//c/Users/sebas/AppData/Local/Pub/Cache/hosted/pub.dev/**)",
+      "Bash(find \"C:/Users/sebas/AppData/Local/Pub/Cache/hosted/pub.dev/analyzer-7.6.0/lib/\" -name \"*.dart\" -exec grep -l \"class Namespace\" {} \\\\;)",
+      "Bash(grep -v \"^$\")",
+      "Bash(flutter --version)",
+      "Read(//c//**)",
+      "Read(//c/Users/sebas/flutter/**)",
+      "Bash(where flutter:*)",
+      "Bash(dart --version)",
+      "Bash(npm install:*)",
+      "Bash(npm run:*)",
+      "Bash(grep -v \"test\\\\\\\\\")",
+      "Read(//c/Users/sebas/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.7/skills/**)",
+      "Bash(dart format:*)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\sebas\\OneDrive\\Escritorio\\Proyectos\\Toka\\docs\\superpowers"
+    ]
+  }
+}

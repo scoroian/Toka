@@ -1,0 +1,385 @@
+<style>
+  .phone-frame {
+    width: 360px;
+    background: #1a1a2e;
+    border-radius: 32px;
+    border: 2px solid #333;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: #f0f0f0;
+    margin: 0 auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+  .status-bar {
+    background: #16213e;
+    padding: 8px 16px 4px;
+    font-size: 11px;
+    display: flex;
+    justify-content: space-between;
+    color: #aaa;
+  }
+  .app-bar {
+    background: #16213e;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #2a2a4a;
+  }
+  .home-selector {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #0f3460;
+    border-radius: 20px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .home-selector .chevron { color: #7b8cb8; font-size: 10px; }
+  .home-icon { font-size: 16px; }
+  .counters-row {
+    background: #16213e;
+    padding: 12px 16px 16px;
+    display: flex;
+    gap: 10px;
+  }
+  .counter-chip {
+    flex: 1;
+    background: #0f3460;
+    border-radius: 14px;
+    padding: 10px;
+    text-align: center;
+  }
+  .counter-chip .num { font-size: 24px; font-weight: 700; color: #e94560; }
+  .counter-chip .label { font-size: 10px; color: #7b8cb8; margin-top: 2px; }
+  .counter-chip.done .num { color: #4ecca3; }
+  .screen-body {
+    background: #12122a;
+    padding: 12px 0;
+    min-height: 480px;
+    overflow-y: auto;
+  }
+  .section-header {
+    padding: 4px 16px 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-badge {
+    background: #e94560;
+    color: white;
+    border-radius: 10px;
+    padding: 2px 8px;
+    font-size: 10px;
+    font-weight: 700;
+  }
+  .section-badge.done { background: #4ecca3; color: #12122a; }
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #7b8cb8;
+  }
+  .task-card {
+    margin: 0 12px 8px;
+    background: #1e1e3a;
+    border-radius: 14px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .task-card.overdue { border-left: 3px solid #e94560; }
+  .task-card.done { opacity: 0.7; border-left: 3px solid #4ecca3; }
+  .task-icon-box {
+    width: 40px; height: 40px;
+    background: #2a2a5a;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .task-info { flex: 1; min-width: 0; }
+  .task-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .task-time { font-size: 11px; color: #7b8cb8; margin-top: 2px; }
+  .task-time.overdue { color: #e94560; }
+  .task-time.done { color: #4ecca3; }
+  .assignee {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    flex-shrink: 0;
+  }
+  .avatar {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: white;
+  }
+  .avatar.a { background: #e94560; }
+  .avatar.b { background: #0f3460; border: 1px solid #7b8cb8; }
+  .avatar.c { background: #4ecca3; color: #12122a; }
+  .avatar-name { font-size: 9px; color: #7b8cb8; max-width: 40px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .done-check {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: #4ecca3;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    color: #12122a;
+    flex-shrink: 0;
+  }
+  .bottom-nav {
+    background: #16213e;
+    display: flex;
+    border-top: 1px solid #2a2a4a;
+    padding: 8px 0 12px;
+  }
+  .nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    font-size: 9px;
+    color: #7b8cb8;
+  }
+  .nav-item.active { color: #e94560; }
+  .nav-item .nav-icon { font-size: 20px; }
+  .section-divider {
+    height: 1px;
+    background: #2a2a4a;
+    margin: 8px 16px 12px;
+  }
+  .ad-banner {
+    margin: 8px 12px;
+    background: #2a2a4a;
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 11px;
+    color: #7b8cb8;
+    text-align: center;
+    border: 1px dashed #3a3a6a;
+  }
+  .contract-tag {
+    background: #e94560;
+    color: white;
+    font-size: 9px;
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-family: monospace;
+    margin-left: 4px;
+  }
+  .annotation {
+    font-size: 11px;
+    color: #aaa;
+    background: #1e2030;
+    border-left: 3px solid #e94560;
+    padding: 6px 10px;
+    margin: 4px 0;
+    border-radius: 0 6px 6px 0;
+  }
+  .annotation code {
+    color: #4ecca3;
+    font-family: monospace;
+    font-size: 10px;
+  }
+</style>
+
+<h2>Pantalla Hoy — Mockup de contrato <span class="contract-tag">TodayViewModel</span></h2>
+<p class="subtitle">Validar qué datos necesita exponer el ViewModel para esta pantalla</p>
+
+<div style="display:flex; gap:32px; align-items:flex-start; flex-wrap:wrap;">
+
+  <!-- Phone mockup -->
+  <div class="phone-frame">
+    <div class="status-bar">
+      <span>9:41</span>
+      <span>● ● ●</span>
+    </div>
+
+    <!-- AppBar con selector de hogar -->
+    <div class="app-bar">
+      <div class="home-selector">
+        <span class="home-icon">🏠</span>
+        <span>Casa de Ana</span>
+        <span class="chevron">▼</span>
+      </div>
+      <span style="font-size:18px">🔔</span>
+    </div>
+
+    <!-- Contadores -->
+    <div class="counters-row">
+      <div class="counter-chip">
+        <div class="num">5</div>
+        <div class="label">Para hoy</div>
+      </div>
+      <div class="counter-chip done">
+        <div class="num">3</div>
+        <div class="label">Completadas</div>
+      </div>
+      <div class="counter-chip">
+        <div class="num">2</div>
+        <div class="label">Pendientes</div>
+      </div>
+    </div>
+
+    <div class="screen-body">
+      <!-- Grupo: Diarias - Por hacer -->
+      <div class="section-header">
+        <span class="section-label">Diarias</span>
+        <span class="section-badge">2 por hacer</span>
+      </div>
+
+      <div class="task-card overdue">
+        <div class="task-icon-box">🧹</div>
+        <div class="task-info">
+          <div class="task-name">Barrer el salón</div>
+          <div class="task-time overdue">⏰ Hace 2h · Atrasada</div>
+        </div>
+        <div class="assignee">
+          <div class="avatar a">A</div>
+          <div class="avatar-name">Ana</div>
+        </div>
+      </div>
+
+      <div class="task-card">
+        <div class="task-icon-box">🍽️</div>
+        <div class="task-info">
+          <div class="task-name">Fregar platos</div>
+          <div class="task-time">🕐 A las 14:00</div>
+        </div>
+        <div class="assignee">
+          <div class="avatar b">S</div>
+          <div class="avatar-name">Sebas</div>
+        </div>
+      </div>
+
+      <!-- Grupo: Diarias - Hechas -->
+      <div class="section-header" style="margin-top:8px">
+        <span class="section-label">Diarias</span>
+        <span class="section-badge done">1 hecha</span>
+      </div>
+
+      <div class="task-card done">
+        <div class="task-icon-box">☕</div>
+        <div class="task-info">
+          <div class="task-name">Preparar café</div>
+          <div class="task-time done">✓ Hecha a las 8:32</div>
+        </div>
+        <div class="assignee">
+          <div class="avatar c">M</div>
+          <div class="avatar-name">María</div>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- Grupo: Semanales - Por hacer -->
+      <div class="section-header">
+        <span class="section-label">Semanales</span>
+        <span class="section-badge">1 por hacer</span>
+      </div>
+
+      <div class="task-card">
+        <div class="task-icon-box">🛒</div>
+        <div class="task-info">
+          <div class="task-name">Compra semanal</div>
+          <div class="task-time">🕐 Sin hora fija</div>
+        </div>
+        <div class="assignee">
+          <div class="avatar a">A</div>
+          <div class="avatar-name">Ana</div>
+        </div>
+      </div>
+
+      <!-- Grupo: Mensuales - Hechas -->
+      <div class="section-divider"></div>
+      <div class="section-header">
+        <span class="section-label">Mensuales</span>
+        <span class="section-badge done">2 hechas</span>
+      </div>
+
+      <div class="task-card done">
+        <div class="task-icon-box">💡</div>
+        <div class="task-info">
+          <div class="task-name">Pagar facturas</div>
+          <div class="task-time done">✓ Hecha a las 10:15</div>
+        </div>
+        <div class="assignee">
+          <div class="avatar b">S</div>
+          <div class="avatar-name">Sebas</div>
+        </div>
+      </div>
+
+      <div class="ad-banner">📢 Banner AdMob (solo no-premium)</div>
+    </div>
+
+    <div class="bottom-nav">
+      <div class="nav-item active"><span class="nav-icon">🏠</span>Hoy</div>
+      <div class="nav-item"><span class="nav-icon">📋</span>Tareas</div>
+      <div class="nav-item"><span class="nav-icon">👥</span>Miembros</div>
+      <div class="nav-item"><span class="nav-icon">🕐</span>Historial</div>
+      <div class="nav-item"><span class="nav-icon">⚙️</span>Ajustes</div>
+    </div>
+  </div>
+
+  <!-- Annotations panel -->
+  <div style="flex:1; min-width:260px;">
+    <h3>Datos que el ViewModel debe exponer</h3>
+
+    <div class="section" style="margin-bottom:16px">
+      <div class="label">Selector de hogar (AppBar)</div>
+      <div class="annotation"><code>homes: List&lt;HomeItem&gt;</code> — lista de hogares del usuario<br>
+      <code>currentHome: HomeItem</code> — hogar seleccionado (nombre + icono/emoji)<br>
+      <code>onSelectHome(homeId)</code> — acción de cambio</div>
+    </div>
+
+    <div class="section" style="margin-bottom:16px">
+      <div class="label">Contadores superiores</div>
+      <div class="annotation"><code>totalToday: int</code> — tareas para hoy<br>
+      <code>completedToday: int</code> — completadas<br>
+      <code>pendingToday: int</code> — pendientes<br>
+      <em>(ya existe en DashboardCounters, pero falta pendingToday)</em></div>
+    </div>
+
+    <div class="section" style="margin-bottom:16px">
+      <div class="label">Grupos de tareas</div>
+      <div class="annotation"><code>grouped: Map&lt;String, RecurrenceGroup&gt;</code><br>
+      Cada RecurrenceGroup tiene <code>todos</code> y <code>dones</code><br>
+      <code>recurrenceOrder: List&lt;String&gt;</code> — orden de visualización<br>
+      <em>(ya existe, bien modelado)</em></div>
+    </div>
+
+    <div class="section" style="margin-bottom:16px">
+      <div class="label">Cada TaskPreview (card)</div>
+      <div class="annotation">
+      <code>title, visualKind, visualValue</code> — icono/emoji + nombre<br>
+      <code>currentAssigneeName, currentAssigneePhoto</code> — foto + nombre<br>
+      <code>nextDueAt</code> — hora de ejecución<br>
+      <code>doneAt: DateTime?</code> — hora marcada si está hecha ← <strong>FALTA</strong><br>
+      <code>isOverdue: bool</code> — si está atrasada<br>
+      <code>status</code> — active / done
+      </div>
+    </div>
+
+    <div class="section" style="margin-bottom:16px">
+      <div class="label">Banner / Ads</div>
+      <div class="annotation"><code>showAdBanner: bool</code><br>
+      <code>adBannerUnit: String</code><br>
+      <em>(ya existe)</em></div>
+    </div>
+
+    <div style="margin-top:16px; padding:12px; background:#1e2030; border-radius:8px; font-size:12px;">
+      <strong style="color:#e94560">Gap detectado:</strong><br>
+      <code style="color:#4ecca3">DoneTaskPreview</code> no expone <code style="color:#4ecca3">doneAt</code> —
+      necesario para mostrar "✓ Hecha a las 8:32" en lugar de solo el nextDueAt.
+    </div>
+  </div>
+</div>

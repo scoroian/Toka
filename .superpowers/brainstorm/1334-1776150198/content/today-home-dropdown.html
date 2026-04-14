@@ -1,0 +1,322 @@
+<style>
+  .phone-frame {
+    width: 360px;
+    background: #1a1a2e;
+    border-radius: 32px;
+    border: 2px solid #333;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: #f0f0f0;
+    margin: 0 auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    position: relative;
+  }
+  .status-bar {
+    background: #16213e;
+    padding: 8px 16px 4px;
+    font-size: 11px;
+    display: flex;
+    justify-content: space-between;
+    color: #aaa;
+  }
+  .app-bar {
+    background: #16213e;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #2a2a4a;
+    position: relative;
+    z-index: 10;
+  }
+  .home-selector {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #0f3460;
+    border-radius: 20px;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    border: 1px solid #4a6fa5;
+  }
+  .home-selector .chevron { color: #7b8cb8; font-size: 10px; }
+  .dropdown-overlay {
+    position: absolute;
+    top: 56px;
+    left: 12px;
+    right: 12px;
+    background: #1e1e3a;
+    border-radius: 16px;
+    border: 1px solid #2a2a5a;
+    z-index: 20;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+    overflow: hidden;
+  }
+  .dropdown-header {
+    padding: 10px 14px 6px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #7b8cb8;
+  }
+  .home-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    cursor: pointer;
+    transition: background 0.15s;
+    position: relative;
+  }
+  .home-item:hover, .home-item.active { background: #2a2a5a; }
+  .home-item.active { background: #0f3460; }
+  .home-emoji {
+    font-size: 22px;
+    width: 36px; height: 36px;
+    background: #12122a;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .home-meta { flex: 1; min-width: 0; }
+  .home-name { font-size: 13px; font-weight: 600; }
+  .home-role { font-size: 10px; color: #7b8cb8; margin-top: 1px; }
+  .home-check { color: #4ecca3; font-size: 16px; }
+  .badge-dot {
+    width: 9px; height: 9px;
+    background: #e94560;
+    border-radius: 50%;
+    border: 2px solid #1e1e3a;
+    position: absolute;
+    top: 8px;
+    right: 12px;
+  }
+  .badge-count {
+    background: #e94560;
+    color: white;
+    border-radius: 10px;
+    padding: 1px 6px;
+    font-size: 10px;
+    font-weight: 700;
+    min-width: 18px;
+    text-align: center;
+  }
+  .dropdown-divider { height: 1px; background: #2a2a5a; margin: 4px 0; }
+  .dropdown-action {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 14px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #7b8cb8;
+  }
+  .dropdown-action:hover { background: #2a2a5a; color: #f0f0f0; }
+  .action-icon {
+    width: 36px; height: 36px;
+    background: #2a2a5a;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+  .counters-row {
+    background: #16213e;
+    padding: 12px 16px 16px;
+    display: flex;
+    gap: 10px;
+    filter: blur(1.5px);
+    opacity: 0.4;
+  }
+  .counter-chip {
+    flex: 1;
+    background: #0f3460;
+    border-radius: 14px;
+    padding: 10px;
+    text-align: center;
+  }
+  .counter-chip .num { font-size: 24px; font-weight: 700; color: #e94560; }
+  .counter-chip .label { font-size: 10px; color: #7b8cb8; margin-top: 2px; }
+  .counter-chip.done .num { color: #4ecca3; }
+  .screen-body {
+    background: #12122a;
+    padding: 12px 0;
+    min-height: 300px;
+    filter: blur(1.5px);
+    opacity: 0.4;
+  }
+  .bottom-nav {
+    background: #16213e;
+    display: flex;
+    border-top: 1px solid #2a2a4a;
+    padding: 8px 0 12px;
+    filter: blur(1.5px);
+    opacity: 0.4;
+  }
+  .nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    font-size: 9px;
+    color: #7b8cb8;
+  }
+  .nav-item.active { color: #e94560; }
+  .nav-item .nav-icon { font-size: 20px; }
+  .annotation {
+    font-size: 11px;
+    color: #ccc;
+    background: #1e2030;
+    border-left: 3px solid #e94560;
+    padding: 6px 10px;
+    margin: 6px 0;
+    border-radius: 0 6px 6px 0;
+  }
+  .annotation code { color: #4ecca3; font-family: monospace; font-size: 10px; }
+  .label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #7b8cb8; margin-bottom: 6px; }
+  .gap-box {
+    margin-top: 12px;
+    padding: 12px;
+    background: #1e2030;
+    border-radius: 8px;
+    font-size: 12px;
+    border: 1px solid #e9456040;
+  }
+  .gap-box strong { color: #e94560; }
+</style>
+
+<h2>Pantalla Hoy — Dropdown de hogares</h2>
+<p class="subtitle">Estado: dropdown abierto. El fondo aparece difuminado para indicar que el contenido queda bloqueado.</p>
+
+<div style="display:flex; gap:32px; align-items:flex-start; flex-wrap:wrap;">
+
+  <div class="phone-frame">
+    <div class="status-bar"><span>9:41</span><span>● ● ●</span></div>
+
+    <div class="app-bar">
+      <div class="home-selector">
+        <span>🏠</span>
+        <span>Casa de Ana</span>
+        <span class="chevron">▲</span>
+      </div>
+      <span style="font-size:18px; opacity:0.4">🔔</span>
+    </div>
+
+    <!-- DROPDOWN abierto -->
+    <div class="dropdown-overlay">
+      <div class="dropdown-header">Mis hogares</div>
+
+      <!-- Hogar activo -->
+      <div class="home-item active">
+        <div class="home-emoji">🏠</div>
+        <div class="home-meta">
+          <div class="home-name">Casa de Ana</div>
+          <div class="home-role">Administradora</div>
+        </div>
+        <span class="home-check">✓</span>
+      </div>
+
+      <!-- Hogar con pendientes -->
+      <div class="home-item" style="position:relative">
+        <div class="home-emoji">🏡</div>
+        <div class="home-meta">
+          <div class="home-name">Piso compartido</div>
+          <div class="home-role">Miembro</div>
+        </div>
+        <span class="badge-count">4</span>
+      </div>
+
+      <!-- Hogar sin pendientes -->
+      <div class="home-item">
+        <div class="home-emoji">🏢</div>
+        <div class="home-meta">
+          <div class="home-name">Oficina</div>
+          <div class="home-role">Propietario</div>
+        </div>
+        <!-- sin badge = sin pendientes hoy -->
+      </div>
+
+      <div class="dropdown-divider"></div>
+
+      <!-- Acciones -->
+      <div class="dropdown-action">
+        <div class="action-icon">➕</div>
+        <span>Crear nuevo hogar</span>
+      </div>
+      <div class="dropdown-action" style="padding-bottom:14px">
+        <div class="action-icon">🔗</div>
+        <span>Unirse con código</span>
+      </div>
+    </div>
+
+    <!-- Fondo difuminado -->
+    <div class="counters-row">
+      <div class="counter-chip"><div class="num">5</div><div class="label">Para hoy</div></div>
+      <div class="counter-chip done"><div class="num">3</div><div class="label">Completadas</div></div>
+      <div class="counter-chip"><div class="num">2</div><div class="label">Pendientes</div></div>
+    </div>
+    <div class="screen-body" style="height:260px"></div>
+    <div class="bottom-nav">
+      <div class="nav-item active"><span class="nav-icon">🏠</span>Hoy</div>
+      <div class="nav-item"><span class="nav-icon">📋</span>Tareas</div>
+      <div class="nav-item"><span class="nav-icon">👥</span>Miembros</div>
+      <div class="nav-item"><span class="nav-icon">🕐</span>Historial</div>
+      <div class="nav-item"><span class="nav-icon">⚙️</span>Ajustes</div>
+    </div>
+  </div>
+
+  <!-- Anotaciones del contrato -->
+  <div style="flex:1; min-width:260px;">
+    <h3>Contrato <code style="font-size:13px; color:#4ecca3">TodayViewModel</code> — selector</h3>
+
+    <div class="section" style="margin-bottom:14px">
+      <div class="label">Lista de hogares del usuario</div>
+      <div class="annotation">
+        <code>homes: List&lt;HomeDropdownItem&gt;</code><br><br>
+        Cada item:<br>
+        <code>id, name, emoji/icon</code><br>
+        <code>role: MemberRole</code> — Propietario / Admin / Miembro<br>
+        <code>pendingCount: int</code> — tareas pendientes hoy en ese hogar<br>
+        <code>isSelected: bool</code> — hogar actualmente activo
+      </div>
+    </div>
+
+    <div class="section" style="margin-bottom:14px">
+      <div class="label">Estado del dropdown</div>
+      <div class="annotation">
+        El dropdown es <strong>estado puramente visual</strong> — no pertenece al ViewModel.<br>
+        La pantalla lo gestiona localmente con un <code>bool _dropdownOpen</code>.<br>
+        El ViewModel solo expone la lista y la acción de cambio.
+      </div>
+    </div>
+
+    <div class="section" style="margin-bottom:14px">
+      <div class="label">Acción de cambio de hogar</div>
+      <div class="annotation">
+        <code>selectHome(String homeId)</code><br>
+        Cambia <code>currentHomeProvider</code> internamente.<br>
+        El resto del ViewModel (tareas, contadores) se recalcula automáticamente.
+      </div>
+    </div>
+
+    <div class="section" style="margin-bottom:14px">
+      <div class="label">Botones crear / unirse</div>
+      <div class="annotation">
+        No necesitan lógica en <code>TodayViewModel</code>.<br>
+        Son navegación pura: el screen hace <code>context.go(AppRoutes.createHome)</code><br>
+        o <code>context.go(AppRoutes.joinHome)</code> directamente.
+      </div>
+    </div>
+
+    <div class="gap-box">
+      <strong>Nuevo campo necesario en HomeDropdownItem:</strong><br><br>
+      <code style="color:#4ecca3">pendingCount: int</code> — requiere que el ViewModel
+      lea los contadores del dashboard de <em>cada</em> hogar, no solo del activo.<br><br>
+      <strong>Opción A:</strong> Leer <code>homes/{id}/views/dashboard</code> de cada hogar en tiempo real → costoso.<br>
+      <strong>Opción B:</strong> Solo marcar si hay ≥1 pendiente (punto rojo), leyendo un campo denormalizado <code>hasPendingToday: bool</code> en el documento de membresía.<br><br>
+      ¿Prefieres el número exacto (Opción A) o solo el punto rojo indicador (Opción B)?
+    </div>
+  </div>
+</div>

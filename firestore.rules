@@ -42,7 +42,10 @@ service cloud.firestore {
     // ─── Usuarios ──────────────────────────────────────────────────────────────
     
     match /users/{uid} {
-      allow read: if isUser(uid);
+      // Cualquier usuario autenticado puede leer perfiles ajenos (nickname,
+      // photoUrl, bio) para mostrarlos en listas de miembros e historial.
+      // Los campos sensibles (phone, billing) se controlan a nivel de app.
+      allow read: if isAuth();
       allow create: if isUser(uid);
       allow update: if isUser(uid) && !request.resource.data.diff(resource.data).affectedKeys()
                        .hasAny(['baseHomeSlots', 'lifetimeUnlockedHomeSlots', 'homeSlotCap']);

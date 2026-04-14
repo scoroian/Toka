@@ -13,7 +13,7 @@ class MemberModel {
     return Member(
       uid: uid,
       homeId: homeId,
-      nickname: data['nickname'] as String? ?? uid,
+      nickname: data['nickname'] as String? ?? '',
       photoUrl: data['photoUrl'] as String?,
       bio: data['bio'] as String?,
       phone: data['phone'] as String?,

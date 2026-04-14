@@ -60,6 +60,7 @@ void main() {
       await $.tester.pumpWidget(testApp());
       await $.tester.pump();
       await _loginIfNeeded($);
+      await ensureHomeExists($);
 
       if (!$(find.byType(NavigationBar)).exists) {
         markTestSkipped(
@@ -134,6 +135,7 @@ void main() {
       await $.tester.pumpWidget(testApp());
       await $.tester.pump();
       await _loginIfNeeded($);
+      await ensureHomeExists($);
 
       if (!$(find.byType(NavigationBar)).exists) {
         markTestSkipped('Could not reach home shell. Skipping pass-turn test.');
@@ -183,6 +185,7 @@ void main() {
       await $.tester.pumpWidget(testApp());
       await $.tester.pump();
       await _loginIfNeeded($);
+      await ensureHomeExists($);
 
       if (!$(find.byType(NavigationBar)).exists) {
         markTestSkipped('Could not reach home shell.');
@@ -239,6 +242,7 @@ void main() {
       await $.tester.pumpWidget(testApp());
       await $.tester.pump();
       await _loginIfNeeded($);
+      await ensureHomeExists($);
 
       if (!$(find.byType(NavigationBar)).exists) {
         markTestSkipped('Could not reach home shell.');
@@ -297,6 +301,7 @@ void main() {
       await $.tester.pumpWidget(testApp());
       await $.tester.pump();
       await _loginIfNeeded($);
+      await ensureHomeExists($);
 
       if (!$(find.byType(NavigationBar)).exists) {
         markTestSkipped('Could not reach home shell.');

@@ -22,16 +22,14 @@ export function getDb(): admin.firestore.Firestore {
   return getApp().firestore();
 }
 
-/** Borra todas las colecciones usadas en tests */
+/** Borra TODOS los documentos del emulador Firestore (incluidas subcollections) */
 export async function cleanAll(): Promise<void> {
-  const db = getDb();
-  const collections = ['homes', 'users'];
-  for (const col of collections) {
-    const snap = await db.collection(col).get();
-    const batch = db.batch();
-    snap.docs.forEach((d) => batch.delete(d.ref));
-    await batch.commit();
-  }
+  const projectId = process.env.GCLOUD_PROJECT ?? 'demo-toka-integration';
+  const host = process.env.FIRESTORE_EMULATOR_HOST ?? 'localhost:8080';
+  await fetch(
+    `http://${host}/emulator/v1/projects/${projectId}/databases/(default)/documents`,
+    { method: 'DELETE' }
+  );
 }
 
 /** Crea un usuario en Firestore (simula el doc creado tras Auth) */

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -27,14 +28,19 @@ Future<void> main() async {
   await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
   FirebaseFirestore.instance.useFirestoreEmulator('localhost', 8080);
   await FirebaseStorage.instance.useStorageEmulator('localhost', 9199);
+  FirebaseFunctions.instance.useFunctionsEmulator('localhost', 5001);
 
   // En dev: inicializar RemoteConfig (usa emuladores si están disponibles)
   final remoteConfigService = RemoteConfigService(FirebaseRemoteConfig.instance);
   await remoteConfigService.init();
 
-  // En dev: Crashlytics solo captura errores localmente, no envía a producción
+  // En dev: log errors locally, no Crashlytics upload
   FlutterError.onError = (errorDetails) {
     debugPrint('FlutterError: ${errorDetails.exceptionAsString()}');
+  };
+  WidgetsBinding.instance.platformDispatcher.onError = (error, stack) {
+    debugPrint('Unhandled async error: $error\n$stack');
+    return true;
   };
 
   runApp(const ProviderScope(child: TokaApp()));

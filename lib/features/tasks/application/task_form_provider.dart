@@ -36,7 +36,17 @@ class TaskFormNotifier extends _$TaskFormNotifier {
   TaskFormState build() => const TaskFormState();
 
   void initCreate() {
-    state = const TaskFormState(mode: TaskFormMode.create);
+    state = const TaskFormState(
+      mode: TaskFormMode.create,
+      // Ponemos una regla diaria por defecto para que el formulario nunca
+      // empiece con recurrenceRule == null. Esto elimina la race condition
+      // entre el microtask de initCreate y el postFrameCallback del RecurrenceForm.
+      recurrenceRule: RecurrenceRule.daily(
+        every: 1,
+        time: '09:00',
+        timezone: 'Europe/Madrid',
+      ),
+    );
   }
 
   void initEdit(Task task) {

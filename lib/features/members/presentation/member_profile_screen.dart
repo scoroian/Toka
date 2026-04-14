@@ -4,7 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/loading_widget.dart';
+import '../../profile/application/profile_provider.dart';
 import '../../profile/presentation/widgets/radar_chart_widget.dart';
+import '../../homes/domain/home_membership.dart';
 import '../application/member_profile_view_model.dart';
 import 'widgets/member_role_badge.dart';
 
@@ -17,6 +19,67 @@ class MemberProfileScreen extends ConsumerWidget {
 
   final String homeId;
   final String memberUid;
+
+  Future<void> _toggleAdminRole(
+    BuildContext context,
+    WidgetRef ref,
+    MemberProfileViewModel vm,
+    MemberProfileViewData data,
+    AppLocalizations l10n,
+  ) async {
+    final member = data.member;
+    final isAdmin = member.role == MemberRole.admin;
+    final actionLabel = isAdmin
+        ? l10n.member_profile_demote_admin
+        : l10n.member_profile_promote_admin;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text(actionLabel),
+        content: Text(
+          isAdmin
+              ? l10n.member_profile_demote_admin_confirm(member.nickname)
+              : l10n.member_profile_promote_admin_confirm(member.nickname),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(actionLabel),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+
+    try {
+      if (isAdmin) {
+        await vm.demoteFromAdmin(homeId, memberUid);
+      } else {
+        await vm.promoteToAdmin(homeId, memberUid);
+      }
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              isAdmin
+                  ? l10n.member_profile_demoted_ok
+                  : l10n.member_profile_promoted_ok,
+            ),
+          ),
+        );
+      }
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.error_generic)),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -36,6 +99,17 @@ class MemberProfileScreen extends ConsumerWidget {
           }
           final member = data.member;
 
+          // Fallback al perfil del usuario si el documento del miembro
+          // no tiene nickname/photoUrl denormalizados.
+          final profileFallback = (member.nickname.isEmpty || member.photoUrl == null)
+              ? ref.watch(userProfileProvider(member.uid)).valueOrNull
+              : null;
+          final displayNickname = member.nickname.isNotEmpty
+              ? member.nickname
+              : profileFallback?.nickname ?? '?';
+          final displayPhotoUrl =
+              member.photoUrl ?? profileFallback?.photoUrl;
+
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
@@ -45,13 +119,13 @@ class MemberProfileScreen extends ConsumerWidget {
                   children: [
                     CircleAvatar(
                       radius: 48,
-                      backgroundImage: member.photoUrl != null
-                          ? CachedNetworkImageProvider(member.photoUrl!)
+                      backgroundImage: displayPhotoUrl != null
+                          ? CachedNetworkImageProvider(displayPhotoUrl)
                           : null,
-                      child: member.photoUrl == null
+                      child: displayPhotoUrl == null
                           ? Text(
-                              member.nickname.isNotEmpty
-                                  ? member.nickname[0].toUpperCase()
+                              displayNickname != '?'
+                                  ? displayNickname[0].toUpperCase()
                                   : '?',
                               style: const TextStyle(fontSize: 32),
                             )
@@ -59,7 +133,7 @@ class MemberProfileScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      member.nickname,
+                      displayNickname,
                       key: const Key('member_nickname'),
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
@@ -118,6 +192,32 @@ class MemberProfileScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 24),
               RadarChartWidget(entries: data.radarEntries),
+
+              // Gestión de rol (solo visible para el owner, sobre miembros ajenos)
+              if (data.canManageRoles &&
+                  member.role != MemberRole.owner) ...[
+                const Divider(height: 32),
+                OutlinedButton.icon(
+                  key: const Key('btn_toggle_admin'),
+                  onPressed: () => _toggleAdminRole(
+                    context,
+                    ref,
+                    vm,
+                    data,
+                    l10n,
+                  ),
+                  icon: Icon(
+                    member.role == MemberRole.admin
+                        ? Icons.shield_outlined
+                        : Icons.shield,
+                  ),
+                  label: Text(
+                    member.role == MemberRole.admin
+                        ? l10n.member_profile_demote_admin
+                        : l10n.member_profile_promote_admin,
+                  ),
+                ),
+              ],
             ],
           );
         },

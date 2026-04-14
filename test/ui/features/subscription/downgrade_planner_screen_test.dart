@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:toka/features/homes/application/current_home_provider.dart';
 import 'package:toka/features/homes/application/dashboard_provider.dart';
 import 'package:toka/features/homes/domain/home.dart';
@@ -10,6 +11,7 @@ import 'package:toka/features/homes/domain/home_limits.dart';
 import 'package:toka/features/homes/domain/home_membership.dart';
 import 'package:toka/features/members/application/members_provider.dart';
 import 'package:toka/features/members/domain/member.dart';
+import 'package:toka/features/subscription/application/downgrade_planner_view_model.dart';
 import 'package:toka/features/subscription/application/paywall_provider.dart';
 import 'package:toka/features/subscription/domain/purchase_result.dart';
 import 'package:toka/features/subscription/presentation/downgrade_planner_screen.dart';
@@ -139,6 +141,8 @@ HomeDashboard _emptyDashboard() => HomeDashboard(
       updatedAt: DateTime(2026),
     );
 
+class _MockDowngradeVM extends Mock implements DowngradePlannerViewModel {}
+
 Widget _wrap(Widget child, {List<Override> overrides = const []}) =>
     ProviderScope(
       overrides: overrides,
@@ -155,17 +159,30 @@ Widget _wrap(Widget child, {List<Override> overrides = const []}) =>
     );
 
 void main() {
-  final overrides = <Override>[
+  // Data overrides needed for providers that the screen watches directly
+  final dataOverrides = <Override>[
     currentHomeProvider.overrideWith(() => _FakeCurrentHome()),
-    homeMembersProvider('h1').overrideWith((ref) => Stream.value(_fiveMembers())),
+    homeMembersProvider('h1')
+        .overrideWith((ref) => Stream.value(_fiveMembers())),
     dashboardProvider.overrideWith((_) => Stream.value(_emptyDashboard())),
     paywallProvider.overrideWith(() => _FakePaywall()),
   ];
 
-  testWidgets('DowngradePlannerScreen: owner siempre marcado y no desseleccionable',
+  testWidgets(
+      'DowngradePlannerScreen: owner siempre marcado y no desseleccionable',
       (tester) async {
-    await tester.pumpWidget(
-        _wrap(const DowngradePlannerScreen(), overrides: overrides));
+    final allUids = {'owner', 'm1', 'm2', 'm3', 'm4'};
+    final mock = _MockDowngradeVM();
+    when(() => mock.selectedMemberIds).thenReturn(allUids);
+    when(() => mock.selectedTaskIds).thenReturn(<String>{});
+    when(() => mock.isLoading).thenReturn(false);
+    when(() => mock.savedSuccessfully).thenReturn(false);
+    when(() => mock.savePlan()).thenAnswer((_) async {});
+
+    await tester.pumpWidget(_wrap(const DowngradePlannerScreen(), overrides: [
+      ...dataOverrides,
+      downgradePlannerViewModelProvider.overrideWithValue(mock),
+    ]));
     await tester.pumpAndSettle();
 
     final ownerCheckbox = tester.widget<CheckboxListTile>(
@@ -176,8 +193,17 @@ void main() {
 
   testWidgets('DowngradePlannerScreen: botón Guardar plan está presente',
       (tester) async {
-    await tester.pumpWidget(
-        _wrap(const DowngradePlannerScreen(), overrides: overrides));
+    final mock = _MockDowngradeVM();
+    when(() => mock.selectedMemberIds).thenReturn(<String>{});
+    when(() => mock.selectedTaskIds).thenReturn(<String>{});
+    when(() => mock.isLoading).thenReturn(false);
+    when(() => mock.savedSuccessfully).thenReturn(false);
+    when(() => mock.savePlan()).thenAnswer((_) async {});
+
+    await tester.pumpWidget(_wrap(const DowngradePlannerScreen(), overrides: [
+      ...dataOverrides,
+      downgradePlannerViewModelProvider.overrideWithValue(mock),
+    ]));
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('btn_save_plan')), findsOneWidget);
@@ -185,8 +211,17 @@ void main() {
 
   testWidgets('DowngradePlannerScreen: muestra 5 miembros en la lista',
       (tester) async {
-    await tester.pumpWidget(
-        _wrap(const DowngradePlannerScreen(), overrides: overrides));
+    final mock = _MockDowngradeVM();
+    when(() => mock.selectedMemberIds).thenReturn(<String>{});
+    when(() => mock.selectedTaskIds).thenReturn(<String>{});
+    when(() => mock.isLoading).thenReturn(false);
+    when(() => mock.savedSuccessfully).thenReturn(false);
+    when(() => mock.savePlan()).thenAnswer((_) async {});
+
+    await tester.pumpWidget(_wrap(const DowngradePlannerScreen(), overrides: [
+      ...dataOverrides,
+      downgradePlannerViewModelProvider.overrideWithValue(mock),
+    ]));
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('member_check_owner')), findsOneWidget);
@@ -194,25 +229,32 @@ void main() {
     expect(find.byKey(const Key('member_check_m2')), findsOneWidget);
   });
 
-  testWidgets('DowngradePlannerScreen: no permite seleccionar más de 3 miembros',
+  testWidgets(
+      'DowngradePlannerScreen: no permite seleccionar más de 3 miembros',
       (tester) async {
-    await tester.pumpWidget(_wrap(const DowngradePlannerScreen(), overrides: overrides));
-    await tester.pumpAndSettle();
+    // Use real VM + data overrides for interaction test
+    await tester.pumpWidget(
+        _wrap(const DowngradePlannerScreen(), overrides: dataOverrides));
+    // Pump explicitly to allow the VM microtask initialization
+    await tester.pump();
+    await tester.pump();
+    await tester.pump();
 
-    // Initially all 5 members are checked (no limit on initialization)
+    // Initially all 5 members are checked
     // Uncheck m1 and m2 to get to owner + m3 + m4 = 3 selected
     await tester.tap(find.byKey(const Key('member_check_m1')));
-    await tester.pumpAndSettle();
+    await tester.pump();
     await tester.tap(find.byKey(const Key('member_check_m2')));
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     // Now 3 are selected: owner, m3, m4
     // Try to re-check m1 (would be 4th) — should be blocked
     await tester.tap(find.byKey(const Key('member_check_m1')));
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     // m1 should still be unchecked (blocked by max 3 limit)
-    final m1Widget = tester.widget<CheckboxListTile>(find.byKey(const Key('member_check_m1')));
+    final m1Widget = tester.widget<CheckboxListTile>(
+        find.byKey(const Key('member_check_m1')));
     expect(m1Widget.value, false);
   });
 }

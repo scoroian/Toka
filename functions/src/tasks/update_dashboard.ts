@@ -2,6 +2,7 @@
 import * as admin from "firebase-admin";
 import * as logger from "firebase-functions/logger";
 import { onSchedule } from "firebase-functions/v2/scheduler";
+import { onCall, HttpsError } from "firebase-functions/v2/https";
 
 const db = admin.firestore();
 const FieldValue = admin.firestore.FieldValue;
@@ -22,12 +23,40 @@ export async function updateHomeDashboard(homeId: string): Promise<void> {
   }
   const homeData = homeDoc.data()!;
 
-  // --- 1. Leer tareas activas del hogar ---
+  // --- 1. Leer miembros activos para resolver nombres al construir previews ---
+  const membersSnap = await homeRef.collection("members").get();
+  const memberMap = new Map<string, { nickname: string; photoUrl: string | null }>();
+
+  // Para miembros sin nickname/photoUrl denormalizados, fallback a users/{uid}
+  const uidsNeedingFallback: string[] = [];
+  for (const mDoc of membersSnap.docs) {
+    const m = mDoc.data();
+    const nickname = (m["nickname"] as string | undefined) ?? "";
+    const photoUrl = (m["photoUrl"] as string | undefined) ?? null;
+    memberMap.set(mDoc.id, { nickname, photoUrl });
+    if (!nickname) uidsNeedingFallback.push(mDoc.id);
+  }
+
+  if (uidsNeedingFallback.length > 0) {
+    const userDocs = await Promise.all(
+      uidsNeedingFallback.map((uid) => db.collection("users").doc(uid).get())
+    );
+    for (const userDoc of userDocs) {
+      if (!userDoc.exists) continue;
+      const u = userDoc.data()!;
+      const existing = memberMap.get(userDoc.id)!;
+      memberMap.set(userDoc.id, {
+        nickname: existing.nickname || ((u["nickname"] as string | undefined) ?? ""),
+        photoUrl: existing.photoUrl ?? ((u["photoUrl"] as string | undefined) ?? null),
+      });
+    }
+  }
+
+  // --- 2. Leer TODAS las tareas activas del hogar ---
   const tasksSnap = await homeRef.collection("tasks")
     .where("status", "==", "active")
     .get();
 
-  // --- 2. Determinar qué tareas son "de hoy" ---
   const now = new Date();
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const todayEnd = new Date(todayStart.getTime() + 24 * 60 * 60 * 1000);
@@ -38,8 +67,9 @@ export async function updateHomeDashboard(homeId: string): Promise<void> {
     const nextDueAt = (t["nextDueAt"] as admin.firestore.Timestamp | undefined)?.toDate();
     if (!nextDueAt) continue;
     const isOverdue = nextDueAt < todayStart;
-    const isDueToday = nextDueAt >= todayStart && nextDueAt < todayEnd;
-    if (!isDueToday && !isOverdue) continue;
+
+    const assigneeUid = (t["currentAssigneeUid"] as string | null) ?? null;
+    const assigneeInfo = assigneeUid ? memberMap.get(assigneeUid) : undefined;
 
     activeTasksPreview.push({
       taskId: doc.id,
@@ -47,9 +77,9 @@ export async function updateHomeDashboard(homeId: string): Promise<void> {
       visualKind: t["visualKind"] ?? "emoji",
       visualValue: t["visualValue"] ?? "",
       recurrenceType: t["recurrenceType"] ?? "daily",
-      currentAssigneeUid: t["currentAssigneeUid"] ?? null,
-      currentAssigneeName: t["currentAssigneeName"] ?? null,
-      currentAssigneePhoto: t["currentAssigneePhoto"] ?? null,
+      currentAssigneeUid: assigneeUid,
+      currentAssigneeName: assigneeInfo?.nickname ?? null,
+      currentAssigneePhoto: assigneeInfo?.photoUrl ?? null,
       nextDueAt: t["nextDueAt"],
       isOverdue,
       status: "active",
@@ -67,37 +97,36 @@ export async function updateHomeDashboard(homeId: string): Promise<void> {
   for (const doc of eventsSnap.docs) {
     const ev = doc.data();
     const actorUid = (ev["actorUid"] as string) ?? "";
-    const memberDoc = await homeRef.collection("members").doc(actorUid).get();
-    const m = memberDoc.data() ?? {};
+    const actorInfo = memberMap.get(actorUid);
     const visualSnapshot = (ev["taskVisualSnapshot"] as Record<string, string>) ?? {};
+    // Obtener recurrenceType desde la tarea si está disponible
+    const taskId = (ev["taskId"] as string) ?? doc.id;
+    const matchingTask = tasksSnap.docs.find((d) => d.id === taskId);
+    const recurrenceType = (matchingTask?.data()["recurrenceType"] as string) ?? "daily";
     doneTasksPreview.push({
-      taskId: ev["taskId"] ?? doc.id,
+      taskId,
       title: ev["taskTitleSnapshot"] ?? "",
       visualKind: visualSnapshot["kind"] ?? "emoji",
       visualValue: visualSnapshot["value"] ?? "",
-      recurrenceType: "daily",
+      recurrenceType,
       completedByUid: actorUid,
-      completedByName: (m["name"] as string) ?? "",
-      completedByPhoto: m["photoUrl"] ?? null,
+      completedByName: actorInfo?.nickname ?? "",
+      completedByPhoto: actorInfo?.photoUrl ?? null,
       completedAt: ev["completedAt"],
     });
   }
 
-  // --- 4. Leer miembros activos ---
-  const membersSnap = await db.collectionGroup("memberships")
-    .where("status", "==", "active")
-    .get();
-
+  // --- 4. Construir memberPreview desde el memberMap ya cargado ---
   const memberPreview: Record<string, unknown>[] = [];
   for (const doc of membersSnap.docs) {
-    if (doc.ref.parent.parent?.id !== homeId) continue;
     const m = doc.data();
+    if (m["status"] !== "active") continue;
     const memberTaskCount = activeTasksPreview.filter(
       (t) => t["currentAssigneeUid"] === doc.id
     ).length;
     memberPreview.push({
       uid: doc.id,
-      name: m["name"] ?? "",
+      name: (m["nickname"] as string) ?? "",
       photoUrl: m["photoUrl"] ?? null,
       role: m["role"] ?? "member",
       status: "active",
@@ -147,6 +176,27 @@ export async function updateHomeDashboard(homeId: string): Promise<void> {
 
   logger.info(`Dashboard updated for home ${homeId}`);
 }
+
+// ---------------------------------------------------------------------------
+// refreshDashboard — callable para reconstruir el dashboard desde el cliente
+// (llamado tras crear/editar/congelar/eliminar tareas desde Flutter)
+// Input:  { homeId: string }
+// ---------------------------------------------------------------------------
+export const refreshDashboard = onCall(async (request) => {
+  if (!request.auth) {
+    throw new HttpsError("unauthenticated", "Must be authenticated");
+  }
+  const { homeId } = request.data as { homeId?: string };
+  if (!homeId) throw new HttpsError("invalid-argument", "homeId is required");
+
+  // Verificar que el usuario es miembro del hogar
+  const memberRef = db.collection("homes").doc(homeId).collection("members").doc(request.auth.uid);
+  const memberDoc = await memberRef.get();
+  if (!memberDoc.exists) throw new HttpsError("permission-denied", "Not a member of this home");
+
+  await updateHomeDashboard(homeId);
+  return { ok: true };
+});
 
 // ---------------------------------------------------------------------------
 // Cron: reset diario a medianoche (00:00 UTC)

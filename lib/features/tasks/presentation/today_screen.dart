@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/app_localizations.dart';
+import '../../homes/presentation/home_selector_widget.dart';
 import '../application/today_view_model.dart';
 import '../domain/home_dashboard.dart';
 import 'widgets/complete_task_dialog.dart';
@@ -72,7 +73,7 @@ class TodayScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.today_screen_title),
+        title: const HomeSelectorWidget(),
       ),
       body: vm.viewData.when(
         loading: () => const TodaySkeletonLoader(),

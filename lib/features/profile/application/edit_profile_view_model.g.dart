@@ -26,7 +26,7 @@ final editProfileViewModelProvider =
 // ignore: unused_element
 typedef EditProfileViewModelRef = AutoDisposeProviderRef<EditProfileViewModel>;
 String _$editProfileViewModelNotifierHash() =>
-    r'2529702f393fb931db07c8b58125134050c09749';
+    r'a11e4f845ee3362c326865a991947ac70e8999b2';
 
 /// See also [EditProfileViewModelNotifier].
 @ProviderFor(EditProfileViewModelNotifier)

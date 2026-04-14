@@ -55,14 +55,10 @@ class MembersRepositoryImpl implements MembersRepository {
 
   @override
   Future<String> generateInviteCode(String homeId) async {
-    try {
-      final result = await _functions
-          .httpsCallable('generateInviteCode')
-          .call<Map<String, dynamic>>({'homeId': homeId});
-      return result.data['code'] as String;
-    } on FirebaseFunctionsException {
-      rethrow;
-    }
+    final result = await _functions
+        .httpsCallable('generateInviteCode')
+        .call<Map<String, dynamic>>({'homeId': homeId});
+    return result.data['code'] as String;
   }
 
   @override

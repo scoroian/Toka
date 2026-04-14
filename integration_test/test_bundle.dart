@@ -9,15 +9,15 @@ import 'package:patrol/src/platform/contracts/contracts.dart';
 import 'package:test_api/src/backend/invoker.dart';
 
 // START: GENERATED TEST IMPORTS
-import 'flows/auth_onboarding_flow_test.dart' as flows__auth_onboarding_flow_test;
-import 'flows/member_management_flow_test.dart' as flows__member_management_flow_test;
-import 'flows/settings_notifications_flow_test.dart' as flows__settings_notifications_flow_test;
-import 'flows/subscription_flow_test.dart' as flows__subscription_flow_test;
-import 'flows/task_completion_flow_test.dart' as flows__task_completion_flow_test;
-import 'flows/home_management_flow_test.dart' as flows__home_management_flow_test;
-import 'flows/profile_flow_test.dart' as flows__profile_flow_test;
-import 'flows/history_flow_test.dart' as flows__history_flow_test;
-import 'flows/onboarding_registration_flow_test.dart' as flows__onboarding_registration_flow_test;
+import 'flows/auth_onboarding_flow_test.dart' as __flows__auth_onboarding_flow_test;
+import 'flows/history_flow_test.dart' as __flows__history_flow_test;
+import 'flows/home_management_flow_test.dart' as __flows__home_management_flow_test;
+import 'flows/member_management_flow_test.dart' as __flows__member_management_flow_test;
+import 'flows/onboarding_registration_flow_test.dart' as __flows__onboarding_registration_flow_test;
+import 'flows/profile_flow_test.dart' as __flows__profile_flow_test;
+import 'flows/settings_notifications_flow_test.dart' as __flows__settings_notifications_flow_test;
+import 'flows/subscription_flow_test.dart' as __flows__subscription_flow_test;
+import 'flows/task_completion_flow_test.dart' as __flows__task_completion_flow_test;
 // END: GENERATED TEST IMPORTS
 
 Future<void> main() async {
@@ -80,15 +80,15 @@ Future<void> main() async {
   });
 
 // START: GENERATED TEST GROUPS
-  group('flows.auth_onboarding_flow_test', flows__auth_onboarding_flow_test.main);
-  group('flows.member_management_flow_test', flows__member_management_flow_test.main);
-  group('flows.settings_notifications_flow_test', flows__settings_notifications_flow_test.main);
-  group('flows.subscription_flow_test', flows__subscription_flow_test.main);
-  group('flows.task_completion_flow_test', flows__task_completion_flow_test.main);
-  group('flows.home_management_flow_test', flows__home_management_flow_test.main);
-  group('flows.profile_flow_test', flows__profile_flow_test.main);
-  group('flows.history_flow_test', flows__history_flow_test.main);
-  group('flows.onboarding_registration_flow_test', flows__onboarding_registration_flow_test.main);
+  group('.flows.auth_onboarding_flow_test', __flows__auth_onboarding_flow_test.main);
+  group('.flows.history_flow_test', __flows__history_flow_test.main);
+  group('.flows.home_management_flow_test', __flows__home_management_flow_test.main);
+  group('.flows.member_management_flow_test', __flows__member_management_flow_test.main);
+  group('.flows.onboarding_registration_flow_test', __flows__onboarding_registration_flow_test.main);
+  group('.flows.profile_flow_test', __flows__profile_flow_test.main);
+  group('.flows.settings_notifications_flow_test', __flows__settings_notifications_flow_test.main);
+  group('.flows.subscription_flow_test', __flows__subscription_flow_test.main);
+  group('.flows.task_completion_flow_test', __flows__task_completion_flow_test.main);
 // END: GENERATED TEST GROUPS
 
   final dartTestGroup = await testExplorationCompleter.future;

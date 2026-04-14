@@ -10,6 +10,8 @@ import '../application/task_form_provider.dart';
 import '../../homes/application/current_home_provider.dart';
 import '../../members/application/members_provider.dart';
 import '../../members/domain/member.dart';
+import '../../profile/application/profile_provider.dart';
+import '../../profile/domain/user_profile.dart';
 import 'widgets/assignment_form.dart';
 import 'widgets/recurrence_form.dart';
 import 'widgets/task_visual_picker.dart';
@@ -83,7 +85,30 @@ class _CreateEditTaskScreenState extends ConsumerState<CreateEditTaskScreen> {
         : homeId == null
             ? const AsyncValue<List<Member>>.data([])
             : ref.watch(homeMembersProvider(homeId));
-    final members = membersAsync.valueOrNull ?? [];
+    final rawMembers = membersAsync.valueOrNull ?? [];
+
+    // Fallback: si el documento del miembro no tiene nickname/photoUrl
+    // denormalizados, los leemos de users/{uid} (mismo patrón que members_screen).
+    final profileFallback = <String, UserProfile>{};
+    for (final m in rawMembers) {
+      if (m.nickname.isEmpty || m.photoUrl == null) {
+        final profile = ref.watch(userProfileProvider(m.uid)).valueOrNull;
+        if (profile != null) profileFallback[m.uid] = profile;
+      }
+    }
+
+    Member enrich(Member m) {
+      final profile = profileFallback[m.uid];
+      if (profile == null) return m;
+      return m.copyWith(
+        nickname: m.nickname.isEmpty && profile.nickname.isNotEmpty
+            ? profile.nickname
+            : m.nickname,
+        photoUrl: m.photoUrl ?? profile.photoUrl,
+      );
+    }
+
+    final members = rawMembers.map(enrich).toList();
 
     // Auto-reparación: si el stream de miembros termina de cargar y devuelve
     // lista vacía, significa que el documento homes/{homeId}/members/{uid}

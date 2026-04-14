@@ -8,11 +8,13 @@ abstract interface class ProfileRepository {
   Stream<UserProfile> watchProfile(String uid);
 
   /// Actualiza los campos proporcionados en `users/{uid}`.
+  /// Si [photoLocalPath] no es nulo, sube la imagen a Storage y actualiza photoUrl.
   Future<void> updateProfile(
     String uid, {
     String? nickname,
     String? bio,
     String? phone,
     String? phoneVisibility,
+    String? photoLocalPath,
   });
 }

@@ -65,11 +65,11 @@ Todas las animaciones usan `CurvedAnimation` con curva `Curves.easeOutBack` (sim
 #### Opcionales elegidas
 
 - **Confetti al completar** — ~20 partículas, colores `[coral, mint, white]`, duración 800ms. Paquete: `confetti: ^0.7.0`.
-- **Hero animation** entre `AllTasksScreenV2` → `TaskDetailScreenV2` sobre el emoji/icono de tarea.
 
-#### No incluidas
+#### No incluidas / no decididas
 
-- Pull-to-refresh personalizado — se usará el estándar.
+- Hero animation entre pantallas — no se decidió; no incluir en esta iteración.
+- Pull-to-refresh personalizado — se usará el estándar de Flutter.
 - Glassmorphism — no aplica a este estilo.
 
 ### 5. Tarjeta de tarea (TodayTaskCardTodo V2)
@@ -96,7 +96,7 @@ Todas las animaciones usan `CurvedAnimation` con curva `Curves.easeOutBack` (sim
 - Tab activo: icono opaco + punto coral debajo.
 - Tab inactivo: icono al 25-35% de opacidad. Sin etiquetas de texto.
 - 4 tabs: Hoy / Tareas / Historial / Perfil.
-- El `Scaffold` principal debe tener `extendBody: true` y `bottomNavigationBar: null`; la barra flota sobre el contenido mediante `Stack` o `Overlay`.
+- Implementación: `ShellRoute` con `extendBody: true` y `bottomNavigationBar: null`. El builder del ShellRoute devuelve un `Stack` donde el primer hijo es el `child` (pantalla activa) y el segundo hijo es la barra flotante alineada al bottom con padding de `12px`. El scroll de cada pantalla debe añadir `padding: EdgeInsets.only(bottom: 80)` para no quedar tapado.
 
 ### 7. Cabecera de contadores (TodayHeaderCounters V2)
 

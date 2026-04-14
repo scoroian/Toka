@@ -49,7 +49,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final vm = ref.watch(historyViewModelProvider);
+    final HistoryViewModel vm = ref.watch(historyViewModelProvider);
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.history_title)),
@@ -128,7 +128,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   }
 
   void _showRateSheet(TaskEventItem item) {
-    final vm = ref.read(historyViewModelProvider);
+    final HistoryViewModel vm = ref.read(historyViewModelProvider);
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,

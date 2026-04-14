@@ -71,7 +71,7 @@ class TodayScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final vm = ref.watch(todayViewModelProvider);
+    final TodayViewModel vm = ref.watch(todayViewModelProvider);
 
     return Scaffold(
       appBar: AppBar(

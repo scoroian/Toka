@@ -16,7 +16,7 @@ class TaskDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final vm = ref.watch(taskDetailViewModelProvider(taskId));
+    final TaskDetailViewModel vm = ref.watch(taskDetailViewModelProvider(taskId));
 
     return vm.viewData.when(
       loading: () => Scaffold(

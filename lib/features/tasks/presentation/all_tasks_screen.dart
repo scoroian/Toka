@@ -61,7 +61,7 @@ class _AllTasksScreenState extends ConsumerState<AllTasksScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final vm = ref.watch(allTasksViewModelProvider);
+    final AllTasksViewModel vm = ref.watch(allTasksViewModelProvider);
     final isSelectionMode = vm.isSelectionMode;
     final selectedIds = vm.selectedIds;
 

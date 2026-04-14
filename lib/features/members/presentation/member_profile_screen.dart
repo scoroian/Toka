@@ -20,7 +20,7 @@ class MemberProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final vm = ref.watch(
+    final MemberProfileViewModel vm = ref.watch(
       memberProfileViewModelProvider(homeId: homeId, memberUid: memberUid),
     );
 

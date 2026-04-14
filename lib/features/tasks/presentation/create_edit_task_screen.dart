@@ -51,7 +51,7 @@ class _CreateEditTaskScreenState extends ConsumerState<CreateEditTaskScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final vm = ref.watch(createEditTaskViewModelProvider(widget.editTaskId));
+    final CreateEditTaskViewModel vm = ref.watch(createEditTaskViewModelProvider(widget.editTaskId));
 
     ref.listen<CreateEditTaskViewModel>(
       createEditTaskViewModelProvider(widget.editTaskId),

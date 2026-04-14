@@ -16,24 +16,32 @@ class ThemeModeNotifier extends _$ThemeModeNotifier {
   }
 
   Future<void> _load() async {
-    final prefs = await SharedPreferences.getInstance();
-    final v = prefs.getString(_kKey);
-    if (v == 'light') {
-      state = ThemeMode.light;
-    } else if (v == 'dark') {
-      state = ThemeMode.dark;
-    } else {
-      state = ThemeMode.system;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final v = prefs.getString(_kKey);
+      if (v == 'light') {
+        state = ThemeMode.light;
+      } else if (v == 'dark') {
+        state = ThemeMode.dark;
+      } else {
+        state = ThemeMode.system;
+      }
+    } catch (_) {
+      // SharedPreferences unavailable; stay with system default.
     }
   }
 
   Future<void> setMode(ThemeMode mode) async {
     state = mode;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_kKey, switch (mode) {
-      ThemeMode.light => 'light',
-      ThemeMode.dark  => 'dark',
-      _               => 'system',
-    });
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_kKey, switch (mode) {
+        ThemeMode.light => 'light',
+        ThemeMode.dark  => 'dark',
+        _               => 'system',
+      });
+    } catch (_) {
+      // Write failed; state is already updated in UI.
+    }
   }
 }

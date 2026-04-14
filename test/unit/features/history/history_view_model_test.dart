@@ -1,6 +1,8 @@
 // test/unit/features/history/history_view_model_test.dart
 import 'package:flutter_test/flutter_test.dart';
 import 'package:toka/features/history/application/history_provider.dart';
+import 'package:toka/features/history/application/history_view_model.dart';
+import 'package:toka/features/history/domain/task_event.dart';
 
 void main() {
   group('HistoryFilter', () {
@@ -29,6 +31,97 @@ void main() {
       const base = HistoryFilter();
       final withMember = base.copyWith(memberUid: 'u2');
       expect(withMember, isNot(equals(base)));
+    });
+  });
+
+  group('TaskEventItem.canRate', () {
+    final completedEvent = TaskEvent.completed(
+      id: 'e1',
+      taskId: 't1',
+      taskTitleSnapshot: 'Fregar',
+      taskVisualSnapshot: const TaskVisual(kind: 'emoji', value: '🍽️'),
+      actorUid: 'uid_actor',
+      performerUid: 'uid_actor',
+      completedAt: DateTime(2026, 4, 14, 10, 0),
+      createdAt: DateTime(2026, 4, 14, 10, 0),
+    );
+
+    final passedEvent = TaskEvent.passed(
+      id: 'e2',
+      taskId: 't2',
+      taskTitleSnapshot: 'Barrer',
+      taskVisualSnapshot: const TaskVisual(kind: 'emoji', value: '🧹'),
+      actorUid: 'uid_actor',
+      fromUid: 'uid_actor',
+      toUid: 'uid_other',
+      penaltyApplied: false,
+      complianceBefore: null,
+      complianceAfter: null,
+      createdAt: DateTime(2026, 4, 14),
+    );
+
+    test('canRate true: completedEvent, otro actor, no valorado', () {
+      final item = TaskEventItem(
+        raw: completedEvent,
+        actorName: 'Ana',
+        actorPhotoUrl: null,
+        isOwnEvent: false,
+        isRated: false,
+        canRate: TaskEventItem.computeCanRate(
+          raw: completedEvent,
+          isOwnEvent: false,
+          isRated: false,
+        ),
+      );
+      expect(item.canRate, isTrue);
+    });
+
+    test('canRate false: completedEvent, propio evento', () {
+      final item = TaskEventItem(
+        raw: completedEvent,
+        actorName: 'Sebas',
+        actorPhotoUrl: null,
+        isOwnEvent: true,
+        isRated: false,
+        canRate: TaskEventItem.computeCanRate(
+          raw: completedEvent,
+          isOwnEvent: true,
+          isRated: false,
+        ),
+      );
+      expect(item.canRate, isFalse);
+    });
+
+    test('canRate false: completedEvent, otro actor, ya valorado', () {
+      final item = TaskEventItem(
+        raw: completedEvent,
+        actorName: 'Ana',
+        actorPhotoUrl: null,
+        isOwnEvent: false,
+        isRated: true,
+        canRate: TaskEventItem.computeCanRate(
+          raw: completedEvent,
+          isOwnEvent: false,
+          isRated: true,
+        ),
+      );
+      expect(item.canRate, isFalse);
+    });
+
+    test('canRate false: passedEvent, aunque sea de otro', () {
+      final item = TaskEventItem(
+        raw: passedEvent,
+        actorName: 'Ana',
+        actorPhotoUrl: null,
+        isOwnEvent: false,
+        isRated: false,
+        canRate: TaskEventItem.computeCanRate(
+          raw: passedEvent,
+          isOwnEvent: false,
+          isRated: false,
+        ),
+      );
+      expect(item.canRate, isFalse);
     });
   });
 }

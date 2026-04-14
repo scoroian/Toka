@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/loading_widget.dart';
-import '../application/history_provider.dart';
 import '../application/history_view_model.dart';
 import '../domain/task_event.dart';
 import 'widgets/history_empty_state.dart';
@@ -60,11 +59,11 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
             onChanged: (f) => vm.applyFilter(f),
           ),
           Expanded(
-            child: vm.events.when(
+            child: vm.items.when(
               loading: () => const LoadingWidget(),
               error: (_, __) => Center(child: Text(l10n.error_generic)),
-              data: (events) {
-                if (events.isEmpty) {
+              data: (items) {
+                if (items.isEmpty) {
                   return const HistoryEmptyState();
                 }
                 final isPremium = vm.isPremium;
@@ -76,12 +75,12 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                 return ListView.builder(
                   key: const Key('history_list'),
                   controller: _scrollController,
-                  itemCount: events.length + extraItems,
+                  itemCount: items.length + extraItems,
                   itemBuilder: (context, index) {
-                    if (index < events.length) {
-                      return _buildEventTile(events[index]);
+                    if (index < items.length) {
+                      return _buildEventTile(items[index]);
                     }
-                    final extra = index - events.length;
+                    final extra = index - items.length;
                     if (showBanner && extra == 0) {
                       return _PremiumBanner(l10n: l10n);
                     }
@@ -106,13 +105,15 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     );
   }
 
-  Widget _buildEventTile(TaskEvent event) {
-    String? toName;
-    if (event is PassedEvent) toName = event.toUid;
+  Widget _buildEventTile(TaskEventItem item) {
+    final toName = switch (item.raw) {
+      PassedEvent p => p.toUid,
+      _ => null,
+    };
     return HistoryEventTile(
-      event: event,
-      actorName: event.actorUid,
-      actorPhotoUrl: null,
+      event: item.raw,
+      actorName: item.actorName,
+      actorPhotoUrl: item.actorPhotoUrl,
       toName: toName,
     );
   }

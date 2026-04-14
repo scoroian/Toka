@@ -758,5 +758,11 @@
     "placeholders": { "score": { "type": "String" } }
   },
   "history_rate_note_hint": "Notă privată (opțional)",
-  "history_rate_submit": "Trimite evaluarea"
+  "history_rate_submit": "Trimite evaluarea",
+  "member_profile_overflow_tasks_title": "Mai multe sarcini atribuite",
+  "member_profile_manage_role": "Gestionează rol",
+  "member_profile_role_manage_unavailable": "Gestionarea rolurilor disponibilă în curând",
+  "today_home_selector_create": "Creează cămin",
+  "today_home_selector_join": "Alătură-te cu cod",
+  "today_home_selector_my_homes": "Căminele mele"
 }

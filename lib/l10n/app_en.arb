@@ -758,5 +758,11 @@
     "placeholders": { "score": { "type": "String" } }
   },
   "history_rate_note_hint": "Private note (optional)",
-  "history_rate_submit": "Submit rating"
+  "history_rate_submit": "Submit rating",
+  "member_profile_overflow_tasks_title": "More assigned tasks",
+  "member_profile_manage_role": "Manage role",
+  "member_profile_role_manage_unavailable": "Role management coming soon",
+  "today_home_selector_create": "Create home",
+  "today_home_selector_join": "Join with code",
+  "today_home_selector_my_homes": "My homes"
 }

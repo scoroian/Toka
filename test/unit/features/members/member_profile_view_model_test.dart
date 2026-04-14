@@ -13,6 +13,7 @@ import 'package:toka/features/members/application/members_provider.dart';
 import 'package:toka/features/homes/domain/home_membership.dart';
 import 'package:toka/features/members/domain/member.dart';
 import 'package:toka/features/members/domain/members_repository.dart';
+import 'package:toka/features/profile/presentation/widgets/radar_chart_widget.dart';
 import 'package:flutter/material.dart';
 
 class _MockMembersRepository extends Mock implements MembersRepository {}
@@ -152,6 +153,66 @@ void main() {
       );
       expect(vm.viewData.hasValue, isTrue);
       expect(vm.viewData.value!.isSelf, isTrue);
+    });
+  });
+
+  group('MemberProfileViewData — stats del Member', () {
+    test('completedCount, streakCount, averageScore vienen del Member', () {
+      // fakeMember defined at top: tasksCompleted: 10, currentStreak: 3, averageScore: 8.5
+      final data = MemberProfileViewData(
+        member: fakeMember,
+        isSelf: false,
+        visiblePhone: null,
+        compliancePct: '85.0',
+        radarEntries: const [],
+        canManageRoles: false,
+        completedCount: 10,
+        streakCount: 3,
+        averageScore: 8.5,
+        showRadar: false,
+        overflowEntries: const [],
+      );
+      expect(data.completedCount, 10);
+      expect(data.streakCount, 3);
+      expect(data.averageScore, 8.5);
+    });
+
+    test('showRadar false cuando radarEntries tiene menos de 3 elementos', () {
+      final data = MemberProfileViewData(
+        member: fakeMember,
+        isSelf: false,
+        visiblePhone: null,
+        compliancePct: '85.0',
+        radarEntries: const [RadarEntry(taskName: 'T1', avgScore: 7.0)],
+        canManageRoles: false,
+        completedCount: 10,
+        streakCount: 3,
+        averageScore: 8.5,
+        showRadar: false,
+        overflowEntries: const [],
+      );
+      expect(data.showRadar, isFalse);
+    });
+
+    test('showRadar true cuando radarEntries tiene 3 o más elementos', () {
+      final data = MemberProfileViewData(
+        member: fakeMember,
+        isSelf: false,
+        visiblePhone: null,
+        compliancePct: '85.0',
+        radarEntries: const [
+          RadarEntry(taskName: 'T1', avgScore: 7.0),
+          RadarEntry(taskName: 'T2', avgScore: 8.0),
+          RadarEntry(taskName: 'T3', avgScore: 9.0),
+        ],
+        canManageRoles: false,
+        completedCount: 10,
+        streakCount: 3,
+        averageScore: 8.5,
+        showRadar: true,
+        overflowEntries: const [],
+      );
+      expect(data.showRadar, isTrue);
     });
   });
 }

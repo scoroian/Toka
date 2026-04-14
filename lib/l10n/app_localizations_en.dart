@@ -1273,4 +1273,79 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get month_dec => 'December';
+
+  @override
+  String tasks_selection_count(int count) {
+    return '$count selected';
+  }
+
+  @override
+  String get tasks_bulk_freeze => 'Freeze';
+
+  @override
+  String get tasks_bulk_delete => 'Delete';
+
+  @override
+  String tasks_bulk_delete_confirm_title(int count) {
+    return 'Delete $count tasks?';
+  }
+
+  @override
+  String get tasks_bulk_delete_confirm_body => 'This action cannot be undone.';
+
+  @override
+  String get history_rate_button => 'Rate';
+
+  @override
+  String get history_rate_sheet_title => 'Rate task';
+
+  @override
+  String history_rate_score_label(String score) {
+    return 'Score: $score';
+  }
+
+  @override
+  String get history_rate_note_hint => 'Private note (optional)';
+
+  @override
+  String get history_rate_submit => 'Submit rating';
+
+  @override
+  String get member_profile_overflow_tasks_title => 'More assigned tasks';
+
+  @override
+  String get member_profile_manage_role => 'Manage role';
+
+  @override
+  String get member_profile_role_manage_unavailable =>
+      'Role management coming soon';
+
+  @override
+  String get today_home_selector_create => 'Create home';
+
+  @override
+  String get today_home_selector_join => 'Join with code';
+
+  @override
+  String get today_home_selector_my_homes => 'My homes';
+
+  @override
+  String get tasks_fixed_time_label => 'Fixed time';
+
+  @override
+  String get tasks_fixed_time_pick => 'Pick time';
+
+  @override
+  String get tasks_apply_today_label => 'Create occurrence for today';
+
+  @override
+  String get tasks_upcoming_preview_title => 'Next 3 dates';
+
+  @override
+  String tasks_upcoming_preview_assignee(String name) {
+    return '→ $name';
+  }
+
+  @override
+  String get tasks_assignment_drag_hint => 'Drag to reorder';
 }

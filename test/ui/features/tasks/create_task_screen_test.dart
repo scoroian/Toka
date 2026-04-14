@@ -14,6 +14,7 @@ import 'package:toka/features/homes/domain/home_limits.dart';
 import 'package:toka/features/homes/domain/home_membership.dart';
 import 'package:toka/features/members/application/members_provider.dart';
 import 'package:toka/features/members/domain/member.dart';
+import 'package:toka/features/tasks/application/create_edit_task_view_model.dart';
 import 'package:toka/features/tasks/application/task_form_provider.dart';
 import 'package:toka/features/tasks/application/tasks_provider.dart';
 import 'package:toka/features/tasks/domain/recurrence_rule.dart';
@@ -310,23 +311,13 @@ void main() {
   });
 
   group('AssignmentForm — avatar e iniciales', () {
-    testWidgets('muestra CircleAvatar con inicial del nickname', (tester) async {
-      final member = Member(
+    testWidgets('muestra CircleAvatar con inicial del nombre', (tester) async {
+      final item = MemberOrderItem(
         uid: 'uid1',
-        homeId: 'h1',
-        nickname: 'Ana García',
+        name: 'Ana García',
         photoUrl: null,
-        bio: null,
-        phone: null,
-        phoneVisibility: 'hidden',
-        role: MemberRole.owner,
-        status: MemberStatus.active,
-        joinedAt: DateTime(2024),
-        tasksCompleted: 0,
-        passedCount: 0,
-        complianceRate: 1.0,
-        currentStreak: 0,
-        averageScore: 0.0,
+        isAssigned: false,
+        position: 0,
       );
 
       await tester.pumpWidget(MaterialApp(
@@ -339,9 +330,9 @@ void main() {
         supportedLocales: const [Locale('es')],
         home: Scaffold(
           body: AssignmentForm(
-            availableMembers: [member],
-            selectedOrder: const [],
-            onChanged: (_) {},
+            members: [item],
+            onToggle: (_) {},
+            onReorder: (_, __) {},
           ),
         ),
       ));

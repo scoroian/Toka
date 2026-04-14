@@ -152,7 +152,7 @@ ProviderContainer _makeCanCreateContainer({
       ]),
     ),
 
-    // Tareas vacías — no interesan para canCreate
+    // Tareas vacías — no interesan para canManage
     homeTasksProvider(homeId).overrideWith(
       (_) => Stream.value([]),
     ),
@@ -217,16 +217,11 @@ void main() {
   });
 
   // ---------------------------------------------------------------------------
-  // canCreate por rol
+  // canManage por rol
   // ---------------------------------------------------------------------------
-  group('AllTasksViewModel canCreate', () {
+  group('AllTasksViewModel canManage', () {
     test(
-      // ESTE TEST DEBE FALLAR antes de Task 6:
-      // canCreate lee userMembershipsProvider (role=member, desactualizado)
-      // en lugar de homeMembersProvider (role=admin, fuente de verdad).
-      // Cuando se promueve a admin, solo homes/{homeId}/members/{uid}.role
-      // se actualiza; users/{uid}/memberships/{homeId}.role permanece obsoleto.
-      'admin en homeMembers con membresía desactualizada (member) → canCreate == true',
+      'admin en homeMembers con membresía desactualizada (member) → canManage == true',
       () async {
         // Given: homeMembersProvider tiene al usuario con role=admin (fuente de verdad)
         //        userMembershipsProvider devuelve role=member (dato obsoleto tras promoción)
@@ -240,13 +235,12 @@ void main() {
         final viewData = await _resolveViewData(container);
 
         // Then: debe ser true porque el usuario ES admin según homeMembers
-        // ACTUALMENTE FALLA: canCreate lee userMemberships y devuelve false
         expect(viewData, isNotNull);
-        expect(viewData!.canCreate, isTrue);
+        expect(viewData!.canManage, isTrue);
       },
     );
 
-    test('owner en ambas fuentes → canCreate == true', () async {
+    test('owner en ambas fuentes → canManage == true', () async {
       // Given: ambas fuentes coinciden en role=owner
       final container = _makeCanCreateContainer(
         staleRole: MemberRole.owner,
@@ -259,10 +253,10 @@ void main() {
 
       // Then
       expect(viewData, isNotNull);
-      expect(viewData!.canCreate, isTrue);
+      expect(viewData!.canManage, isTrue);
     });
 
-    test('member en ambas fuentes → canCreate == false', () async {
+    test('member en ambas fuentes → canManage == false', () async {
       // Given: ambas fuentes coinciden en role=member
       final container = _makeCanCreateContainer(
         staleRole: MemberRole.member,
@@ -275,7 +269,46 @@ void main() {
 
       // Then
       expect(viewData, isNotNull);
-      expect(viewData!.canCreate, isFalse);
+      expect(viewData!.canManage, isFalse);
+    });
+  });
+
+  group('AllTasksViewModel — selección múltiple', () {
+    test('isSelectionMode false cuando selectedIds está vacío', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      final vm = container.read(allTasksViewModelProvider);
+      expect(vm.isSelectionMode, isFalse);
+      expect(vm.selectedIds, isEmpty);
+    });
+
+    test('toggleSelection añade id a selectedIds', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      container.read(allTasksViewModelProvider).toggleSelection('task_1');
+      final vm = container.read(allTasksViewModelProvider);
+      expect(vm.selectedIds, contains('task_1'));
+      expect(vm.isSelectionMode, isTrue);
+    });
+
+    test('toggleSelection sobre id ya seleccionado lo elimina', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      container.read(allTasksViewModelProvider).toggleSelection('task_1');
+      container.read(allTasksViewModelProvider).toggleSelection('task_1');
+      final vm = container.read(allTasksViewModelProvider);
+      expect(vm.selectedIds, isNot(contains('task_1')));
+      expect(vm.isSelectionMode, isFalse);
+    });
+
+    test('clearSelection vacía selectedIds', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      container.read(allTasksViewModelProvider).toggleSelection('task_1');
+      container.read(allTasksViewModelProvider).toggleSelection('task_2');
+      container.read(allTasksViewModelProvider).clearSelection();
+      final vm = container.read(allTasksViewModelProvider);
+      expect(vm.selectedIds, isEmpty);
     });
   });
 }

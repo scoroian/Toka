@@ -23,6 +23,7 @@ mixin _$HomeMembership {
   MemberStatus get status => throw _privateConstructorUsedError;
   DateTime get joinedAt => throw _privateConstructorUsedError;
   DateTime? get leftAt => throw _privateConstructorUsedError;
+  bool get hasPendingToday => throw _privateConstructorUsedError;
 
   /// Create a copy of HomeMembership
   /// with the given fields replaced by the non-null parameter values.
@@ -44,7 +45,8 @@ abstract class $HomeMembershipCopyWith<$Res> {
       BillingState billingState,
       MemberStatus status,
       DateTime joinedAt,
-      DateTime? leftAt});
+      DateTime? leftAt,
+      bool hasPendingToday});
 }
 
 /// @nodoc
@@ -69,6 +71,7 @@ class _$HomeMembershipCopyWithImpl<$Res, $Val extends HomeMembership>
     Object? status = null,
     Object? joinedAt = null,
     Object? leftAt = freezed,
+    Object? hasPendingToday = null,
   }) {
     return _then(_value.copyWith(
       homeId: null == homeId
@@ -99,6 +102,10 @@ class _$HomeMembershipCopyWithImpl<$Res, $Val extends HomeMembership>
           ? _value.leftAt
           : leftAt // ignore: cast_nullable_to_non_nullable
               as DateTime?,
+      hasPendingToday: null == hasPendingToday
+          ? _value.hasPendingToday
+          : hasPendingToday // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 }
@@ -118,7 +125,8 @@ abstract class _$$HomeMembershipImplCopyWith<$Res>
       BillingState billingState,
       MemberStatus status,
       DateTime joinedAt,
-      DateTime? leftAt});
+      DateTime? leftAt,
+      bool hasPendingToday});
 }
 
 /// @nodoc
@@ -141,6 +149,7 @@ class __$$HomeMembershipImplCopyWithImpl<$Res>
     Object? status = null,
     Object? joinedAt = null,
     Object? leftAt = freezed,
+    Object? hasPendingToday = null,
   }) {
     return _then(_$HomeMembershipImpl(
       homeId: null == homeId
@@ -171,6 +180,10 @@ class __$$HomeMembershipImplCopyWithImpl<$Res>
           ? _value.leftAt
           : leftAt // ignore: cast_nullable_to_non_nullable
               as DateTime?,
+      hasPendingToday: null == hasPendingToday
+          ? _value.hasPendingToday
+          : hasPendingToday // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -185,7 +198,8 @@ class _$HomeMembershipImpl implements _HomeMembership {
       required this.billingState,
       required this.status,
       required this.joinedAt,
-      this.leftAt});
+      this.leftAt,
+      this.hasPendingToday = false});
 
   @override
   final String homeId;
@@ -201,10 +215,13 @@ class _$HomeMembershipImpl implements _HomeMembership {
   final DateTime joinedAt;
   @override
   final DateTime? leftAt;
+  @override
+  @JsonKey()
+  final bool hasPendingToday;
 
   @override
   String toString() {
-    return 'HomeMembership(homeId: $homeId, homeNameSnapshot: $homeNameSnapshot, role: $role, billingState: $billingState, status: $status, joinedAt: $joinedAt, leftAt: $leftAt)';
+    return 'HomeMembership(homeId: $homeId, homeNameSnapshot: $homeNameSnapshot, role: $role, billingState: $billingState, status: $status, joinedAt: $joinedAt, leftAt: $leftAt, hasPendingToday: $hasPendingToday)';
   }
 
   @override
@@ -221,12 +238,14 @@ class _$HomeMembershipImpl implements _HomeMembership {
             (identical(other.status, status) || other.status == status) &&
             (identical(other.joinedAt, joinedAt) ||
                 other.joinedAt == joinedAt) &&
-            (identical(other.leftAt, leftAt) || other.leftAt == leftAt));
+            (identical(other.leftAt, leftAt) || other.leftAt == leftAt) &&
+            (identical(other.hasPendingToday, hasPendingToday) ||
+                other.hasPendingToday == hasPendingToday));
   }
 
   @override
   int get hashCode => Object.hash(runtimeType, homeId, homeNameSnapshot, role,
-      billingState, status, joinedAt, leftAt);
+      billingState, status, joinedAt, leftAt, hasPendingToday);
 
   /// Create a copy of HomeMembership
   /// with the given fields replaced by the non-null parameter values.
@@ -246,7 +265,8 @@ abstract class _HomeMembership implements HomeMembership {
       required final BillingState billingState,
       required final MemberStatus status,
       required final DateTime joinedAt,
-      final DateTime? leftAt}) = _$HomeMembershipImpl;
+      final DateTime? leftAt,
+      final bool hasPendingToday}) = _$HomeMembershipImpl;
 
   @override
   String get homeId;
@@ -262,6 +282,8 @@ abstract class _HomeMembership implements HomeMembership {
   DateTime get joinedAt;
   @override
   DateTime? get leftAt;
+  @override
+  bool get hasPendingToday;
 
   /// Create a copy of HomeMembership
   /// with the given fields replaced by the non-null parameter values.

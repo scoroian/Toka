@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../core/constants/routes.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../homes/presentation/home_selector_widget.dart';
 import '../application/today_view_model.dart';
 import '../domain/home_dashboard.dart';
 import 'widgets/complete_task_dialog.dart';
+import 'widgets/home_dropdown_button.dart';
 import 'widgets/pass_turn_dialog.dart';
 import 'widgets/today_empty_state.dart';
 import 'widgets/today_header_counters.dart';
@@ -69,11 +71,18 @@ class TodayScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final vm = ref.watch(todayViewModelProvider);
+    final TodayViewModel vm = ref.watch(todayViewModelProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const HomeSelectorWidget(),
+        title: vm.homes.length > 1
+            ? HomeDropdownButton(
+                homes: vm.homes,
+                onSelect: vm.selectHome,
+                onCreateHome: () => context.go(AppRoutes.myHomes),
+                onJoinHome: () => context.go(AppRoutes.myHomes),
+              )
+            : Text(l10n.today_screen_title),
       ),
       body: vm.viewData.when(
         loading: () => const TodaySkeletonLoader(),

@@ -27,19 +27,21 @@ class TaskDetailViewData {
     required this.canManage,
     required this.currentAssigneeName,
     required this.upcomingOccurrences,
+    required this.difficultyWeight,   // ← new
   });
   final Task task;
   final bool canManage;
   final String? currentAssigneeName;
   final List<UpcomingOccurrence> upcomingOccurrences;
+  final double difficultyWeight;     // ← new
 
   bool get isFrozen => task.status == TaskStatus.frozen;
 }
 
 abstract class TaskDetailViewModel {
   AsyncValue<TaskDetailViewData?> get viewData;
-  Future<void> toggleFreeze();
-  Future<void> deleteTask();
+  Future<void> toggleFreeze(Task task);
+  Future<void> deleteTask(Task task);
 }
 
 class _TaskDetailViewModelImpl implements TaskDetailViewModel {
@@ -50,25 +52,26 @@ class _TaskDetailViewModelImpl implements TaskDetailViewModel {
   final Ref ref;
 
   @override
-  Future<void> toggleFreeze() async {
-    final data = viewData.valueOrNull;
-    if (data == null) return;
-    final homeId = data.task.homeId;
+  Future<void> toggleFreeze(Task task) async {
+    final homeId = viewData.valueOrNull?.task.homeId;
+    if (homeId == null) return;
     final repo = ref.read(tasksRepositoryProvider);
-    if (data.isFrozen) {
-      await repo.unfreezeTask(homeId, data.task.id);
+    if (task.status == TaskStatus.active) {
+      await repo.freezeTask(homeId, task.id);
     } else {
-      await repo.freezeTask(homeId, data.task.id);
+      await repo.unfreezeTask(homeId, task.id);
     }
   }
 
   @override
-  Future<void> deleteTask() async {
+  Future<void> deleteTask(Task task) async {
     final data = viewData.valueOrNull;
     if (data == null) return;
-    final homeId = data.task.homeId;
-    final uid = ref.read(authProvider).whenOrNull(authenticated: (u) => u.uid) ?? '';
-    await ref.read(tasksRepositoryProvider).deleteTask(homeId, data.task.id, uid);
+    final uid =
+        ref.read(authProvider).whenOrNull(authenticated: (u) => u.uid) ?? '';
+    await ref
+        .read(tasksRepositoryProvider)
+        .deleteTask(data.task.homeId, task.id, uid);
   }
 }
 
@@ -144,13 +147,14 @@ TaskDetailViewModel taskDetailViewModel(
     final upcomingDates =
         ref.watch(upcomingOccurrencesProvider(task.recurrenceRule));
     final upcomingOccurrences = _computeUpcomingOccurrences(
-        task, upcomingDates.take(3).toList(), nameMap);
+        task, upcomingDates.take(5).toList(), nameMap);
 
     return TaskDetailViewData(
       task: task,
       canManage: canManage,
       currentAssigneeName: currentAssigneeName,
       upcomingOccurrences: upcomingOccurrences,
+      difficultyWeight: task.difficultyWeight,          // ← new
     );
   });
 

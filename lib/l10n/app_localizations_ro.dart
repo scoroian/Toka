@@ -1280,4 +1280,81 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get month_dec => 'Decembrie';
+
+  @override
+  String tasks_selection_count(int count) {
+    return '$count selectate';
+  }
+
+  @override
+  String get tasks_bulk_freeze => 'Îngheță';
+
+  @override
+  String get tasks_bulk_delete => 'Șterge';
+
+  @override
+  String tasks_bulk_delete_confirm_title(int count) {
+    return 'Șterge $count sarcini?';
+  }
+
+  @override
+  String get tasks_bulk_delete_confirm_body =>
+      'Această acțiune nu poate fi anulată.';
+
+  @override
+  String get history_rate_button => 'Evaluează';
+
+  @override
+  String get history_rate_sheet_title => 'Evaluează sarcina';
+
+  @override
+  String history_rate_score_label(String score) {
+    return 'Scor: $score';
+  }
+
+  @override
+  String get history_rate_note_hint => 'Notă privată (opțional)';
+
+  @override
+  String get history_rate_submit => 'Trimite evaluarea';
+
+  @override
+  String get member_profile_overflow_tasks_title =>
+      'Mai multe sarcini atribuite';
+
+  @override
+  String get member_profile_manage_role => 'Gestionează rol';
+
+  @override
+  String get member_profile_role_manage_unavailable =>
+      'Gestionarea rolurilor disponibilă în curând';
+
+  @override
+  String get today_home_selector_create => 'Creează cămin';
+
+  @override
+  String get today_home_selector_join => 'Alătură-te cu cod';
+
+  @override
+  String get today_home_selector_my_homes => 'Căminele mele';
+
+  @override
+  String get tasks_fixed_time_label => 'Oră fixă';
+
+  @override
+  String get tasks_fixed_time_pick => 'Alege ora';
+
+  @override
+  String get tasks_apply_today_label => 'Creează ocurență pentru azi';
+
+  @override
+  String get tasks_upcoming_preview_title => 'Următoarele 3 date';
+
+  @override
+  String tasks_upcoming_preview_assignee(String name) {
+    return '→ $name';
+  }
+
+  @override
+  String get tasks_assignment_drag_hint => 'Trage pentru a reordona';
 }

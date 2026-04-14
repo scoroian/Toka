@@ -1,10 +1,19 @@
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:toka/features/tasks/data/tasks_repository_impl.dart';
 import 'package:toka/features/tasks/domain/recurrence_rule.dart';
 import 'package:toka/features/tasks/domain/task.dart';
 import 'package:toka/features/tasks/domain/task_status.dart';
+
+class _MockFirebaseFunctions extends Mock implements FirebaseFunctions {}
+
+class _MockHttpsCallable extends Mock implements HttpsCallable {}
+
+class _MockHttpsCallableResult extends Mock
+    implements HttpsCallableResult<dynamic> {}
 
 const _homeId = 'home1';
 const _uid = 'user1';
@@ -24,10 +33,17 @@ void main() {
 
   late FakeFirebaseFirestore fakeDb;
   late TasksRepositoryImpl repo;
+  late _MockFirebaseFunctions mockFunctions;
+  late _MockHttpsCallable mockCallable;
 
   setUp(() {
     fakeDb = FakeFirebaseFirestore();
-    repo = TasksRepositoryImpl(firestore: fakeDb);
+    mockFunctions = _MockFirebaseFunctions();
+    mockCallable = _MockHttpsCallable();
+    when(() => mockFunctions.httpsCallable(any())).thenReturn(mockCallable);
+    when(() => mockCallable.call(any())).thenAnswer((_) async =>
+        _MockHttpsCallableResult());
+    repo = TasksRepositoryImpl(firestore: fakeDb, functions: mockFunctions);
   });
 
   test('createTask → documento creado con status active', () async {

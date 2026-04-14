@@ -6,7 +6,7 @@ part of 'all_tasks_view_model.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$allTasksViewModelHash() => r'03047340ea182c5510ed2a5a4c7f42d809981de5';
+String _$allTasksViewModelHash() => r'5e990c5adefa5c17a4b3d51e44df70cd02e2c9ad';
 
 /// See also [allTasksViewModel].
 @ProviderFor(allTasksViewModel)
@@ -41,5 +41,22 @@ final allTasksFilterNotifierProvider = AutoDisposeNotifierProvider<
 );
 
 typedef _$AllTasksFilterNotifier = AutoDisposeNotifier<AllTasksFilter>;
+String _$allTasksSelectionNotifierHash() =>
+    r'dd4a888dce3be60546594340078cd859584605cb';
+
+/// See also [AllTasksSelectionNotifier].
+@ProviderFor(AllTasksSelectionNotifier)
+final allTasksSelectionNotifierProvider = AutoDisposeNotifierProvider<
+    AllTasksSelectionNotifier, Set<String>>.internal(
+  AllTasksSelectionNotifier.new,
+  name: r'allTasksSelectionNotifierProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$allTasksSelectionNotifierHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef _$AllTasksSelectionNotifier = AutoDisposeNotifier<Set<String>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/loading_widget.dart';
 import '../application/task_detail_view_model.dart';
+import '../domain/task.dart';
 import '../domain/task_status.dart';
 
 class TaskDetailScreen extends ConsumerWidget {
@@ -17,6 +18,7 @@ class TaskDetailScreen extends ConsumerWidget {
     BuildContext context,
     AppLocalizations l10n,
     TaskDetailViewModel vm,
+    Task task,
   ) async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -36,7 +38,7 @@ class TaskDetailScreen extends ConsumerWidget {
       ),
     );
     if (confirmed == true && context.mounted) {
-      await vm.deleteTask();
+      await vm.deleteTask(task);
       if (context.mounted) context.pop();
     }
   }
@@ -44,7 +46,7 @@ class TaskDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final vm = ref.watch(taskDetailViewModelProvider(taskId));
+    final TaskDetailViewModel vm = ref.watch(taskDetailViewModelProvider(taskId));
 
     return vm.viewData.when(
       loading: () => Scaffold(
@@ -75,13 +77,13 @@ class TaskDetailScreen extends ConsumerWidget {
                   tooltip: data.isFrozen
                       ? l10n.tasks_action_unfreeze
                       : l10n.tasks_action_freeze,
-                  onPressed: () => vm.toggleFreeze(),
+                  onPressed: () => vm.toggleFreeze(task),
                 ),
                 IconButton(
                   key: const Key('delete_task_button'),
                   icon: const Icon(Icons.delete_outline),
                   tooltip: l10n.delete,
-                  onPressed: () => _confirmDelete(context, l10n, vm),
+                  onPressed: () => _confirmDelete(context, l10n, vm, task),
                 ),
                 IconButton(
                   key: const Key('edit_task_button'),

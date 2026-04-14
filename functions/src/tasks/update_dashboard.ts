@@ -174,6 +174,18 @@ export async function updateHomeDashboard(homeId: string): Promise<void> {
     updatedAt: FieldValue.serverTimestamp(),
   });
 
+  // Update hasPendingToday for each active member of this home
+  const hasPendingToday = activeTasksPreview.length > doneTasksPreview.length;
+  const membershipUpdates = memberPreview.map((m) =>
+    db.collection("users").doc(m["uid"] as string)
+      .collection("memberships").doc(homeId)
+      .update({ hasPendingToday })
+      .catch((err: unknown) =>
+        logger.warn(`Could not update hasPendingToday for ${m["uid"] as string}: ${String(err)}`)
+      )
+  );
+  await Promise.all(membershipUpdates);
+
   logger.info(`Dashboard updated for home ${homeId}`);
 }
 

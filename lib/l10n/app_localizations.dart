@@ -2481,6 +2481,138 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Diciembre'**
   String get month_dec;
+
+  /// No description provided for @tasks_selection_count.
+  ///
+  /// In es, this message translates to:
+  /// **'{count} seleccionadas'**
+  String tasks_selection_count(int count);
+
+  /// No description provided for @tasks_bulk_freeze.
+  ///
+  /// In es, this message translates to:
+  /// **'Congelar'**
+  String get tasks_bulk_freeze;
+
+  /// No description provided for @tasks_bulk_delete.
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar'**
+  String get tasks_bulk_delete;
+
+  /// No description provided for @tasks_bulk_delete_confirm_title.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Eliminar {count} tareas?'**
+  String tasks_bulk_delete_confirm_title(int count);
+
+  /// No description provided for @tasks_bulk_delete_confirm_body.
+  ///
+  /// In es, this message translates to:
+  /// **'Esta acción no se puede deshacer.'**
+  String get tasks_bulk_delete_confirm_body;
+
+  /// No description provided for @history_rate_button.
+  ///
+  /// In es, this message translates to:
+  /// **'Valorar'**
+  String get history_rate_button;
+
+  /// No description provided for @history_rate_sheet_title.
+  ///
+  /// In es, this message translates to:
+  /// **'Valorar tarea'**
+  String get history_rate_sheet_title;
+
+  /// No description provided for @history_rate_score_label.
+  ///
+  /// In es, this message translates to:
+  /// **'Puntuación: {score}'**
+  String history_rate_score_label(String score);
+
+  /// No description provided for @history_rate_note_hint.
+  ///
+  /// In es, this message translates to:
+  /// **'Nota privada (opcional)'**
+  String get history_rate_note_hint;
+
+  /// No description provided for @history_rate_submit.
+  ///
+  /// In es, this message translates to:
+  /// **'Enviar valoración'**
+  String get history_rate_submit;
+
+  /// No description provided for @member_profile_overflow_tasks_title.
+  ///
+  /// In es, this message translates to:
+  /// **'Más tareas asignadas'**
+  String get member_profile_overflow_tasks_title;
+
+  /// No description provided for @member_profile_manage_role.
+  ///
+  /// In es, this message translates to:
+  /// **'Gestionar rol'**
+  String get member_profile_manage_role;
+
+  /// No description provided for @member_profile_role_manage_unavailable.
+  ///
+  /// In es, this message translates to:
+  /// **'Gestión de roles disponible próximamente'**
+  String get member_profile_role_manage_unavailable;
+
+  /// No description provided for @today_home_selector_create.
+  ///
+  /// In es, this message translates to:
+  /// **'Crear hogar'**
+  String get today_home_selector_create;
+
+  /// No description provided for @today_home_selector_join.
+  ///
+  /// In es, this message translates to:
+  /// **'Unirse con código'**
+  String get today_home_selector_join;
+
+  /// No description provided for @today_home_selector_my_homes.
+  ///
+  /// In es, this message translates to:
+  /// **'Mis hogares'**
+  String get today_home_selector_my_homes;
+
+  /// No description provided for @tasks_fixed_time_label.
+  ///
+  /// In es, this message translates to:
+  /// **'Hora fija'**
+  String get tasks_fixed_time_label;
+
+  /// No description provided for @tasks_fixed_time_pick.
+  ///
+  /// In es, this message translates to:
+  /// **'Elegir hora'**
+  String get tasks_fixed_time_pick;
+
+  /// No description provided for @tasks_apply_today_label.
+  ///
+  /// In es, this message translates to:
+  /// **'Crear ocurrencia para hoy'**
+  String get tasks_apply_today_label;
+
+  /// No description provided for @tasks_upcoming_preview_title.
+  ///
+  /// In es, this message translates to:
+  /// **'Próximas 3 fechas'**
+  String get tasks_upcoming_preview_title;
+
+  /// No description provided for @tasks_upcoming_preview_assignee.
+  ///
+  /// In es, this message translates to:
+  /// **'→ {name}'**
+  String tasks_upcoming_preview_assignee(String name);
+
+  /// No description provided for @tasks_assignment_drag_hint.
+  ///
+  /// In es, this message translates to:
+  /// **'Arrastra para reordenar'**
+  String get tasks_assignment_drag_hint;
 }
 
 class _AppLocalizationsDelegate

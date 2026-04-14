@@ -1,5 +1,4 @@
 // lib/features/tasks/presentation/create_edit_task_screen.dart
-import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -7,14 +6,10 @@ import 'package:go_router/go_router.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/create_edit_task_view_model.dart';
 import '../application/task_form_provider.dart';
-import '../../homes/application/current_home_provider.dart';
-import '../../members/application/members_provider.dart';
-import '../../members/domain/member.dart';
-import '../../profile/application/profile_provider.dart';
-import '../../profile/domain/user_profile.dart';
 import 'widgets/assignment_form.dart';
 import 'widgets/recurrence_form.dart';
 import 'widgets/task_visual_picker.dart';
+import 'widgets/upcoming_dates_preview.dart';
 
 class CreateEditTaskScreen extends ConsumerStatefulWidget {
   const CreateEditTaskScreen({super.key, this.editTaskId});
@@ -28,7 +23,6 @@ class CreateEditTaskScreen extends ConsumerStatefulWidget {
 class _CreateEditTaskScreenState extends ConsumerState<CreateEditTaskScreen> {
   late TextEditingController _titleController;
   late TextEditingController _descController;
-  bool _repairAttempted = false;
 
   @override
   void initState() {
@@ -44,28 +38,23 @@ class _CreateEditTaskScreenState extends ConsumerState<CreateEditTaskScreen> {
     super.dispose();
   }
 
-  /// Llama a la Cloud Function repairMemberDocument para crear el documento
-  /// homes/{homeId}/members/{uid} si no existe (usuarios creados antes del fix).
-  Future<void> _tryRepairMemberDocument(String homeId) async {
-    if (_repairAttempted) return;
-    _repairAttempted = true;
-    try {
-      await FirebaseFunctions.instance
-          .httpsCallable('repairMemberDocument')
-          .call({'homeId': homeId});
-      // Invalidar el provider para que re-lea la subcolección
-      if (mounted) {
-        ref.invalidate(homeMembersProvider(homeId));
-      }
-    } catch (_) {
-      // Si falla la reparación no bloqueamos al usuario
+  Future<void> _pickTime(
+      BuildContext context, CreateEditTaskViewModel vm) async {
+    final initial = vm.fixedTime ?? TimeOfDay.now();
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: initial,
+    );
+    if (picked != null) {
+      vm.setFixedTime(picked);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final vm = ref.watch(createEditTaskViewModelProvider(widget.editTaskId));
+    final CreateEditTaskViewModel vm =
+        ref.watch(createEditTaskViewModelProvider(widget.editTaskId));
 
     // Observamos el taskFormNotifierProvider directamente para que la pantalla
     // se reconstruya cada vez que cambia el estado del formulario (slider,
@@ -73,57 +62,6 @@ class _CreateEditTaskScreenState extends ConsumerState<CreateEditTaskScreen> {
     // siempre la misma instancia del notifier, por lo que Riverpod no detecta
     // cambio sin esta suscripción directa.
     final formState = ref.watch(taskFormNotifierProvider);
-
-    final currentHomeAsync = ref.watch(currentHomeProvider);
-    final homeId = currentHomeAsync.valueOrNull?.id;
-
-    // Si currentHomeProvider todavía está cargando, propagamos ese estado
-    // de carga para que no aparezca una lista vacía de miembros mientras
-    // el provider resuelve el hogar actual.
-    final membersAsync = currentHomeAsync.isLoading
-        ? const AsyncValue<List<Member>>.loading()
-        : homeId == null
-            ? const AsyncValue<List<Member>>.data([])
-            : ref.watch(homeMembersProvider(homeId));
-    final rawMembers = membersAsync.valueOrNull ?? [];
-
-    // Fallback: si el documento del miembro no tiene nickname/photoUrl
-    // denormalizados, los leemos de users/{uid} (mismo patrón que members_screen).
-    final profileFallback = <String, UserProfile>{};
-    for (final m in rawMembers) {
-      if (m.nickname.isEmpty || m.photoUrl == null) {
-        final profile = ref.watch(userProfileProvider(m.uid)).valueOrNull;
-        if (profile != null) profileFallback[m.uid] = profile;
-      }
-    }
-
-    Member enrich(Member m) {
-      final profile = profileFallback[m.uid];
-      if (profile == null) return m;
-      return m.copyWith(
-        nickname: m.nickname.isEmpty && profile.nickname.isNotEmpty
-            ? profile.nickname
-            : m.nickname,
-        photoUrl: m.photoUrl ?? profile.photoUrl,
-      );
-    }
-
-    final members = rawMembers.map(enrich).toList();
-
-    // Auto-reparación: si el stream de miembros termina de cargar y devuelve
-    // lista vacía, significa que el documento homes/{homeId}/members/{uid}
-    // no fue creado por la Cloud Function (bug histórico). Llamamos a la
-    // función repairMemberDocument para crearlo.
-    if (homeId != null) {
-      ref.listen<AsyncValue<List<Member>>>(
-        homeMembersProvider(homeId),
-        (_, next) {
-          if (!next.isLoading && next.valueOrNull?.isEmpty == true) {
-            _tryRepairMemberDocument(homeId);
-          }
-        },
-      );
-    }
 
     ref.listen(
       createEditTaskViewModelNotifierProvider(widget.editTaskId),
@@ -166,7 +104,7 @@ class _CreateEditTaskScreenState extends ConsumerState<CreateEditTaskScreen> {
           else
             TextButton(
               key: const Key('save_task_button'),
-              onPressed: vm.save,
+              onPressed: vm.canSave ? vm.save : null,
               child: Text(l10n.save),
             ),
         ],
@@ -174,12 +112,15 @@ class _CreateEditTaskScreenState extends ConsumerState<CreateEditTaskScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          // Visual picker
           TaskVisualPicker(
             selectedKind: formState.visualKind,
             selectedValue: formState.visualValue,
             onChanged: vm.setVisual,
           ),
           const SizedBox(height: 12),
+
+          // Título
           TextFormField(
             key: const Key('task_title_field'),
             controller: _titleController,
@@ -193,6 +134,8 @@ class _CreateEditTaskScreenState extends ConsumerState<CreateEditTaskScreen> {
             onChanged: vm.setTitle,
           ),
           const SizedBox(height: 12),
+
+          // Descripción
           TextFormField(
             key: const Key('task_desc_field'),
             controller: _descController,
@@ -204,6 +147,8 @@ class _CreateEditTaskScreenState extends ConsumerState<CreateEditTaskScreen> {
             onChanged: vm.setDescription,
           ),
           const SizedBox(height: 16),
+
+          // Recurrencia
           const RecurrenceForm(key: Key('recurrence_form')),
           if (recurrenceError != null)
             Padding(
@@ -216,19 +161,41 @@ class _CreateEditTaskScreenState extends ConsumerState<CreateEditTaskScreen> {
               ),
             ),
           const SizedBox(height: 16),
-          if (membersAsync.isLoading)
-            const Center(
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 16),
-                child: CircularProgressIndicator(),
-              ),
-            )
-          else
-            AssignmentForm(
-              availableMembers: members,
-              selectedOrder: formState.assignmentOrder,
-              onChanged: vm.setAssignmentOrder,
+
+          // Hora fija
+          SwitchListTile(
+            key: const Key('fixed_time_toggle'),
+            title: Text(l10n.tasks_fixed_time_label),
+            value: vm.hasFixedTime,
+            onChanged: vm.setHasFixedTime,
+          ),
+          if (vm.hasFixedTime) ...[
+            ListTile(
+              key: const Key('fixed_time_picker_tile'),
+              leading: const Icon(Icons.access_time),
+              title: Text(vm.fixedTime != null
+                  ? vm.fixedTime!.format(context)
+                  : l10n.tasks_fixed_time_pick),
+              onTap: () => _pickTime(context, vm),
             ),
+            if (vm.showApplyToday)
+              CheckboxListTile(
+                key: const Key('apply_today_checkbox'),
+                title: Text(l10n.tasks_apply_today_label),
+                value: vm.applyToday,
+                onChanged: (v) => vm.setApplyToday(v ?? false),
+                controlAffinity: ListTileControlAffinity.leading,
+              ),
+          ],
+          const SizedBox(height: 16),
+
+          // Miembros (reordenables)
+          AssignmentForm(
+            key: const Key('assignment_form'),
+            members: vm.orderedMembers,
+            onToggle: vm.toggleMember,
+            onReorder: vm.reorderMember,
+          ),
           if (assigneesError != null)
             Padding(
               padding: const EdgeInsets.only(top: 4),
@@ -239,6 +206,8 @@ class _CreateEditTaskScreenState extends ConsumerState<CreateEditTaskScreen> {
               ),
             ),
           const SizedBox(height: 16),
+
+          // Dificultad
           Text(l10n.tasks_field_difficulty,
               style: Theme.of(context).textTheme.titleSmall),
           Slider(
@@ -250,6 +219,16 @@ class _CreateEditTaskScreenState extends ConsumerState<CreateEditTaskScreen> {
             label: formState.difficultyWeight.toStringAsFixed(1),
             onChanged: vm.setDifficultyWeight,
           ),
+
+          // Fechas próximas
+          if (vm.upcomingDates.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            UpcomingDatesPreview(
+              key: const Key('upcoming_dates_preview'),
+              dates: vm.upcomingDates,
+            ),
+          ],
+
           if (formState.globalError != null)
             Padding(
               padding: const EdgeInsets.only(top: 8),

@@ -801,5 +801,39 @@
   "month_sep": "Septembrie",
   "month_oct": "Octombrie",
   "month_nov": "Noiembrie",
-  "month_dec": "Decembrie"
+  "month_dec": "Decembrie",
+  "tasks_selection_count": "{count} selectate",
+  "@tasks_selection_count": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "tasks_bulk_freeze": "Îngheță",
+  "tasks_bulk_delete": "Șterge",
+  "tasks_bulk_delete_confirm_title": "Șterge {count} sarcini?",
+  "@tasks_bulk_delete_confirm_title": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "tasks_bulk_delete_confirm_body": "Această acțiune nu poate fi anulată.",
+  "history_rate_button": "Evaluează",
+  "history_rate_sheet_title": "Evaluează sarcina",
+  "history_rate_score_label": "Scor: {score}",
+  "@history_rate_score_label": {
+    "placeholders": { "score": { "type": "String" } }
+  },
+  "history_rate_note_hint": "Notă privată (opțional)",
+  "history_rate_submit": "Trimite evaluarea",
+  "member_profile_overflow_tasks_title": "Mai multe sarcini atribuite",
+  "member_profile_manage_role": "Gestionează rol",
+  "member_profile_role_manage_unavailable": "Gestionarea rolurilor disponibilă în curând",
+  "today_home_selector_create": "Creează cămin",
+  "today_home_selector_join": "Alătură-te cu cod",
+  "today_home_selector_my_homes": "Căminele mele",
+  "tasks_fixed_time_label": "Oră fixă",
+  "tasks_fixed_time_pick": "Alege ora",
+  "tasks_apply_today_label": "Creează ocurență pentru azi",
+  "tasks_upcoming_preview_title": "Următoarele 3 date",
+  "tasks_upcoming_preview_assignee": "→ {name}",
+  "@tasks_upcoming_preview_assignee": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "tasks_assignment_drag_hint": "Trage pentru a reordona"
 }

@@ -801,5 +801,39 @@
   "month_sep": "September",
   "month_oct": "October",
   "month_nov": "November",
-  "month_dec": "December"
+  "month_dec": "December",
+  "tasks_selection_count": "{count} selected",
+  "@tasks_selection_count": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "tasks_bulk_freeze": "Freeze",
+  "tasks_bulk_delete": "Delete",
+  "tasks_bulk_delete_confirm_title": "Delete {count} tasks?",
+  "@tasks_bulk_delete_confirm_title": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "tasks_bulk_delete_confirm_body": "This action cannot be undone.",
+  "history_rate_button": "Rate",
+  "history_rate_sheet_title": "Rate task",
+  "history_rate_score_label": "Score: {score}",
+  "@history_rate_score_label": {
+    "placeholders": { "score": { "type": "String" } }
+  },
+  "history_rate_note_hint": "Private note (optional)",
+  "history_rate_submit": "Submit rating",
+  "member_profile_overflow_tasks_title": "More assigned tasks",
+  "member_profile_manage_role": "Manage role",
+  "member_profile_role_manage_unavailable": "Role management coming soon",
+  "today_home_selector_create": "Create home",
+  "today_home_selector_join": "Join with code",
+  "today_home_selector_my_homes": "My homes",
+  "tasks_fixed_time_label": "Fixed time",
+  "tasks_fixed_time_pick": "Pick time",
+  "tasks_apply_today_label": "Create occurrence for today",
+  "tasks_upcoming_preview_title": "Next 3 dates",
+  "tasks_upcoming_preview_assignee": "→ {name}",
+  "@tasks_upcoming_preview_assignee": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "tasks_assignment_drag_hint": "Drag to reorder"
 }

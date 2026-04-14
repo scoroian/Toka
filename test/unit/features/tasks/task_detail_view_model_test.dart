@@ -156,6 +156,30 @@ Task _makeTask({
       updatedAt: DateTime(2024),
     );
 
+Task _makeDetailTask({double difficultyWeight = 2.0}) => Task(
+      id: 't1',
+      homeId: 'home1',
+      title: 'Barrer',
+      description: null,
+      visualKind: 'emoji',
+      visualValue: '🧹',
+      status: TaskStatus.active,
+      recurrenceRule: RecurrenceRule.daily(
+        every: 1,
+        time: '10:00',
+        timezone: 'Europe/Madrid',
+      ),
+      assignmentMode: 'basicRotation',
+      assignmentOrder: const ['uid1'],
+      currentAssigneeUid: 'uid1',
+      nextDueAt: DateTime(2026, 4, 14, 10, 0),
+      difficultyWeight: difficultyWeight,
+      completedCount90d: 5,
+      createdByUid: 'uid1',
+      createdAt: DateTime(2026, 1, 1),
+      updatedAt: DateTime(2026, 4, 14),
+    );
+
 /// Crea un [ProviderContainer] con todos los providers necesarios para que
 /// el [taskDetailViewModelProvider] pueda computar [viewData] de forma síncrona.
 ///
@@ -401,9 +425,6 @@ void main() {
         );
 
     test(
-        // ESTE TEST DEBE FALLAR antes de Task 4:
-        // canManage lee userMembershipsProvider (role=member, desactualizado)
-        // en lugar de homeMembersProvider (role=admin, fuente de verdad).
         'admin en homeMembers con membresía desactualizada (member) → canManage == true',
         () async {
       // Given: homeMembers tiene al usuario con role=admin (fuente de verdad)
@@ -470,6 +491,64 @@ void main() {
       // Then
       expect(viewData, isNotNull);
       expect(viewData!.canManage, isFalse);
+    });
+  });
+
+  group('TaskDetailViewData — difficultyWeight', () {
+    test('difficultyWeight viene de task.difficultyWeight', () {
+      final task = _makeDetailTask(difficultyWeight: 2.5);
+      final data = TaskDetailViewData(
+        task: task,
+        canManage: true,
+        currentAssigneeName: 'Ana',
+        upcomingOccurrences: [],
+        difficultyWeight: task.difficultyWeight,
+      );
+      expect(data.difficultyWeight, 2.5);
+      expect(data.canManage, isTrue);
+      expect(data.currentAssigneeName, 'Ana');
+    });
+
+    test('difficultyWeight default 1.0', () {
+      final task = _makeDetailTask(difficultyWeight: 1.0);
+      final data = TaskDetailViewData(
+        task: task,
+        canManage: false,
+        currentAssigneeName: null,
+        upcomingOccurrences: [],
+        difficultyWeight: task.difficultyWeight,
+      );
+      expect(data.difficultyWeight, 1.0);
+    });
+  });
+
+  group('TaskDetailViewData — upcomingOccurrences', () {
+    test('upcomingOccurrences acepta lista de 5 UpcomingOccurrence', () {
+      final task = _makeDetailTask();
+      final fiveDates = List.generate(
+        5,
+        (i) => UpcomingOccurrence(date: DateTime(2026, 4, 14 + i)),
+      );
+      final data = TaskDetailViewData(
+        task: task,
+        canManage: true,
+        currentAssigneeName: null,
+        upcomingOccurrences: fiveDates,
+        difficultyWeight: task.difficultyWeight,
+      );
+      expect(data.upcomingOccurrences.length, 5);
+    });
+
+    test('isFrozen es true cuando task.status == TaskStatus.frozen', () {
+      final frozenTask = _makeDetailTask().copyWith(status: TaskStatus.frozen);
+      final data = TaskDetailViewData(
+        task: frozenTask,
+        canManage: true,
+        currentAssigneeName: null,
+        upcomingOccurrences: [],
+        difficultyWeight: frozenTask.difficultyWeight,
+      );
+      expect(data.isFrozen, isTrue);
     });
   });
 }

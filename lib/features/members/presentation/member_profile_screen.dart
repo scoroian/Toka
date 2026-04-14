@@ -84,7 +84,7 @@ class MemberProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final vm = ref.watch(
+    final MemberProfileViewModel vm = ref.watch(
       memberProfileViewModelProvider(homeId: homeId, memberUid: memberUid),
     );
 
@@ -173,7 +173,7 @@ class MemberProfileScreen extends ConsumerWidget {
               _StatRow(
                 key: const Key('stat_tasks_completed'),
                 label: l10n.member_profile_tasks_completed,
-                value: member.tasksCompleted.toString(),
+                value: data.completedCount.toString(),
               ),
               _StatRow(
                 key: const Key('stat_compliance'),
@@ -183,16 +183,43 @@ class MemberProfileScreen extends ConsumerWidget {
               _StatRow(
                 key: const Key('stat_streak'),
                 label: l10n.member_profile_streak,
-                value: member.currentStreak.toString(),
+                value: data.streakCount.toString(),
               ),
               _StatRow(
                 key: const Key('stat_avg_score'),
                 label: l10n.member_profile_avg_score,
-                value: '${member.averageScore.toStringAsFixed(1)}/10',
+                value: '${data.averageScore.toStringAsFixed(1)}/10',
               ),
-              const SizedBox(height: 24),
-              RadarChartWidget(entries: data.radarEntries),
-
+              if (data.showRadar) ...[
+                const SizedBox(height: 24),
+                RadarChartWidget(
+                  key: const Key('radar_chart'),
+                  entries: data.radarEntries,
+                ),
+              ],
+              if (data.overflowEntries.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                Text(
+                  l10n.member_profile_overflow_tasks_title,
+                  key: const Key('overflow_tasks_title'),
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                const SizedBox(height: 8),
+                ...data.overflowEntries.map(
+                  (e) => ListTile(
+                    key: Key('overflow_task_${e.taskId}'),
+                    dense: true,
+                    leading: e.visualKind == 'emoji'
+                        ? Text(e.visualValue, style: const TextStyle(fontSize: 20))
+                        : const Icon(Icons.task_alt, size: 20),
+                    title: Text(e.title),
+                    trailing: Text(
+                      e.averageScore.toStringAsFixed(1),
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ),
+                ),
+              ],
               // Gestión de rol (solo visible para el owner, sobre miembros ajenos)
               if (data.canManageRoles &&
                   member.role != MemberRole.owner) ...[

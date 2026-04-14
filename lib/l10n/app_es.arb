@@ -801,5 +801,39 @@
   "month_sep": "Septiembre",
   "month_oct": "Octubre",
   "month_nov": "Noviembre",
-  "month_dec": "Diciembre"
+  "month_dec": "Diciembre",
+  "tasks_selection_count": "{count} seleccionadas",
+  "@tasks_selection_count": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "tasks_bulk_freeze": "Congelar",
+  "tasks_bulk_delete": "Eliminar",
+  "tasks_bulk_delete_confirm_title": "¿Eliminar {count} tareas?",
+  "@tasks_bulk_delete_confirm_title": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "tasks_bulk_delete_confirm_body": "Esta acción no se puede deshacer.",
+  "history_rate_button": "Valorar",
+  "history_rate_sheet_title": "Valorar tarea",
+  "history_rate_score_label": "Puntuación: {score}",
+  "@history_rate_score_label": {
+    "placeholders": { "score": { "type": "String" } }
+  },
+  "history_rate_note_hint": "Nota privada (opcional)",
+  "history_rate_submit": "Enviar valoración",
+  "member_profile_overflow_tasks_title": "Más tareas asignadas",
+  "member_profile_manage_role": "Gestionar rol",
+  "member_profile_role_manage_unavailable": "Gestión de roles disponible próximamente",
+  "today_home_selector_create": "Crear hogar",
+  "today_home_selector_join": "Unirse con código",
+  "today_home_selector_my_homes": "Mis hogares",
+  "tasks_fixed_time_label": "Hora fija",
+  "tasks_fixed_time_pick": "Elegir hora",
+  "tasks_apply_today_label": "Crear ocurrencia para hoy",
+  "tasks_upcoming_preview_title": "Próximas 3 fechas",
+  "tasks_upcoming_preview_assignee": "→ {name}",
+  "@tasks_upcoming_preview_assignee": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "tasks_assignment_drag_hint": "Arrastra para reordenar"
 }

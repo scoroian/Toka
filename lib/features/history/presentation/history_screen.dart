@@ -4,17 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/loading_widget.dart';
-import '../../auth/application/auth_provider.dart';
-import '../../homes/application/current_home_provider.dart';
-import '../../members/application/members_provider.dart';
-import '../../members/domain/member.dart';
-import '../../profile/application/profile_provider.dart';
-import '../../profile/domain/user_profile.dart';
 import '../application/history_view_model.dart';
 import '../domain/task_event.dart';
 import 'widgets/history_empty_state.dart';
 import 'widgets/history_event_tile.dart';
 import 'widgets/history_filter_bar.dart';
+import 'widgets/rate_event_sheet.dart';
 
 class HistoryScreen extends ConsumerStatefulWidget {
   const HistoryScreen({super.key});
@@ -54,40 +49,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final vm = ref.watch(historyViewModelProvider);
-    final isPremium = vm.isPremium;
-
-    final homeId = ref.watch(currentHomeProvider).valueOrNull?.id;
-    final currentUid =
-        ref.watch(authProvider).whenOrNull(authenticated: (u) => u.uid);
-
-    // Members from the home's subcollection (may lack nickname/photoUrl
-    // if Cloud Functions didn't denormalise them from users/{uid}).
-    final members = homeId != null
-        ? ref.watch(homeMembersProvider(homeId)).valueOrNull ?? <Member>[]
-        : <Member>[];
-    final membersByUid = {for (final m in members) m.uid: m};
-
-    // Collect every actor/recipient UID present in the loaded events so we
-    // can watch their user profile as a fallback when the member doc is
-    // incomplete (empty nickname / no photoUrl).
-    final loadedEvents = vm.events.valueOrNull ?? <TaskEvent>[];
-    final allEventUids = <String>{};
-    for (final e in loadedEvents) {
-      allEventUids.add(e.actorUid);
-      if (e is PassedEvent) allEventUids.add(e.toUid);
-    }
-
-    // Build a fallback map: uid → UserProfile, only for UIDs whose member
-    // document has an empty nickname (or is missing entirely).
-    final profileFallback = <String, UserProfile>{};
-    for (final uid in allEventUids) {
-      final member = membersByUid[uid];
-      if (member == null || member.nickname.isEmpty || member.photoUrl == null) {
-        final profile = ref.watch(userProfileProvider(uid)).valueOrNull;
-        if (profile != null) profileFallback[uid] = profile;
-      }
-    }
+    final HistoryViewModel vm = ref.watch(historyViewModelProvider);
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.history_title)),
@@ -98,13 +60,14 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
             onChanged: (f) => vm.applyFilter(f),
           ),
           Expanded(
-            child: vm.events.when(
+            child: vm.items.when(
               loading: () => const LoadingWidget(),
               error: (_, __) => Center(child: Text(l10n.error_generic)),
-              data: (events) {
-                if (events.isEmpty) {
+              data: (items) {
+                if (items.isEmpty) {
                   return const HistoryEmptyState();
                 }
+                final isPremium = vm.isPremium;
                 final showBanner = !isPremium;
                 final showLoadMore = vm.hasMore;
                 final extraItems =
@@ -113,19 +76,12 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                 return ListView.builder(
                   key: const Key('history_list'),
                   controller: _scrollController,
-                  itemCount: events.length + extraItems,
+                  itemCount: items.length + extraItems,
                   itemBuilder: (context, index) {
-                    if (index < events.length) {
-                      return _buildEventTile(
-                        events[index],
-                        membersByUid,
-                        profileFallback,
-                        currentUid,
-                        homeId,
-                        isPremium,
-                      );
+                    if (index < items.length) {
+                      return _buildEventTile(items[index]);
                     }
-                    final extra = index - events.length;
+                    final extra = index - items.length;
                     if (showBanner && extra == 0) {
                       return _PremiumBanner(l10n: l10n);
                     }
@@ -150,43 +106,36 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     );
   }
 
-  Widget _buildEventTile(
-    TaskEvent event,
-    Map<String, Member> membersByUid,
-    Map<String, UserProfile> profileFallback,
-    String? currentUid,
-    String? homeId,
-    bool isPremium,
-  ) {
-    final member = membersByUid[event.actorUid];
-    final fallback = profileFallback[event.actorUid];
-
-    final actorName = (member?.nickname.isNotEmpty == true)
-        ? member!.nickname
-        : (fallback?.nickname.isNotEmpty == true)
-            ? fallback!.nickname
-            : '?';
-    final actorPhotoUrl = member?.photoUrl ?? fallback?.photoUrl;
-
-    String? toName;
-    if (event is PassedEvent) {
-      final toMember = membersByUid[event.toUid];
-      final toFallback = profileFallback[event.toUid];
-      toName = (toMember?.nickname.isNotEmpty == true)
-          ? toMember!.nickname
-          : (toFallback?.nickname.isNotEmpty == true)
-              ? toFallback!.nickname
-              : '?';
-    }
-
+  Widget _buildEventTile(TaskEventItem item) {
+    final toName = switch (item.raw) {
+      PassedEvent p => p.toUid,
+      _ => null,
+    };
     return HistoryEventTile(
-      event: event,
-      actorName: actorName,
-      actorPhotoUrl: actorPhotoUrl,
+      event: item.raw,
+      actorName: item.actorName,
+      actorPhotoUrl: item.actorPhotoUrl,
       toName: toName,
-      homeId: homeId,
-      currentUid: currentUid,
-      isPremium: isPremium,
+      trailing: item.canRate
+          ? IconButton(
+              key: Key('rate_button_${item.raw.id}'),
+              icon: const Icon(Icons.star_border),
+              tooltip: AppLocalizations.of(context).history_rate_button,
+              onPressed: () => _showRateSheet(item),
+            )
+          : null,
+    );
+  }
+
+  void _showRateSheet(TaskEventItem item) {
+    final HistoryViewModel vm = ref.read(historyViewModelProvider);
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => RateEventSheet(
+        onSubmit: (rating, note) =>
+            vm.rateEvent(item.raw.id, rating, note: note),
+      ),
     );
   }
 }

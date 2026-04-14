@@ -19,9 +19,9 @@ class _LoadingViewModel implements TaskDetailViewModel {
   @override
   AsyncValue<TaskDetailViewData?> get viewData => const AsyncLoading();
   @override
-  Future<void> toggleFreeze() async {}
+  Future<void> toggleFreeze(Task task) async {}
   @override
-  Future<void> deleteTask() async {}
+  Future<void> deleteTask(Task task) async {}
 }
 
 class _DataViewModel implements TaskDetailViewModel {
@@ -31,9 +31,9 @@ class _DataViewModel implements TaskDetailViewModel {
   @override
   AsyncValue<TaskDetailViewData?> get viewData => AsyncData(_data);
   @override
-  Future<void> toggleFreeze() async {}
+  Future<void> toggleFreeze(Task task) async {}
   @override
-  Future<void> deleteTask() async {}
+  Future<void> deleteTask(Task task) async {}
 }
 
 // ---------------------------------------------------------------------------
@@ -108,6 +108,7 @@ void main() {
       canManage: false,
       currentAssigneeName: null,
       upcomingOccurrences: [],
+      difficultyWeight: 1.0,
     ));
     await tester.pumpWidget(_wrap(vm));
     await tester.pumpAndSettle();
@@ -122,6 +123,7 @@ void main() {
       canManage: false,
       currentAssigneeName: null,
       upcomingOccurrences: [],
+      difficultyWeight: 1.0,
     ));
     await tester.pumpWidget(_wrap(vm));
     await tester.pumpAndSettle();
@@ -136,6 +138,7 @@ void main() {
       canManage: true,
       currentAssigneeName: null,
       upcomingOccurrences: [],
+      difficultyWeight: 1.0,
     ));
     await tester.pumpWidget(_wrap(vm));
     await tester.pumpAndSettle();
@@ -150,6 +153,7 @@ void main() {
       canManage: false,
       currentAssigneeName: null,
       upcomingOccurrences: [],
+      difficultyWeight: 1.0,
     ));
     await tester.pumpWidget(_wrap(vm));
     await tester.pumpAndSettle();
@@ -165,6 +169,7 @@ void main() {
       canManage: false,
       currentAssigneeName: 'Ana García',
       upcomingOccurrences: [],
+      difficultyWeight: 1.0,
     ));
     await tester.pumpWidget(_wrap(vm));
     await tester.pumpAndSettle();
@@ -180,6 +185,7 @@ void main() {
       canManage: false,
       currentAssigneeName: null,
       upcomingOccurrences: [],
+      difficultyWeight: 1.0,
     ));
     await tester.pumpWidget(_wrap(vm));
     await tester.pumpAndSettle();
@@ -206,6 +212,7 @@ void main() {
       upcomingOccurrences: [
         UpcomingOccurrence(date: DateTime(2025, 7, 1, 20, 0), assigneeName: 'Paco'),
       ],
+      difficultyWeight: 1.0,
     ));
     await tester.pumpWidget(_wrap(vm));
     await tester.pumpAndSettle();
@@ -227,6 +234,7 @@ void main() {
       upcomingOccurrences: [
         UpcomingOccurrence(date: occDate, assigneeName: null),
       ],
+      difficultyWeight: 1.0,
     ));
     await tester.pumpWidget(_wrap(vm));
     await tester.pumpAndSettle();

@@ -69,10 +69,10 @@ PassedEvent passedEvent() => TaskEvent.passed(
 // ---------------------------------------------------------------------------
 
 class _FakeHistoryViewModel implements HistoryViewModel {
-  const _FakeHistoryViewModel({required this.events, this.isPremium = false});
+  const _FakeHistoryViewModel({required this.items, this.isPremium = false});
 
   @override
-  final AsyncValue<List<TaskEvent>> events;
+  final AsyncValue<List<TaskEventItem>> items;
   @override
   final bool isPremium;
   @override
@@ -83,6 +83,8 @@ class _FakeHistoryViewModel implements HistoryViewModel {
   void loadMore() {}
   @override
   void applyFilter(HistoryFilter newFilter) {}
+  @override
+  Future<void> rateEvent(String eventId, double rating, {String? note}) async {}
 }
 
 class _FakeCurrentHome extends CurrentHome {
@@ -133,29 +135,47 @@ Member _makeMember(String uid, String nickname) => Member(
 Widget _wrapScreen({
   required List<TaskEvent> events,
   required List<Member> members,
-}) =>
-    ProviderScope(
-      overrides: [
-        historyViewModelProvider.overrideWith(
-          (ref) => _FakeHistoryViewModel(events: AsyncData(events)),
-        ),
-        currentHomeProvider.overrideWith(() => _FakeCurrentHome()),
-        homeMembersProvider('h1').overrideWith(
-          (ref) => Stream.value(members),
-        ),
-        authProvider.overrideWith(() => _FakeAuth()),
-      ],
-      child: const MaterialApp(
-        localizationsDelegates: [
-          AppLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        supportedLocales: [Locale('es')],
-        home: HistoryScreen(),
-      ),
+}) {
+  // Resuelve nombres a partir de la lista de miembros (simula lo que hace el ViewModel)
+  final membersByUid = {for (final m in members) m.uid: m};
+  final items = events.map((e) {
+    final actor = membersByUid[e.actorUid];
+    final actorName = (actor != null && actor.nickname.isNotEmpty)
+        ? actor.nickname
+        : '?';
+    return TaskEventItem(
+      raw: e,
+      actorName: actorName,
+      actorPhotoUrl: actor?.photoUrl,
+      isOwnEvent: false,
+      isRated: false,
+      canRate: false,
     );
+  }).toList();
+
+  return ProviderScope(
+    overrides: [
+      historyViewModelProvider.overrideWith(
+        (ref) => _FakeHistoryViewModel(items: AsyncData(items)),
+      ),
+      currentHomeProvider.overrideWith(() => _FakeCurrentHome()),
+      homeMembersProvider('h1').overrideWith(
+        (ref) => Stream.value(members),
+      ),
+      authProvider.overrideWith(() => _FakeAuth()),
+    ],
+    child: const MaterialApp(
+      localizationsDelegates: [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: [Locale('es')],
+      home: HistoryScreen(),
+    ),
+  );
+}
 
 // ---------------------------------------------------------------------------
 // Tests

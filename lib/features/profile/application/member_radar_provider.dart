@@ -43,10 +43,11 @@ Future<List<RadarEntry>> memberRadar(
   for (var i = 0; i < statsSnap.docs.length; i++) {
     final stat = statsSnap.docs[i].data();
     final taskData = taskSnaps[i].data();
+    final taskId = stat['taskId'] as String? ?? statsSnap.docs[i].id;
     final taskName = taskData?['title'] as String? ?? '?';
     final avgScore = (stat['avgScore'] as num?)?.toDouble() ?? 0.0;
     if (avgScore > 0) {
-      entries.add(RadarEntry(taskName: taskName, avgScore: avgScore));
+      entries.add(RadarEntry(taskId: taskId, taskName: taskName, avgScore: avgScore));
     }
   }
   return entries;

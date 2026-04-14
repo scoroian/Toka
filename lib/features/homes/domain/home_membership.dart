@@ -18,5 +18,6 @@ class HomeMembership with _$HomeMembership {
     required MemberStatus status,
     required DateTime joinedAt,
     DateTime? leftAt,
+    @Default(false) bool hasPendingToday,
   }) = _HomeMembership;
 }

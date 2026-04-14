@@ -7,6 +7,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../auth/application/auth_provider.dart';
 import '../../homes/application/current_home_provider.dart';
 import '../../homes/application/dashboard_provider.dart';
+import '../../homes/application/homes_provider.dart';
+import '../../homes/domain/home_membership.dart';
 import '../../members/application/members_provider.dart';
 import '../domain/home_dashboard.dart';
 import '../domain/recurrence_order.dart';
@@ -70,6 +72,39 @@ Map<String, RecurrenceGroup> groupByRecurrence(
   return result;
 }
 
+/// Representa un hogar en el dropdown del selector de pantalla Hoy.
+class HomeDropdownItem {
+  const HomeDropdownItem({
+    required this.homeId,
+    required this.name,
+    required this.emoji,
+    required this.role,
+    required this.hasPendingToday,
+    required this.isSelected,
+  });
+
+  final String homeId;
+  final String name;
+  final String emoji;
+  final MemberRole role;
+  final bool hasPendingToday;
+  final bool isSelected;
+
+  factory HomeDropdownItem.fromMembership(
+    HomeMembership membership, {
+    required String emoji,
+    required bool isSelected,
+  }) =>
+      HomeDropdownItem(
+        homeId: membership.homeId,
+        name: membership.homeNameSnapshot,
+        emoji: emoji,
+        role: membership.role,
+        hasPendingToday: membership.hasPendingToday,
+        isSelected: isSelected,
+      );
+}
+
 class TodayViewData {
   const TodayViewData({
     required this.grouped,
@@ -92,6 +127,8 @@ class TodayViewData {
 
 abstract class TodayViewModel {
   AsyncValue<TodayViewData?> get viewData;
+  List<HomeDropdownItem> get homes;
+  void selectHome(String homeId);
   Future<void> completeTask(String taskId);
   Future<({double complianceBefore, double estimatedAfter})> fetchPassStats(
       String currentUid);
@@ -102,14 +139,21 @@ abstract class TodayViewModel {
 class _TodayViewModelImpl implements TodayViewModel {
   const _TodayViewModelImpl({
     required this.viewData,
+    required this.homes,
     required this.ref,
   });
 
   @override
   final AsyncValue<TodayViewData?> viewData;
+  @override
+  final List<HomeDropdownItem> homes;
   final Ref ref;
 
   String? get _homeId => viewData.valueOrNull?.homeId;
+
+  @override
+  void selectHome(String homeId) =>
+      ref.read(currentHomeProvider.notifier).switchHome(homeId);
 
   @override
   Future<void> completeTask(String taskId) async {
@@ -204,6 +248,18 @@ TodayViewModel todayViewModel(TodayViewModelRef ref) {
   final currentUid = auth.whenOrNull(authenticated: (u) => u.uid);
   final homeId = ref.watch(currentHomeProvider).valueOrNull?.id ?? '';
 
+  // Build homes list for the dropdown
+  final memberships = currentUid != null
+      ? ref.watch(userMembershipsProvider(currentUid)).valueOrNull ?? []
+      : <HomeMembership>[];
+  final homes = memberships
+      .map((m) => HomeDropdownItem.fromMembership(
+            m,
+            emoji: '🏠', // TODO: read emoji from Home document when available
+            isSelected: m.homeId == homeId,
+          ))
+      .toList();
+
   final viewData = dashboardAsync.whenData((data) {
     // Dashboard disponible → usarlo directamente
     if (data != null) {
@@ -258,5 +314,5 @@ TodayViewModel todayViewModel(TodayViewModelRef ref) {
     );
   });
 
-  return _TodayViewModelImpl(viewData: viewData, ref: ref);
+  return _TodayViewModelImpl(viewData: viewData, homes: homes, ref: ref);
 }

@@ -7,7 +7,7 @@ part of 'recurrence_provider.dart';
 // **************************************************************************
 
 String _$upcomingOccurrencesHash() =>
-    r'07aff3e4c1a64624d70ab1a7bcab32befe4f9174';
+    r'63bb7e2fe8c9538331449f338a519a419be0cea7';
 
 /// Copied from Dart SDK
 class _SystemHash {

@@ -40,4 +40,43 @@ void main() {
       );
     });
   });
+
+  group('AllTasksViewModel — selección múltiple', () {
+    test('isSelectionMode false cuando selectedIds está vacío', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      final vm = container.read(allTasksViewModelProvider);
+      expect(vm.isSelectionMode, isFalse);
+      expect(vm.selectedIds, isEmpty);
+    });
+
+    test('toggleSelection añade id a selectedIds', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      container.read(allTasksViewModelProvider).toggleSelection('task_1');
+      final vm = container.read(allTasksViewModelProvider);
+      expect(vm.selectedIds, contains('task_1'));
+      expect(vm.isSelectionMode, isTrue);
+    });
+
+    test('toggleSelection sobre id ya seleccionado lo elimina', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      container.read(allTasksViewModelProvider).toggleSelection('task_1');
+      container.read(allTasksViewModelProvider).toggleSelection('task_1');
+      final vm = container.read(allTasksViewModelProvider);
+      expect(vm.selectedIds, isNot(contains('task_1')));
+      expect(vm.isSelectionMode, isFalse);
+    });
+
+    test('clearSelection vacía selectedIds', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      container.read(allTasksViewModelProvider).toggleSelection('task_1');
+      container.read(allTasksViewModelProvider).toggleSelection('task_2');
+      container.read(allTasksViewModelProvider).clearSelection();
+      final vm = container.read(allTasksViewModelProvider);
+      expect(vm.selectedIds, isEmpty);
+    });
+  });
 }

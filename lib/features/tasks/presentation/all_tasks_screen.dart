@@ -98,7 +98,7 @@ class AllTasksScreen extends ConsumerWidget {
                     );
                   },
                 ),
-          floatingActionButton: data.canCreate
+          floatingActionButton: data.canManage
               ? FloatingActionButton(
                   key: const Key('create_task_fab'),
                   tooltip: l10n.tasks_create_title,

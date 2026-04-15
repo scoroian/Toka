@@ -64,6 +64,14 @@ class HistoryEventTile extends StatelessWidget {
         l10n: l10n,
         trailingOverride: trailing,
       ),
+      missed: (e) => _MissedTile(
+        event: e,
+        actorName: actorName,
+        actorPhotoUrl: actorPhotoUrl,
+        timestamp: _formatRelativeTime(l10n, e.missedAt),
+        l10n: l10n,
+        trailingOverride: trailing,
+      ),
     );
   }
 }
@@ -215,6 +223,47 @@ class _PassedTile extends StatelessWidget {
         ],
       ),
       trailing: trailingOverride ?? const Icon(Icons.swap_horiz, color: Colors.orange),
+      isThreeLine: true,
+    );
+  }
+}
+
+class _MissedTile extends StatelessWidget {
+  const _MissedTile({
+    required this.event,
+    required this.actorName,
+    required this.actorPhotoUrl,
+    required this.timestamp,
+    required this.l10n,
+    this.trailingOverride,
+  });
+  final MissedEvent event;
+  final String actorName;
+  final String? actorPhotoUrl;
+  final String timestamp;
+  final AppLocalizations l10n;
+  final Widget? trailingOverride;
+
+  @override
+  Widget build(BuildContext context) {
+    final visual = event.taskVisualSnapshot;
+    final taskLabel = visual.kind == 'emoji'
+        ? '${visual.value} ${event.taskTitleSnapshot}'
+        : event.taskTitleSnapshot;
+
+    return ListTile(
+      key: Key('history_tile_${event.id}'),
+      leading: _Avatar(photoUrl: actorPhotoUrl, name: actorName),
+      title: Text(l10n.history_event_missed(actorName)),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(taskLabel, style: const TextStyle(fontWeight: FontWeight.w500)),
+          Text(timestamp,
+              style: const TextStyle(fontSize: 12, color: Colors.grey)),
+        ],
+      ),
+      trailing: trailingOverride ?? const Icon(Icons.alarm_off, color: Colors.red),
       isThreeLine: true,
     );
   }

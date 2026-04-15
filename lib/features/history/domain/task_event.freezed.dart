@@ -48,6 +48,19 @@ mixin _$TaskEvent {
             double? complianceAfter,
             DateTime createdAt)
         passed,
+    required TResult Function(
+            String id,
+            String taskId,
+            String taskTitleSnapshot,
+            TaskVisual taskVisualSnapshot,
+            String actorUid,
+            String toUid,
+            bool penaltyApplied,
+            double? complianceBefore,
+            double? complianceAfter,
+            DateTime missedAt,
+            DateTime createdAt)
+        missed,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -76,6 +89,19 @@ mixin _$TaskEvent {
             double? complianceAfter,
             DateTime createdAt)?
         passed,
+    TResult? Function(
+            String id,
+            String taskId,
+            String taskTitleSnapshot,
+            TaskVisual taskVisualSnapshot,
+            String actorUid,
+            String toUid,
+            bool penaltyApplied,
+            double? complianceBefore,
+            double? complianceAfter,
+            DateTime missedAt,
+            DateTime createdAt)?
+        missed,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -104,6 +130,19 @@ mixin _$TaskEvent {
             double? complianceAfter,
             DateTime createdAt)?
         passed,
+    TResult Function(
+            String id,
+            String taskId,
+            String taskTitleSnapshot,
+            TaskVisual taskVisualSnapshot,
+            String actorUid,
+            String toUid,
+            bool penaltyApplied,
+            double? complianceBefore,
+            double? complianceAfter,
+            DateTime missedAt,
+            DateTime createdAt)?
+        missed,
     required TResult orElse(),
   }) =>
       throw _privateConstructorUsedError;
@@ -111,18 +150,21 @@ mixin _$TaskEvent {
   TResult map<TResult extends Object?>({
     required TResult Function(CompletedEvent value) completed,
     required TResult Function(PassedEvent value) passed,
+    required TResult Function(MissedEvent value) missed,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(CompletedEvent value)? completed,
     TResult? Function(PassedEvent value)? passed,
+    TResult? Function(MissedEvent value)? missed,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
     TResult Function(CompletedEvent value)? completed,
     TResult Function(PassedEvent value)? passed,
+    TResult Function(MissedEvent value)? missed,
     required TResult orElse(),
   }) =>
       throw _privateConstructorUsedError;
@@ -373,6 +415,19 @@ class _$CompletedEventImpl implements CompletedEvent {
             double? complianceAfter,
             DateTime createdAt)
         passed,
+    required TResult Function(
+            String id,
+            String taskId,
+            String taskTitleSnapshot,
+            TaskVisual taskVisualSnapshot,
+            String actorUid,
+            String toUid,
+            bool penaltyApplied,
+            double? complianceBefore,
+            double? complianceAfter,
+            DateTime missedAt,
+            DateTime createdAt)
+        missed,
   }) {
     return completed(id, taskId, taskTitleSnapshot, taskVisualSnapshot,
         actorUid, performerUid, completedAt, createdAt);
@@ -405,6 +460,19 @@ class _$CompletedEventImpl implements CompletedEvent {
             double? complianceAfter,
             DateTime createdAt)?
         passed,
+    TResult? Function(
+            String id,
+            String taskId,
+            String taskTitleSnapshot,
+            TaskVisual taskVisualSnapshot,
+            String actorUid,
+            String toUid,
+            bool penaltyApplied,
+            double? complianceBefore,
+            double? complianceAfter,
+            DateTime missedAt,
+            DateTime createdAt)?
+        missed,
   }) {
     return completed?.call(id, taskId, taskTitleSnapshot, taskVisualSnapshot,
         actorUid, performerUid, completedAt, createdAt);
@@ -437,6 +505,19 @@ class _$CompletedEventImpl implements CompletedEvent {
             double? complianceAfter,
             DateTime createdAt)?
         passed,
+    TResult Function(
+            String id,
+            String taskId,
+            String taskTitleSnapshot,
+            TaskVisual taskVisualSnapshot,
+            String actorUid,
+            String toUid,
+            bool penaltyApplied,
+            double? complianceBefore,
+            double? complianceAfter,
+            DateTime missedAt,
+            DateTime createdAt)?
+        missed,
     required TResult orElse(),
   }) {
     if (completed != null) {
@@ -451,6 +532,7 @@ class _$CompletedEventImpl implements CompletedEvent {
   TResult map<TResult extends Object?>({
     required TResult Function(CompletedEvent value) completed,
     required TResult Function(PassedEvent value) passed,
+    required TResult Function(MissedEvent value) missed,
   }) {
     return completed(this);
   }
@@ -460,6 +542,7 @@ class _$CompletedEventImpl implements CompletedEvent {
   TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(CompletedEvent value)? completed,
     TResult? Function(PassedEvent value)? passed,
+    TResult? Function(MissedEvent value)? missed,
   }) {
     return completed?.call(this);
   }
@@ -469,6 +552,7 @@ class _$CompletedEventImpl implements CompletedEvent {
   TResult maybeMap<TResult extends Object?>({
     TResult Function(CompletedEvent value)? completed,
     TResult Function(PassedEvent value)? passed,
+    TResult Function(MissedEvent value)? missed,
     required TResult orElse(),
   }) {
     if (completed != null) {
@@ -738,6 +822,19 @@ class _$PassedEventImpl implements PassedEvent {
             double? complianceAfter,
             DateTime createdAt)
         passed,
+    required TResult Function(
+            String id,
+            String taskId,
+            String taskTitleSnapshot,
+            TaskVisual taskVisualSnapshot,
+            String actorUid,
+            String toUid,
+            bool penaltyApplied,
+            double? complianceBefore,
+            double? complianceAfter,
+            DateTime missedAt,
+            DateTime createdAt)
+        missed,
   }) {
     return passed(
         id,
@@ -781,6 +878,19 @@ class _$PassedEventImpl implements PassedEvent {
             double? complianceAfter,
             DateTime createdAt)?
         passed,
+    TResult? Function(
+            String id,
+            String taskId,
+            String taskTitleSnapshot,
+            TaskVisual taskVisualSnapshot,
+            String actorUid,
+            String toUid,
+            bool penaltyApplied,
+            double? complianceBefore,
+            double? complianceAfter,
+            DateTime missedAt,
+            DateTime createdAt)?
+        missed,
   }) {
     return passed?.call(
         id,
@@ -824,6 +934,19 @@ class _$PassedEventImpl implements PassedEvent {
             double? complianceAfter,
             DateTime createdAt)?
         passed,
+    TResult Function(
+            String id,
+            String taskId,
+            String taskTitleSnapshot,
+            TaskVisual taskVisualSnapshot,
+            String actorUid,
+            String toUid,
+            bool penaltyApplied,
+            double? complianceBefore,
+            double? complianceAfter,
+            DateTime missedAt,
+            DateTime createdAt)?
+        missed,
     required TResult orElse(),
   }) {
     if (passed != null) {
@@ -849,6 +972,7 @@ class _$PassedEventImpl implements PassedEvent {
   TResult map<TResult extends Object?>({
     required TResult Function(CompletedEvent value) completed,
     required TResult Function(PassedEvent value) passed,
+    required TResult Function(MissedEvent value) missed,
   }) {
     return passed(this);
   }
@@ -858,6 +982,7 @@ class _$PassedEventImpl implements PassedEvent {
   TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(CompletedEvent value)? completed,
     TResult? Function(PassedEvent value)? passed,
+    TResult? Function(MissedEvent value)? missed,
   }) {
     return passed?.call(this);
   }
@@ -867,6 +992,7 @@ class _$PassedEventImpl implements PassedEvent {
   TResult maybeMap<TResult extends Object?>({
     TResult Function(CompletedEvent value)? completed,
     TResult Function(PassedEvent value)? passed,
+    TResult Function(MissedEvent value)? missed,
     required TResult orElse(),
   }) {
     if (passed != null) {
@@ -915,5 +1041,438 @@ abstract class PassedEvent implements TaskEvent {
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$PassedEventImplCopyWith<_$PassedEventImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class _$$MissedEventImplCopyWith<$Res>
+    implements $TaskEventCopyWith<$Res> {
+  factory _$$MissedEventImplCopyWith(
+          _$MissedEventImpl value, $Res Function(_$MissedEventImpl) then) =
+      __$$MissedEventImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call(
+      {String id,
+      String taskId,
+      String taskTitleSnapshot,
+      TaskVisual taskVisualSnapshot,
+      String actorUid,
+      String toUid,
+      bool penaltyApplied,
+      double? complianceBefore,
+      double? complianceAfter,
+      DateTime missedAt,
+      DateTime createdAt});
+}
+
+/// @nodoc
+class __$$MissedEventImplCopyWithImpl<$Res>
+    extends _$TaskEventCopyWithImpl<$Res, _$MissedEventImpl>
+    implements _$$MissedEventImplCopyWith<$Res> {
+  __$$MissedEventImplCopyWithImpl(
+      _$MissedEventImpl _value, $Res Function(_$MissedEventImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of TaskEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? id = null,
+    Object? taskId = null,
+    Object? taskTitleSnapshot = null,
+    Object? taskVisualSnapshot = null,
+    Object? actorUid = null,
+    Object? toUid = null,
+    Object? penaltyApplied = null,
+    Object? complianceBefore = freezed,
+    Object? complianceAfter = freezed,
+    Object? missedAt = null,
+    Object? createdAt = null,
+  }) {
+    return _then(_$MissedEventImpl(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      taskId: null == taskId
+          ? _value.taskId
+          : taskId // ignore: cast_nullable_to_non_nullable
+              as String,
+      taskTitleSnapshot: null == taskTitleSnapshot
+          ? _value.taskTitleSnapshot
+          : taskTitleSnapshot // ignore: cast_nullable_to_non_nullable
+              as String,
+      taskVisualSnapshot: null == taskVisualSnapshot
+          ? _value.taskVisualSnapshot
+          : taskVisualSnapshot // ignore: cast_nullable_to_non_nullable
+              as TaskVisual,
+      actorUid: null == actorUid
+          ? _value.actorUid
+          : actorUid // ignore: cast_nullable_to_non_nullable
+              as String,
+      toUid: null == toUid
+          ? _value.toUid
+          : toUid // ignore: cast_nullable_to_non_nullable
+              as String,
+      penaltyApplied: null == penaltyApplied
+          ? _value.penaltyApplied
+          : penaltyApplied // ignore: cast_nullable_to_non_nullable
+              as bool,
+      complianceBefore: freezed == complianceBefore
+          ? _value.complianceBefore
+          : complianceBefore // ignore: cast_nullable_to_non_nullable
+              as double?,
+      complianceAfter: freezed == complianceAfter
+          ? _value.complianceAfter
+          : complianceAfter // ignore: cast_nullable_to_non_nullable
+              as double?,
+      missedAt: null == missedAt
+          ? _value.missedAt
+          : missedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      createdAt: null == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+    ));
+  }
+}
+
+/// @nodoc
+
+class _$MissedEventImpl implements MissedEvent {
+  const _$MissedEventImpl(
+      {required this.id,
+      required this.taskId,
+      required this.taskTitleSnapshot,
+      required this.taskVisualSnapshot,
+      required this.actorUid,
+      required this.toUid,
+      required this.penaltyApplied,
+      this.complianceBefore,
+      this.complianceAfter,
+      required this.missedAt,
+      required this.createdAt});
+
+  @override
+  final String id;
+  @override
+  final String taskId;
+  @override
+  final String taskTitleSnapshot;
+  @override
+  final TaskVisual taskVisualSnapshot;
+  @override
+  final String actorUid;
+  @override
+  final String toUid;
+  @override
+  final bool penaltyApplied;
+  @override
+  final double? complianceBefore;
+  @override
+  final double? complianceAfter;
+  @override
+  final DateTime missedAt;
+  @override
+  final DateTime createdAt;
+
+  @override
+  String toString() {
+    return 'TaskEvent.missed(id: $id, taskId: $taskId, taskTitleSnapshot: $taskTitleSnapshot, taskVisualSnapshot: $taskVisualSnapshot, actorUid: $actorUid, toUid: $toUid, penaltyApplied: $penaltyApplied, complianceBefore: $complianceBefore, complianceAfter: $complianceAfter, missedAt: $missedAt, createdAt: $createdAt)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$MissedEventImpl &&
+            (identical(other.id, id) || other.id == id) &&
+            (identical(other.taskId, taskId) || other.taskId == taskId) &&
+            (identical(other.taskTitleSnapshot, taskTitleSnapshot) ||
+                other.taskTitleSnapshot == taskTitleSnapshot) &&
+            (identical(other.taskVisualSnapshot, taskVisualSnapshot) ||
+                other.taskVisualSnapshot == taskVisualSnapshot) &&
+            (identical(other.actorUid, actorUid) ||
+                other.actorUid == actorUid) &&
+            (identical(other.toUid, toUid) || other.toUid == toUid) &&
+            (identical(other.penaltyApplied, penaltyApplied) ||
+                other.penaltyApplied == penaltyApplied) &&
+            (identical(other.complianceBefore, complianceBefore) ||
+                other.complianceBefore == complianceBefore) &&
+            (identical(other.complianceAfter, complianceAfter) ||
+                other.complianceAfter == complianceAfter) &&
+            (identical(other.missedAt, missedAt) ||
+                other.missedAt == missedAt) &&
+            (identical(other.createdAt, createdAt) ||
+                other.createdAt == createdAt));
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      runtimeType,
+      id,
+      taskId,
+      taskTitleSnapshot,
+      taskVisualSnapshot,
+      actorUid,
+      toUid,
+      penaltyApplied,
+      complianceBefore,
+      complianceAfter,
+      missedAt,
+      createdAt);
+
+  /// Create a copy of TaskEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$MissedEventImplCopyWith<_$MissedEventImpl> get copyWith =>
+      __$$MissedEventImplCopyWithImpl<_$MissedEventImpl>(this, _$identity);
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function(
+            String id,
+            String taskId,
+            String taskTitleSnapshot,
+            TaskVisual taskVisualSnapshot,
+            String actorUid,
+            String performerUid,
+            DateTime completedAt,
+            DateTime createdAt)
+        completed,
+    required TResult Function(
+            String id,
+            String taskId,
+            String taskTitleSnapshot,
+            TaskVisual taskVisualSnapshot,
+            String actorUid,
+            String fromUid,
+            String toUid,
+            String? reason,
+            bool penaltyApplied,
+            double? complianceBefore,
+            double? complianceAfter,
+            DateTime createdAt)
+        passed,
+    required TResult Function(
+            String id,
+            String taskId,
+            String taskTitleSnapshot,
+            TaskVisual taskVisualSnapshot,
+            String actorUid,
+            String toUid,
+            bool penaltyApplied,
+            double? complianceBefore,
+            double? complianceAfter,
+            DateTime missedAt,
+            DateTime createdAt)
+        missed,
+  }) {
+    return missed(
+        id,
+        taskId,
+        taskTitleSnapshot,
+        taskVisualSnapshot,
+        actorUid,
+        toUid,
+        penaltyApplied,
+        complianceBefore,
+        complianceAfter,
+        missedAt,
+        createdAt);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function(
+            String id,
+            String taskId,
+            String taskTitleSnapshot,
+            TaskVisual taskVisualSnapshot,
+            String actorUid,
+            String performerUid,
+            DateTime completedAt,
+            DateTime createdAt)?
+        completed,
+    TResult? Function(
+            String id,
+            String taskId,
+            String taskTitleSnapshot,
+            TaskVisual taskVisualSnapshot,
+            String actorUid,
+            String fromUid,
+            String toUid,
+            String? reason,
+            bool penaltyApplied,
+            double? complianceBefore,
+            double? complianceAfter,
+            DateTime createdAt)?
+        passed,
+    TResult? Function(
+            String id,
+            String taskId,
+            String taskTitleSnapshot,
+            TaskVisual taskVisualSnapshot,
+            String actorUid,
+            String toUid,
+            bool penaltyApplied,
+            double? complianceBefore,
+            double? complianceAfter,
+            DateTime missedAt,
+            DateTime createdAt)?
+        missed,
+  }) {
+    return missed?.call(
+        id,
+        taskId,
+        taskTitleSnapshot,
+        taskVisualSnapshot,
+        actorUid,
+        toUid,
+        penaltyApplied,
+        complianceBefore,
+        complianceAfter,
+        missedAt,
+        createdAt);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function(
+            String id,
+            String taskId,
+            String taskTitleSnapshot,
+            TaskVisual taskVisualSnapshot,
+            String actorUid,
+            String performerUid,
+            DateTime completedAt,
+            DateTime createdAt)?
+        completed,
+    TResult Function(
+            String id,
+            String taskId,
+            String taskTitleSnapshot,
+            TaskVisual taskVisualSnapshot,
+            String actorUid,
+            String fromUid,
+            String toUid,
+            String? reason,
+            bool penaltyApplied,
+            double? complianceBefore,
+            double? complianceAfter,
+            DateTime createdAt)?
+        passed,
+    TResult Function(
+            String id,
+            String taskId,
+            String taskTitleSnapshot,
+            TaskVisual taskVisualSnapshot,
+            String actorUid,
+            String toUid,
+            bool penaltyApplied,
+            double? complianceBefore,
+            double? complianceAfter,
+            DateTime missedAt,
+            DateTime createdAt)?
+        missed,
+    required TResult orElse(),
+  }) {
+    if (missed != null) {
+      return missed(
+          id,
+          taskId,
+          taskTitleSnapshot,
+          taskVisualSnapshot,
+          actorUid,
+          toUid,
+          penaltyApplied,
+          complianceBefore,
+          complianceAfter,
+          missedAt,
+          createdAt);
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(CompletedEvent value) completed,
+    required TResult Function(PassedEvent value) passed,
+    required TResult Function(MissedEvent value) missed,
+  }) {
+    return missed(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(CompletedEvent value)? completed,
+    TResult? Function(PassedEvent value)? passed,
+    TResult? Function(MissedEvent value)? missed,
+  }) {
+    return missed?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(CompletedEvent value)? completed,
+    TResult Function(PassedEvent value)? passed,
+    TResult Function(MissedEvent value)? missed,
+    required TResult orElse(),
+  }) {
+    if (missed != null) {
+      return missed(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class MissedEvent implements TaskEvent {
+  const factory MissedEvent(
+      {required final String id,
+      required final String taskId,
+      required final String taskTitleSnapshot,
+      required final TaskVisual taskVisualSnapshot,
+      required final String actorUid,
+      required final String toUid,
+      required final bool penaltyApplied,
+      final double? complianceBefore,
+      final double? complianceAfter,
+      required final DateTime missedAt,
+      required final DateTime createdAt}) = _$MissedEventImpl;
+
+  @override
+  String get id;
+  @override
+  String get taskId;
+  @override
+  String get taskTitleSnapshot;
+  @override
+  TaskVisual get taskVisualSnapshot;
+  @override
+  String get actorUid;
+  String get toUid;
+  bool get penaltyApplied;
+  double? get complianceBefore;
+  double? get complianceAfter;
+  DateTime get missedAt;
+  @override
+  DateTime get createdAt;
+
+  /// Create a copy of TaskEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$MissedEventImplCopyWith<_$MissedEventImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

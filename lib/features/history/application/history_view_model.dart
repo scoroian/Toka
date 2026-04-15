@@ -135,6 +135,7 @@ HistoryViewModel historyViewModel(HistoryViewModelRef ref) {
         final actorUid = switch (e) {
           CompletedEvent c => c.actorUid,
           PassedEvent p    => p.actorUid,
+          MissedEvent m    => m.actorUid,
         };
         final isOwnEvent = actorUid == currentUid;
         const isRated = false;

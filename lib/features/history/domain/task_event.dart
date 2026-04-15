@@ -50,6 +50,20 @@ sealed class TaskEvent with _$TaskEvent {
     required DateTime createdAt,
   }) = PassedEvent;
 
+  const factory TaskEvent.missed({
+    required String id,
+    required String taskId,
+    required String taskTitleSnapshot,
+    required TaskVisual taskVisualSnapshot,
+    required String actorUid,
+    required String toUid,
+    required bool penaltyApplied,
+    double? complianceBefore,
+    double? complianceAfter,
+    required DateTime missedAt,
+    required DateTime createdAt,
+  }) = MissedEvent;
+
   static TaskEvent fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
     return fromMap(doc.id, doc.data()!);
   }
@@ -61,6 +75,22 @@ sealed class TaskEvent with _$TaskEvent {
     );
     final createdAt =
         (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now();
+
+    if (eventType == 'missed') {
+      return TaskEvent.missed(
+        id: id,
+        taskId: data['taskId'] as String? ?? '',
+        taskTitleSnapshot: data['taskTitleSnapshot'] as String? ?? '',
+        taskVisualSnapshot: visual,
+        actorUid: data['actorUid'] as String? ?? '',
+        toUid: data['toUid'] as String? ?? '',
+        penaltyApplied: data['penaltyApplied'] as bool? ?? true,
+        complianceBefore: (data['complianceBefore'] as num?)?.toDouble(),
+        complianceAfter: (data['complianceAfter'] as num?)?.toDouble(),
+        missedAt: (data['missedAt'] as Timestamp?)?.toDate() ?? createdAt,
+        createdAt: createdAt,
+      );
+    }
 
     if (eventType == 'passed') {
       return TaskEvent.passed(

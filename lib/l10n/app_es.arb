@@ -835,5 +835,17 @@
   "@tasks_upcoming_preview_assignee": {
     "placeholders": { "name": { "type": "String" } }
   },
-  "tasks_assignment_drag_hint": "Arrastra para reordenar"
+  "tasks_assignment_drag_hint": "Arrastra para reordenar",
+  "history_event_missed": "{name} no completó",
+  "@history_event_missed": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "history_filter_missed": "Vencidas",
+  "@history_filter_missed": {},
+  "task_on_miss_label": "Si vence sin completar",
+  "@task_on_miss_label": {},
+  "task_on_miss_same_assignee": "Mantener asignado",
+  "@task_on_miss_same_assignee": {},
+  "task_on_miss_next_rotation": "Rotar al siguiente",
+  "@task_on_miss_next_rotation": {}
 }

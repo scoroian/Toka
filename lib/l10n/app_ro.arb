@@ -835,5 +835,17 @@
   "@tasks_upcoming_preview_assignee": {
     "placeholders": { "name": { "type": "String" } }
   },
-  "tasks_assignment_drag_hint": "Trage pentru a reordona"
+  "tasks_assignment_drag_hint": "Trage pentru a reordona",
+  "history_event_missed": "{name} nu a finalizat",
+  "@history_event_missed": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "history_filter_missed": "Expirate",
+  "@history_filter_missed": {},
+  "task_on_miss_label": "Dacă expiră neefectuată",
+  "@task_on_miss_label": {},
+  "task_on_miss_same_assignee": "Păstrează responsabilul",
+  "@task_on_miss_same_assignee": {},
+  "task_on_miss_next_rotation": "Rotație la următor",
+  "@task_on_miss_next_rotation": {}
 }

@@ -835,5 +835,17 @@
   "@tasks_upcoming_preview_assignee": {
     "placeholders": { "name": { "type": "String" } }
   },
-  "tasks_assignment_drag_hint": "Drag to reorder"
+  "tasks_assignment_drag_hint": "Drag to reorder",
+  "history_event_missed": "{name} didn't complete",
+  "@history_event_missed": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "history_filter_missed": "Missed",
+  "@history_filter_missed": {},
+  "task_on_miss_label": "If it expires incomplete",
+  "@task_on_miss_label": {},
+  "task_on_miss_same_assignee": "Keep assignee",
+  "@task_on_miss_same_assignee": {},
+  "task_on_miss_next_rotation": "Rotate to next",
+  "@task_on_miss_next_rotation": {}
 }

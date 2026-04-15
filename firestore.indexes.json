@@ -80,6 +80,14 @@
         { "fieldPath": "uid", "order": "ASCENDING" },
         { "fieldPath": "avgScore", "order": "DESCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "tasks",
+      "queryScope": "COLLECTION_GROUP",
+      "fields": [
+        { "fieldPath": "status",    "order": "ASCENDING" },
+        { "fieldPath": "nextDueAt", "order": "ASCENDING" }
+      ]
     }
   ],
   "fieldOverrides": [

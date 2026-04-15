@@ -18,16 +18,32 @@ class MainShellV2 extends StatelessWidget {
     return 0;
   }
 
+  // Altura total que la barra flotante ocupa desde el borde inferior de la pantalla.
+  // Usada tanto para el placeholder transparente (MediaQuery) como para el Positioned.
+  static const double _kNavBarHeight  = 56;
+  static const double _kNavBarBottom  = 12;
+
   @override
   Widget build(BuildContext context) {
     final location = GoRouterState.of(context).matchedLocation;
+    final safeBottom = MediaQuery.of(context).padding.bottom;
+
+    // El SizedBox transparente registra la altura de la barra en el Scaffold,
+    // lo que hace que Flutter ajuste automáticamente MediaQuery.padding.bottom
+    // para los hijos. Gracias a extendBody: true el body sigue extendiéndose
+    // por detrás — el blur sigue siendo visible — pero showModalBottomSheet,
+    // teclados y FABs ya posicionan su borde inferior por encima de la barra.
     return Scaffold(
       extendBody: true,
+      bottomNavigationBar: SizedBox(
+        height: _kNavBarHeight + _kNavBarBottom + safeBottom,
+      ),
       body: Stack(
         children: [
           child,
           Positioned(
-            left: 16, right: 16, bottom: 12,
+            left: 16, right: 16,
+            bottom: _kNavBarBottom + safeBottom,
             child: _FloatingNavBar(selectedIndex: _tabIndex(location)),
           ),
         ],

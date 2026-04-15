@@ -60,6 +60,19 @@ class HistoryFilterBar extends StatelessWidget {
               ),
             ),
           ),
+          const SizedBox(width: 8),
+          FilterChip(
+            key: const Key('filter_chip_missed'),
+            label: Text(l10n.history_filter_missed),
+            selected: current.eventType == 'missed',
+            onSelected: (_) => onChanged(
+              HistoryFilter(
+                memberUid: current.memberUid,
+                taskId: current.taskId,
+                eventType: 'missed',
+              ),
+            ),
+          ),
         ],
       ),
     );

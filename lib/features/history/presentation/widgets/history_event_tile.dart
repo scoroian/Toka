@@ -263,7 +263,7 @@ class _MissedTile extends StatelessWidget {
               style: const TextStyle(fontSize: 12, color: Colors.grey)),
         ],
       ),
-      trailing: trailingOverride ?? const Icon(Icons.alarm_off, color: Colors.red),
+      trailing: trailingOverride ?? const Icon(Icons.timer_off_outlined, color: Colors.orange),
       isThreeLine: true,
     );
   }

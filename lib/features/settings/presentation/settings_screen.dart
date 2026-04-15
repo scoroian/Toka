@@ -7,6 +7,7 @@ import '../../../core/constants/routes.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/application/auth_provider.dart';
 import '../application/settings_view_model.dart';
+import '../../../core/theme/theme_mode_provider.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -50,6 +51,11 @@ class SettingsScreen extends ConsumerWidget {
             title: Text(l10n.settings_section_language),
             onTap: () {},
           ),
+          const Divider(),
+
+          // ── Apariencia ───────────────────────────────────────────────
+          const _SectionHeader(key: Key('settings_section_appearance'), title: 'Apariencia'),
+          const _ThemeModeSelector(key: Key('settings_theme_mode')),
           const Divider(),
 
           // ── Notificaciones ───────────────────────────────────────────
@@ -181,6 +187,30 @@ class _SectionHeader extends StatelessWidget {
         style: Theme.of(context).textTheme.labelLarge?.copyWith(
               color: Theme.of(context).colorScheme.primary,
             ),
+      ),
+    );
+  }
+}
+
+class _ThemeModeSelector extends ConsumerWidget {
+  const _ThemeModeSelector({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final current = ref.watch(themeModeNotifierProvider);
+    final notifier = ref.read(themeModeNotifierProvider.notifier);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: SegmentedButton<ThemeMode>(
+        key: const Key('theme_mode_segmented'),
+        segments: const [
+          ButtonSegment(value: ThemeMode.light,  label: Text('Claro'),  icon: Icon(Icons.wb_sunny_outlined)),
+          ButtonSegment(value: ThemeMode.dark,   label: Text('Oscuro'), icon: Icon(Icons.nightlight_outlined)),
+          ButtonSegment(value: ThemeMode.system, label: Text('Sistema'),icon: Icon(Icons.phone_android_outlined)),
+        ],
+        selected: {current},
+        onSelectionChanged: (set) => notifier.setMode(set.first),
       ),
     );
   }

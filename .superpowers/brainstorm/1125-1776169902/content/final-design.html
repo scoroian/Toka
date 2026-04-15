@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Toka Skin V2 — Diseño final</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+    background: #0f0f13;
+    color: #f0f0f0;
+    padding: 24px 16px 64px;
+    min-height: 100vh;
+  }
+  h1 { text-align: center; font-size: 22px; font-weight: 800; margin-bottom: 6px; color: #fff; }
+  .subtitle { text-align: center; color: #888; font-size: 14px; margin-bottom: 8px; }
+  .decisions-summary {
+    display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 32px;
+  }
+  .badge {
+    font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 20px;
+    background: #1e1e2a; color: #a0a0c0; border: 1px solid #2a2a3a;
+  }
+  .badge span { color: #f4845f; }
+
+  .phones {
+    display: flex; gap: 32px; justify-content: center; flex-wrap: wrap; align-items: flex-start;
+  }
+  .phone-wrap {
+    display: flex; flex-direction: column; align-items: center; gap: 14px;
+  }
+  .mode-label {
+    font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #666;
+  }
+
+  /* ── Phone shell ── */
+  .phone-shell {
+    width: 270px; height: 560px;
+    border-radius: 40px; overflow: hidden; position: relative;
+    border: 2px solid #2a2a3a;
+    box-shadow: 0 24px 64px rgba(0,0,0,.6);
+  }
+  .phone-screen {
+    width: 100%; height: 100%; overflow: hidden; position: relative;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+
+  /* ── Status bar ── */
+  .status-bar {
+    height: 28px; display: flex; align-items: center;
+    justify-content: space-between; padding: 0 18px;
+    font-size: 11px; font-weight: 600; position: relative; z-index: 10;
+  }
+
+  /* ════════════════════════════
+     LIGHT THEME
+  ════════════════════════════ */
+  .light { background: #f9f9f7; color: #1a1a1a; }
+  .light .status-bar { color: #888; }
+
+  .light .appbar {
+    padding: 4px 20px 14px; background: #f9f9f7;
+    border-bottom: 1px solid #ebebE8;
+  }
+  .light .home-row {
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .light .home-chip {
+    display: flex; align-items: center; gap: 6px;
+    background: #fff; border: 1px solid #e8e8e4; border-radius: 20px;
+    padding: 4px 10px 4px 8px; font-size: 11px; font-weight: 700; color: #555;
+  }
+  .light .home-dot { width: 8px; height: 8px; border-radius: 50%; background: #f4845f; }
+  .light .date-label { font-size: 10px; color: #aaa; font-weight: 500; margin-top: 2px; }
+  .light .appbar-title {
+    font-size: 28px; font-weight: 900; color: #1a1a1a;
+    letter-spacing: -.04em; margin-top: 6px; line-height: 1;
+  }
+
+  .light .counters {
+    margin: 12px 16px; display: flex; gap: 8px;
+  }
+  .light .counter-chip {
+    flex: 1; padding: 10px 14px; border-radius: 14px;
+    background: #fff; border: 1px solid #e8e8e4;
+    display: flex; flex-direction: column; gap: 3px;
+  }
+  .light .counter-num { font-size: 24px; font-weight: 900; color: #1a1a1a; line-height: 1; }
+  .light .counter-num.accent { color: #f4845f; }
+  .light .counter-label { font-size: 9px; text-transform: uppercase; letter-spacing: .1em; color: #bbb; font-weight: 700; }
+
+  .light .section-title {
+    padding: 6px 16px 6px; font-size: 10px; font-weight: 800;
+    letter-spacing: .15em; text-transform: uppercase; color: #999;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .light .section-line { flex: 1; height: 1px; background: #ebebE8; }
+
+  .light .task-card {
+    margin: 0 16px 6px; padding: 12px 14px;
+    background: #fff; border-radius: 14px;
+    border-left: 3px solid #f4845f;
+    box-shadow: 0 1px 6px rgba(0,0,0,.05);
+  }
+  .light .task-card.mine {
+    border-left-color: #f4845f;
+    background: #fff;
+  }
+  .light .task-card.other { border-left-color: #e8e8e4; }
+
+  .light .task-row { display: flex; align-items: center; gap: 10px; }
+  .light .avatar {
+    width: 30px; height: 30px; border-radius: 8px;
+    background: #f4845f;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 800; color: #fff; flex-shrink: 0;
+  }
+  .light .avatar.other { background: #e8e8e4; color: #999; }
+  .light .task-info { flex: 1; min-width: 0; }
+  .light .task-title { font-size: 13px; font-weight: 700; color: #1a1a1a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .light .task-sub { font-size: 10px; color: #999; font-weight: 600; margin-top: 1px; }
+  .light .due-chip {
+    font-size: 10px; padding: 3px 8px; border-radius: 6px;
+    background: #f4f4f2; color: #888; font-weight: 600; flex-shrink: 0;
+  }
+  .light .due-chip.overdue { background: #fff1f1; color: #ef4444; }
+  .light .actions { display: flex; gap: 6px; margin-top: 10px; }
+  .light .btn-done {
+    flex: 1; padding: 8px 0; border-radius: 10px; font-size: 12px; font-weight: 800;
+    background: #1a1a1a; color: #fff; border: none; text-align: center;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+  .light .btn-pass {
+    flex: 1; padding: 8px 0; border-radius: 10px; font-size: 12px; font-weight: 700;
+    background: transparent; color: #aaa; border: 1.5px solid #e8e8e4; text-align: center;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+
+  .light .done-card {
+    margin: 0 16px 6px; padding: 10px 14px;
+    background: #f9f9f7; border-radius: 14px;
+    border-left: 3px solid #e8e8e4;
+    display: flex; align-items: center; gap: 10px;
+    opacity: .6;
+  }
+  .light .done-check {
+    width: 20px; height: 20px; border-radius: 50%;
+    background: #81C99C;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; color: #fff; flex-shrink: 0;
+  }
+  .light .done-title { font-size: 12px; font-weight: 600; color: #aaa; text-decoration: line-through; }
+
+  /* Floating nav */
+  .light .nav-float {
+    position: absolute; bottom: 12px; left: 16px; right: 16px;
+    height: 56px; border-radius: 20px;
+    background: rgba(255,255,255,.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,.6);
+    box-shadow: 0 4px 20px rgba(0,0,0,.1);
+    display: flex; align-items: center; justify-content: space-around;
+  }
+  .light .nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .light .nav-icon { font-size: 18px; opacity: .35; }
+  .light .nav-icon.active { opacity: 1; }
+  .light .nav-dot { width: 4px; height: 4px; border-radius: 50%; background: #f4845f; }
+
+  /* ════════════════════════════
+     DARK THEME
+  ════════════════════════════ */
+  .dark { background: #111118; color: #f0f0f5; }
+  .dark .status-bar { color: #555; }
+
+  .dark .appbar {
+    padding: 4px 20px 14px; background: #111118;
+    border-bottom: 1px solid #1e1e28;
+  }
+  .dark .home-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: #1a1a24; border: 1px solid #2a2a38; border-radius: 20px;
+    padding: 4px 10px 4px 8px; font-size: 11px; font-weight: 700; color: #888;
+  }
+  .dark .home-dot { width: 8px; height: 8px; border-radius: 50%; background: #f4845f; }
+  .dark .date-label { font-size: 10px; color: #444; font-weight: 500; margin-top: 2px; }
+  .dark .appbar-title {
+    font-size: 28px; font-weight: 900; color: #f0f0f5;
+    letter-spacing: -.04em; margin-top: 6px; line-height: 1;
+  }
+
+  .dark .counters { margin: 12px 16px; display: flex; gap: 8px; }
+  .dark .counter-chip {
+    flex: 1; padding: 10px 14px; border-radius: 14px;
+    background: #1a1a24; border: 1px solid #2a2a38;
+    display: flex; flex-direction: column; gap: 3px;
+  }
+  .dark .counter-num { font-size: 24px; font-weight: 900; color: #f0f0f5; line-height: 1; }
+  .dark .counter-num.accent { color: #f4845f; }
+  .dark .counter-label { font-size: 9px; text-transform: uppercase; letter-spacing: .1em; color: #444; font-weight: 700; }
+
+  .dark .section-title {
+    padding: 6px 16px 6px; font-size: 10px; font-weight: 800;
+    letter-spacing: .15em; text-transform: uppercase; color: #666;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .dark .section-line { flex: 1; height: 1px; background: #1e1e28; }
+
+  .dark .task-card {
+    margin: 0 16px 6px; padding: 12px 14px;
+    background: #1a1a24; border-radius: 14px;
+    border-left: 3px solid #f4845f;
+    box-shadow: 0 2px 12px rgba(0,0,0,.3);
+  }
+  .dark .task-card.other { border-left-color: #2a2a38; }
+
+  .dark .task-row { display: flex; align-items: center; gap: 10px; }
+  .dark .avatar {
+    width: 30px; height: 30px; border-radius: 8px;
+    background: #f4845f;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 800; color: #fff; flex-shrink: 0;
+  }
+  .dark .avatar.other { background: #2a2a38; color: #555; }
+  .dark .task-info { flex: 1; min-width: 0; }
+  .dark .task-title { font-size: 13px; font-weight: 700; color: #f0f0f5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .dark .task-sub { font-size: 10px; color: #888; font-weight: 600; margin-top: 1px; }
+  .dark .due-chip {
+    font-size: 10px; padding: 3px 8px; border-radius: 6px;
+    background: #222230; color: #555; font-weight: 600; flex-shrink: 0;
+  }
+  .dark .due-chip.overdue { background: rgba(239,68,68,.15); color: #f87171; }
+  .dark .actions { display: flex; gap: 6px; margin-top: 10px; }
+  .dark .btn-done {
+    flex: 1; padding: 8px 0; border-radius: 10px; font-size: 12px; font-weight: 800;
+    background: #f0f0f5; color: #111118; border: none; text-align: center;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+  .dark .btn-pass {
+    flex: 1; padding: 8px 0; border-radius: 10px; font-size: 12px; font-weight: 700;
+    background: transparent; color: #444; border: 1.5px solid #2a2a38; text-align: center;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+
+  .dark .done-card {
+    margin: 0 16px 6px; padding: 10px 14px;
+    background: #111118; border-radius: 14px;
+    border-left: 3px solid #1e1e28;
+    display: flex; align-items: center; gap: 10px; opacity: .5;
+  }
+  .dark .done-check {
+    width: 20px; height: 20px; border-radius: 50%;
+    background: #4fae7d;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; color: #fff; flex-shrink: 0;
+  }
+  .dark .done-title { font-size: 12px; font-weight: 600; color: #444; text-decoration: line-through; }
+
+  /* Floating nav dark */
+  .dark .nav-float {
+    position: absolute; bottom: 12px; left: 16px; right: 16px;
+    height: 56px; border-radius: 20px;
+    background: rgba(20,20,30,.88);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,.06);
+    box-shadow: 0 4px 24px rgba(0,0,0,.5);
+    display: flex; align-items: center; justify-content: space-around;
+  }
+  .dark .nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .dark .nav-icon { font-size: 18px; opacity: .25; }
+  .dark .nav-icon.active { opacity: 1; }
+  .dark .nav-dot { width: 4px; height: 4px; border-radius: 50%; background: #f4845f; }
+
+  /* Anim legend */
+  .anim-section {
+    max-width: 620px; margin: 40px auto 0;
+    background: #1a1a24; border-radius: 16px;
+    border: 1px solid #2a2a38;
+    padding: 20px 24px;
+  }
+  .anim-section h3 { font-size: 13px; font-weight: 800; color: #f4845f; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 14px; }
+  .anim-row {
+    display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px;
+  }
+  .anim-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .anim-text h4 { font-size: 13px; font-weight: 700; color: #f0f0f5; }
+  .anim-text p { font-size: 12px; color: #666; margin-top: 2px; line-height: 1.5; }
+
+  .approve-row { text-align: center; margin-top: 32px; }
+  .approve-btn {
+    display: inline-block; padding: 12px 32px; border-radius: 24px;
+    background: #f4845f; color: #fff; font-size: 14px; font-weight: 800;
+    cursor: pointer; border: none; font-family: 'Plus Jakarta Sans', sans-serif;
+    box-shadow: 0 4px 20px rgba(244,132,95,.35);
+    transition: transform .15s;
+  }
+  .approve-btn:hover { transform: scale(1.04); }
+  .approved-msg { display: none; color: #81C99C; font-size: 14px; font-weight: 700; margin-top: 12px; }
+</style>
+</head>
+<body>
+
+<h1>Toka Skin V2 — Diseño final</h1>
+<p class="subtitle">Minimal &amp; Editorial · Plus Jakarta Sans · Expresivo · Flotante con blur</p>
+
+<div class="decisions-summary">
+  <div class="badge">Estilo <span>Minimal &amp; Editorial</span></div>
+  <div class="badge">Tema <span>Sistema + selector manual</span></div>
+  <div class="badge">Fuente <span>Plus Jakarta Sans</span></div>
+  <div class="badge">Animaciones <span>Expresivas (spring)</span></div>
+  <div class="badge">Nav <span>Flotante con blur</span></div>
+  <div class="badge">Completar <span>Checkmark + confetti</span></div>
+</div>
+
+<div class="phones">
+
+  <!-- LIGHT -->
+  <div class="phone-wrap">
+    <div class="mode-label">☀️ Modo claro</div>
+    <div class="phone-shell">
+      <div class="phone-screen light">
+        <div class="status-bar"><span>9:41</span><span>●●● 🔋</span></div>
+        <div class="appbar">
+          <div class="home-row">
+            <div class="home-chip"><div class="home-dot"></div>Casa principal ▾</div>
+            <div class="date-label">Martes, 14 abril</div>
+          </div>
+          <div class="appbar-title">Hoy</div>
+        </div>
+        <div class="counters">
+          <div class="counter-chip">
+            <div class="counter-num accent">3</div>
+            <div class="counter-label">Pendientes</div>
+          </div>
+          <div class="counter-chip">
+            <div class="counter-num">1</div>
+            <div class="counter-label">Hechas hoy</div>
+          </div>
+        </div>
+
+        <div class="section-title">Diarias <div class="section-line"></div></div>
+
+        <div class="task-card mine">
+          <div class="task-row">
+            <div class="avatar">MA</div>
+            <div class="task-info">
+              <div class="task-title">🧹 Barrer el salón</div>
+              <div class="task-sub">María · tuya</div>
+            </div>
+            <div class="due-chip">10:00</div>
+          </div>
+          <div class="actions">
+            <div class="btn-done">✓ Marcar hecho</div>
+            <div class="btn-pass">↻ Pasar</div>
+          </div>
+        </div>
+
+        <div class="task-card other">
+          <div class="task-row">
+            <div class="avatar other">JO</div>
+            <div class="task-info">
+              <div class="task-title">🍽️ Fregar platos</div>
+              <div class="task-sub">Jorge</div>
+            </div>
+            <div class="due-chip">14:00</div>
+          </div>
+        </div>
+
+        <div class="section-title">Semanales <div class="section-line"></div></div>
+
+        <div class="task-card other">
+          <div class="task-row">
+            <div class="avatar">MA</div>
+            <div class="task-info">
+              <div class="task-title">💧 Regar plantas</div>
+              <div class="task-sub">María</div>
+            </div>
+            <div class="due-chip overdue">Vencida</div>
+          </div>
+        </div>
+
+        <div class="section-title">Hechas <div class="section-line"></div></div>
+        <div class="done-card">
+          <div class="done-check">✓</div>
+          <div class="done-title">🛒 Hacer la compra</div>
+        </div>
+
+        <div class="nav-float">
+          <div class="nav-item"><div class="nav-icon active">☀️</div><div class="nav-dot"></div></div>
+          <div class="nav-item"><div class="nav-icon">📋</div></div>
+          <div class="nav-item"><div class="nav-icon">📊</div></div>
+          <div class="nav-item"><div class="nav-icon">👤</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DARK -->
+  <div class="phone-wrap">
+    <div class="mode-label">🌙 Modo oscuro</div>
+    <div class="phone-shell">
+      <div class="phone-screen dark">
+        <div class="status-bar"><span>9:41</span><span>●●● 🔋</span></div>
+        <div class="appbar">
+          <div class="home-row" style="display:flex;align-items:center;justify-content:space-between;">
+            <div class="home-chip"><div class="home-dot"></div>Casa principal ▾</div>
+            <div class="date-label">Martes, 14 abril</div>
+          </div>
+          <div class="appbar-title">Hoy</div>
+        </div>
+        <div class="counters">
+          <div class="counter-chip">
+            <div class="counter-num accent">3</div>
+            <div class="counter-label">Pendientes</div>
+          </div>
+          <div class="counter-chip">
+            <div class="counter-num">1</div>
+            <div class="counter-label">Hechas hoy</div>
+          </div>
+        </div>
+
+        <div class="section-title">Diarias <div class="section-line"></div></div>
+
+        <div class="task-card">
+          <div class="task-row">
+            <div class="avatar">MA</div>
+            <div class="task-info">
+              <div class="task-title">🧹 Barrer el salón</div>
+              <div class="task-sub">María · tuya</div>
+            </div>
+            <div class="due-chip">10:00</div>
+          </div>
+          <div class="actions">
+            <div class="btn-done">✓ Marcar hecho</div>
+            <div class="btn-pass">↻ Pasar</div>
+          </div>
+        </div>
+
+        <div class="task-card other">
+          <div class="task-row">
+            <div class="avatar other">JO</div>
+            <div class="task-info">
+              <div class="task-title">🍽️ Fregar platos</div>
+              <div class="task-sub">Jorge</div>
+            </div>
+            <div class="due-chip">14:00</div>
+          </div>
+        </div>
+
+        <div class="section-title">Semanales <div class="section-line"></div></div>
+
+        <div class="task-card other">
+          <div class="task-row">
+            <div class="avatar">MA</div>
+            <div class="task-info">
+              <div class="task-title">💧 Regar plantas</div>
+              <div class="task-sub">María</div>
+            </div>
+            <div class="due-chip overdue">Vencida</div>
+          </div>
+        </div>
+
+        <div class="section-title">Hechas <div class="section-line"></div></div>
+        <div class="done-card">
+          <div class="done-check">✓</div>
+          <div class="done-title">🛒 Hacer la compra</div>
+        </div>
+
+        <div class="nav-float">
+          <div class="nav-item"><div class="nav-icon active">☀️</div><div class="nav-dot"></div></div>
+          <div class="nav-item"><div class="nav-icon">📋</div></div>
+          <div class="nav-item"><div class="nav-icon">📊</div></div>
+          <div class="nav-item"><div class="nav-icon">👤</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Animaciones -->
+<div class="anim-section">
+  <h3>Animaciones confirmadas</h3>
+  <div class="anim-row">
+    <div class="anim-icon">🎴</div>
+    <div class="anim-text">
+      <h4>Entrada escalonada de tarjetas</h4>
+      <p>Cada tarjeta aparece con slide-up + fade, con 50ms de retraso entre ellas. Spring physics (damping 0.7).</p>
+    </div>
+  </div>
+  <div class="anim-row">
+    <div class="anim-icon">✅</div>
+    <div class="anim-text">
+      <h4>Completar tarea: Checkmark + confetti</h4>
+      <p>El ✓ se dibuja con un trazo animado (350ms), luego la tarjeta sale con slide-left. Unas 20 partículas de confetti explotan desde el botón (paquete confetti).</p>
+    </div>
+  </div>
+  <div class="anim-row">
+    <div class="anim-icon">💀</div>
+    <div class="anim-text">
+      <h4>Skeleton shimmer</h4>
+      <p>En lugar de spinner: bloques grises con shimmer horizontal mientras carga.</p>
+    </div>
+  </div>
+  <div class="anim-row">
+    <div class="anim-icon">🔀</div>
+    <div class="anim-text">
+      <h4>Transición entre pestañas</h4>
+      <p>Fade suave de 200ms al cambiar de pestaña en la barra flotante.</p>
+    </div>
+  </div>
+  <div class="anim-row">
+    <div class="anim-icon">➕</div>
+    <div class="anim-text">
+      <h4>FAB scale-in</h4>
+      <p>El botón flotante de nueva tarea aparece con scale 0→1 + elastic bounce.</p>
+    </div>
+  </div>
+</div>
+
+<div class="approve-row">
+  <button class="approve-btn" onclick="approve()">Aprobar diseño →</button>
+  <div class="approved-msg" id="approved-msg">¡Aprobado! Dímelo en el terminal.</div>
+</div>
+
+<script>
+function approve() {
+  document.getElementById('approved-msg').style.display = 'block';
+  if (window.__companion) window.__companion.select('approved', 'Diseño aprobado');
+}
+</script>
+</body>
+</html>

@@ -1357,4 +1357,21 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get tasks_assignment_drag_hint => 'Trage pentru a reordona';
+
+  @override
+  String history_event_missed(String name) {
+    return '$name nu a finalizat';
+  }
+
+  @override
+  String get history_filter_missed => 'Expirate';
+
+  @override
+  String get task_on_miss_label => 'Dacă expiră neefectuată';
+
+  @override
+  String get task_on_miss_same_assignee => 'Păstrează responsabilul';
+
+  @override
+  String get task_on_miss_next_rotation => 'Rotație la următor';
 }

@@ -6,7 +6,7 @@ part of 'all_tasks_view_model.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$allTasksViewModelHash() => r'5e990c5adefa5c17a4b3d51e44df70cd02e2c9ad';
+String _$allTasksViewModelHash() => r'ad9b43c2fb9493d2e193d4e3e88438df7096297b';
 
 /// See also [allTasksViewModel].
 @ProviderFor(allTasksViewModel)

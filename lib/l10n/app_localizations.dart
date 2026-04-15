@@ -2613,6 +2613,36 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Arrastra para reordenar'**
   String get tasks_assignment_drag_hint;
+
+  /// No description provided for @history_event_missed.
+  ///
+  /// In es, this message translates to:
+  /// **'{name} no completó'**
+  String history_event_missed(String name);
+
+  /// No description provided for @history_filter_missed.
+  ///
+  /// In es, this message translates to:
+  /// **'Vencidas'**
+  String get history_filter_missed;
+
+  /// No description provided for @task_on_miss_label.
+  ///
+  /// In es, this message translates to:
+  /// **'Si vence sin completar'**
+  String get task_on_miss_label;
+
+  /// No description provided for @task_on_miss_same_assignee.
+  ///
+  /// In es, this message translates to:
+  /// **'Mantener asignado'**
+  String get task_on_miss_same_assignee;
+
+  /// No description provided for @task_on_miss_next_rotation.
+  ///
+  /// In es, this message translates to:
+  /// **'Rotar al siguiente'**
+  String get task_on_miss_next_rotation;
 }
 
 class _AppLocalizationsDelegate

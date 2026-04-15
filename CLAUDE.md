@@ -185,6 +185,28 @@ Ver `execution-order.md` para el orden estricto de ejecución de las specs.
 
 ---
 
+## Workflow de desarrollo
+
+Seguir siempre estos pasos en orden:
+
+1. Antes de implementar: usar la skill `superpowers:brainstorming` para confirmar el plan.
+2. Implementar el código.
+3. Ejecutar `flutter analyze` — debe pasar sin errores.
+4. Compilar y desplegar en emulador: `flutter run -d emulator-5554`.
+5. Capturar screenshot con ADB: `adb exec-out screencap -p > /tmp/screen.png`.
+6. Analizar la captura visualmente contra la spec.
+7. Si algo no cumple la spec → corregir y volver al paso 3.
+8. Solo marcar una tarea como DONE cuando la captura confirme que es correcto.
+
+### Criterios de aceptación UI
+
+- Los textos deben ser legibles (sin overflow ni cortados).
+- Los botones deben estar en la posición descrita en la spec.
+- El espaciado debe ser consistente con Material Design 3.
+- No puede haber pantallas en blanco ni errores visibles.
+
+---
+
 ## Al terminar cada spec
 
 Claude Code debe:
@@ -211,6 +233,23 @@ firebase emulators:start --import=./emulator-data --export-on-exit
 ```
 
 En `main_dev.dart` conectar todos los servicios a los emuladores.
+
+### Emulador Android
+
+```bash
+# Dispositivo
+Device: emulator-5554
+
+# Lanzar app en el emulador
+flutter run -d emulator-5554
+
+# Capturar pantalla con ADB
+adb exec-out screencap -p > /tmp/screen.png
+
+# ADB path (ajustar según instalación local)
+# macOS/Linux: ~/Library/Android/sdk/platform-tools/adb
+# Windows:     %LOCALAPPDATA%\Android\Sdk\platform-tools\adb.exe
+```
 
 ---
 

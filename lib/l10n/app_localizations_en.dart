@@ -1348,4 +1348,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tasks_assignment_drag_hint => 'Drag to reorder';
+
+  @override
+  String history_event_missed(String name) {
+    return '$name didn\'t complete';
+  }
+
+  @override
+  String get history_filter_missed => 'Missed';
+
+  @override
+  String get task_on_miss_label => 'If it expires incomplete';
+
+  @override
+  String get task_on_miss_same_assignee => 'Keep assignee';
+
+  @override
+  String get task_on_miss_next_rotation => 'Rotate to next';
 }

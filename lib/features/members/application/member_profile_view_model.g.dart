@@ -175,7 +175,7 @@ class _MemberDetailProviderElement
 }
 
 String _$memberProfileViewModelHash() =>
-    r'85579e7e8e78d9c021af8905f6e18ed2f7a9b2f0';
+    r'd6ac739cec58c37c21e7d362042e4c1665770221';
 
 /// See also [memberProfileViewModel].
 @ProviderFor(memberProfileViewModel)

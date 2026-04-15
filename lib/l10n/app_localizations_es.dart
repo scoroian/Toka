@@ -1360,4 +1360,21 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get tasks_assignment_drag_hint => 'Arrastra para reordenar';
+
+  @override
+  String history_event_missed(String name) {
+    return '$name no completó';
+  }
+
+  @override
+  String get history_filter_missed => 'Vencidas';
+
+  @override
+  String get task_on_miss_label => 'Si vence sin completar';
+
+  @override
+  String get task_on_miss_same_assignee => 'Mantener asignado';
+
+  @override
+  String get task_on_miss_next_rotation => 'Rotar al siguiente';
 }

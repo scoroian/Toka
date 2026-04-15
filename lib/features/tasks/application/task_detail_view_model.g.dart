@@ -7,7 +7,7 @@ part of 'task_detail_view_model.dart';
 // **************************************************************************
 
 String _$taskDetailViewModelHash() =>
-    r'0797bf2578363b85c6900f38761a65075e630151';
+    r'a91ada69ede12f9f4cee3b38bd25d0706519e516';
 
 /// Copied from Dart SDK
 class _SystemHash {

@@ -1365,4 +1365,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get task_on_miss_next_rotation => 'Rotate to next';
+
+  @override
+  String get task_detail_assignee => 'Assignee';
+
+  @override
+  String get task_detail_next_due => 'Next due';
+
+  @override
+  String get task_detail_difficulty => 'Difficulty';
+
+  @override
+  String get task_detail_upcoming => 'Upcoming dates';
 }

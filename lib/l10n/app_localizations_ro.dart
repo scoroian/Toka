@@ -1374,4 +1374,16 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get task_on_miss_next_rotation => 'Rotație la următor';
+
+  @override
+  String get task_detail_assignee => 'Responsabil';
+
+  @override
+  String get task_detail_next_due => 'Următoarea dată';
+
+  @override
+  String get task_detail_difficulty => 'Dificultate';
+
+  @override
+  String get task_detail_upcoming => 'Date viitoare';
 }

@@ -847,5 +847,13 @@
   "task_on_miss_same_assignee": "Mantener asignado",
   "@task_on_miss_same_assignee": {},
   "task_on_miss_next_rotation": "Rotar al siguiente",
-  "@task_on_miss_next_rotation": {}
+  "@task_on_miss_next_rotation": {},
+  "task_detail_assignee": "Responsable",
+  "@task_detail_assignee": {},
+  "task_detail_next_due": "Próxima vez",
+  "@task_detail_next_due": {},
+  "task_detail_difficulty": "Dificultad",
+  "@task_detail_difficulty": {},
+  "task_detail_upcoming": "Próximas fechas",
+  "@task_detail_upcoming": {}
 }

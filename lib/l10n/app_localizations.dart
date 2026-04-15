@@ -2643,6 +2643,30 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Rotar al siguiente'**
   String get task_on_miss_next_rotation;
+
+  /// No description provided for @task_detail_assignee.
+  ///
+  /// In es, this message translates to:
+  /// **'Responsable'**
+  String get task_detail_assignee;
+
+  /// No description provided for @task_detail_next_due.
+  ///
+  /// In es, this message translates to:
+  /// **'Próxima vez'**
+  String get task_detail_next_due;
+
+  /// No description provided for @task_detail_difficulty.
+  ///
+  /// In es, this message translates to:
+  /// **'Dificultad'**
+  String get task_detail_difficulty;
+
+  /// No description provided for @task_detail_upcoming.
+  ///
+  /// In es, this message translates to:
+  /// **'Próximas fechas'**
+  String get task_detail_upcoming;
 }
 
 class _AppLocalizationsDelegate

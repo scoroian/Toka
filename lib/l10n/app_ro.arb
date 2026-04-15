@@ -847,5 +847,13 @@
   "task_on_miss_same_assignee": "Păstrează responsabilul",
   "@task_on_miss_same_assignee": {},
   "task_on_miss_next_rotation": "Rotație la următor",
-  "@task_on_miss_next_rotation": {}
+  "@task_on_miss_next_rotation": {},
+  "task_detail_assignee": "Responsabil",
+  "@task_detail_assignee": {},
+  "task_detail_next_due": "Următoarea dată",
+  "@task_detail_next_due": {},
+  "task_detail_difficulty": "Dificultate",
+  "@task_detail_difficulty": {},
+  "task_detail_upcoming": "Date viitoare",
+  "@task_detail_upcoming": {}
 }

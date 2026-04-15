@@ -847,5 +847,13 @@
   "task_on_miss_same_assignee": "Keep assignee",
   "@task_on_miss_same_assignee": {},
   "task_on_miss_next_rotation": "Rotate to next",
-  "@task_on_miss_next_rotation": {}
+  "@task_on_miss_next_rotation": {},
+  "task_detail_assignee": "Assignee",
+  "@task_detail_assignee": {},
+  "task_detail_next_due": "Next due",
+  "@task_detail_next_due": {},
+  "task_detail_difficulty": "Difficulty",
+  "@task_detail_difficulty": {},
+  "task_detail_upcoming": "Upcoming dates",
+  "@task_detail_upcoming": {}
 }

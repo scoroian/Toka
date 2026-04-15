@@ -76,6 +76,10 @@ abstract class CreateEditTaskViewModel {
   void setDifficultyWeight(double v);
   Future<void> save();
 
+  // Expiry behaviour
+  String get onMissAssign;
+  void   setOnMissAssign(String value);
+
   // New actions
   void setHasFixedTime(bool value);
   void setFixedTime(TimeOfDay? time);
@@ -281,6 +285,14 @@ class CreateEditTaskViewModelNotifier
     }
     _form.setAssignmentOrder(current);
   }
+
+  @override
+  String get onMissAssign =>
+      ref.read(taskFormNotifierProvider).onMissAssign;
+
+  @override
+  void setOnMissAssign(String value) =>
+      ref.read(taskFormNotifierProvider.notifier).setOnMissAssign(value);
 
   @override
   void reorderMember(int fromIndex, int toIndex) {

@@ -1,26 +1,27 @@
-// lib/features/tasks/presentation/create_edit_task_screen.dart
+// lib/features/tasks/presentation/skins/create_edit_task_screen_v2.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../l10n/app_localizations.dart';
-import '../application/create_edit_task_view_model.dart';
-import '../application/task_form_provider.dart';
-import 'widgets/assignment_form.dart';
-import 'widgets/recurrence_form.dart';
-import 'widgets/task_visual_picker.dart';
-import 'widgets/upcoming_dates_preview.dart';
+import '../../../../l10n/app_localizations.dart';
+import '../../application/create_edit_task_view_model.dart';
+import '../../application/task_form_provider.dart';
+import '../widgets/assignment_form.dart';
+import '../widgets/recurrence_form.dart';
+import '../widgets/task_visual_picker.dart';
+import '../widgets/upcoming_dates_preview.dart';
 
-class CreateEditTaskScreen extends ConsumerStatefulWidget {
-  const CreateEditTaskScreen({super.key, this.editTaskId});
+class CreateEditTaskScreenV2 extends ConsumerStatefulWidget {
+  const CreateEditTaskScreenV2({super.key, this.editTaskId});
   final String? editTaskId;
 
   @override
-  ConsumerState<CreateEditTaskScreen> createState() =>
-      _CreateEditTaskScreenState();
+  ConsumerState<CreateEditTaskScreenV2> createState() =>
+      _CreateEditTaskScreenV2State();
 }
 
-class _CreateEditTaskScreenState extends ConsumerState<CreateEditTaskScreen> {
+class _CreateEditTaskScreenV2State
+    extends ConsumerState<CreateEditTaskScreenV2> {
   late TextEditingController _titleController;
   late TextEditingController _descController;
 
@@ -56,11 +57,6 @@ class _CreateEditTaskScreenState extends ConsumerState<CreateEditTaskScreen> {
     final CreateEditTaskViewModel vm =
         ref.watch(createEditTaskViewModelProvider(widget.editTaskId));
 
-    // Observamos el taskFormNotifierProvider directamente para que la pantalla
-    // se reconstruya cada vez que cambia el estado del formulario (slider,
-    // emoji picker, etc.). El wrapper createEditTaskViewModelProvider devuelve
-    // siempre la misma instancia del notifier, por lo que Riverpod no detecta
-    // cambio sin esta suscripción directa.
     final formState = ref.watch(taskFormNotifierProvider);
 
     ref.listen(
@@ -271,7 +267,6 @@ class _OnMissAssignSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    // Solo visible con más de 1 miembro en la rotación
     if (vm.orderedMembers.where((m) => m.isAssigned).length <= 1) {
       return const SizedBox.shrink();
     }

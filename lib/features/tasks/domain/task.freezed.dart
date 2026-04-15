@@ -37,6 +37,7 @@ mixin _$Task {
   String get createdByUid => throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
   DateTime get updatedAt => throw _privateConstructorUsedError;
+  String get onMissAssign => throw _privateConstructorUsedError;
 
   /// Create a copy of Task
   /// with the given fields replaced by the non-null parameter values.
@@ -66,7 +67,8 @@ abstract class $TaskCopyWith<$Res> {
       int completedCount90d,
       String createdByUid,
       DateTime createdAt,
-      DateTime updatedAt});
+      DateTime updatedAt,
+      String onMissAssign});
 
   $RecurrenceRuleCopyWith<$Res> get recurrenceRule;
 }
@@ -103,6 +105,7 @@ class _$TaskCopyWithImpl<$Res, $Val extends Task>
     Object? createdByUid = null,
     Object? createdAt = null,
     Object? updatedAt = null,
+    Object? onMissAssign = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -173,6 +176,10 @@ class _$TaskCopyWithImpl<$Res, $Val extends Task>
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
               as DateTime,
+      onMissAssign: null == onMissAssign
+          ? _value.onMissAssign
+          : onMissAssign // ignore: cast_nullable_to_non_nullable
+              as String,
     ) as $Val);
   }
 
@@ -211,7 +218,8 @@ abstract class _$$TaskImplCopyWith<$Res> implements $TaskCopyWith<$Res> {
       int completedCount90d,
       String createdByUid,
       DateTime createdAt,
-      DateTime updatedAt});
+      DateTime updatedAt,
+      String onMissAssign});
 
   @override
   $RecurrenceRuleCopyWith<$Res> get recurrenceRule;
@@ -246,6 +254,7 @@ class __$$TaskImplCopyWithImpl<$Res>
     Object? createdByUid = null,
     Object? createdAt = null,
     Object? updatedAt = null,
+    Object? onMissAssign = null,
   }) {
     return _then(_$TaskImpl(
       id: null == id
@@ -316,6 +325,10 @@ class __$$TaskImplCopyWithImpl<$Res>
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
               as DateTime,
+      onMissAssign: null == onMissAssign
+          ? _value.onMissAssign
+          : onMissAssign // ignore: cast_nullable_to_non_nullable
+              as String,
     ));
   }
 }
@@ -340,7 +353,8 @@ class _$TaskImpl implements _Task {
       required this.completedCount90d,
       required this.createdByUid,
       required this.createdAt,
-      required this.updatedAt})
+      required this.updatedAt,
+      this.onMissAssign = 'sameAssignee'})
       : _assignmentOrder = assignmentOrder;
 
   @override
@@ -388,10 +402,13 @@ class _$TaskImpl implements _Task {
   final DateTime createdAt;
   @override
   final DateTime updatedAt;
+  @override
+  @JsonKey()
+  final String onMissAssign;
 
   @override
   String toString() {
-    return 'Task(id: $id, homeId: $homeId, title: $title, description: $description, visualKind: $visualKind, visualValue: $visualValue, status: $status, recurrenceRule: $recurrenceRule, assignmentMode: $assignmentMode, assignmentOrder: $assignmentOrder, currentAssigneeUid: $currentAssigneeUid, nextDueAt: $nextDueAt, difficultyWeight: $difficultyWeight, completedCount90d: $completedCount90d, createdByUid: $createdByUid, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'Task(id: $id, homeId: $homeId, title: $title, description: $description, visualKind: $visualKind, visualValue: $visualValue, status: $status, recurrenceRule: $recurrenceRule, assignmentMode: $assignmentMode, assignmentOrder: $assignmentOrder, currentAssigneeUid: $currentAssigneeUid, nextDueAt: $nextDueAt, difficultyWeight: $difficultyWeight, completedCount90d: $completedCount90d, createdByUid: $createdByUid, createdAt: $createdAt, updatedAt: $updatedAt, onMissAssign: $onMissAssign)';
   }
 
   @override
@@ -428,7 +445,9 @@ class _$TaskImpl implements _Task {
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt));
+                other.updatedAt == updatedAt) &&
+            (identical(other.onMissAssign, onMissAssign) ||
+                other.onMissAssign == onMissAssign));
   }
 
   @override
@@ -450,7 +469,8 @@ class _$TaskImpl implements _Task {
       completedCount90d,
       createdByUid,
       createdAt,
-      updatedAt);
+      updatedAt,
+      onMissAssign);
 
   /// Create a copy of Task
   /// with the given fields replaced by the non-null parameter values.
@@ -479,7 +499,8 @@ abstract class _Task implements Task {
       required final int completedCount90d,
       required final String createdByUid,
       required final DateTime createdAt,
-      required final DateTime updatedAt}) = _$TaskImpl;
+      required final DateTime updatedAt,
+      final String onMissAssign}) = _$TaskImpl;
 
   @override
   String get id;
@@ -515,6 +536,8 @@ abstract class _Task implements Task {
   DateTime get createdAt;
   @override
   DateTime get updatedAt;
+  @override
+  String get onMissAssign;
 
   /// Create a copy of Task
   /// with the given fields replaced by the non-null parameter values.
@@ -534,6 +557,7 @@ mixin _$TaskInput {
   String get assignmentMode => throw _privateConstructorUsedError;
   List<String> get assignmentOrder => throw _privateConstructorUsedError;
   double get difficultyWeight => throw _privateConstructorUsedError;
+  String get onMissAssign => throw _privateConstructorUsedError;
 
   /// Create a copy of TaskInput
   /// with the given fields replaced by the non-null parameter values.
@@ -555,7 +579,8 @@ abstract class $TaskInputCopyWith<$Res> {
       RecurrenceRule recurrenceRule,
       String assignmentMode,
       List<String> assignmentOrder,
-      double difficultyWeight});
+      double difficultyWeight,
+      String onMissAssign});
 
   $RecurrenceRuleCopyWith<$Res> get recurrenceRule;
 }
@@ -583,6 +608,7 @@ class _$TaskInputCopyWithImpl<$Res, $Val extends TaskInput>
     Object? assignmentMode = null,
     Object? assignmentOrder = null,
     Object? difficultyWeight = null,
+    Object? onMissAssign = null,
   }) {
     return _then(_value.copyWith(
       title: null == title
@@ -617,6 +643,10 @@ class _$TaskInputCopyWithImpl<$Res, $Val extends TaskInput>
           ? _value.difficultyWeight
           : difficultyWeight // ignore: cast_nullable_to_non_nullable
               as double,
+      onMissAssign: null == onMissAssign
+          ? _value.onMissAssign
+          : onMissAssign // ignore: cast_nullable_to_non_nullable
+              as String,
     ) as $Val);
   }
 
@@ -647,7 +677,8 @@ abstract class _$$TaskInputImplCopyWith<$Res>
       RecurrenceRule recurrenceRule,
       String assignmentMode,
       List<String> assignmentOrder,
-      double difficultyWeight});
+      double difficultyWeight,
+      String onMissAssign});
 
   @override
   $RecurrenceRuleCopyWith<$Res> get recurrenceRule;
@@ -674,6 +705,7 @@ class __$$TaskInputImplCopyWithImpl<$Res>
     Object? assignmentMode = null,
     Object? assignmentOrder = null,
     Object? difficultyWeight = null,
+    Object? onMissAssign = null,
   }) {
     return _then(_$TaskInputImpl(
       title: null == title
@@ -708,6 +740,10 @@ class __$$TaskInputImplCopyWithImpl<$Res>
           ? _value.difficultyWeight
           : difficultyWeight // ignore: cast_nullable_to_non_nullable
               as double,
+      onMissAssign: null == onMissAssign
+          ? _value.onMissAssign
+          : onMissAssign // ignore: cast_nullable_to_non_nullable
+              as String,
     ));
   }
 }
@@ -723,7 +759,8 @@ class _$TaskInputImpl implements _TaskInput {
       required this.recurrenceRule,
       required this.assignmentMode,
       required final List<String> assignmentOrder,
-      this.difficultyWeight = 1.0})
+      this.difficultyWeight = 1.0,
+      this.onMissAssign = 'sameAssignee'})
       : _assignmentOrder = assignmentOrder;
 
   @override
@@ -749,10 +786,13 @@ class _$TaskInputImpl implements _TaskInput {
   @override
   @JsonKey()
   final double difficultyWeight;
+  @override
+  @JsonKey()
+  final String onMissAssign;
 
   @override
   String toString() {
-    return 'TaskInput(title: $title, description: $description, visualKind: $visualKind, visualValue: $visualValue, recurrenceRule: $recurrenceRule, assignmentMode: $assignmentMode, assignmentOrder: $assignmentOrder, difficultyWeight: $difficultyWeight)';
+    return 'TaskInput(title: $title, description: $description, visualKind: $visualKind, visualValue: $visualValue, recurrenceRule: $recurrenceRule, assignmentMode: $assignmentMode, assignmentOrder: $assignmentOrder, difficultyWeight: $difficultyWeight, onMissAssign: $onMissAssign)';
   }
 
   @override
@@ -774,7 +814,9 @@ class _$TaskInputImpl implements _TaskInput {
             const DeepCollectionEquality()
                 .equals(other._assignmentOrder, _assignmentOrder) &&
             (identical(other.difficultyWeight, difficultyWeight) ||
-                other.difficultyWeight == difficultyWeight));
+                other.difficultyWeight == difficultyWeight) &&
+            (identical(other.onMissAssign, onMissAssign) ||
+                other.onMissAssign == onMissAssign));
   }
 
   @override
@@ -787,7 +829,8 @@ class _$TaskInputImpl implements _TaskInput {
       recurrenceRule,
       assignmentMode,
       const DeepCollectionEquality().hash(_assignmentOrder),
-      difficultyWeight);
+      difficultyWeight,
+      onMissAssign);
 
   /// Create a copy of TaskInput
   /// with the given fields replaced by the non-null parameter values.
@@ -807,7 +850,8 @@ abstract class _TaskInput implements TaskInput {
       required final RecurrenceRule recurrenceRule,
       required final String assignmentMode,
       required final List<String> assignmentOrder,
-      final double difficultyWeight}) = _$TaskInputImpl;
+      final double difficultyWeight,
+      final String onMissAssign}) = _$TaskInputImpl;
 
   @override
   String get title;
@@ -825,6 +869,8 @@ abstract class _TaskInput implements TaskInput {
   List<String> get assignmentOrder;
   @override
   double get difficultyWeight;
+  @override
+  String get onMissAssign;
 
   /// Create a copy of TaskInput
   /// with the given fields replaced by the non-null parameter values.

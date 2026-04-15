@@ -24,6 +24,7 @@ class TaskFormState with _$TaskFormState {
     @Default('basicRotation') String assignmentMode,
     @Default([]) List<String> assignmentOrder,
     @Default(1.0) double difficultyWeight,
+    @Default('sameAssignee') String onMissAssign,
     @Default(false) bool isLoading,
     @Default({}) Map<String, String> fieldErrors,
     String? globalError,
@@ -61,6 +62,7 @@ class TaskFormNotifier extends _$TaskFormNotifier {
       assignmentMode: task.assignmentMode,
       assignmentOrder: task.assignmentOrder,
       difficultyWeight: task.difficultyWeight,
+      onMissAssign: task.onMissAssign,
     );
   }
 
@@ -89,6 +91,9 @@ class TaskFormNotifier extends _$TaskFormNotifier {
   void setDifficultyWeight(double v) =>
       state = state.copyWith(difficultyWeight: v);
 
+  void setOnMissAssign(String value) =>
+      state = state.copyWith(onMissAssign: value);
+
   /// Guarda la tarea. Devuelve el ID si fue exitoso, null si hay errores.
   Future<String?> save(String homeId, String createdByUid) async {
     if (state.recurrenceRule == null) {
@@ -108,6 +113,7 @@ class TaskFormNotifier extends _$TaskFormNotifier {
       assignmentMode: state.assignmentMode,
       assignmentOrder: state.assignmentOrder,
       difficultyWeight: state.difficultyWeight,
+      onMissAssign: state.onMissAssign,
     );
 
     final validation = TaskValidator.validate(input);

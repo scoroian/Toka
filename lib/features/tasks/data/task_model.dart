@@ -27,6 +27,7 @@ class TaskModel {
       createdByUid: d['createdByUid'] as String,
       createdAt: (d['createdAt'] as Timestamp).toDate(),
       updatedAt: (d['updatedAt'] as Timestamp).toDate(),
+      onMissAssign: d['onMissAssign'] as String? ?? 'sameAssignee',
     );
   }
 
@@ -51,6 +52,7 @@ class TaskModel {
       'createdByUid': createdByUid,
       'createdAt': FieldValue.serverTimestamp(),
       'updatedAt': FieldValue.serverTimestamp(),
+      'onMissAssign': input.onMissAssign,
     };
   }
 
@@ -70,6 +72,7 @@ class TaskModel {
       'nextDueAt': Timestamp.fromDate(nextDueAt),
       'difficultyWeight': input.difficultyWeight,
       'updatedAt': FieldValue.serverTimestamp(),
+      'onMissAssign': input.onMissAssign,
     };
   }
 

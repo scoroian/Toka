@@ -26,6 +26,7 @@ mixin _$TaskFormState {
   String get assignmentMode => throw _privateConstructorUsedError;
   List<String> get assignmentOrder => throw _privateConstructorUsedError;
   double get difficultyWeight => throw _privateConstructorUsedError;
+  String get onMissAssign => throw _privateConstructorUsedError;
   bool get isLoading => throw _privateConstructorUsedError;
   Map<String, String> get fieldErrors => throw _privateConstructorUsedError;
   String? get globalError => throw _privateConstructorUsedError;
@@ -54,6 +55,7 @@ abstract class $TaskFormStateCopyWith<$Res> {
       String assignmentMode,
       List<String> assignmentOrder,
       double difficultyWeight,
+      String onMissAssign,
       bool isLoading,
       Map<String, String> fieldErrors,
       String? globalError});
@@ -86,6 +88,7 @@ class _$TaskFormStateCopyWithImpl<$Res, $Val extends TaskFormState>
     Object? assignmentMode = null,
     Object? assignmentOrder = null,
     Object? difficultyWeight = null,
+    Object? onMissAssign = null,
     Object? isLoading = null,
     Object? fieldErrors = null,
     Object? globalError = freezed,
@@ -131,6 +134,10 @@ class _$TaskFormStateCopyWithImpl<$Res, $Val extends TaskFormState>
           ? _value.difficultyWeight
           : difficultyWeight // ignore: cast_nullable_to_non_nullable
               as double,
+      onMissAssign: null == onMissAssign
+          ? _value.onMissAssign
+          : onMissAssign // ignore: cast_nullable_to_non_nullable
+              as String,
       isLoading: null == isLoading
           ? _value.isLoading
           : isLoading // ignore: cast_nullable_to_non_nullable
@@ -180,6 +187,7 @@ abstract class _$$TaskFormStateImplCopyWith<$Res>
       String assignmentMode,
       List<String> assignmentOrder,
       double difficultyWeight,
+      String onMissAssign,
       bool isLoading,
       Map<String, String> fieldErrors,
       String? globalError});
@@ -211,6 +219,7 @@ class __$$TaskFormStateImplCopyWithImpl<$Res>
     Object? assignmentMode = null,
     Object? assignmentOrder = null,
     Object? difficultyWeight = null,
+    Object? onMissAssign = null,
     Object? isLoading = null,
     Object? fieldErrors = null,
     Object? globalError = freezed,
@@ -256,6 +265,10 @@ class __$$TaskFormStateImplCopyWithImpl<$Res>
           ? _value.difficultyWeight
           : difficultyWeight // ignore: cast_nullable_to_non_nullable
               as double,
+      onMissAssign: null == onMissAssign
+          ? _value.onMissAssign
+          : onMissAssign // ignore: cast_nullable_to_non_nullable
+              as String,
       isLoading: null == isLoading
           ? _value.isLoading
           : isLoading // ignore: cast_nullable_to_non_nullable
@@ -286,6 +299,7 @@ class _$TaskFormStateImpl implements _TaskFormState {
       this.assignmentMode = 'basicRotation',
       final List<String> assignmentOrder = const [],
       this.difficultyWeight = 1.0,
+      this.onMissAssign = 'sameAssignee',
       this.isLoading = false,
       final Map<String, String> fieldErrors = const {},
       this.globalError})
@@ -328,6 +342,9 @@ class _$TaskFormStateImpl implements _TaskFormState {
   final double difficultyWeight;
   @override
   @JsonKey()
+  final String onMissAssign;
+  @override
+  @JsonKey()
   final bool isLoading;
   final Map<String, String> _fieldErrors;
   @override
@@ -343,7 +360,7 @@ class _$TaskFormStateImpl implements _TaskFormState {
 
   @override
   String toString() {
-    return 'TaskFormState(mode: $mode, editingTaskId: $editingTaskId, title: $title, description: $description, visualKind: $visualKind, visualValue: $visualValue, recurrenceRule: $recurrenceRule, assignmentMode: $assignmentMode, assignmentOrder: $assignmentOrder, difficultyWeight: $difficultyWeight, isLoading: $isLoading, fieldErrors: $fieldErrors, globalError: $globalError)';
+    return 'TaskFormState(mode: $mode, editingTaskId: $editingTaskId, title: $title, description: $description, visualKind: $visualKind, visualValue: $visualValue, recurrenceRule: $recurrenceRule, assignmentMode: $assignmentMode, assignmentOrder: $assignmentOrder, difficultyWeight: $difficultyWeight, onMissAssign: $onMissAssign, isLoading: $isLoading, fieldErrors: $fieldErrors, globalError: $globalError)';
   }
 
   @override
@@ -369,6 +386,8 @@ class _$TaskFormStateImpl implements _TaskFormState {
                 .equals(other._assignmentOrder, _assignmentOrder) &&
             (identical(other.difficultyWeight, difficultyWeight) ||
                 other.difficultyWeight == difficultyWeight) &&
+            (identical(other.onMissAssign, onMissAssign) ||
+                other.onMissAssign == onMissAssign) &&
             (identical(other.isLoading, isLoading) ||
                 other.isLoading == isLoading) &&
             const DeepCollectionEquality()
@@ -390,6 +409,7 @@ class _$TaskFormStateImpl implements _TaskFormState {
       assignmentMode,
       const DeepCollectionEquality().hash(_assignmentOrder),
       difficultyWeight,
+      onMissAssign,
       isLoading,
       const DeepCollectionEquality().hash(_fieldErrors),
       globalError);
@@ -415,6 +435,7 @@ abstract class _TaskFormState implements TaskFormState {
       final String assignmentMode,
       final List<String> assignmentOrder,
       final double difficultyWeight,
+      final String onMissAssign,
       final bool isLoading,
       final Map<String, String> fieldErrors,
       final String? globalError}) = _$TaskFormStateImpl;
@@ -439,6 +460,8 @@ abstract class _TaskFormState implements TaskFormState {
   List<String> get assignmentOrder;
   @override
   double get difficultyWeight;
+  @override
+  String get onMissAssign;
   @override
   bool get isLoading;
   @override

@@ -25,6 +25,7 @@ class Task with _$Task {
     required String createdByUid,
     required DateTime createdAt,
     required DateTime updatedAt,
+    @Default('sameAssignee') String onMissAssign,
   }) = _Task;
 }
 
@@ -39,5 +40,6 @@ class TaskInput with _$TaskInput {
     required String assignmentMode,
     required List<String> assignmentOrder,
     @Default(1.0) double difficultyWeight,
+    @Default('sameAssignee') String onMissAssign,
   }) = _TaskInput;
 }

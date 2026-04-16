@@ -7,6 +7,8 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/routes.dart';
 import '../../../../core/theme/app_colors_v2.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/widgets/no_home_empty_state.dart';
+import '../../../../shared/widgets/skins/main_shell_v2.dart';
 import '../../application/all_tasks_view_model.dart';
 import '../../domain/task_status.dart';
 import '../widgets/task_card.dart';
@@ -90,7 +92,10 @@ class _AllTasksScreenV2State extends ConsumerState<AllTasksScreenV2>
         if (data == null) {
           return Scaffold(
             appBar: _buildAppBar(l10n, vm, isDark),
-            body: const Center(child: CircularProgressIndicator()),
+            body: NoHomeEmptyState(
+              title: l10n.tasks_no_home_title,
+              body: l10n.tasks_no_home_body,
+            ),
           );
         }
 
@@ -143,22 +148,27 @@ class _AllTasksScreenV2State extends ConsumerState<AllTasksScreenV2>
                       },
                       child: TaskCard(
                         task: task,
-                        onTap: () => context.go('/task/${task.id}'),
+                        onTap: () => context.push('/tasks/${task.id}'),
                         onLongPress: () => vm.toggleSelection(task.id),
                       ),
                     );
                   },
                 ),
           floatingActionButton: (!vm.isSelectionMode && data.canManage)
-              ? ScaleTransition(
-                  scale: CurvedAnimation(
-                      parent: _fabCtrl, curve: Curves.elasticOut),
-                  child: FloatingActionButton(
-                    key: const Key('create_task_fab'),
-                    backgroundColor: AppColorsV2.primary,
-                    foregroundColor: AppColorsV2.onPrimary,
-                    onPressed: () => context.push(AppRoutes.createTask),
-                    child: const Icon(Icons.add),
+              ? Padding(
+                  padding: const EdgeInsets.only(
+                    bottom: MainShellV2.kNavBarHeight + MainShellV2.kNavBarBottom,
+                  ),
+                  child: ScaleTransition(
+                    scale: CurvedAnimation(
+                        parent: _fabCtrl, curve: Curves.elasticOut),
+                    child: FloatingActionButton(
+                      key: const Key('create_task_fab'),
+                      backgroundColor: AppColorsV2.primary,
+                      foregroundColor: AppColorsV2.onPrimary,
+                      onPressed: () => context.push(AppRoutes.createTask),
+                      child: const Icon(Icons.add),
+                    ),
                   ),
                 )
               : null,

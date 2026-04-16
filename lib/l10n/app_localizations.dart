@@ -767,27 +767,51 @@ abstract class AppLocalizations {
   String get homes_error_cannot_leave_as_owner;
 
   /// Transfer ownership dialog title
+  ///
+  /// In es, this message translates to:
+  /// **'Transferir propiedad del hogar'**
   String get homes_transfer_ownership_title;
 
   /// Transfer ownership dialog body
+  ///
+  /// In es, this message translates to:
+  /// **'Para abandonar el hogar, selecciona quién será el nuevo propietario.'**
   String get homes_transfer_ownership_body;
 
   /// Transfer button label
+  ///
+  /// In es, this message translates to:
+  /// **'Transferir'**
   String get homes_transfer_btn;
 
   /// Delete home dialog title
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar hogar'**
   String get homes_delete_home_title;
 
   /// Delete home dialog body when sole member
+  ///
+  /// In es, this message translates to:
+  /// **'Eres el único miembro de este hogar. Al abandonarlo, se eliminará permanentemente y no podrá recuperarse.'**
   String get homes_delete_home_body_sole;
 
   /// Delete button label
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar'**
   String get homes_delete_btn;
 
   /// Leave home dialog title when only frozen members exist
+  ///
+  /// In es, this message translates to:
+  /// **'Abandonar hogar'**
   String get homes_frozen_only_title;
 
   /// Leave home dialog body when only frozen members exist
+  ///
+  /// In es, this message translates to:
+  /// **'Solo hay miembros congelados. Puedes transferir la propiedad a uno de ellos o eliminar el hogar permanentemente.'**
   String get homes_frozen_only_body;
 
   /// Owner role label
@@ -1041,6 +1065,42 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Crea un hogar o únete a uno para empezar a gestionar las tareas'**
   String get today_no_home_body;
+
+  /// No home empty state title in history screen
+  ///
+  /// In es, this message translates to:
+  /// **'Sin historial'**
+  String get history_no_home_title;
+
+  /// No home empty state body in history screen
+  ///
+  /// In es, this message translates to:
+  /// **'Crea un hogar o únete a uno para ver tu historial'**
+  String get history_no_home_body;
+
+  /// No home empty state title in all-tasks screen
+  ///
+  /// In es, this message translates to:
+  /// **'Sin tareas'**
+  String get tasks_no_home_title;
+
+  /// No home empty state body in all-tasks screen
+  ///
+  /// In es, this message translates to:
+  /// **'Crea un hogar o únete a uno para gestionar tareas'**
+  String get tasks_no_home_body;
+
+  /// No home empty state title in members screen
+  ///
+  /// In es, this message translates to:
+  /// **'Sin miembros'**
+  String get members_no_home_title;
+
+  /// No home empty state body in members screen
+  ///
+  /// In es, this message translates to:
+  /// **'Crea un hogar o únete a uno para ver los miembros'**
+  String get members_no_home_body;
 
   /// Complete task confirmation body
   ///

@@ -368,7 +368,8 @@ class AppLocalizationsRo extends AppLocalizations {
       'Transferă proprietatea înainte de a părăsi casa';
 
   @override
-  String get homes_transfer_ownership_title => 'Transferă proprietatea locuinței';
+  String get homes_transfer_ownership_title =>
+      'Transferă proprietatea locuinței';
 
   @override
   String get homes_transfer_ownership_body =>
@@ -534,6 +535,27 @@ class AppLocalizationsRo extends AppLocalizations {
   @override
   String get today_no_home_body =>
       'Creează o locuință sau alătură-te uneia pentru a gestiona sarcinile';
+
+  @override
+  String get history_no_home_title => 'Fără istoric';
+
+  @override
+  String get history_no_home_body =>
+      'Creează sau alătură-te unui cămin pentru a-ți vedea istoricul';
+
+  @override
+  String get tasks_no_home_title => 'Fără sarcini';
+
+  @override
+  String get tasks_no_home_body =>
+      'Creează sau alătură-te unui cămin pentru a gestiona sarcinile';
+
+  @override
+  String get members_no_home_title => 'Fără membri';
+
+  @override
+  String get members_no_home_body =>
+      'Creează sau alătură-te unui cămin pentru a vedea membrii';
 
   @override
   String get complete_task_dialog_body =>

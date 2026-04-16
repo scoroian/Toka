@@ -538,6 +538,27 @@ class AppLocalizationsEs extends AppLocalizations {
       'Crea un hogar o únete a uno para empezar a gestionar las tareas';
 
   @override
+  String get history_no_home_title => 'Sin historial';
+
+  @override
+  String get history_no_home_body =>
+      'Crea un hogar o únete a uno para ver tu historial';
+
+  @override
+  String get tasks_no_home_title => 'Sin tareas';
+
+  @override
+  String get tasks_no_home_body =>
+      'Crea un hogar o únete a uno para gestionar tareas';
+
+  @override
+  String get members_no_home_title => 'Sin miembros';
+
+  @override
+  String get members_no_home_body =>
+      'Crea un hogar o únete a uno para ver los miembros';
+
+  @override
   String get complete_task_dialog_body =>
       '¿Confirmas que has completado esta tarea?';
 

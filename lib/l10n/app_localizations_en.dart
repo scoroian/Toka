@@ -532,6 +532,27 @@ class AppLocalizationsEn extends AppLocalizations {
       'Create a home or join one to start managing tasks';
 
   @override
+  String get history_no_home_title => 'No history';
+
+  @override
+  String get history_no_home_body =>
+      'Create or join a home to see your history';
+
+  @override
+  String get tasks_no_home_title => 'No tasks';
+
+  @override
+  String get tasks_no_home_body =>
+      'Create or join a home to manage your tasks';
+
+  @override
+  String get members_no_home_title => 'No members';
+
+  @override
+  String get members_no_home_body =>
+      'Create or join a home to see its members';
+
+  @override
   String get complete_task_dialog_body =>
       'Confirm you have completed this task?';
 

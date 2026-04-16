@@ -25,11 +25,13 @@ Future<void> _transferAndLeave(
   String homeId,
   String uid,
   String newOwnerUid,
+  AppLocalizations l10n,
 ) async {
   try {
     await ref
         .read(membersRepositoryProvider)
         .transferOwnership(homeId, newOwnerUid);
+    if (!context.mounted) return;
     await ref
         .read(homesRepositoryProvider)
         .leaveHome(homeId, uid: uid);
@@ -38,7 +40,7 @@ Future<void> _transferAndLeave(
   } catch (_) {
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Ha ocurrido un error. Inténtalo de nuevo.')),
+        SnackBar(content: Text(l10n.error_generic)),
       );
     }
   }
@@ -80,7 +82,7 @@ Future<void> _confirmAndDeleteHome(
   } catch (_) {
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Ha ocurrido un error. Inténtalo de nuevo.')),
+        SnackBar(content: Text(l10n.error_generic)),
       );
     }
   }
@@ -267,7 +269,6 @@ class SettingsScreen extends ConsumerWidget {
                 style: const TextStyle(color: Colors.red)), // TODO: move to AppColors
             onTap: () async {
               if (homeId.isEmpty || uid.isEmpty) return;
-              final l10n = AppLocalizations.of(context);
 
               // Lectura one-shot de miembros para clasificar el caso
               final members = await ref
@@ -319,7 +320,7 @@ class SettingsScreen extends ConsumerWidget {
                   builder: (_) => _TransferOwnershipDialog(members: activeOthers),
                 );
                 if (selectedUid == null || !context.mounted) return;
-                await _transferAndLeave(context, ref, homeId, uid, selectedUid);
+                await _transferAndLeave(context, ref, homeId, uid, selectedUid, l10n);
                 return;
               }
 
@@ -337,7 +338,7 @@ class SettingsScreen extends ConsumerWidget {
               if (result == null || !context.mounted) return;
               final (action, selectedUid) = result;
               if (action == 'transfer' && selectedUid != null) {
-                await _transferAndLeave(context, ref, homeId, uid, selectedUid);
+                await _transferAndLeave(context, ref, homeId, uid, selectedUid, l10n);
               } else if (action == 'delete') {
                 await _confirmAndDeleteHome(context, ref, homeId, l10n);
               }

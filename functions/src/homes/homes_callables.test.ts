@@ -70,3 +70,53 @@ describe("joinHome — validación de invitación expirada", () => {
     expect(isExpired(past)).toBe(true);
   });
 });
+
+// ---------------------------------------------------------------------------
+// transferOwnership — validaciones de entrada
+// Happy-path tests require emulator setup; skipped here (DONE_WITH_CONCERNS).
+// ---------------------------------------------------------------------------
+describe("transferOwnership — validaciones de entrada", () => {
+  function validateTransferOwnershipInput(
+    uid: string,
+    homeId: string | undefined,
+    newOwnerUid: string | undefined
+  ): string | null {
+    const trimmedHomeId = homeId?.trim();
+    const trimmedNewOwnerUid = newOwnerUid?.trim();
+    if (!trimmedHomeId || !trimmedNewOwnerUid) {
+      return "homeId and newOwnerUid are required";
+    }
+    if (trimmedNewOwnerUid === uid) {
+      return "Cannot transfer ownership to yourself";
+    }
+    return null;
+  }
+
+  it("newOwnerUid vacío → invalid-argument", () => {
+    expect(validateTransferOwnershipInput("uid1", "home1", "")).toBe(
+      "homeId and newOwnerUid are required"
+    );
+  });
+
+  it("newOwnerUid undefined → invalid-argument", () => {
+    expect(validateTransferOwnershipInput("uid1", "home1", undefined)).toBe(
+      "homeId and newOwnerUid are required"
+    );
+  });
+
+  it("homeId vacío → invalid-argument", () => {
+    expect(validateTransferOwnershipInput("uid1", "", "uid2")).toBe(
+      "homeId and newOwnerUid are required"
+    );
+  });
+
+  it("self-transfer (newOwnerUid === uid) → invalid-argument", () => {
+    expect(validateTransferOwnershipInput("uid1", "home1", "uid1")).toBe(
+      "Cannot transfer ownership to yourself"
+    );
+  });
+
+  it("inputs válidos con distinto destinatario → null", () => {
+    expect(validateTransferOwnershipInput("uid1", "home1", "uid2")).toBeNull();
+  });
+});

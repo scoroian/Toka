@@ -692,58 +692,62 @@ export const transferOwnership = onCall(async (request) => {
     );
   }
 
-  const homeRef = db.collection("homes").doc(homeId);
-  const homeDoc = await homeRef.get();
-
-  if (!homeDoc.exists) {
-    throw new HttpsError("not-found", "Home not found");
-  }
-  if (homeDoc.data()!["ownerUid"] !== uid) {
+  if (newOwnerUid === uid) {
     throw new HttpsError(
-      "permission-denied",
-      "Only the current owner can transfer ownership"
+      "invalid-argument",
+      "Cannot transfer ownership to yourself"
     );
   }
 
-  // Verificar que newOwner es miembro del hogar
-  const newOwnerMemberRef = db
-    .collection("homes")
-    .doc(homeId)
-    .collection("members")
-    .doc(newOwnerUid);
-  const newOwnerMemberDoc = await newOwnerMemberRef.get();
+  const homeRef = db.collection("homes").doc(homeId);
 
-  if (!newOwnerMemberDoc.exists) {
-    throw new HttpsError("not-found", "New owner is not a member of this home");
-  }
+  const callerMemberRef = homeRef.collection("members").doc(uid);
+  const newOwnerMemberRef = homeRef.collection("members").doc(newOwnerUid);
 
-  const batch = db.batch();
+  await db.runTransaction(async (tx) => {
+    const [homeDoc, newOwnerMemberDoc, callerMemberDoc] = await Promise.all([
+      tx.get(homeRef),
+      tx.get(newOwnerMemberRef),
+      tx.get(callerMemberRef),
+    ]);
 
-  // homes/{homeId}: actualizar ownerUid
-  batch.update(homeRef, { ownerUid: newOwnerUid });
+    if (!homeDoc.exists) {
+      throw new HttpsError("not-found", "Home not found");
+    }
+    if (homeDoc.data()!["ownerUid"] !== uid) {
+      throw new HttpsError(
+        "permission-denied",
+        "Only the current owner can transfer ownership"
+      );
+    }
 
-  // homes/{homeId}/members: cambiar roles
-  batch.update(newOwnerMemberRef, { role: "owner" });
-  batch.update(
-    db.collection("homes").doc(homeId).collection("members").doc(uid),
-    { role: "admin" }
-  );
+    if (!callerMemberDoc.exists) {
+      throw new HttpsError("permission-denied", "Caller is not a member of this home");
+    }
 
-  // users/.../memberships: reflejar cambio de rol
-  batch.update(
-    db
-      .collection("users")
-      .doc(newOwnerUid)
-      .collection("memberships")
-      .doc(homeId),
-    { role: "owner" }
-  );
-  batch.update(
-    db.collection("users").doc(uid).collection("memberships").doc(homeId),
-    { role: "admin" }
-  );
+    // Frozen members can receive ownership (Caso D: only frozen members remain)
+    if (!newOwnerMemberDoc.exists) {
+      throw new HttpsError("not-found", "New owner is not a member of this home");
+    }
 
-  await batch.commit();
+    // homes/{homeId}: actualizar ownerUid
+    tx.update(homeRef, { ownerUid: newOwnerUid });
+
+    // homes/{homeId}/members: cambiar roles
+    tx.update(newOwnerMemberRef, { role: "owner" });
+    tx.update(callerMemberRef, { role: "admin" });
+
+    // users/.../memberships: reflejar cambio de rol
+    tx.update(
+      db.collection("users").doc(newOwnerUid).collection("memberships").doc(homeId),
+      { role: "owner" }
+    );
+    tx.update(
+      db.collection("users").doc(uid).collection("memberships").doc(homeId),
+      { role: "admin" }
+    );
+  });
+
   logger.info(
     `transferOwnership: ${uid} → ${newOwnerUid} in home ${homeId}`
   );

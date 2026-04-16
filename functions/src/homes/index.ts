@@ -102,6 +102,44 @@ export const createHome = onCall(async (request) => {
     homeRef.collection("members").doc(uid),
     memberData
   );
+  // Inicializar documento dashboard vacío para que Flutter no entre en modo fallback
+  batch.set(
+    homeRef.collection("views").doc("dashboard"),
+    {
+      activeTasksPreview: [],
+      doneTasksPreview: [],
+      counters: {
+        totalActiveTasks: 0,
+        totalMembers: 1,
+        tasksDueToday: 0,
+        tasksDoneToday: 0,
+      },
+      memberPreview: [{
+        uid,
+        name: nickname,
+        photoUrl,
+        role: "owner",
+        status: "active",
+        tasksDueCount: 0,
+      }],
+      premiumFlags: {
+        isPremium: false,
+        showAds: true,
+        canUseSmartDistribution: false,
+        canUseVacations: false,
+        canUseReviews: false,
+      },
+      adFlags: {
+        showBanner: true,
+        bannerUnit: "ca-app-pub-3940256099942544/6300978111",
+      },
+      rescueFlags: {
+        isInRescue: false,
+        daysLeft: null,
+      },
+      updatedAt: now,
+    }
+  );
   await batch.commit();
 
   logger.info(`Home created: ${homeRef.id} by ${uid}`);
@@ -128,11 +166,13 @@ export const joinHome = onCall(async (request) => {
 
   const homeRef = db.collection("homes").doc(homeId);
   const invRef = homeRef.collection("invitations").doc(invitationId);
+  const userRef = db.collection("users").doc(uid);
 
   await db.runTransaction(async (tx) => {
-    const [invDoc, homeDoc] = await Promise.all([
+    const [invDoc, homeDoc, userDoc] = await Promise.all([
       tx.get(invRef),
       tx.get(homeRef),
+      tx.get(userRef),
     ]);
 
     if (!invDoc.exists) {
@@ -153,6 +193,9 @@ export const joinHome = onCall(async (request) => {
     }
 
     const homeName = homeDoc.data()!["name"] as string;
+    const userDataTx = userDoc.data() ?? {};
+    const memberNickname = (userDataTx["nickname"] as string | undefined) ?? "";
+    const memberPhotoUrl = (userDataTx["photoUrl"] as string | undefined) ?? null;
     const now = FieldValue.serverTimestamp();
 
     tx.update(invRef, { used: true, usedAt: now, usedBy: uid });
@@ -167,12 +210,12 @@ export const joinHome = onCall(async (request) => {
         leftAt: null,
       }
     );
-    // Crear documento de miembro en la subcolección del hogar
+    // Crear documento de miembro en la subcolección del hogar con datos reales del usuario
     tx.set(
       db.collection("homes").doc(homeId).collection("members").doc(uid),
       {
-        nickname: "",
-        photoUrl: null,
+        nickname: memberNickname,
+        photoUrl: memberPhotoUrl,
         bio: null,
         phone: null,
         phoneVisibility: "hidden",
@@ -228,11 +271,13 @@ export const joinHomeByCode = onCall(async (request) => {
 
   const homeRef = invDoc.ref.parent.parent!;
   const invRef = invDoc.ref;
+  const userRef = db.collection("users").doc(uid);
 
   await db.runTransaction(async (tx) => {
-    const [homeDoc, freshInv] = await Promise.all([
+    const [homeDoc, freshInv, userDoc] = await Promise.all([
       tx.get(homeRef),
       tx.get(invRef),
+      tx.get(userRef),
     ]);
 
     if (!homeDoc.exists) throw new HttpsError("not-found", "Home not found");
@@ -241,6 +286,9 @@ export const joinHomeByCode = onCall(async (request) => {
     }
 
     const homeName = homeDoc.data()!["name"] as string;
+    const userDataTx = userDoc.data() ?? {};
+    const memberNickname = (userDataTx["nickname"] as string | undefined) ?? "";
+    const memberPhotoUrl = (userDataTx["photoUrl"] as string | undefined) ?? null;
     const now = FieldValue.serverTimestamp();
 
     tx.update(invRef, { used: true, usedAt: now, usedBy: uid });
@@ -255,12 +303,12 @@ export const joinHomeByCode = onCall(async (request) => {
         leftAt: null,
       }
     );
-    // Crear documento de miembro en la subcolección del hogar
+    // Crear documento de miembro en la subcolección del hogar con datos reales del usuario
     tx.set(
       homeRef.collection("members").doc(uid),
       {
-        nickname: "",
-        photoUrl: null,
+        nickname: memberNickname,
+        photoUrl: memberPhotoUrl,
         bio: null,
         phone: null,
         phoneVisibility: "hidden",
@@ -505,6 +553,10 @@ export const promoteToAdmin = onCall(async (request) => {
   const callerRef = homeRef.collection("members").doc(uid);
   const targetRef = homeRef.collection("members").doc(targetUid);
 
+  const targetMembershipRef = db
+    .collection("users").doc(targetUid)
+    .collection("memberships").doc(homeId);
+
   await db.runTransaction(async (tx) => {
     const [callerDoc, targetDoc] = await Promise.all([tx.get(callerRef), tx.get(targetRef)]);
 
@@ -517,7 +569,10 @@ export const promoteToAdmin = onCall(async (request) => {
       throw new HttpsError("failed-precondition", "Target is not a regular member");
     }
 
+    // Actualizar rol en ambos documentos para que las reglas Firestore
+    // (que leen de users/{uid}/memberships/{homeId}) vean el rol correcto.
     tx.update(targetRef, { role: "admin" });
+    tx.update(targetMembershipRef, { role: "admin" });
   });
 
   logger.info(`promoteToAdmin: uid=${targetUid} in home=${homeId} by owner=${uid}`);
@@ -541,6 +596,10 @@ export const demoteFromAdmin = onCall(async (request) => {
   const callerRef = homeRef.collection("members").doc(uid);
   const targetRef = homeRef.collection("members").doc(targetUid);
 
+  const targetMembershipRef = db
+    .collection("users").doc(targetUid)
+    .collection("memberships").doc(homeId);
+
   await db.runTransaction(async (tx) => {
     const [callerDoc, targetDoc] = await Promise.all([tx.get(callerRef), tx.get(targetRef)]);
 
@@ -553,7 +612,9 @@ export const demoteFromAdmin = onCall(async (request) => {
       throw new HttpsError("failed-precondition", "Target is not an admin");
     }
 
+    // Actualizar rol en ambos documentos (ver promoteToAdmin para contexto).
     tx.update(targetRef, { role: "member" });
+    tx.update(targetMembershipRef, { role: "member" });
   });
 
   logger.info(`demoteFromAdmin: uid=${targetUid} in home=${homeId} by owner=${uid}`);
@@ -609,3 +670,81 @@ export const syncMemberProfile = onDocumentUpdated(
     );
   }
 );
+
+// ---------------------------------------------------------------------------
+// transferOwnership
+// Input:  { homeId: string, newOwnerUid: string }
+// ---------------------------------------------------------------------------
+export const transferOwnership = onCall(async (request) => {
+  if (!request.auth) {
+    throw new HttpsError("unauthenticated", "Must be authenticated");
+  }
+
+  const uid = request.auth.uid;
+  const data = request.data as { homeId?: string; newOwnerUid?: string };
+  const homeId = data.homeId?.trim();
+  const newOwnerUid = data.newOwnerUid?.trim();
+
+  if (!homeId || !newOwnerUid) {
+    throw new HttpsError(
+      "invalid-argument",
+      "homeId and newOwnerUid are required"
+    );
+  }
+
+  const homeRef = db.collection("homes").doc(homeId);
+  const homeDoc = await homeRef.get();
+
+  if (!homeDoc.exists) {
+    throw new HttpsError("not-found", "Home not found");
+  }
+  if (homeDoc.data()!["ownerUid"] !== uid) {
+    throw new HttpsError(
+      "permission-denied",
+      "Only the current owner can transfer ownership"
+    );
+  }
+
+  // Verificar que newOwner es miembro del hogar
+  const newOwnerMemberRef = db
+    .collection("homes")
+    .doc(homeId)
+    .collection("members")
+    .doc(newOwnerUid);
+  const newOwnerMemberDoc = await newOwnerMemberRef.get();
+
+  if (!newOwnerMemberDoc.exists) {
+    throw new HttpsError("not-found", "New owner is not a member of this home");
+  }
+
+  const batch = db.batch();
+
+  // homes/{homeId}: actualizar ownerUid
+  batch.update(homeRef, { ownerUid: newOwnerUid });
+
+  // homes/{homeId}/members: cambiar roles
+  batch.update(newOwnerMemberRef, { role: "owner" });
+  batch.update(
+    db.collection("homes").doc(homeId).collection("members").doc(uid),
+    { role: "admin" }
+  );
+
+  // users/.../memberships: reflejar cambio de rol
+  batch.update(
+    db
+      .collection("users")
+      .doc(newOwnerUid)
+      .collection("memberships")
+      .doc(homeId),
+    { role: "owner" }
+  );
+  batch.update(
+    db.collection("users").doc(uid).collection("memberships").doc(homeId),
+    { role: "admin" }
+  );
+
+  await batch.commit();
+  logger.info(
+    `transferOwnership: ${uid} → ${newOwnerUid} in home ${homeId}`
+  );
+});

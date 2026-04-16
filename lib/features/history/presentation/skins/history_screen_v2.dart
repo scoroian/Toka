@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors_v2.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../application/history_view_model.dart';
+import '../../../../shared/widgets/no_home_empty_state.dart';
 import '../widgets/history_empty_state.dart';
 import '../widgets/history_event_tile.dart';
 import '../widgets/history_filter_bar.dart';
@@ -44,6 +45,21 @@ class _HistoryScreenV2State extends ConsumerState<HistoryScreenV2> {
     final HistoryViewModel vm = ref.watch(historyViewModelProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bg    = isDark ? AppColorsV2.backgroundDark : AppColorsV2.backgroundLight;
+
+    if (!vm.hasHome) {
+      return Scaffold(
+        backgroundColor: bg,
+        appBar: AppBar(
+          backgroundColor: bg,
+          title: Text(l10n.history_title,
+              style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w900)),
+        ),
+        body: NoHomeEmptyState(
+          title: l10n.history_no_home_title,
+          body: l10n.history_no_home_body,
+        ),
+      );
+    }
 
     return Scaffold(
       backgroundColor: bg,

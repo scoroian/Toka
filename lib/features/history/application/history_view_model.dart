@@ -50,6 +50,7 @@ abstract class HistoryViewModel {
   HistoryFilter get filter;
   bool get hasMore;
   bool get isPremium;
+  bool get hasHome;
   void loadMore();
   void applyFilter(HistoryFilter newFilter);
   Future<void> rateEvent(String eventId, double rating, {String? note});
@@ -74,6 +75,8 @@ class _HistoryViewModelImpl implements HistoryViewModel {
   final bool hasMore;
   @override
   final bool isPremium;
+  @override
+  bool get hasHome => homeId != null;
   final String? homeId;
   final String  currentUid;
   final Ref ref;

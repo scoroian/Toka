@@ -78,6 +78,7 @@ class RouterNotifier extends _$RouterNotifier implements Listenable {
       final nextUid = next.whenOrNull(authenticated: (u) => u.uid);
       if (prevUid != nextUid) {
         ref.invalidate(currentHomeProvider);
+        ref.invalidate(onboardingCompletedProvider);
       }
       notify();
     });

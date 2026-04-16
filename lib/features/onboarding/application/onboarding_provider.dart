@@ -30,11 +30,40 @@ OnboardingRepository onboardingRepository(Ref ref) {
   );
 }
 
-/// True if the user has already completed the onboarding flow on this device.
-/// Used by the router to distinguish "new user" from "user with no active homes".
+/// True if the user has already completed the onboarding flow.
+/// Checks SharedPreferences first (fast path), then Firestore as fallback so
+/// the flag survives app reinstalls and works across devices (Bug #onboarding-reinstall).
 @Riverpod(keepAlive: true)
 Future<bool> onboardingCompleted(Ref ref) async {
-  return OnboardingNotifier.isCompleted();
+  // Fast path: SharedPreferences (works within the same install)
+  final prefs = await SharedPreferences.getInstance();
+  if (prefs.getBool(_kCompleted) ?? false) return true;
+
+  // Fallback: Firestore (survives reinstalls and works across devices)
+  final uid = FirebaseAuth.instance.currentUser?.uid;
+  if (uid == null) return false;
+
+  final doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+  if (!doc.exists) return false;
+
+  final data = doc.data()!;
+
+  // Check explicit flag (written since this version)
+  final flagSet = (data['onboardingCompleted'] as bool?) ?? false;
+  if (flagSet) {
+    await prefs.setBool(_kCompleted, true);
+    return true;
+  }
+
+  // Proxy for users who completed onboarding before this flag was added:
+  // a non-empty nickname means they went through the profile step.
+  final nickname = (data['nickname'] as String?)?.trim() ?? '';
+  if (nickname.isNotEmpty) {
+    await prefs.setBool(_kCompleted, true);
+    return true;
+  }
+
+  return false;
 }
 
 @Riverpod(keepAlive: true)
@@ -220,5 +249,18 @@ class OnboardingNotifier extends _$OnboardingNotifier {
   Future<void> _markCompleted() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_kCompleted, true);
+    // Also persist in Firestore so the flag survives reinstalls and device changes
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid != null) {
+      try {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(uid)
+            .update({'onboardingCompleted': true});
+      } catch (_) {
+        // Non-critical: SharedPreferences covers the current session;
+        // the nickname proxy in onboardingCompleted() acts as backup.
+      }
+    }
   }
 }

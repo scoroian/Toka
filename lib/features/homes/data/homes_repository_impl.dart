@@ -23,6 +23,7 @@ class HomesRepositoryImpl implements HomesRepository {
         .collection('users')
         .doc(uid)
         .collection('memberships')
+        .where('status', whereIn: ['active', 'frozen'])
         .snapshots()
         .map((snap) =>
             snap.docs.map(HomeModel.membershipFromFirestore).toList());
@@ -104,6 +105,7 @@ class HomesRepositoryImpl implements HomesRepository {
         .collection('users')
         .doc(uid)
         .collection('memberships')
+        .where('status', whereIn: ['active', 'frozen'])
         .get();
     final currentCount = membershipsSnap.docs.length;
 

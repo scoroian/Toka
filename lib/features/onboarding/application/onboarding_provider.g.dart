@@ -24,8 +24,29 @@ final onboardingRepositoryProvider = Provider<OnboardingRepository>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef OnboardingRepositoryRef = ProviderRef<OnboardingRepository>;
+String _$onboardingCompletedHash() =>
+    r'9e036bcaeb3b844e67299e02c20568ccadf38cfb';
+
+/// True if the user has already completed the onboarding flow on this device.
+/// Used by the router to distinguish "new user" from "user with no active homes".
+///
+/// Copied from [onboardingCompleted].
+@ProviderFor(onboardingCompleted)
+final onboardingCompletedProvider = FutureProvider<bool>.internal(
+  onboardingCompleted,
+  name: r'onboardingCompletedProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$onboardingCompletedHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef OnboardingCompletedRef = FutureProviderRef<bool>;
 String _$onboardingNotifierHash() =>
-    r'd0f4d6f0d84895351c1b9d47c200099966587bbf';
+    r'5eb07ed07903c951de66cdf2c52fb07ea2664e03';
 
 /// See also [OnboardingNotifier].
 @ProviderFor(OnboardingNotifier)

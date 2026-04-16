@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -26,6 +28,13 @@ OnboardingRepository onboardingRepository(Ref ref) {
     firestore: FirebaseFirestore.instance,
     storage: FirebaseStorage.instance,
   );
+}
+
+/// True if the user has already completed the onboarding flow on this device.
+/// Used by the router to distinguish "new user" from "user with no active homes".
+@Riverpod(keepAlive: true)
+Future<bool> onboardingCompleted(Ref ref) async {
+  return OnboardingNotifier.isCompleted();
 }
 
 @Riverpod(keepAlive: true)
@@ -176,8 +185,19 @@ class OnboardingNotifier extends _$OnboardingNotifier {
     } on ExpiredInviteCodeException {
       state = state.copyWith(isLoading: false, error: 'expired_invite');
       return null;
-    } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
+    } on FirebaseException catch (e) {
+      final errorCode = switch (e.code) {
+        'permission-denied' => 'permission_denied',
+        'not-found' => 'invalid_invite',
+        _ => 'unexpected_error',
+      };
+      state = state.copyWith(isLoading: false, error: errorCode);
+      return null;
+    } on SocketException {
+      state = state.copyWith(isLoading: false, error: 'network_error');
+      return null;
+    } catch (_) {
+      state = state.copyWith(isLoading: false, error: 'unexpected_error');
       return null;
     }
   }

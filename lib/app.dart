@@ -13,6 +13,7 @@ import 'core/theme/theme_mode_provider.dart';
 import 'features/auth/application/auth_provider.dart';
 import 'features/auth/application/auth_state.dart';
 import 'features/homes/application/current_home_provider.dart';
+import 'features/onboarding/application/onboarding_provider.dart';
 import 'features/auth/presentation/forgot_password_screen.dart';
 import 'features/auth/presentation/login_screen.dart';
 import 'features/auth/presentation/register_screen.dart';
@@ -50,6 +51,11 @@ import 'shared/widgets/skins/main_shell_v2.dart';
 
 part 'app.g.dart';
 
+// Navigator key raíz: necesario para que las sub-rutas de tasks (detalle, edición,
+// nueva tarea) usen el navigator raíz y no el navigator del ShellRoute. Así el
+// botón Back del sistema puede volver a la lista de tareas (Bug #32).
+final _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
+
 @Riverpod(keepAlive: true)
 class RouterNotifier extends _$RouterNotifier implements Listenable {
   final List<VoidCallback> _listeners = [];
@@ -62,13 +68,30 @@ class RouterNotifier extends _$RouterNotifier implements Listenable {
       }
     }
 
-    ref.listen<AuthState>(authProvider, (_, __) => notify());
+    // Cuando el UID cambia (login/logout/switch account), invalidar
+    // currentHomeProvider de forma síncrona ANTES de llamar notify().
+    // Sin esto, ref.listen dispara antes de que Riverpod marque los providers
+    // dependientes como stale, y redirect() lee el hogar obsoleto del usuario
+    // anterior (Bug #15: race condition keepAlive).
+    ref.listen<AuthState>(authProvider, (prev, next) {
+      final prevUid = prev?.whenOrNull(authenticated: (u) => u.uid);
+      final nextUid = next.whenOrNull(authenticated: (u) => u.uid);
+      if (prevUid != nextUid) {
+        ref.invalidate(currentHomeProvider);
+      }
+      notify();
+    });
 
     // También escuchar currentHomeProvider para que el router se re-evalúe
     // cuando el hogar termina de cargar (loading → data). Sin esto, la primera
     // vez que el usuario se autentica, currentHomeProvider todavía está en
     // AsyncLoading y el redirect va a /onboarding aunque ya tenga hogar.
     ref.listen<AsyncValue<dynamic>>(currentHomeProvider, (_, __) => notify());
+
+    // Escuchar onboardingCompletedProvider para re-evaluar el redirect cuando
+    // resuelve. Distingue "usuario sin hogares activos" de "usuario nuevo"
+    // sin leer Firestore (SharedPreferences local).
+    ref.listen<AsyncValue<bool>>(onboardingCompletedProvider, (_, __) => notify());
   }
 
   @override
@@ -104,7 +127,17 @@ class RouterNotifier extends _$RouterNotifier implements Listenable {
           if (homeAsync.valueOrNull != null) {
             return AppRoutes.home;
           }
-          // Hogar confirmado nulo → usuario nuevo, ir a onboarding.
+          // Hogar confirmado nulo: distinguir "usuario sin hogares activos"
+          // de "usuario nuevo" mediante la flag local de onboarding completado.
+          final completedAsync = ref.read(onboardingCompletedProvider);
+          if (completedAsync.isLoading) {
+            return location == AppRoutes.splash ? null : AppRoutes.splash;
+          }
+          if (completedAsync.valueOrNull == true) {
+            // Ya hizo el onboarding pero no tiene hogares activos → home vacía.
+            return AppRoutes.home;
+          }
+          // Genuinamente nuevo → onboarding.
           return AppRoutes.onboarding;
         }
         return null;
@@ -125,6 +158,7 @@ class RouterNotifier extends _$RouterNotifier implements Listenable {
 GoRouter appRouter(AppRouterRef ref) {
   final notifier = ref.watch(routerNotifierProvider.notifier);
   return GoRouter(
+    navigatorKey: _rootNavigatorKey,
     initialLocation: AppRoutes.splash,
     refreshListenable: notifier,
     redirect: notifier.redirect,
@@ -181,6 +215,39 @@ GoRouter appRouter(AppRouterRef ref) {
             builder: (_, __) => SkinConfig.current == AppSkin.v2
                 ? const AllTasksScreenV2()
                 : const AllTasksScreen(),
+            routes: [
+              // 'new' debe ir ANTES de ':id' para que /tasks/new no sea
+              // capturado por el parámetro :id (Bug #32).
+              GoRoute(
+                parentNavigatorKey: _rootNavigatorKey,
+                path: 'new',
+                builder: (_, __) => SkinConfig.current == AppSkin.v2
+                    ? const CreateEditTaskScreenV2()
+                    : const CreateEditTaskScreen(),
+              ),
+              GoRoute(
+                parentNavigatorKey: _rootNavigatorKey,
+                path: ':id',
+                builder: (context, state) {
+                  final id = state.pathParameters['id']!;
+                  return SkinConfig.current == AppSkin.v2
+                      ? TaskDetailScreenV2(taskId: id)
+                      : TaskDetailScreen(taskId: id);
+                },
+                routes: [
+                  GoRoute(
+                    parentNavigatorKey: _rootNavigatorKey,
+                    path: 'edit',
+                    builder: (context, state) {
+                      final id = state.pathParameters['id']!;
+                      return SkinConfig.current == AppSkin.v2
+                          ? CreateEditTaskScreenV2(editTaskId: id)
+                          : CreateEditTaskScreen(editTaskId: id);
+                    },
+                  ),
+                ],
+              ),
+            ],
           ),
           GoRoute(
             path: AppRoutes.settings,
@@ -190,30 +257,10 @@ GoRouter appRouter(AppRouterRef ref) {
       ),
 
       // ── Pantallas fuera del shell (sin NavigationBar) ──────────────
-      GoRoute(
-        path: AppRoutes.createTask,
-        builder: (_, __) => SkinConfig.current == AppSkin.v2
-            ? const CreateEditTaskScreenV2()
-            : const CreateEditTaskScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.taskDetail,
-        builder: (context, state) {
-          final id = state.pathParameters['id']!;
-          return SkinConfig.current == AppSkin.v2
-              ? TaskDetailScreenV2(taskId: id)
-              : TaskDetailScreen(taskId: id);
-        },
-      ),
-      GoRoute(
-        path: AppRoutes.editTask,
-        builder: (context, state) {
-          final id = state.pathParameters['id']!;
-          return SkinConfig.current == AppSkin.v2
-              ? CreateEditTaskScreenV2(editTaskId: id)
-              : CreateEditTaskScreen(editTaskId: id);
-        },
-      ),
+      // NOTA: createTask (/tasks/new), taskDetail (/tasks/:id) y editTask
+      // (/tasks/:id/edit) se definen ahora como sub-rutas de /tasks dentro del
+      // ShellRoute con parentNavigatorKey: _rootNavigatorKey. Esto resuelve el
+      // Bug #32 (BACK desde detalle cerraba la app).
       GoRoute(
         path: AppRoutes.myHomes,
         builder: (_, __) => const MyHomesScreen(),
@@ -221,6 +268,15 @@ GoRouter appRouter(AppRouterRef ref) {
       GoRoute(
         path: AppRoutes.homeSettings,
         builder: (_, __) => const HomeSettingsScreen(),
+        routes: [
+          // Ruta de miembros fuera del ShellRoute para evitar conflicto de
+          // GlobalKey cuando se navega desde HomeSettingsScreen (que está
+          // fuera del shell) a /members (que está dentro del shell).
+          GoRoute(
+            path: 'members',
+            builder: (_, __) => const MembersScreen(),
+          ),
+        ],
       ),
       GoRoute(
         path: AppRoutes.memberProfile,

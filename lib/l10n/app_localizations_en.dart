@@ -287,6 +287,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboarding_error_no_slots => 'No home slots available';
 
   @override
+  String get onboarding_error_network =>
+      'No internet connection. Check your network and try again.';
+
+  @override
+  String get onboarding_error_unexpected =>
+      'An unexpected error occurred. Please try again.';
+
+  @override
+  String get onboarding_error_permission_denied =>
+      'You don\'t have permission to join this home.';
+
+  @override
   String get onboarding_add_photo => 'Add photo';
 
   @override
@@ -350,6 +362,33 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get homes_error_cannot_leave_as_owner =>
       'Transfer ownership before leaving the home';
+
+  @override
+  String get homes_transfer_ownership_title => 'Transfer home ownership';
+
+  @override
+  String get homes_transfer_ownership_body =>
+      'To leave the home, select who will become the new owner.';
+
+  @override
+  String get homes_transfer_btn => 'Transfer';
+
+  @override
+  String get homes_delete_home_title => 'Delete home';
+
+  @override
+  String get homes_delete_home_body_sole =>
+      'You are the only member. Leaving will permanently delete the home and it cannot be recovered.';
+
+  @override
+  String get homes_delete_btn => 'Delete';
+
+  @override
+  String get homes_frozen_only_title => 'Leave home';
+
+  @override
+  String get homes_frozen_only_body =>
+      'There are only frozen members. You can transfer ownership to one of them or permanently delete the home.';
 
   @override
   String get homes_role_owner => 'Owner';
@@ -475,10 +514,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get today_btn_pass => 'Pass';
 
   @override
+  String today_hecho_not_yet(String date) {
+    return 'The \'\'Done\'\' button will be active on $date';
+  }
+
+  @override
   String get today_empty_title => 'No tasks for today';
 
   @override
   String get today_empty_body => 'All tasks are up to date';
+
+  @override
+  String get today_no_home_title => 'No home';
+
+  @override
+  String get today_no_home_body =>
+      'Create a home or join one to start managing tasks';
 
   @override
   String get complete_task_dialog_body =>
@@ -1377,4 +1428,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get task_detail_upcoming => 'Upcoming dates';
+
+  @override
+  String get editTask => 'Edit task';
+
+  @override
+  String get settings_delete_account_confirm_title => 'Delete account?';
+
+  @override
+  String get settings_delete_account_confirm_body =>
+      'This action is permanent and irreversible. You will lose access to all your homes and data.';
+
+  @override
+  String get settings_delete_requires_reauth =>
+      'For security, please sign out and sign in again before deleting your account.';
 }

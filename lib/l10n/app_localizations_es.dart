@@ -293,6 +293,18 @@ class AppLocalizationsEs extends AppLocalizations {
       'No tienes plazas disponibles para crear más hogares';
 
   @override
+  String get onboarding_error_network =>
+      'Sin conexión a internet. Comprueba tu red e inténtalo de nuevo.';
+
+  @override
+  String get onboarding_error_unexpected =>
+      'Ha ocurrido un error inesperado. Inténtalo de nuevo.';
+
+  @override
+  String get onboarding_error_permission_denied =>
+      'No tienes permiso para unirte a este hogar.';
+
+  @override
   String get onboarding_add_photo => 'Añadir foto';
 
   @override
@@ -356,6 +368,33 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get homes_error_cannot_leave_as_owner =>
       'Transfiere la propiedad antes de abandonar el hogar';
+
+  @override
+  String get homes_transfer_ownership_title => 'Transferir propiedad del hogar';
+
+  @override
+  String get homes_transfer_ownership_body =>
+      'Para abandonar el hogar, selecciona quién será el nuevo propietario.';
+
+  @override
+  String get homes_transfer_btn => 'Transferir';
+
+  @override
+  String get homes_delete_home_title => 'Eliminar hogar';
+
+  @override
+  String get homes_delete_home_body_sole =>
+      'Eres el único miembro de este hogar. Al abandonarlo, se eliminará permanentemente y no podrá recuperarse.';
+
+  @override
+  String get homes_delete_btn => 'Eliminar';
+
+  @override
+  String get homes_frozen_only_title => 'Abandonar hogar';
+
+  @override
+  String get homes_frozen_only_body =>
+      'Solo hay miembros congelados. Puedes transferir la propiedad a uno de ellos o eliminar el hogar permanentemente.';
 
   @override
   String get homes_role_owner => 'Propietario';
@@ -481,10 +520,22 @@ class AppLocalizationsEs extends AppLocalizations {
   String get today_btn_pass => 'Pasar';
 
   @override
+  String today_hecho_not_yet(String date) {
+    return 'El botón \'\'Hecho\'\' estará activo el $date';
+  }
+
+  @override
   String get today_empty_title => 'Sin tareas para hoy';
 
   @override
   String get today_empty_body => 'Todas las tareas están al día';
+
+  @override
+  String get today_no_home_title => 'Sin hogar';
+
+  @override
+  String get today_no_home_body =>
+      'Crea un hogar o únete a uno para empezar a gestionar las tareas';
 
   @override
   String get complete_task_dialog_body =>
@@ -1389,4 +1440,18 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get task_detail_upcoming => 'Próximas fechas';
+
+  @override
+  String get editTask => 'Editar tarea';
+
+  @override
+  String get settings_delete_account_confirm_title => '¿Eliminar cuenta?';
+
+  @override
+  String get settings_delete_account_confirm_body =>
+      'Esta acción es permanente e irreversible. Perderás acceso a todos tus hogares y datos.';
+
+  @override
+  String get settings_delete_requires_reauth =>
+      'Por seguridad, cierra sesión y vuelve a iniciarla antes de eliminar tu cuenta.';
 }

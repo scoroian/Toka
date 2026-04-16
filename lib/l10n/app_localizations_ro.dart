@@ -291,6 +291,18 @@ class AppLocalizationsRo extends AppLocalizations {
       'Nu mai ai locuri disponibile pentru locuințe';
 
   @override
+  String get onboarding_error_network =>
+      'Nu există conexiune la internet. Verifică rețeaua și încearcă din nou.';
+
+  @override
+  String get onboarding_error_unexpected =>
+      'A apărut o eroare neașteptată. Încearcă din nou.';
+
+  @override
+  String get onboarding_error_permission_denied =>
+      'Nu ai permisiunea de a te alătura acestei case.';
+
+  @override
   String get onboarding_add_photo => 'Adaugă fotografie';
 
   @override
@@ -354,6 +366,33 @@ class AppLocalizationsRo extends AppLocalizations {
   @override
   String get homes_error_cannot_leave_as_owner =>
       'Transferă proprietatea înainte de a părăsi casa';
+
+  @override
+  String get homes_transfer_ownership_title => 'Transferă proprietatea locuinței';
+
+  @override
+  String get homes_transfer_ownership_body =>
+      'Pentru a părăsi locuința, selectează cine va deveni noul proprietar.';
+
+  @override
+  String get homes_transfer_btn => 'Transferă';
+
+  @override
+  String get homes_delete_home_title => 'Șterge locuința';
+
+  @override
+  String get homes_delete_home_body_sole =>
+      'Ești singurul membru. Dacă pleci, locuința va fi ștearsă permanent și nu poate fi recuperată.';
+
+  @override
+  String get homes_delete_btn => 'Șterge';
+
+  @override
+  String get homes_frozen_only_title => 'Părăsește locuința';
+
+  @override
+  String get homes_frozen_only_body =>
+      'Există doar membri înghețați. Poți transfera proprietatea unuia dintre ei sau poți șterge locuința permanent.';
 
   @override
   String get homes_role_owner => 'Proprietar';
@@ -479,10 +518,22 @@ class AppLocalizationsRo extends AppLocalizations {
   String get today_btn_pass => 'Pasă';
 
   @override
+  String today_hecho_not_yet(String date) {
+    return 'Butonul \'\'Gata\'\' va fi activ pe $date';
+  }
+
+  @override
   String get today_empty_title => 'Nicio sarcină pentru azi';
 
   @override
   String get today_empty_body => 'Toate sarcinile sunt la zi';
+
+  @override
+  String get today_no_home_title => 'Fără locuință';
+
+  @override
+  String get today_no_home_body =>
+      'Creează o locuință sau alătură-te uneia pentru a gestiona sarcinile';
 
   @override
   String get complete_task_dialog_body =>
@@ -1386,4 +1437,18 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get task_detail_upcoming => 'Date viitoare';
+
+  @override
+  String get editTask => 'Editează sarcina';
+
+  @override
+  String get settings_delete_account_confirm_title => 'Ștergi contul?';
+
+  @override
+  String get settings_delete_account_confirm_body =>
+      'Această acțiune este permanentă și ireversibilă. Vei pierde accesul la toate locuințele și datele tale.';
+
+  @override
+  String get settings_delete_requires_reauth =>
+      'Pentru securitate, deconectează-te și reconectează-te înainte de a șterge contul.';
 }

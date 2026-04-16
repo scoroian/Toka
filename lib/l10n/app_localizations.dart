@@ -628,6 +628,24 @@ abstract class AppLocalizations {
   /// **'No tienes plazas disponibles para crear más hogares'**
   String get onboarding_error_no_slots;
 
+  /// Network error joining a home
+  ///
+  /// In es, this message translates to:
+  /// **'Sin conexión a internet. Comprueba tu red e inténtalo de nuevo.'**
+  String get onboarding_error_network;
+
+  /// Unexpected error joining a home
+  ///
+  /// In es, this message translates to:
+  /// **'Ha ocurrido un error inesperado. Inténtalo de nuevo.'**
+  String get onboarding_error_unexpected;
+
+  /// Permission denied error joining a home
+  ///
+  /// In es, this message translates to:
+  /// **'No tienes permiso para unirte a este hogar.'**
+  String get onboarding_error_permission_denied;
+
   /// Add photo button
   ///
   /// In es, this message translates to:
@@ -747,6 +765,30 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Transfiere la propiedad antes de abandonar el hogar'**
   String get homes_error_cannot_leave_as_owner;
+
+  /// Transfer ownership dialog title
+  String get homes_transfer_ownership_title;
+
+  /// Transfer ownership dialog body
+  String get homes_transfer_ownership_body;
+
+  /// Transfer button label
+  String get homes_transfer_btn;
+
+  /// Delete home dialog title
+  String get homes_delete_home_title;
+
+  /// Delete home dialog body when sole member
+  String get homes_delete_home_body_sole;
+
+  /// Delete button label
+  String get homes_delete_btn;
+
+  /// Leave home dialog title when only frozen members exist
+  String get homes_frozen_only_title;
+
+  /// Leave home dialog body when only frozen members exist
+  String get homes_frozen_only_body;
 
   /// Owner role label
   ///
@@ -970,6 +1012,12 @@ abstract class AppLocalizations {
   /// **'Pasar'**
   String get today_btn_pass;
 
+  /// Snackbar shown when tapping disabled Hecho button before due date
+  ///
+  /// In es, this message translates to:
+  /// **'El botón \'\'Hecho\'\' estará activo el {date}'**
+  String today_hecho_not_yet(String date);
+
   /// Empty state title
   ///
   /// In es, this message translates to:
@@ -981,6 +1029,18 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Todas las tareas están al día'**
   String get today_empty_body;
+
+  /// No home empty state title
+  ///
+  /// In es, this message translates to:
+  /// **'Sin hogar'**
+  String get today_no_home_title;
+
+  /// No home empty state body
+  ///
+  /// In es, this message translates to:
+  /// **'Crea un hogar o únete a uno para empezar a gestionar las tareas'**
+  String get today_no_home_body;
 
   /// Complete task confirmation body
   ///
@@ -2667,6 +2727,30 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Próximas fechas'**
   String get task_detail_upcoming;
+
+  /// Tooltip/label for the edit task button
+  ///
+  /// In es, this message translates to:
+  /// **'Editar tarea'**
+  String get editTask;
+
+  /// Delete account confirmation dialog title
+  ///
+  /// In es, this message translates to:
+  /// **'¿Eliminar cuenta?'**
+  String get settings_delete_account_confirm_title;
+
+  /// Delete account confirmation dialog body
+  ///
+  /// In es, this message translates to:
+  /// **'Esta acción es permanente e irreversible. Perderás acceso a todos tus hogares y datos.'**
+  String get settings_delete_account_confirm_body;
+
+  /// Requires recent login to delete account
+  ///
+  /// In es, this message translates to:
+  /// **'Por seguridad, cierra sesión y vuelve a iniciarla antes de eliminar tu cuenta.'**
+  String get settings_delete_requires_reauth;
 }
 
 class _AppLocalizationsDelegate

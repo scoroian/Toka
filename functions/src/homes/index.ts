@@ -35,6 +35,7 @@ export const createHome = onCall(async (request) => {
     .collection("users")
     .doc(uid)
     .collection("memberships")
+    .where("status", "==", "active")
     .get();
 
   if (membershipsSnap.size >= totalSlots) {

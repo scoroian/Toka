@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/routes.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/loading_widget.dart';
+import '../../../shared/widgets/no_home_empty_state.dart';
+import '../../../shared/widgets/skins/main_shell_v2.dart';
 import '../../profile/application/profile_provider.dart';
 import '../../profile/domain/user_profile.dart';
 import '../application/members_view_model.dart';
@@ -33,7 +35,10 @@ class MembersScreen extends ConsumerWidget {
         if (data == null) {
           return Scaffold(
             appBar: AppBar(title: Text(l10n.members_title)),
-            body: Center(child: Text(l10n.error_generic)),
+            body: NoHomeEmptyState(
+              title: l10n.members_no_home_title,
+              body: l10n.members_no_home_body,
+            ),
           );
         }
 
@@ -66,15 +71,20 @@ class MembersScreen extends ConsumerWidget {
         return Scaffold(
           appBar: AppBar(title: Text(l10n.members_title)),
           floatingActionButton: data.canInvite
-              ? FloatingActionButton.extended(
-                  key: const Key('fab_invite'),
-                  onPressed: () => showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    builder: (_) => InviteMemberSheet(homeId: data.homeId),
+              ? Padding(
+                  padding: const EdgeInsets.only(
+                    bottom: MainShellV2.kNavBarHeight + MainShellV2.kNavBarBottom,
                   ),
-                  icon: const Icon(Icons.person_add),
-                  label: Text(l10n.members_invite_fab),
+                  child: FloatingActionButton.extended(
+                    key: const Key('fab_invite'),
+                    onPressed: () => showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      builder: (_) => InviteMemberSheet(homeId: data.homeId),
+                    ),
+                    icon: const Icon(Icons.person_add),
+                    label: Text(l10n.members_invite_fab),
+                  ),
                 )
               : null,
           body: ListView(

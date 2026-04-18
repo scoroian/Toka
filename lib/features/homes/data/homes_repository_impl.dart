@@ -123,4 +123,12 @@ class HomesRepositoryImpl implements HomesRepository {
   Future<void> updateHomeName(String homeId, String name) async {
     await _firestore.collection('homes').doc(homeId).update({'name': name});
   }
+
+  // DEBUG PREMIUM — REMOVE BEFORE PRODUCTION
+  @override
+  Future<void> debugSetPremiumStatus(String homeId, String status) async {
+    final callable = _functions.httpsCallable('debugSetPremiumStatus');
+    await callable.call<void>({'homeId': homeId, 'status': status});
+  }
+  // END DEBUG PREMIUM
 }

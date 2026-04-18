@@ -20,7 +20,12 @@ class HomeSettingsViewData {
     required this.canEdit,
     required this.canManageSubscription,
     required this.isOwner,
+    required this.canGenerateCode,
     required this.uid,
+    // DEBUG PREMIUM — REMOVE BEFORE PRODUCTION
+    required this.premiumStatusCode,
+    required this.showDebugPremiumToggle,
+    // END DEBUG PREMIUM
   });
 
   final String homeId;
@@ -29,7 +34,12 @@ class HomeSettingsViewData {
   final bool canEdit;
   final bool canManageSubscription;
   final bool isOwner;
+  final bool canGenerateCode;
   final String uid;
+  // DEBUG PREMIUM — REMOVE BEFORE PRODUCTION
+  final String premiumStatusCode;
+  final bool showDebugPremiumToggle;
+  // END DEBUG PREMIUM
 }
 
 abstract class HomeSettingsViewModel {
@@ -40,6 +50,9 @@ abstract class HomeSettingsViewModel {
   Future<void> leaveHome();
   Future<void> closeHome();
   void clearError();
+  // DEBUG PREMIUM — REMOVE BEFORE PRODUCTION
+  Future<void> debugSetPremiumStatus(String status);
+  // END DEBUG PREMIUM
 }
 
 class _HomeSettingsViewModelImpl implements HomeSettingsViewModel {
@@ -85,6 +98,17 @@ class _HomeSettingsViewModelImpl implements HomeSettingsViewModel {
 
   @override
   void clearError() {}
+
+  // DEBUG PREMIUM — REMOVE BEFORE PRODUCTION
+  @override
+  Future<void> debugSetPremiumStatus(String status) async {
+    final homeId = viewData.valueOrNull?.homeId;
+    if (homeId == null) return;
+    await ref
+        .read(homesRepositoryProvider)
+        .debugSetPremiumStatus(homeId, status);
+  }
+  // END DEBUG PREMIUM
 }
 
 String _planLabel(Home home, AppLocalizations l10n) {
@@ -132,7 +156,12 @@ HomeSettingsViewModel homeSettingsViewModel(
       canEdit: canEdit,
       canManageSubscription: isOwner || isCurrentPayer,
       isOwner: isOwner,
+      canGenerateCode: canEdit,
       uid: uid,
+      // DEBUG PREMIUM — REMOVE BEFORE PRODUCTION
+      premiumStatusCode: home.premiumStatus.name,
+      showDebugPremiumToggle: isOwner,
+      // END DEBUG PREMIUM
     );
   });
 

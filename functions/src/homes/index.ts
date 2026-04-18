@@ -451,19 +451,30 @@ export const generateInviteCode = onCall(async (request) => {
     code += chars[Math.floor(Math.random() * chars.length)];
   }
 
-  const expiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000); // 48 horas
+  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 días
   const invRef = db.collection("homes").doc(homeId).collection("invitations").doc();
 
-  await invRef.set({
+  // Revocar (marcar como usados) los códigos activos previos del hogar
+  const oldCodesSnap = await db.collection("homes").doc(homeId)
+    .collection("invitations")
+    .where("used", "==", false)
+    .get();
+
+  const batch = db.batch();
+  for (const doc of oldCodesSnap.docs) {
+    batch.update(doc.ref, { used: true, revokedAt: FieldValue.serverTimestamp() });
+  }
+  batch.set(invRef, {
     code,
     createdBy: uid,
     used: false,
     expiresAt: admin.firestore.Timestamp.fromDate(expiresAt),
     createdAt: FieldValue.serverTimestamp(),
   });
+  await batch.commit();
 
   logger.info(`Invite code generated for home ${homeId} by ${uid}`);
-  return { code };
+  return { code, expiresAt: expiresAt.toISOString() };
 });
 
 // ---------------------------------------------------------------------------
@@ -753,3 +764,133 @@ export const transferOwnership = onCall(async (request) => {
     `transferOwnership: ${uid} → ${newOwnerUid} in home ${homeId}`
   );
 });
+
+// DEBUG PREMIUM — REMOVE BEFORE PRODUCTION
+// ---------------------------------------------------------------------------
+// debugSetPremiumStatus
+// Cambia `premiumStatus` de un hogar a uno de 6 valores válidos y propaga el
+// cambio a `homes/{homeId}/views/dashboard.premiumFlags` de forma coherente.
+// Solo el owner puede llamarla. Pensado exclusivamente para QA/desarrollo.
+// Input:  { homeId: string, status: "free" | "active" | "cancelledPendingEnd"
+//          | "rescue" | "expiredFree" | "restorable" }
+// Output: { ok: true }
+// ---------------------------------------------------------------------------
+const DEBUG_VALID_STATUSES = [
+  "free",
+  "active",
+  "cancelledPendingEnd",
+  "rescue",
+  "expiredFree",
+  "restorable",
+] as const;
+
+type DebugPremiumStatus = typeof DEBUG_VALID_STATUSES[number];
+
+export const debugSetPremiumStatus = onCall(async (request) => {
+  if (!request.auth) {
+    throw new HttpsError("unauthenticated", "Must be authenticated");
+  }
+
+  const uid = request.auth.uid;
+  const data = request.data as { homeId?: string; status?: string };
+  const homeId = data.homeId?.trim();
+  const status = data.status?.trim();
+
+  if (!homeId) {
+    throw new HttpsError("invalid-argument", "homeId is required");
+  }
+  if (!status || !DEBUG_VALID_STATUSES.includes(status as DebugPremiumStatus)) {
+    throw new HttpsError(
+      "invalid-argument",
+      `status must be one of: ${DEBUG_VALID_STATUSES.join(", ")}`
+    );
+  }
+
+  const homeRef = db.collection("homes").doc(homeId);
+  const dashboardRef = homeRef.collection("views").doc("dashboard");
+  const homeDoc = await homeRef.get();
+
+  if (!homeDoc.exists) {
+    throw new HttpsError("not-found", "Home not found");
+  }
+  if (homeDoc.data()!["ownerUid"] !== uid) {
+    throw new HttpsError(
+      "permission-denied",
+      "Only the owner can use the debug premium toggle"
+    );
+  }
+
+  const now = Date.now();
+  const day = 24 * 60 * 60 * 1000;
+  const typed = status as DebugPremiumStatus;
+
+  let premiumEndsAt: admin.firestore.Timestamp | null = null;
+  let restoreUntil: admin.firestore.Timestamp | null = null;
+  let autoRenewEnabled = false;
+  let premiumPlan: string | null = null;
+
+  switch (typed) {
+    case "free":
+      break;
+    case "active":
+      premiumEndsAt = admin.firestore.Timestamp.fromMillis(now + 30 * day);
+      autoRenewEnabled = true;
+      premiumPlan = "debug";
+      break;
+    case "cancelledPendingEnd":
+      premiumEndsAt = admin.firestore.Timestamp.fromMillis(now + 10 * day);
+      premiumPlan = "debug";
+      break;
+    case "rescue":
+      premiumEndsAt = admin.firestore.Timestamp.fromMillis(now + 2 * day);
+      premiumPlan = "debug";
+      break;
+    case "expiredFree":
+      premiumEndsAt = admin.firestore.Timestamp.fromMillis(now - 1 * day);
+      break;
+    case "restorable":
+      premiumEndsAt = admin.firestore.Timestamp.fromMillis(now - 2 * day);
+      restoreUntil = admin.firestore.Timestamp.fromMillis(now + 20 * day);
+      break;
+  }
+
+  const isPremium =
+    typed === "active" ||
+    typed === "cancelledPendingEnd" ||
+    typed === "rescue";
+
+  const batch = db.batch();
+  batch.update(homeRef, {
+    premiumStatus: typed,
+    premiumEndsAt,
+    restoreUntil,
+    autoRenewEnabled,
+    premiumPlan,
+    updatedAt: FieldValue.serverTimestamp(),
+  });
+  batch.set(
+    dashboardRef,
+    {
+      premiumFlags: {
+        isPremium,
+        showAds: !isPremium,
+        canUseSmartDistribution: isPremium,
+        canUseVacations: isPremium,
+        canUseReviews: isPremium,
+      },
+      rescueFlags: {
+        isInRescue: typed === "rescue",
+        daysLeft: typed === "rescue" ? 2 : null,
+      },
+      updatedAt: FieldValue.serverTimestamp(),
+    },
+    { merge: true }
+  );
+  await batch.commit();
+
+  logger.info(
+    `debugSetPremiumStatus: home=${homeId} status=${typed} by owner=${uid}`
+  );
+  return { ok: true };
+});
+// END DEBUG PREMIUM

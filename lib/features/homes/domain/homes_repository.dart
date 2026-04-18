@@ -36,4 +36,12 @@ abstract interface class HomesRepository {
 
   /// Actualiza el campo `name` del hogar en `homes/{homeId}`.
   Future<void> updateHomeName(String homeId, String name);
+
+  // DEBUG PREMIUM — REMOVE BEFORE PRODUCTION
+  /// Cambia el estado premium del hogar a [status] invocando la Cloud
+  /// Function `debugSetPremiumStatus`. Solo el owner puede usarlo.
+  /// [status] debe ser uno de: free, active, cancelledPendingEnd, rescue,
+  /// expiredFree, restorable.
+  Future<void> debugSetPremiumStatus(String homeId, String status);
+  // END DEBUG PREMIUM
 }

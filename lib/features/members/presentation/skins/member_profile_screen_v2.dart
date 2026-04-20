@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/theme/app_colors_v2.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/widgets/ad_aware_scaffold.dart';
 import '../../../homes/domain/home_membership.dart';
 import '../../application/member_profile_view_model.dart';
 import '../widgets/member_role_badge.dart';
@@ -134,7 +135,7 @@ class _MemberProfileScreenV2State extends ConsumerState<MemberProfileScreenV2> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bg = isDark ? AppColorsV2.backgroundDark : AppColorsV2.backgroundLight;
 
-    return Scaffold(
+    return AdAwareScaffold(
       backgroundColor: bg,
       appBar: AppBar(backgroundColor: bg),
       body: vm.viewData.when(
@@ -147,7 +148,10 @@ class _MemberProfileScreenV2State extends ConsumerState<MemberProfileScreenV2> {
           final bd = isDark ? AppColorsV2.borderDark : AppColorsV2.borderLight;
 
           return ListView(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
+            padding: EdgeInsets.fromLTRB(
+              16, 8, 16,
+              AdAwareScaffold.bottomPaddingOf(context, ref),
+            ),
             children: [
               // Avatar + nombre
               Center(

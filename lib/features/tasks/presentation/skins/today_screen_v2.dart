@@ -1,14 +1,12 @@
 // lib/features/tasks/presentation/skins/today_screen_v2.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
-import '../../../../core/constants/routes.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../application/today_view_model.dart';
 import '../../domain/home_dashboard.dart';
 import '../widgets/complete_task_dialog.dart';
-import '../widgets/home_dropdown_button.dart';
+import '../../../../features/homes/presentation/home_selector_widget.dart';
 import '../widgets/pass_turn_dialog.dart';
 import '../widgets/today_empty_state.dart';
 import 'widgets/today_header_counters_v2.dart';
@@ -52,14 +50,7 @@ class TodayScreenV2 extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: vm.homes.length > 1
-            ? HomeDropdownButton(
-                homes: vm.homes,
-                onSelect: vm.selectHome,
-                onCreateHome: () => context.go(AppRoutes.myHomes),
-                onJoinHome:   () => context.go(AppRoutes.myHomes),
-              )
-            : Text(l10n.today_screen_title),
+        title: const HomeSelectorWidget(),
       ),
       body: vm.viewData.when(
         loading: () => const TodaySkeletonV2(),
@@ -72,6 +63,7 @@ class TodayScreenV2 extends ConsumerWidget {
           ],
         )),
         data: (data) {
+          if (data == null && vm.homes.isEmpty) return _NoHomeEmptyState(widgetRef: ref);
           if (data == null) return const TodayEmptyState();
           return CustomScrollView(
             slivers: [
@@ -89,10 +81,58 @@ class TodayScreenV2 extends ConsumerWidget {
                     onPass: data.homeId.isNotEmpty
                         ? (t) => _onPass(context, vm, t, data.currentUid) : null,
                   ),
-              const SliverToBoxAdapter(child: SizedBox(height: 96)),
+              const SliverToBoxAdapter(child: SizedBox(height: 16)),
             ],
           );
         },
+      ),
+    );
+  }
+}
+
+class _NoHomeEmptyState extends StatelessWidget {
+  const _NoHomeEmptyState({required this.widgetRef});
+
+  final WidgetRef widgetRef;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.home_outlined, size: 64, color: Colors.grey),
+            const SizedBox(height: 16),
+            Text(
+              l10n.today_no_home_title,
+              style: Theme.of(context).textTheme.titleLarge,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              l10n.today_no_home_body,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 32),
+            FilledButton.icon(
+              key: const Key('no_home_create_button'),
+              onPressed: () => showCreateHomeSheet(context, widgetRef, 0),
+              icon: const Icon(Icons.add),
+              label: Text(l10n.onboarding_create_home_button),
+            ),
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              key: const Key('no_home_join_button'),
+              onPressed: () => showJoinHomeSheet(context, widgetRef, 0),
+              icon: const Icon(Icons.group_add_outlined),
+              label: Text(l10n.onboarding_join_home),
+            ),
+          ],
+        ),
       ),
     );
   }

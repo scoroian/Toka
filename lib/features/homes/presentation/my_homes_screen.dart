@@ -1,6 +1,7 @@
 // lib/features/homes/presentation/my_homes_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/loading_widget.dart';
@@ -47,7 +48,7 @@ class MyHomesScreen extends ConsumerWidget {
                   : null,
               onTap: () {
                 vm.switchHome(m.homeId);
-                Navigator.of(context).pop();
+                context.pop();
               },
             );
           },

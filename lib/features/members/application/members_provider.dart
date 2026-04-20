@@ -20,3 +20,9 @@ MembersRepository membersRepository(MembersRepositoryRef ref) {
 Stream<List<Member>> homeMembers(HomeMembersRef ref, String homeId) {
   return ref.watch(membersRepositoryProvider).watchHomeMembers(homeId);
 }
+
+@riverpod
+Stream<({String code, DateTime expiresAt})?> activeInviteCode(
+    ActiveInviteCodeRef ref, String homeId) {
+  return ref.watch(membersRepositoryProvider).watchActiveInviteCode(homeId);
+}

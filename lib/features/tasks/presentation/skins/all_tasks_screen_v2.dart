@@ -7,7 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/routes.dart';
 import '../../../../core/theme/app_colors_v2.dart';
 import '../../../../l10n/app_localizations.dart';
-import '../../../../shared/widgets/ad_banner.dart';
+import '../../../../shared/widgets/ad_banner_config_provider.dart';
 import '../../../../shared/widgets/no_home_empty_state.dart';
 import '../../../../shared/widgets/skins/main_shell_v2.dart';
 import '../../application/all_tasks_view_model.dart';
@@ -100,16 +100,18 @@ class _AllTasksScreenV2State extends ConsumerState<AllTasksScreenV2>
           );
         }
 
+        final adConfig = ref.watch(adBannerConfigProvider);
+        final bannerVisible = adConfig.show && adConfig.unitId.isNotEmpty;
+        final bannerSlot =
+            MainShellV2.bannerSlotHeight(bannerVisible: bannerVisible);
+
         return Scaffold(
           appBar: _buildAppBar(l10n, vm, isDark),
-          body: Column(
-            children: [
-              Expanded(
-                child: data.tasks.isEmpty
-                    ? Center(
-                        key: const Key('tasks_empty_state'),
-                        child: Text(l10n.tasks_empty_title))
-                    : ListView.builder(
+          body: data.tasks.isEmpty
+              ? Center(
+                  key: const Key('tasks_empty_state'),
+                  child: Text(l10n.tasks_empty_title))
+              : ListView.builder(
                         key: const Key('tasks_list'),
                         padding: const EdgeInsets.only(bottom: 96),
                         itemCount: data.tasks.length,
@@ -159,15 +161,9 @@ class _AllTasksScreenV2State extends ConsumerState<AllTasksScreenV2>
                           );
                         },
                       ),
-              ),
-              const AdBanner(key: Key('ad_banner')),
-            ],
-          ),
           floatingActionButton: (!vm.isSelectionMode && data.canManage)
               ? Padding(
-                  padding: const EdgeInsets.only(
-                    bottom: MainShellV2.kNavBarHeight + MainShellV2.kNavBarBottom,
-                  ),
+                  padding: EdgeInsets.only(bottom: bannerSlot),
                   child: ScaleTransition(
                     scale: CurvedAnimation(
                         parent: _fabCtrl, curve: Curves.elasticOut),

@@ -1,4 +1,6 @@
 // test/unit/features/members/member_profile_view_model_test.dart
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -68,9 +70,10 @@ void main() {
   });
 
   group('MemberProfileViewModel', () {
-    test('viewData is loading while memberDetail resolves', () {
-      when(() => mockRepo.fetchMember('home1', 'uid1'))
-          .thenAnswer((_) async => fakeMember);
+    test('viewData is loading while stream has not emitted yet', () {
+      // Stream que nunca emite → provider en estado loading
+      when(() => mockRepo.watchHomeMembers('home1'))
+          .thenAnswer((_) => const Stream.empty());
 
       final container = ProviderContainer(overrides: [
         authProvider.overrideWith(
@@ -86,13 +89,13 @@ void main() {
       final vm = container.read(
         memberProfileViewModelProvider(homeId: 'home1', memberUid: 'uid1'),
       );
-      // Before future resolves, viewData should be loading
+      // Antes de que el stream emita, viewData debe ser loading
       expect(vm.viewData.isLoading || vm.viewData.hasValue, isTrue);
     });
 
     test('viewData exposes compliancePct correctly when member loads', () async {
-      when(() => mockRepo.fetchMember('home1', 'uid1'))
-          .thenAnswer((_) async => fakeMember);
+      when(() => mockRepo.watchHomeMembers('home1'))
+          .thenAnswer((_) => Stream.value([fakeMember]));
 
       final container = ProviderContainer(overrides: [
         authProvider.overrideWith(
@@ -102,12 +105,11 @@ void main() {
         currentHomeProvider.overrideWith(() => _FakeCurrentHome()),
         localeNotifierProvider.overrideWith(() => _FakeLocaleNotifier()),
         membersRepositoryProvider.overrideWithValue(mockRepo),
-        memberDetailProvider('home1', 'uid1')
-            .overrideWith((ref) async => fakeMember),
       ]);
       addTearDown(container.dispose);
 
-      await container.read(memberDetailProvider('home1', 'uid1').future);
+      // Esperar a que el stream emita el primer valor
+      await container.read(homeMembersProvider('home1').future);
 
       final vm = container.read(
         memberProfileViewModelProvider(homeId: 'home1', memberUid: 'uid1'),
@@ -120,8 +122,9 @@ void main() {
     });
 
     test('isSelf is true when currentUid matches memberUid', () async {
-      when(() => mockRepo.fetchMember('home1', 'uid-me'))
-          .thenAnswer((_) async => fakeMember.copyWith(uid: 'uid-me'));
+      final selfMember = fakeMember.copyWith(uid: 'uid-me');
+      when(() => mockRepo.watchHomeMembers('home1'))
+          .thenAnswer((_) => Stream.value([selfMember]));
 
       const fakeUser = AuthUser(
         uid: 'uid-me',
@@ -140,19 +143,56 @@ void main() {
         currentHomeProvider.overrideWith(() => _FakeCurrentHome()),
         localeNotifierProvider.overrideWith(() => _FakeLocaleNotifier()),
         membersRepositoryProvider.overrideWithValue(mockRepo),
-        memberDetailProvider('home1', 'uid-me').overrideWith(
-          (ref) async => fakeMember.copyWith(uid: 'uid-me'),
-        ),
       ]);
       addTearDown(container.dispose);
 
-      await container.read(memberDetailProvider('home1', 'uid-me').future);
+      await container.read(homeMembersProvider('home1').future);
 
       final vm = container.read(
         memberProfileViewModelProvider(homeId: 'home1', memberUid: 'uid-me'),
       );
       expect(vm.viewData.hasValue, isTrue);
       expect(vm.viewData.value!.isSelf, isTrue);
+    });
+
+    test('rol se actualiza reactivamente al emitir nuevo valor en el stream', () async {
+      // Stream con controller para emitir dos eventos: member → admin
+      final controller = StreamController<List<Member>>();
+      when(() => mockRepo.watchHomeMembers('home1'))
+          .thenAnswer((_) => controller.stream);
+
+      final container = ProviderContainer(overrides: [
+        authProvider.overrideWith(
+          () => _TestAuth(const AuthState.unauthenticated()),
+        ),
+        authStateChangesProvider.overrideWith((ref) => const Stream.empty()),
+        currentHomeProvider.overrideWith(() => _FakeCurrentHome()),
+        localeNotifierProvider.overrideWith(() => _FakeLocaleNotifier()),
+        membersRepositoryProvider.overrideWithValue(mockRepo),
+      ]);
+      addTearDown(() {
+        controller.close();
+        container.dispose();
+      });
+
+      // Emit 1: miembro con rol 'member'
+      controller.add([fakeMember]);
+      await container.read(homeMembersProvider('home1').future);
+      final vmBefore = container.read(
+        memberProfileViewModelProvider(homeId: 'home1', memberUid: 'uid1'),
+      );
+      expect(vmBefore.viewData.value?.member.role, MemberRole.member);
+
+      // Emit 2: mismo miembro promovido a 'admin'
+      final adminMember = fakeMember.copyWith(role: MemberRole.admin);
+      controller.add([adminMember]);
+      await Future.microtask(() {});
+
+      final vmAfter = container.read(
+        memberProfileViewModelProvider(homeId: 'home1', memberUid: 'uid1'),
+      );
+      expect(vmAfter.viewData.value?.member.role, MemberRole.admin,
+          reason: 'El rol debe actualizarse reactivamente sin navegar');
     });
   });
 
@@ -166,6 +206,7 @@ void main() {
         compliancePct: '85.0',
         radarEntries: const [],
         canManageRoles: false,
+        canRemoveMember: false,
         completedCount: 10,
         streakCount: 3,
         averageScore: 8.5,
@@ -185,6 +226,7 @@ void main() {
         compliancePct: '85.0',
         radarEntries: const [RadarEntry(taskName: 'T1', avgScore: 7.0)],
         canManageRoles: false,
+        canRemoveMember: false,
         completedCount: 10,
         streakCount: 3,
         averageScore: 8.5,
@@ -206,6 +248,7 @@ void main() {
           RadarEntry(taskName: 'T3', avgScore: 9.0),
         ],
         canManageRoles: false,
+        canRemoveMember: false,
         completedCount: 10,
         streakCount: 3,
         averageScore: 8.5,

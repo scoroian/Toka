@@ -27,7 +27,13 @@ class _MockMembersRepo implements MembersRepository {
   @override
   Future<void> inviteMember(String homeId, String? email) async {}
   @override
-  Future<String> generateInviteCode(String homeId) async => 'ABC123';
+  Future<({String code, DateTime expiresAt})> generateInviteCode(
+          String homeId) async =>
+      (code: 'ABC123', expiresAt: DateTime.now().add(const Duration(days: 7)));
+  @override
+  Stream<({String code, DateTime expiresAt})?> watchActiveInviteCode(
+          String homeId) =>
+      Stream.value(null);
   @override
   Future<void> removeMember(String homeId, String uid) async {}
   @override
@@ -42,6 +48,13 @@ class _MockMembersRepo implements MembersRepository {
   @override
   Stream<Vacation?> watchVacation(String homeId, String uid) =>
       Stream.value(null);
+  @override
+  Future<void> submitReview({
+    required String homeId,
+    required String taskEventId,
+    required double score,
+    String? note,
+  }) async {}
 }
 
 const _viewerUser = AuthUser(

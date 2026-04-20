@@ -13,7 +13,7 @@ class TodayTaskCardDone extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final timeStr = DateFormat('HH:mm').format(task.completedAt);
+    final timeStr = DateFormat('HH:mm').format(task.completedAt.toLocal());
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),

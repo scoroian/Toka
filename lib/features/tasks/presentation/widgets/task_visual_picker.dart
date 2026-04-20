@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../l10n/app_localizations.dart';
+import '../utils/task_visual_utils.dart';
 
 class TaskVisualPicker extends StatefulWidget {
   const TaskVisualPicker({
@@ -73,16 +74,15 @@ class _TaskVisualPickerState extends State<TaskVisualPicker>
             width: 64,
             height: 64,
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primaryContainer,
+              color: widget.selectedKind == 'emoji'
+                  ? Theme.of(context).colorScheme.primaryContainer
+                  : Colors.transparent,
               borderRadius: BorderRadius.circular(16),
             ),
             child: Center(
-              child: widget.selectedKind == 'emoji'
-                  ? Text(widget.selectedValue,
-                      style: const TextStyle(fontSize: 32))
-                  : Icon(Icons.task_alt,
-                      size: 36,
-                      color: Theme.of(context).colorScheme.onPrimaryContainer),
+              child: taskVisualWidget(
+                  widget.selectedKind, widget.selectedValue,
+                  size: 36),
             ),
           ),
         ),

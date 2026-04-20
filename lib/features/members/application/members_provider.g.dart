@@ -173,5 +173,141 @@ class _HomeMembersProviderElement extends StreamProviderElement<List<Member>>
   @override
   String get homeId => (origin as HomeMembersProvider).homeId;
 }
+
+String _$activeInviteCodeHash() => r'47563f5e45357170c3afddd1eb87f7f9f60feefd';
+
+/// See also [activeInviteCode].
+@ProviderFor(activeInviteCode)
+const activeInviteCodeProvider = ActiveInviteCodeFamily();
+
+/// See also [activeInviteCode].
+class ActiveInviteCodeFamily
+    extends Family<AsyncValue<({String code, DateTime expiresAt})?>> {
+  /// See also [activeInviteCode].
+  const ActiveInviteCodeFamily();
+
+  /// See also [activeInviteCode].
+  ActiveInviteCodeProvider call(
+    String homeId,
+  ) {
+    return ActiveInviteCodeProvider(
+      homeId,
+    );
+  }
+
+  @override
+  ActiveInviteCodeProvider getProviderOverride(
+    covariant ActiveInviteCodeProvider provider,
+  ) {
+    return call(
+      provider.homeId,
+    );
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'activeInviteCodeProvider';
+}
+
+/// See also [activeInviteCode].
+class ActiveInviteCodeProvider
+    extends AutoDisposeStreamProvider<({String code, DateTime expiresAt})?> {
+  /// See also [activeInviteCode].
+  ActiveInviteCodeProvider(
+    String homeId,
+  ) : this._internal(
+          (ref) => activeInviteCode(
+            ref as ActiveInviteCodeRef,
+            homeId,
+          ),
+          from: activeInviteCodeProvider,
+          name: r'activeInviteCodeProvider',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$activeInviteCodeHash,
+          dependencies: ActiveInviteCodeFamily._dependencies,
+          allTransitiveDependencies:
+              ActiveInviteCodeFamily._allTransitiveDependencies,
+          homeId: homeId,
+        );
+
+  ActiveInviteCodeProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.homeId,
+  }) : super.internal();
+
+  final String homeId;
+
+  @override
+  Override overrideWith(
+    Stream<({String code, DateTime expiresAt})?> Function(
+            ActiveInviteCodeRef provider)
+        create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: ActiveInviteCodeProvider._internal(
+        (ref) => create(ref as ActiveInviteCodeRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        homeId: homeId,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeStreamProviderElement<({String code, DateTime expiresAt})?>
+      createElement() {
+    return _ActiveInviteCodeProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is ActiveInviteCodeProvider && other.homeId == homeId;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, homeId.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin ActiveInviteCodeRef
+    on AutoDisposeStreamProviderRef<({String code, DateTime expiresAt})?> {
+  /// The parameter `homeId` of this provider.
+  String get homeId;
+}
+
+class _ActiveInviteCodeProviderElement extends AutoDisposeStreamProviderElement<
+    ({String code, DateTime expiresAt})?> with ActiveInviteCodeRef {
+  _ActiveInviteCodeProviderElement(super.provider);
+
+  @override
+  String get homeId => (origin as ActiveInviteCodeProvider).homeId;
+}
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

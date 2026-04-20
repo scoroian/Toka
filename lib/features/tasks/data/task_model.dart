@@ -21,7 +21,7 @@ class TaskModel {
       assignmentOrder:
           List<String>.from(d['assignmentOrder'] as List? ?? []),
       currentAssigneeUid: d['currentAssigneeUid'] as String?,
-      nextDueAt: (d['nextDueAt'] as Timestamp).toDate(),
+      nextDueAt: (d['nextDueAt'] as Timestamp).toDate().toLocal(),
       difficultyWeight: (d['difficultyWeight'] as num?)?.toDouble() ?? 1.0,
       completedCount90d: (d['completedCount90d'] as int?) ?? 0,
       createdByUid: d['createdByUid'] as String,

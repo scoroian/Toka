@@ -18,6 +18,9 @@ class NotificationSettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
+    // Observar el estado del notifier directamente garantiza que el widget
+    // se reconstruya cuando isLoaded cambie de false a true.
+    ref.watch(notificationSettingsViewModelNotifierProvider(homeId, uid));
     final vm =
         ref.watch(notificationSettingsViewModelProvider(homeId, uid));
     final notifier = ref.read(

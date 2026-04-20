@@ -83,10 +83,18 @@ class TaskFormNotifier extends _$TaskFormNotifier {
   void setAssignmentMode(String mode) =>
       state = state.copyWith(assignmentMode: mode);
 
-  void setAssignmentOrder(List<String> order) =>
-      state = state.copyWith(assignmentOrder: order, fieldErrors: {
+  void setAssignmentOrder(List<String> order) {
+    // Si quedan menos de 2 miembros, la rotación no tiene sentido: resetear a sameAssignee
+    final newOnMissAssign =
+        order.length < 2 ? 'sameAssignee' : state.onMissAssign;
+    state = state.copyWith(
+      assignmentOrder: order,
+      onMissAssign: newOnMissAssign,
+      fieldErrors: {
         ...Map.of(state.fieldErrors)..remove('assignees'),
-      });
+      },
+    );
+  }
 
   void setDifficultyWeight(double v) =>
       state = state.copyWith(difficultyWeight: v);

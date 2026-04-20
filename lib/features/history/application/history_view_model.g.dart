@@ -6,7 +6,7 @@ part of 'history_view_model.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$historyViewModelHash() => r'0227238c3a4d28a395d172a592d7c0b24bbde216';
+String _$historyViewModelHash() => r'fe496efab098b77ff3bac4dbca2a70d72b92721f';
 
 /// See also [historyViewModel].
 @ProviderFor(historyViewModel)

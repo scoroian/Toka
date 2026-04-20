@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/task.dart';
 import '../../domain/task_status.dart';
+import '../utils/task_visual_utils.dart';
 
 class TaskCard extends StatelessWidget {
   const TaskCard({
@@ -89,24 +90,12 @@ class _VisualWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (kind == 'emoji') {
-      return SizedBox(
-        width: 40,
-        height: 40,
-        child: Center(
-          child: Text(value, style: const TextStyle(fontSize: 24)),
-        ),
-      );
-    }
-    return Container(
+    return SizedBox(
       width: 40,
       height: 40,
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primaryContainer,
-        borderRadius: BorderRadius.circular(8),
+      child: Center(
+        child: taskVisualWidget(kind, value, size: 24),
       ),
-      child: Icon(Icons.task_alt,
-          color: Theme.of(context).colorScheme.onPrimaryContainer),
     );
   }
 }

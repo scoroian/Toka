@@ -8,6 +8,7 @@ import '../../homes/application/dashboard_provider.dart';
 import '../../members/application/members_provider.dart';
 import '../domain/task_event.dart';
 import 'history_provider.dart';
+import 'rated_events_provider.dart';
 
 part 'history_view_model.g.dart';
 
@@ -91,16 +92,29 @@ class _HistoryViewModelImpl implements HistoryViewModel {
   @override
   void applyFilter(HistoryFilter newFilter) {
     if (homeId == null) return;
-    ref.read(historyFilterNotifierProvider.notifier).setFilter(newFilter);
-    ref.read(historyNotifierProvider(homeId!).notifier).applyFilter(newFilter);
-    loadMore();
+    // Snapshot de ambos notifiers ANTES de mutar: en cuanto `setFilter`
+    // cambia el filtro, `historyViewModelProvider` (que lo observa) queda
+    // marcado dirty y cualquier `ref.read` posterior lanza
+    // "Cannot use ref functions after the dependency of a provider changed
+    // but before the provider rebuilt". Guardar las referencias evita la
+    // segunda llamada a ref.read.
+    final filterNotifier = ref.read(historyFilterNotifierProvider.notifier);
+    final historyNotifier =
+        ref.read(historyNotifierProvider(homeId!).notifier);
+    filterNotifier.setFilter(newFilter);
+    historyNotifier.applyFilter(newFilter);
+    historyNotifier.loadMore(isPremium: isPremium);
   }
 
   @override
   Future<void> rateEvent(String eventId, double rating, {String? note}) async {
-    // Guard: homeId must be set
     if (homeId == null) return;
-    // TODO: write to homes/{homeId}/taskRatings when schema is defined
+    await ref.read(membersRepositoryProvider).submitReview(
+          homeId: homeId!,
+          taskEventId: eventId,
+          score: rating,
+          note: note,
+        );
   }
 }
 
@@ -133,7 +147,10 @@ HistoryViewModel historyViewModel(HistoryViewModelRef ref) {
   final nameMap  = {for (final m in members) m.uid: m.nickname};
   final photoMap = {for (final m in members) m.uid: m.photoUrl};
 
-  // isRated = false until taskRatings collection is implemented
+  final ratedIds = ref.watch(
+    ratedEventIdsProvider(homeId: homeId, currentUid: currentUid),
+  ).valueOrNull ?? {};
+
   final items = rawEvents.whenData((events) => events.map((e) {
         final actorUid = switch (e) {
           CompletedEvent c => c.actorUid,
@@ -141,7 +158,7 @@ HistoryViewModel historyViewModel(HistoryViewModelRef ref) {
           MissedEvent m    => m.actorUid,
         };
         final isOwnEvent = actorUid == currentUid;
-        const isRated = false;
+        final isRated = ratedIds.contains(e.id);
         return TaskEventItem(
           raw: e,
           actorName: nameMap[actorUid] ?? actorUid,

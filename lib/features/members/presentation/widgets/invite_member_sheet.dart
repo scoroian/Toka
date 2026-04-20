@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/widgets/skins/main_shell_v2.dart';
 import '../../application/member_actions_provider.dart';
 
 class InviteMemberSheet extends ConsumerStatefulWidget {
@@ -19,6 +21,7 @@ class _InviteMemberSheetState extends ConsumerState<InviteMemberSheet> {
   bool _showEmail = false;
   final _emailController = TextEditingController();
   String? _generatedCode;
+  DateTime? _expiresAt;
   bool _isLoadingCode = false;
   String? _codeError;
 
@@ -28,18 +31,23 @@ class _InviteMemberSheetState extends ConsumerState<InviteMemberSheet> {
     super.dispose();
   }
 
+  bool _isExpiringSoon(DateTime expiresAt) {
+    return expiresAt.difference(DateTime.now()).inHours < 24;
+  }
+
   Future<void> _generateCode() async {
     setState(() {
       _isLoadingCode = true;
       _codeError = null;
     });
     try {
-      final code = await ref
+      final result = await ref
           .read(memberActionsProvider.notifier)
           .generateInviteCode(widget.homeId);
       if (mounted) {
         setState(() {
-          _generatedCode = code;
+          _generatedCode = result.code;
+          _expiresAt = result.expiresAt;
           _isLoadingCode = false;
         });
       }
@@ -67,12 +75,15 @@ class _InviteMemberSheetState extends ConsumerState<InviteMemberSheet> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
 
+    final mq = MediaQuery.of(context);
+    const navBarExtra = MainShellV2.kNavBarHeight + MainShellV2.kNavBarBottom;
+    final bottomPadding = mq.viewInsets.bottom + mq.viewPadding.bottom + navBarExtra;
     return Padding(
       padding: EdgeInsets.only(
         left: 16,
         right: 16,
         top: 16,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+        bottom: bottomPadding + 16,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -144,19 +155,48 @@ class _InviteMemberSheetState extends ConsumerState<InviteMemberSheet> {
                         .headlineMedium
                         ?.copyWith(letterSpacing: 4),
                   ),
+                  if (_expiresAt != null) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      l10n.invite_code_expires_at(
+                        DateFormat('dd MMM yyyy · HH:mm').format(_expiresAt!),
+                      ),
+                      key: const Key('invite_code_expiry'),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: _isExpiringSoon(_expiresAt!)
+                                ? Theme.of(context).colorScheme.error
+                                : Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
+                          ),
+                    ),
+                  ],
                   const SizedBox(height: 8),
-                  TextButton.icon(
-                    key: const Key('btn_copy_code'),
-                    onPressed: () {
-                      Clipboard.setData(
-                          ClipboardData(text: _generatedCode!));
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                            content: Text(l10n.invite_sheet_code_copied)),
-                      );
-                    },
-                    icon: const Icon(Icons.copy),
-                    label: Text(l10n.invite_sheet_copy_code),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      TextButton.icon(
+                        key: const Key('btn_copy_code'),
+                        onPressed: () {
+                          Clipboard.setData(
+                              ClipboardData(text: _generatedCode!));
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content:
+                                    Text(l10n.invite_sheet_code_copied)),
+                          );
+                        },
+                        icon: const Icon(Icons.copy),
+                        label: Text(l10n.invite_sheet_copy_code),
+                      ),
+                      const SizedBox(width: 8),
+                      TextButton.icon(
+                        key: const Key('btn_regenerate_code'),
+                        onPressed: _isLoadingCode ? null : _generateCode,
+                        icon: const Icon(Icons.refresh),
+                        label: Text(l10n.invite_code_regenerate),
+                      ),
+                    ],
                   ),
                 ],
               ),

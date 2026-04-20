@@ -23,7 +23,7 @@ final historyRepositoryProvider = Provider<HistoryRepository>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef HistoryRepositoryRef = ProviderRef<HistoryRepository>;
-String _$historyNotifierHash() => r'd17c5066975c4f9b022358afe11255f8a5aa6b1a';
+String _$historyNotifierHash() => r'6882879465b9a919504b0dbb59fda87a4ba9f256';
 
 /// Copied from Dart SDK
 class _SystemHash {

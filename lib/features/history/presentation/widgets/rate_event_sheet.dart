@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/widgets/skins/main_shell_v2.dart';
 
 /// Bottom sheet para valorar un evento de tarea completada.
 /// Muestra un Slider (1.0–10.0) y un campo de nota opcional.
@@ -27,12 +28,15 @@ class _RateEventSheetState extends State<RateEventSheet> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final mq = MediaQuery.of(context);
+    const navBarExtra = MainShellV2.kNavBarHeight + MainShellV2.kNavBarBottom;
+    final bottomPadding = mq.viewInsets.bottom + mq.viewPadding.bottom + navBarExtra;
     return Padding(
       padding: EdgeInsets.only(
         left: 24,
         right: 24,
         top: 24,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+        bottom: bottomPadding + 16,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,

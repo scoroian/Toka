@@ -119,14 +119,15 @@ class _HomeJoinFormState extends State<HomeJoinForm> {
               return null;
             },
           ),
-          if (widget.error == 'invalid_invite')
+          if (widget.error != null)
             Text(
-              l10n.onboarding_error_invalid_invite,
-              style: TextStyle(color: Theme.of(context).colorScheme.error),
-            ),
-          if (widget.error == 'expired_invite')
-            Text(
-              l10n.onboarding_error_expired_invite,
+              switch (widget.error!) {
+                'invalid_invite' => l10n.onboarding_error_invalid_invite,
+                'expired_invite' => l10n.onboarding_error_expired_invite,
+                'network_error' => l10n.onboarding_error_network,
+                'permission_denied' => l10n.onboarding_error_permission_denied,
+                _ => l10n.onboarding_error_unexpected,
+              },
               style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
           const SizedBox(height: 16),

@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -189,5 +192,51 @@ void main() {
 
     expect(result, isNull);
     expect(c.read(onboardingNotifierProvider).error, 'expired_invite');
+  });
+
+  test('joinHome sets invalid_invite on FirebaseException not-found', () async {
+    final homeRepo = _MockHomeCreationRepo();
+    when(() => homeRepo.joinHome(code: any(named: 'code'))).thenThrow(
+      FirebaseException(plugin: 'cloud_firestore', code: 'not-found'),
+    );
+
+    final c = _makeContainer(homeRepo: homeRepo);
+    addTearDown(c.dispose);
+
+    final result =
+        await c.read(onboardingNotifierProvider.notifier).joinHome('ABC123');
+
+    expect(result, isNull);
+    expect(c.read(onboardingNotifierProvider).error, 'invalid_invite');
+  });
+
+  test('joinHome sets network_error on SocketException', () async {
+    final homeRepo = _MockHomeCreationRepo();
+    when(() => homeRepo.joinHome(code: any(named: 'code')))
+        .thenThrow(const SocketException('No internet'));
+
+    final c = _makeContainer(homeRepo: homeRepo);
+    addTearDown(c.dispose);
+
+    final result =
+        await c.read(onboardingNotifierProvider.notifier).joinHome('ABC123');
+
+    expect(result, isNull);
+    expect(c.read(onboardingNotifierProvider).error, 'network_error');
+  });
+
+  test('joinHome sets unexpected_error on generic exception', () async {
+    final homeRepo = _MockHomeCreationRepo();
+    when(() => homeRepo.joinHome(code: any(named: 'code')))
+        .thenThrow(Exception('Something went wrong'));
+
+    final c = _makeContainer(homeRepo: homeRepo);
+    addTearDown(c.dispose);
+
+    final result =
+        await c.read(onboardingNotifierProvider.notifier).joinHome('ABC123');
+
+    expect(result, isNull);
+    expect(c.read(onboardingNotifierProvider).error, 'unexpected_error');
   });
 }

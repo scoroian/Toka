@@ -25,10 +25,11 @@ final onboardingRepositoryProvider = Provider<OnboardingRepository>.internal(
 // ignore: unused_element
 typedef OnboardingRepositoryRef = ProviderRef<OnboardingRepository>;
 String _$onboardingCompletedHash() =>
-    r'9e036bcaeb3b844e67299e02c20568ccadf38cfb';
+    r'1cabb9a13cec4b3216ed26cee355300f7e1a60ae';
 
-/// True if the user has already completed the onboarding flow on this device.
-/// Used by the router to distinguish "new user" from "user with no active homes".
+/// True if the user has already completed the onboarding flow.
+/// Checks SharedPreferences first (fast path), then Firestore as fallback so
+/// the flag survives app reinstalls and works across devices (Bug #onboarding-reinstall).
 ///
 /// Copied from [onboardingCompleted].
 @ProviderFor(onboardingCompleted)
@@ -46,7 +47,7 @@ final onboardingCompletedProvider = FutureProvider<bool>.internal(
 // ignore: unused_element
 typedef OnboardingCompletedRef = FutureProviderRef<bool>;
 String _$onboardingNotifierHash() =>
-    r'5eb07ed07903c951de66cdf2c52fb07ea2664e03';
+    r'8d1fde9468e7d63b254500790564c1d38e90576e';
 
 /// See also [OnboardingNotifier].
 @ProviderFor(OnboardingNotifier)

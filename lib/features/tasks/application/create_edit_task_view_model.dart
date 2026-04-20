@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart' show TimeOfDay;
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:timezone/timezone.dart' as tz;
 
 import '../../auth/application/auth_provider.dart';
 import '../../homes/application/current_home_provider.dart';
@@ -181,10 +182,21 @@ class CreateEditTaskViewModelNotifier
         ref.read(homeMembersProvider(homeId)).valueOrNull ?? [];
     final nameMap = {for (final m in members) m.uid: m.nickname};
 
+    final timezone = switch (rule) {
+      HourlyRule r => r.timezone,
+      DailyRule r => r.timezone,
+      WeeklyRule r => r.timezone,
+      MonthlyFixedRule r => r.timezone,
+      MonthlyNthRule r => r.timezone,
+      YearlyFixedRule r => r.timezone,
+      YearlyNthRule r => r.timezone,
+    };
+    final location = tz.getLocation(timezone);
+
     return dates.take(3).toList().asMap().entries.map((e) {
       final assigneeUid = order.isNotEmpty ? order[e.key % order.length] : null;
       return UpcomingDateItem(
-        date: e.value,
+        date: tz.TZDateTime.from(e.value, location),
         assigneeName: assigneeUid != null ? nameMap[assigneeUid] : null,
       );
     }).toList();

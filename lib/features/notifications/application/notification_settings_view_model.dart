@@ -47,16 +47,12 @@ class NotificationSettingsViewModelNotifier
 
     final prefsAsync =
         ref.watch(notificationPrefsProvider(homeId: homeId, uid: uid));
-    prefsAsync.whenData((p) {
-      if (!state.isLoaded) {
-        Future.microtask(() => state = state.copyWith(
-              isLoaded: true,
-              isPremium: isPremium,
-              prefs: p,
-            ));
-      }
-    });
-    return _NotifVMState(isPremium: isPremium);
+
+    return prefsAsync.when(
+      loading: () => _NotifVMState(isPremium: isPremium),
+      error: (_, __) => _NotifVMState(isPremium: isPremium),
+      data: (p) => _NotifVMState(isLoaded: true, isPremium: isPremium, prefs: p),
+    );
   }
 
   @override

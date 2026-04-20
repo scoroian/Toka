@@ -29,7 +29,7 @@ class TodayTaskCardTodo extends ConsumerWidget {
   String _dueDateLabel(BuildContext context, AppLocalizations l10n) {
     if (task.isOverdue) return l10n.today_overdue;
     final effectiveNow = now ?? DateTime.now();
-    final dueDate = task.nextDueAt;
+    final dueDate = task.nextDueAt.toLocal();
     final timeStr = DateFormat('HH:mm').format(dueDate);
     final isToday = dueDate.year == effectiveNow.year &&
         dueDate.month == effectiveNow.month &&

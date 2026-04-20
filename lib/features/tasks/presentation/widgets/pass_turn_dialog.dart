@@ -47,6 +47,8 @@ class _PassTurnDialogState extends State<PassTurnDialog> {
     final l10n = AppLocalizations.of(context);
     final before = (widget.currentComplianceRate * 100).round();
     final after = (widget.estimatedComplianceAfter * 100).round();
+    final diff =
+        (widget.currentComplianceRate - widget.estimatedComplianceAfter) * 100;
 
     return AlertDialog(
       title: Text(l10n.pass_turn_dialog_title),
@@ -55,23 +57,24 @@ class _PassTurnDialogState extends State<PassTurnDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: AppColors.error.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                l10n.pass_turn_compliance_warning(
-                  before.toString(),
-                  after.toString(),
+            if (diff >= 1.0)
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AppColors.error.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                style: const TextStyle(
-                  color: AppColors.error,
-                  fontWeight: FontWeight.w600,
+                child: Text(
+                  l10n.pass_turn_compliance_warning(
+                    before.toString(),
+                    after.toString(),
+                  ),
+                  style: const TextStyle(
+                    color: AppColors.error,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
-            ),
             const SizedBox(height: 12),
             if (widget.nextAssigneeName != null)
               Text(l10n.pass_turn_next_assignee(widget.nextAssigneeName!))

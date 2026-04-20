@@ -1,6 +1,7 @@
 // lib/features/tasks/application/task_detail_view_model.dart
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:timezone/timezone.dart' as tz;
 
 import '../../auth/application/auth_provider.dart';
 import '../../homes/application/current_home_provider.dart';
@@ -8,6 +9,7 @@ import '../../homes/domain/home_membership.dart';
 import '../../members/application/members_provider.dart';
 import '../../members/domain/member.dart';
 import '../../profile/application/profile_provider.dart';
+import '../domain/recurrence_rule.dart';
 import '../domain/task.dart';
 import '../domain/task_status.dart';
 import 'recurrence_provider.dart';
@@ -81,18 +83,34 @@ class _TaskDetailViewModelImpl implements TaskDetailViewModel {
 List<UpcomingOccurrence> _computeUpcomingOccurrences(
     Task task, List<DateTime> dates, Map<String, String?> nameMap) {
   final order = task.assignmentOrder;
+  final timezone = switch (task.recurrenceRule) {
+    HourlyRule r => r.timezone,
+    DailyRule r => r.timezone,
+    WeeklyRule r => r.timezone,
+    MonthlyFixedRule r => r.timezone,
+    MonthlyNthRule r => r.timezone,
+    YearlyFixedRule r => r.timezone,
+    YearlyNthRule r => r.timezone,
+  };
+  final location = tz.getLocation(timezone);
+
   if (order.isEmpty) {
-    return dates.map((d) => UpcomingOccurrence(date: d)).toList();
+    return dates
+        .map((d) => UpcomingOccurrence(date: tz.TZDateTime.from(d, location)))
+        .toList();
   }
   final currentUid = task.currentAssigneeUid;
   final currentIdx = currentUid != null ? order.indexOf(currentUid) : -1;
   return dates.asMap().entries.map((entry) {
     final i = entry.key;
+    // La primera fecha upcoming es para currentAssigneeUid, las siguientes rotan.
     final nextIdx = currentIdx >= 0
-        ? (currentIdx + 1 + i) % order.length
+        ? (currentIdx + i) % order.length
         : i % order.length;
     final uid = order[nextIdx];
-    return UpcomingOccurrence(date: entry.value, assigneeName: nameMap[uid]);
+    return UpcomingOccurrence(
+        date: tz.TZDateTime.from(entry.value, location),
+        assigneeName: nameMap[uid]);
   }).toList();
 }
 

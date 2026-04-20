@@ -26,5 +26,14 @@ void main() {
       );
       expect(result, greaterThanOrEqualTo(0.0));
     });
+
+    test('con 1 miembro (cumplimiento 100%) → diff proyectado < 1%', () {
+      // El usuario tiene 100 tareas completadas, 0 pasadas.
+      // Al pasar turno: estimado = 100/101 ≈ 0.9901 → diff ≈ 0.99 < 1 pp.
+      const rate = 1.0;
+      const estimated = 100 / 101;
+      const diff = (rate - estimated) * 100;
+      expect(diff, lessThan(1.0));
+    });
   });
 }

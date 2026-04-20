@@ -8,6 +8,7 @@ import 'package:toka/features/i18n/application/language_provider.dart';
 import 'package:toka/features/i18n/domain/language.dart';
 import 'package:toka/features/onboarding/application/onboarding_view_model.dart';
 import 'package:toka/features/onboarding/presentation/onboarding_flow_screen.dart';
+import 'package:toka/features/onboarding/presentation/widgets/home_join_form.dart';
 import 'package:toka/l10n/app_localizations.dart';
 
 GoRouter _fakeRouter() => GoRouter(
@@ -172,5 +173,68 @@ void main() {
       find.byType(OnboardingFlowScreen),
       matchesGoldenFile('goldens/onboarding_step3_home_choice.png'),
     );
+  });
+
+  // ── Tests de manejo de errores en HomeJoinForm (Bug #17) ──────────────────
+
+  Widget wrapJoinForm({String? error}) => MaterialApp(
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: const [Locale('es')],
+        home: Scaffold(
+          body: HomeJoinForm(
+            isLoading: false,
+            error: error,
+            onJoin: (_) async {},
+            onBack: () {},
+          ),
+        ),
+      );
+
+  testWidgets('HomeJoinForm muestra error genérico con unexpected_error',
+      (tester) async {
+    await tester.pumpWidget(wrapJoinForm(error: 'unexpected_error'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Ha ocurrido un error inesperado. Inténtalo de nuevo.'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('HomeJoinForm muestra error de red con network_error',
+      (tester) async {
+    await tester.pumpWidget(wrapJoinForm(error: 'network_error'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text(
+          'Sin conexión a internet. Comprueba tu red e inténtalo de nuevo.'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('HomeJoinForm muestra error de código inválido con invalid_invite',
+      (tester) async {
+    await tester.pumpWidget(wrapJoinForm(error: 'invalid_invite'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Código de invitación inválido'), findsOneWidget);
+  });
+
+  testWidgets('HomeJoinForm no muestra error cuando error es null',
+      (tester) async {
+    await tester.pumpWidget(wrapJoinForm());
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Ha ocurrido un error inesperado. Inténtalo de nuevo.'),
+      findsNothing,
+    );
+    expect(find.text('Código de invitación inválido'), findsNothing);
   });
 }

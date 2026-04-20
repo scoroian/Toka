@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/routes.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../../shared/widgets/ad_banner.dart';
+import '../../../shared/widgets/ad_banner_config_provider.dart';
 import '../../../shared/widgets/loading_widget.dart';
 import '../../../shared/widgets/no_home_empty_state.dart';
 import '../../../shared/widgets/skins/main_shell_v2.dart';
@@ -69,13 +69,16 @@ class MembersScreen extends ConsumerWidget {
           );
         }
 
+        final adConfig = ref.watch(adBannerConfigProvider);
+        final bannerVisible = adConfig.show && adConfig.unitId.isNotEmpty;
+        final bannerSlot =
+            MainShellV2.bannerSlotHeight(bannerVisible: bannerVisible);
+
         return Scaffold(
           appBar: AppBar(title: Text(l10n.members_title)),
           floatingActionButton: data.canInvite
               ? Padding(
-                  padding: const EdgeInsets.only(
-                    bottom: MainShellV2.kNavBarHeight + MainShellV2.kNavBarBottom,
-                  ),
+                  padding: EdgeInsets.only(bottom: bannerSlot),
                   child: FloatingActionButton.extended(
                     key: const Key('fab_invite'),
                     onPressed: () => showModalBottomSheet(
@@ -88,10 +91,7 @@ class MembersScreen extends ConsumerWidget {
                   ),
                 )
               : null,
-          body: Column(
-            children: [
-              Expanded(
-                child: ListView(
+          body: ListView(
                   key: const Key('members_list'),
                   children: [
                     if (data.activeMembers.isNotEmpty) ...[
@@ -130,10 +130,6 @@ class MembersScreen extends ConsumerWidget {
                     ],
                   ],
                 ),
-              ),
-              const AdBanner(key: Key('ad_banner')),
-            ],
-          ),
         );
       },
     );

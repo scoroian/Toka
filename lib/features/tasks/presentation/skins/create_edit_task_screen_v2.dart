@@ -59,6 +59,14 @@ class _CreateEditTaskScreenV2State
 
     final formState = ref.watch(taskFormNotifierProvider);
 
+    // Observar el estado del VM notifier directamente para que el widget
+    // reconstruya cuando cambie hasFixedTime (u otro campo del VM state).
+    // Sin esto, createEditTaskViewModelProvider devuelve la misma referencia
+    // del notifier → Riverpod no detecta cambio → widget no reconstruye →
+    // SwitchListTile.value queda obsoleto y la semántica de accesibilidad
+    // reporta checked=false aunque el estado real sea true. (Bug #13)
+    ref.watch(createEditTaskViewModelNotifierProvider(widget.editTaskId));
+
     ref.listen(
       createEditTaskViewModelNotifierProvider(widget.editTaskId),
       (prev, next) {
@@ -80,7 +88,6 @@ class _CreateEditTaskScreenV2State
     );
 
     final titleError = formState.fieldErrors['title'];
-    final assigneesError = formState.fieldErrors['assignees'];
     final recurrenceError = formState.fieldErrors['recurrence'];
 
     return Scaffold(
@@ -98,10 +105,15 @@ class _CreateEditTaskScreenV2State
               ),
             )
           else
-            TextButton(
-              key: const Key('save_task_button'),
-              onPressed: vm.canSave ? vm.save : null,
-              child: Text(l10n.save),
+            Tooltip(
+              message: vm.canSave
+                  ? ''
+                  : _saveDisabledReason(formState, l10n),
+              child: TextButton(
+                key: const Key('save_task_button'),
+                onPressed: vm.canSave ? vm.save : null,
+                child: Text(l10n.save),
+              ),
             ),
         ],
       ),
@@ -192,11 +204,13 @@ class _CreateEditTaskScreenV2State
             onToggle: vm.toggleMember,
             onReorder: vm.reorderMember,
           ),
-          if (assigneesError != null)
+          // Error reactivo: se muestra en cuanto no hay ningún miembro seleccionado
+          if (formState.assignmentOrder.isEmpty)
             Padding(
-              padding: const EdgeInsets.only(top: 4),
+              padding: const EdgeInsets.only(top: 4, left: 12),
               child: Text(
                 l10n.tasks_validation_no_assignees,
+                key: const Key('assignees_error'),
                 style: TextStyle(
                     color: Theme.of(context).colorScheme.error, fontSize: 12),
               ),
@@ -258,6 +272,12 @@ class _CreateEditTaskScreenV2State
     }
     return null;
   }
+
+  String _saveDisabledReason(TaskFormState state, AppLocalizations l10n) {
+    if (state.title.trim().isEmpty) return l10n.tasks_validation_title_empty;
+    if (state.assignmentOrder.isEmpty) return l10n.tasks_validation_no_assignees;
+    return '';
+  }
 }
 
 class _OnMissAssignSelector extends StatelessWidget {
@@ -267,9 +287,13 @@ class _OnMissAssignSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    if (vm.orderedMembers.where((m) => m.isAssigned).length <= 1) {
-      return const SizedBox.shrink();
-    }
+    final assignedCount = vm.orderedMembers.where((m) => m.isAssigned).length;
+
+    // Con 0 miembros no tiene sentido mostrar el selector
+    if (assignedCount == 0) return const SizedBox.shrink();
+
+    final isEnabled = assignedCount >= 2;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
       child: Column(
@@ -293,8 +317,21 @@ class _OnMissAssignSelector extends StatelessWidget {
               ),
             ],
             selected: {vm.onMissAssign},
-            onSelectionChanged: (set) => vm.setOnMissAssign(set.first),
+            onSelectionChanged:
+                isEnabled ? (set) => vm.setOnMissAssign(set.first) : null,
           ),
+          if (!isEnabled)
+            Padding(
+              padding: const EdgeInsets.only(top: 4, left: 4),
+              child: Text(
+                l10n.tasks_rotation_requires_two_members,
+                key: const Key('rotation_requires_two_hint'),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
         ],
       ),
     );

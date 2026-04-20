@@ -9,7 +9,6 @@ import '../data/auth_repository_impl.dart';
 import '../domain/auth_repository.dart';
 import '../domain/auth_user.dart';
 import '../domain/failures/auth_failure.dart';
-import '../../homes/application/current_home_provider.dart';
 import 'auth_state.dart';
 
 part 'auth_provider.g.dart';
@@ -115,11 +114,11 @@ class Auth extends _$Auth {
   }
 
   Future<void> signOut() async {
+    // NOTA: No llamamos ref.invalidate(currentHomeProvider) aquí porque
+    // currentHomeProvider ya depende de authProvider (ciclo directo →
+    // CircularDependencyError). La invalidación la maneja RouterNotifier
+    // en su listener de authProvider (Bug #15).
     await _repo.signOut();
     ref.invalidateSelf();
-    // Invalidate after the current frame to avoid circular dependency
-    // (currentHomeProvider watches authProvider, so it rebuilds on its own,
-    // but explicit invalidation ensures stale cached data is cleared too).
-    Future.microtask(() => ref.invalidate(currentHomeProvider));
   }
 }

@@ -28,7 +28,7 @@ class TaskPreview with _$TaskPreview {
         currentAssigneeUid: map['currentAssigneeUid'] as String?,
         currentAssigneeName: map['currentAssigneeName'] as String?,
         currentAssigneePhoto: map['currentAssigneePhoto'] as String?,
-        nextDueAt: (map['nextDueAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+        nextDueAt: (map['nextDueAt'] as Timestamp?)?.toDate().toLocal() ?? DateTime.now(),
         isOverdue: map['isOverdue'] as bool? ?? false,
         status: map['status'] as String? ?? 'active',
       );
@@ -57,7 +57,7 @@ class DoneTaskPreview with _$DoneTaskPreview {
         completedByUid: map['completedByUid'] as String,
         completedByName: map['completedByName'] as String,
         completedByPhoto: map['completedByPhoto'] as String?,
-        completedAt: (map['completedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+        completedAt: (map['completedAt'] as Timestamp?)?.toDate().toLocal() ?? DateTime.now(),
       );
 }
 

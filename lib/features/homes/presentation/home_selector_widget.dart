@@ -6,6 +6,7 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../../../core/constants/routes.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../shared/widgets/skins/main_shell_v2.dart';
 import '../../auth/application/auth_provider.dart';
 import '../application/current_home_provider.dart';
 import '../application/home_slot_provider.dart';
@@ -249,12 +250,97 @@ class _HomeSelectorSheet extends ConsumerWidget {
 }
 
 // ---------------------------------------------------------------------------
+// Funciones públicas para abrir el sheet desde cualquier pantalla
+// ---------------------------------------------------------------------------
+
+/// Muestra el sheet de "Crear hogar", con verificación de slots previa.
+void showCreateHomeSheet(BuildContext context, WidgetRef ref, int currentCount) {
+  _checkSlotsAndShow(context, ref, currentCount, _AddHomeMode.create);
+}
+
+/// Muestra el sheet de "Unirse a hogar" (código / QR), con verificación de slots previa.
+void showJoinHomeSheet(BuildContext context, WidgetRef ref, int currentCount) {
+  _checkSlotsAndShow(context, ref, currentCount, _AddHomeMode.joinCode);
+}
+
+void _checkSlotsAndShow(
+  BuildContext context,
+  WidgetRef ref,
+  int currentCount,
+  _AddHomeMode initialMode,
+) {
+  final l10n = AppLocalizations.of(context);
+  final slotsAsync = ref.read(availableSlotsProvider);
+  slotsAsync.when(
+    loading: () => _openAddHomeSheet(context, ref, initialMode),
+    error: (_, __) => _openAddHomeSheet(context, ref, initialMode),
+    data: (available) {
+      if (currentCount >= 5) {
+        _showMaxHomesDialog(context, l10n);
+      } else if (available <= 0) {
+        _showUpgradeDialog(context, l10n);
+      } else {
+        _openAddHomeSheet(context, ref, initialMode);
+      }
+    },
+  );
+}
+
+void _openAddHomeSheet(BuildContext context, WidgetRef ref, _AddHomeMode initialMode) {
+  showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    builder: (ctx) => _AddHomeSheet(ref: ref, initialMode: initialMode),
+  );
+}
+
+void _showMaxHomesDialog(BuildContext context, AppLocalizations l10n) {
+  showDialog<void>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: Text(l10n.homes_max_reached_title),
+      content: Text(l10n.homes_max_reached_body),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(ctx).pop(),
+          child: Text(l10n.done),
+        ),
+      ],
+    ),
+  );
+}
+
+void _showUpgradeDialog(BuildContext context, AppLocalizations l10n) {
+  showDialog<void>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: Text(l10n.homes_upgrade_title),
+      content: Text(l10n.homes_upgrade_body),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(ctx).pop(),
+          child: Text(l10n.cancel),
+        ),
+        FilledButton(
+          onPressed: () {
+            Navigator.of(ctx).pop();
+            context.push(AppRoutes.paywall);
+          },
+          child: Text(l10n.homes_upgrade_button),
+        ),
+      ],
+    ),
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Sheet: Crear hogar | Unirse a un hogar
 // ---------------------------------------------------------------------------
 class _AddHomeSheet extends ConsumerStatefulWidget {
-  const _AddHomeSheet({required this.ref});
+  const _AddHomeSheet({required this.ref, this.initialMode = _AddHomeMode.menu});
 
   final WidgetRef ref;
+  final _AddHomeMode initialMode;
 
   @override
   ConsumerState<_AddHomeSheet> createState() => _AddHomeSheetState();
@@ -263,7 +349,13 @@ class _AddHomeSheet extends ConsumerStatefulWidget {
 enum _AddHomeMode { menu, create, joinCode, joinQr }
 
 class _AddHomeSheetState extends ConsumerState<_AddHomeSheet> {
-  _AddHomeMode _mode = _AddHomeMode.menu;
+  late _AddHomeMode _mode;
+
+  @override
+  void initState() {
+    super.initState();
+    _mode = widget.initialMode;
+  }
   final _nameCtrl = TextEditingController();
   final _codeCtrl = TextEditingController();
   bool _isLoading = false;
@@ -352,12 +444,15 @@ class _AddHomeSheetState extends ConsumerState<_AddHomeSheet> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
 
+    final mq = MediaQuery.of(context);
+    const navBarExtra = MainShellV2.kNavBarHeight + MainShellV2.kNavBarBottom;
+    final bottomPadding = mq.viewInsets.bottom + mq.viewPadding.bottom + navBarExtra;
     return SingleChildScrollView(
       padding: EdgeInsets.only(
         left: 16,
         right: 16,
         top: 16,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+        bottom: bottomPadding + 24,
       ),
       child: switch (_mode) {
         _AddHomeMode.menu => _buildMenu(context, l10n),

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart';
@@ -15,6 +16,11 @@ const String _kTestBanneriOS = 'ca-app-pub-3940256099942544/2934735716';
 class AdBanner extends ConsumerStatefulWidget {
   const AdBanner({super.key});
 
+  // Altura del contenedor visual del banner (ad 320x50 + padding vertical mínimo).
+  // Usada por MainShellV2 para reservar espacio en el Scaffold cuando el
+  // banner está visible, y por los FABs para levantarse por encima.
+  static const double kBannerHeight = 58;
+
   @override
   ConsumerState<AdBanner> createState() => _AdBannerState();
 }
@@ -24,6 +30,11 @@ class _AdBannerState extends ConsumerState<AdBanner> {
   bool _loaded = false;
   bool _failed = false;
   String? _loadedUnitId;
+  Timer? _refreshTimer;
+
+  // Refresh cada 60s cumple la política de Google AdMob
+  // (https://support.google.com/admob/answer/3408659): mínimo 60s.
+  static const Duration _kRefreshInterval = Duration(seconds: 60);
 
   String _effectiveUnitId(String fromServer) {
     if (kDebugMode) {
@@ -68,8 +79,20 @@ class _AdBannerState extends ConsumerState<AdBanner> {
     )..load();
   }
 
+  void _scheduleRefresh(String unitId) {
+    _refreshTimer?.cancel();
+    _refreshTimer = Timer.periodic(_kRefreshInterval, (_) {
+      if (!mounted) return;
+      // Sólo refresca si el banner anterior cargó correctamente; si falló,
+      // no quememos inventario reintentando en bucle.
+      if (_failed) return;
+      _loadBanner(unitId);
+    });
+  }
+
   void _syncWithConfig(AdBannerConfig config) {
     if (!config.show || config.unitId.isEmpty) {
+      _refreshTimer?.cancel();
       if (_banner != null || _loaded) {
         setState(_disposeBanner);
       }
@@ -79,10 +102,12 @@ class _AdBannerState extends ConsumerState<AdBanner> {
     if (_failed) return;
     if (_banner != null && _loadedUnitId == effective) return;
     _loadBanner(effective);
+    _scheduleRefresh(effective);
   }
 
   @override
   void dispose() {
+    _refreshTimer?.cancel();
     _banner?.dispose();
     super.dispose();
   }
@@ -107,18 +132,39 @@ class _AdBannerState extends ConsumerState<AdBanner> {
     }
 
     if (_failed) {
-      // Una vez falló, no retry automático — mejor espacio vacío que loop infinito.
       return const SizedBox.shrink();
     }
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     if (!_loaded || _banner == null) {
-      return const SizedBox(height: 50);
+      return const SizedBox(height: AdBanner.kBannerHeight);
     }
 
-    return SizedBox(
-      width: _banner!.size.width.toDouble(),
-      height: _banner!.size.height.toDouble(),
-      child: AdWidget(ad: _banner!),
+    return Center(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(14),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: isDark
+                ? const Color(0xFF14141E).withValues(alpha: 0.88)
+                : Colors.white.withValues(alpha: 0.92),
+            borderRadius: BorderRadius.circular(14),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.08),
+                blurRadius: 12,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: SizedBox(
+            width: _banner!.size.width.toDouble(),
+            height: _banner!.size.height.toDouble(),
+            child: AdWidget(ad: _banner!),
+          ),
+        ),
+      ),
     );
   }
 }

@@ -65,9 +65,10 @@ void main() {
   });
 
   test('generateInviteCode retorna código de 6 chars', () async {
+    final expiresAt = DateTime.now().add(const Duration(days: 7));
     when(() => repo.generateInviteCode('home1'))
-        .thenAnswer((_) async => 'ABC123');
-    final code = await repo.generateInviteCode('home1');
-    expect(code.length, 6);
+        .thenAnswer((_) async => (code: 'ABC123', expiresAt: expiresAt));
+    final result = await repo.generateInviteCode('home1');
+    expect(result.code.length, 6);
   });
 }

@@ -160,12 +160,14 @@ export const joinHome = onCall(async (request) => {
   const homeRef = db.collection("homes").doc(homeId);
   const invRef = homeRef.collection("invitations").doc(invitationId);
   const userRef = db.collection("users").doc(uid);
+  const memberRef = homeRef.collection("members").doc(uid);
 
   await db.runTransaction(async (tx) => {
-    const [invDoc, homeDoc, userDoc] = await Promise.all([
+    const [invDoc, homeDoc, userDoc, existingMember] = await Promise.all([
       tx.get(invRef),
       tx.get(homeRef),
       tx.get(userRef),
+      tx.get(memberRef),
     ]);
 
     if (!invDoc.exists) {
@@ -191,29 +193,40 @@ export const joinHome = onCall(async (request) => {
     const memberPhotoUrl = (userDataTx["photoUrl"] as string | undefined) ?? null;
     const now = FieldValue.serverTimestamp();
 
+    // Rejoin: preservar rol previo (admin/member) si el doc ya existía.
+    const preservedRole =
+      (existingMember.data()?.["role"] as string | undefined) ?? "member";
+
     tx.update(invRef, { used: true, usedAt: now, usedBy: uid });
     tx.set(
       db.collection("users").doc(uid).collection("memberships").doc(homeId),
       {
         homeNameSnapshot: homeName,
-        role: "member",
+        role: preservedRole,
         billingState: "none",
         status: "active",
         joinedAt: now,
         leftAt: null,
       }
     );
-    // Crear documento de miembro en la subcolección del hogar con datos reales del usuario
-    tx.set(
-      db.collection("homes").doc(homeId).collection("members").doc(uid),
-      buildNewMemberDoc({
-        uid,
+    if (existingMember.exists) {
+      tx.update(memberRef, {
         nickname: memberNickname,
-        role: "member",
         photoUrl: memberPhotoUrl,
-      }),
-      { merge: true }
-    );
+        status: "active",
+        rejoinedAt: now,
+      });
+    } else {
+      tx.set(
+        memberRef,
+        buildNewMemberDoc({
+          uid,
+          nickname: memberNickname,
+          role: "member",
+          photoUrl: memberPhotoUrl,
+        })
+      );
+    }
   });
 });
 
@@ -256,12 +269,14 @@ export const joinHomeByCode = onCall(async (request) => {
   const homeRef = invDoc.ref.parent.parent!;
   const invRef = invDoc.ref;
   const userRef = db.collection("users").doc(uid);
+  const memberRef = homeRef.collection("members").doc(uid);
 
   await db.runTransaction(async (tx) => {
-    const [homeDoc, freshInv, userDoc] = await Promise.all([
+    const [homeDoc, freshInv, userDoc, existingMember] = await Promise.all([
       tx.get(homeRef),
       tx.get(invRef),
       tx.get(userRef),
+      tx.get(memberRef),
     ]);
 
     if (!homeDoc.exists) throw new HttpsError("not-found", "Home not found");
@@ -275,29 +290,40 @@ export const joinHomeByCode = onCall(async (request) => {
     const memberPhotoUrl = (userDataTx["photoUrl"] as string | undefined) ?? null;
     const now = FieldValue.serverTimestamp();
 
+    // Rejoin: preservar rol previo (admin/member) si el doc ya existía.
+    const preservedRole =
+      (existingMember.data()?.["role"] as string | undefined) ?? "member";
+
     tx.update(invRef, { used: true, usedAt: now, usedBy: uid });
     tx.set(
       db.collection("users").doc(uid).collection("memberships").doc(homeRef.id),
       {
         homeNameSnapshot: homeName,
-        role: "member",
+        role: preservedRole,
         billingState: "none",
         status: "active",
         joinedAt: now,
         leftAt: null,
       }
     );
-    // Crear documento de miembro en la subcolección del hogar con datos reales del usuario
-    tx.set(
-      homeRef.collection("members").doc(uid),
-      buildNewMemberDoc({
-        uid,
+    if (existingMember.exists) {
+      tx.update(memberRef, {
         nickname: memberNickname,
-        role: "member",
         photoUrl: memberPhotoUrl,
-      }),
-      { merge: true }
-    );
+        status: "active",
+        rejoinedAt: now,
+      });
+    } else {
+      tx.set(
+        memberRef,
+        buildNewMemberDoc({
+          uid,
+          nickname: memberNickname,
+          role: "member",
+          photoUrl: memberPhotoUrl,
+        })
+      );
+    }
   });
 });
 
@@ -323,39 +349,50 @@ export const leaveHome = onCall(async (request) => {
     .doc(uid)
     .collection("memberships")
     .doc(homeId);
-
-  const memberDoc = await membershipRef.get();
-  if (!memberDoc.exists) {
-    throw new HttpsError("not-found", "Membership not found");
-  }
-  if (memberDoc.data()!["role"] === "owner") {
-    throw new HttpsError("failed-precondition", "Owner cannot leave home");
-  }
-
-  // Guard: payer cannot leave while there's an active Premium billing period.
   const homeRef = db.collection("homes").doc(homeId);
-  const homeDoc = await homeRef.get();
-  if (homeDoc.exists) {
-    const homeData = homeDoc.data()!;
-    const PROTECTED_STATUSES = ["active", "cancelledPendingEnd", "rescue"];
-    const currentPayerUid = homeData["currentPayerUid"] as string | null | undefined;
-    const premiumStatus = homeData["premiumStatus"] as string | undefined;
+  const memberRef = homeRef.collection("members").doc(uid);
 
-    if (
-      uid === currentPayerUid &&
-      premiumStatus &&
-      PROTECTED_STATUSES.includes(premiumStatus)
-    ) {
-      throw new HttpsError(
-        "failed-precondition",
-        "payer-cannot-leave-or-be-removed-while-premium-active"
-      );
+  await db.runTransaction(async (tx) => {
+    const [membershipDoc, homeDoc, memberDoc] = await Promise.all([
+      tx.get(membershipRef),
+      tx.get(homeRef),
+      tx.get(memberRef),
+    ]);
+
+    if (!membershipDoc.exists) {
+      throw new HttpsError("not-found", "Membership not found");
     }
-  }
+    if (membershipDoc.data()!["role"] === "owner") {
+      throw new HttpsError("failed-precondition", "Owner cannot leave home");
+    }
 
-  await membershipRef.update({
-    status: "left",
-    leftAt: FieldValue.serverTimestamp(),
+    // Payer cannot leave while there's an active Premium billing period.
+    if (homeDoc.exists) {
+      const homeData = homeDoc.data()!;
+      const PROTECTED_STATUSES = ["active", "cancelledPendingEnd", "rescue"];
+      const currentPayerUid = homeData["currentPayerUid"] as
+        | string
+        | null
+        | undefined;
+      const premiumStatus = homeData["premiumStatus"] as string | undefined;
+
+      if (
+        uid === currentPayerUid &&
+        premiumStatus &&
+        PROTECTED_STATUSES.includes(premiumStatus)
+      ) {
+        throw new HttpsError(
+          "failed-precondition",
+          "payer-cannot-leave-or-be-removed-while-premium-active"
+        );
+      }
+    }
+
+    const now = FieldValue.serverTimestamp();
+    tx.update(membershipRef, { status: "left", leftAt: now });
+    if (memberDoc.exists) {
+      tx.update(memberRef, { status: "left", leftAt: now });
+    }
   });
 });
 
@@ -448,14 +485,13 @@ export const removeMember = onCall(async (request) => {
       }
     }
 
-    tx.update(targetMemberRef, {
-      status: "left",
-      leftAt: FieldValue.serverTimestamp(),
-    });
-    tx.update(targetMembershipRef, {
-      status: "left",
-      leftAt: FieldValue.serverTimestamp(),
-    });
+    const now = FieldValue.serverTimestamp();
+    tx.update(targetMemberRef, { status: "left", leftAt: now });
+    tx.set(
+      targetMembershipRef,
+      { status: "left", leftAt: now },
+      { merge: true }
+    );
   });
 
   logger.info(
@@ -841,6 +877,26 @@ export const transferOwnership = onCall(async (request) => {
       throw new HttpsError("not-found", "New owner is not a member of this home");
     }
 
+    // Payer lock: si el caller es payer con Premium activo, no puede transferir
+    // ownership (sería un backdoor para salirse del hogar vía transferencia).
+    const homeData = homeDoc.data()!;
+    const PROTECTED_STATUSES = ["active", "cancelledPendingEnd", "rescue"];
+    const currentPayerUid = homeData["currentPayerUid"] as
+      | string
+      | null
+      | undefined;
+    const premiumStatus = homeData["premiumStatus"] as string | undefined;
+    if (
+      uid === currentPayerUid &&
+      premiumStatus &&
+      PROTECTED_STATUSES.includes(premiumStatus)
+    ) {
+      throw new HttpsError(
+        "failed-precondition",
+        "payer-cannot-transfer-ownership-while-premium-active"
+      );
+    }
+
     // homes/{homeId}: actualizar ownerUid
     tx.update(homeRef, { ownerUid: newOwnerUid });
 
@@ -965,6 +1021,10 @@ export const debugSetPremiumStatus = onCall(async (request) => {
     typed === "cancelledPendingEnd" ||
     typed === "rescue";
 
+  // En prod syncEntitlement setea currentPayerUid al uid comprador. En QA lo
+  // alineamos con el owner para que los guards de payer-lock funcionen igual.
+  const currentPayerUid = isPremium ? uid : null;
+
   const batch = db.batch();
   batch.update(homeRef, {
     premiumStatus: typed,
@@ -972,6 +1032,7 @@ export const debugSetPremiumStatus = onCall(async (request) => {
     restoreUntil,
     autoRenewEnabled,
     premiumPlan,
+    currentPayerUid,
     updatedAt: FieldValue.serverTimestamp(),
   });
   batch.set(

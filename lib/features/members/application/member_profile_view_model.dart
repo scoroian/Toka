@@ -5,6 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../auth/application/auth_provider.dart';
 import '../../homes/domain/home_membership.dart';
 import '../../profile/application/member_radar_provider.dart';
+import '../../profile/application/profile_provider.dart';
 import '../../profile/presentation/widgets/radar_chart_widget.dart';
 import '../domain/member.dart';
 import 'members_provider.dart';
@@ -35,6 +36,7 @@ class MemberProfileViewData {
     required this.compliancePct,
     required this.radarEntries,
     required this.canManageRoles,
+    required this.canRemoveMember,
     required this.completedCount,
     required this.streakCount,
     required this.averageScore,
@@ -48,6 +50,8 @@ class MemberProfileViewData {
   final List<RadarEntry> radarEntries;
   /// True si el usuario actual es owner del hogar y puede promover/degradar.
   final bool canManageRoles;
+  /// True si el usuario actual es owner y puede expulsar a este miembro.
+  final bool canRemoveMember;
   final int completedCount;
   final int streakCount;
   final double averageScore;
@@ -59,6 +63,7 @@ abstract class MemberProfileViewModel {
   AsyncValue<MemberProfileViewData?> get viewData;
   Future<void> promoteToAdmin(String homeId, String uid);
   Future<void> demoteFromAdmin(String homeId, String uid);
+  Future<void> removeMember(String homeId, String uid);
 }
 
 class _MemberProfileViewModelImpl implements MemberProfileViewModel {
@@ -78,13 +83,10 @@ class _MemberProfileViewModelImpl implements MemberProfileViewModel {
   @override
   Future<void> demoteFromAdmin(String homeId, String uid) =>
       ref.read(membersRepositoryProvider).demoteFromAdmin(homeId, uid);
-}
 
-// Moved from member_profile_screen.dart
-@riverpod
-Future<Member> memberDetail(
-    MemberDetailRef ref, String homeId, String uid) async {
-  return ref.watch(membersRepositoryProvider).fetchMember(homeId, uid);
+  @override
+  Future<void> removeMember(String homeId, String uid) =>
+      ref.read(membersRepositoryProvider).removeMember(homeId, uid);
 }
 
 @riverpod
@@ -97,15 +99,31 @@ MemberProfileViewModel memberProfileViewModel(
   final currentUid = auth.whenOrNull(authenticated: (u) => u.uid) ?? '';
   final isSelf = currentUid == memberUid;
 
-  // Rol del usuario actual en este hogar (para decidir si puede gestionar roles)
-  final allMembers = ref.watch(homeMembersProvider(homeId)).valueOrNull ?? [];
+  // Stream reactivo de todos los miembros del hogar (se actualiza al cambiar rol)
+  final allMembersAsync = ref.watch(homeMembersProvider(homeId));
+  final allMembers = allMembersAsync.valueOrNull ?? [];
+
   final myMember = allMembers.cast<Member?>().firstWhere(
         (m) => m?.uid == currentUid,
         orElse: () => null,
       );
   final isOwner = myMember?.role == MemberRole.owner;
 
-  final memberAsync = ref.watch(memberDetailProvider(homeId, memberUid));
+  // Derivar el miembro objetivo desde el mismo stream reactivo (en lugar de FutureProvider)
+  final memberAsync = allMembersAsync.whenData(
+    (members) {
+      final found = members.cast<Member?>().firstWhere(
+            (m) => m?.uid == memberUid,
+            orElse: () => null,
+          );
+      if (found == null) throw Exception('Member $memberUid not found');
+      return found;
+    },
+  );
+
+  // Fallback al perfil users/{uid} para photoUrl/nickname vacíos en el doc de miembro
+  // (mismo enriquecimiento que MembersScreen.enrich para coherencia lista↔detalle)
+  final profileFallback = ref.watch(userProfileProvider(memberUid)).valueOrNull;
   final radarAsync =
       ref.watch(memberRadarProvider(homeId: homeId, uid: memberUid));
   final allRadarEntries = radarAsync.valueOrNull ?? [];
@@ -126,19 +144,32 @@ MemberProfileViewModel memberProfileViewModel(
 
   final canManageRoles = isOwner && !isSelf;
 
-  final viewData = memberAsync.whenData((member) => MemberProfileViewData(
-        member: member,
+  final viewData = memberAsync.whenData((member) {
+    // Enriquecer con datos de users/{uid} si el doc de miembro tiene campos vacíos
+    final enriched = member.copyWith(
+      nickname: member.nickname.isEmpty &&
+              (profileFallback?.nickname.isNotEmpty ?? false)
+          ? profileFallback!.nickname
+          : member.nickname,
+      photoUrl: member.photoUrl ?? profileFallback?.photoUrl,
+    );
+    final canRemoveMember =
+        isOwner && !isSelf && member.role != MemberRole.owner;
+    return MemberProfileViewData(
+        member: enriched,
         isSelf: isSelf,
         visiblePhone: member.phoneForViewer(isSelf: isSelf),
         compliancePct: (member.complianceRate * 100).toStringAsFixed(1),
         radarEntries: visibleRadarEntries,
         canManageRoles: canManageRoles,
+        canRemoveMember: canRemoveMember,
         completedCount: member.tasksCompleted,
         streakCount: member.currentStreak,
         averageScore: member.averageScore,
         showRadar: showRadar,
         overflowEntries: overflowEntries,
-      ));
+      );
+  });
 
   return _MemberProfileViewModelImpl(viewData: viewData, ref: ref);
 }

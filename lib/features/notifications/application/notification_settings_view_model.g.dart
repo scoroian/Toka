@@ -183,7 +183,7 @@ class _NotificationSettingsViewModelProviderElement
 }
 
 String _$notificationSettingsViewModelNotifierHash() =>
-    r'923660410b16c703247fd7c42c551e33bbf1a9f6';
+    r'a980d1921fed0702bf0cd166af6678b84c1aabf9';
 
 abstract class _$NotificationSettingsViewModelNotifier
     extends BuildlessAutoDisposeNotifier<_NotifVMState> {

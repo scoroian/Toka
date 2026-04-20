@@ -8,8 +8,8 @@ abstract class AppRoutes {
   static const String home = '/home';
   static const String tasks = '/tasks';
   static const String createTask = '/tasks/new';
-  static const String taskDetail = '/task/:id';
-  static const String editTask = '/task/:id/edit';
+  static const String taskDetail = '/tasks/:id';
+  static const String editTask = '/tasks/:id/edit';
   static const String profile = '/profile';
   static const String settings = '/settings';
   static const String subscription = '/subscription';
@@ -18,6 +18,7 @@ abstract class AppRoutes {
   static const String downgradePlanner = '/subscription/downgrade-planner';
   static const String myHomes = '/my-homes';
   static const String homeSettings = '/home-settings';
+  static const String homeSettingsMembers = '/home-settings/members';
   static const String editProfile = '/profile/edit';
   static const String members = '/members';
   static const String memberProfile = '/member/:uid';
@@ -42,6 +43,7 @@ abstract class AppRoutes {
     downgradePlanner,
     myHomes,
     homeSettings,
+    homeSettingsMembers,
     editProfile,
     members,
     memberProfile,

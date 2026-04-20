@@ -25,7 +25,7 @@ class UpcomingDatesPreview extends StatelessWidget {
             key: Key('upcoming_date_${item.date.millisecondsSinceEpoch}'),
             dense: true,
             leading: const Icon(Icons.calendar_today, size: 18),
-            title: Text(DateFormat.yMMMd().add_Hm().format(item.date.toLocal())),
+            title: Text(DateFormat.yMMMd().add_Hm().format(item.date)),
             subtitle: item.assigneeName != null
                 ? Text(l10n.tasks_upcoming_preview_assignee(item.assigneeName!))
                 : null,

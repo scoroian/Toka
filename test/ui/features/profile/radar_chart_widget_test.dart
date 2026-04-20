@@ -44,6 +44,30 @@ void main() {
       expect(find.byKey(const Key('radar_no_data')), findsOneWidget);
     });
 
+    testWidgets('RadarChartWidget con 1 tarea muestra fallback de texto', (t) async {
+      const data = [RadarEntry(taskName: 'Barrer', avgScore: 5.0)];
+      await t.pumpWidget(_wrap(const RadarChartWidget(entries: data)));
+      await t.pumpAndSettle();
+      expect(find.byType(RadarChart), findsNothing);
+      expect(find.byKey(const Key('radar_no_data')), findsNothing);
+      expect(find.byKey(const Key('radar_text_fallback')), findsOneWidget);
+      expect(find.text('Barrer'), findsOneWidget);
+      expect(find.text('5.0'), findsOneWidget);
+    });
+
+    testWidgets('RadarChartWidget con 2 tareas muestra fallback de texto', (t) async {
+      const data = [
+        RadarEntry(taskName: 'Barrer', avgScore: 5.0),
+        RadarEntry(taskName: 'Fregar', avgScore: 9.0),
+      ];
+      await t.pumpWidget(_wrap(const RadarChartWidget(entries: data)));
+      await t.pumpAndSettle();
+      expect(find.byType(RadarChart), findsNothing);
+      expect(find.byKey(const Key('radar_text_fallback')), findsOneWidget);
+      expect(find.text('Barrer'), findsOneWidget);
+      expect(find.text('Fregar'), findsOneWidget);
+    });
+
     testWidgets('RadarChartWidget con 12 tareas muestra 10 en chart + StrengthsListWidget', (t) async {
       final data = List.generate(
         12,

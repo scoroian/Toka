@@ -10,7 +10,7 @@ import '../../homes/domain/home_membership.dart';
 import '../application/member_profile_view_model.dart';
 import 'widgets/member_role_badge.dart';
 
-class MemberProfileScreen extends ConsumerWidget {
+class MemberProfileScreen extends ConsumerStatefulWidget {
   const MemberProfileScreen({
     super.key,
     required this.homeId,
@@ -20,9 +20,16 @@ class MemberProfileScreen extends ConsumerWidget {
   final String homeId;
   final String memberUid;
 
+  @override
+  ConsumerState<MemberProfileScreen> createState() =>
+      _MemberProfileScreenState();
+}
+
+class _MemberProfileScreenState extends ConsumerState<MemberProfileScreen> {
+  bool _isLoading = false;
+
   Future<void> _toggleAdminRole(
     BuildContext context,
-    WidgetRef ref,
     MemberProfileViewModel vm,
     MemberProfileViewData data,
     AppLocalizations l10n,
@@ -55,11 +62,12 @@ class MemberProfileScreen extends ConsumerWidget {
     );
     if (confirmed != true || !context.mounted) return;
 
+    setState(() => _isLoading = true);
     try {
       if (isAdmin) {
-        await vm.demoteFromAdmin(homeId, memberUid);
+        await vm.demoteFromAdmin(widget.homeId, widget.memberUid);
       } else {
-        await vm.promoteToAdmin(homeId, memberUid);
+        await vm.promoteToAdmin(widget.homeId, widget.memberUid);
       }
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -78,14 +86,17 @@ class MemberProfileScreen extends ConsumerWidget {
           SnackBar(content: Text(l10n.error_generic)),
         );
       }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final MemberProfileViewModel vm = ref.watch(
-      memberProfileViewModelProvider(homeId: homeId, memberUid: memberUid),
+      memberProfileViewModelProvider(
+          homeId: widget.homeId, memberUid: widget.memberUid),
     );
 
     return Scaffold(
@@ -101,14 +112,14 @@ class MemberProfileScreen extends ConsumerWidget {
 
           // Fallback al perfil del usuario si el documento del miembro
           // no tiene nickname/photoUrl denormalizados.
-          final profileFallback = (member.nickname.isEmpty || member.photoUrl == null)
-              ? ref.watch(userProfileProvider(member.uid)).valueOrNull
-              : null;
+          final profileFallback =
+              (member.nickname.isEmpty || member.photoUrl == null)
+                  ? ref.watch(userProfileProvider(member.uid)).valueOrNull
+                  : null;
           final displayNickname = member.nickname.isNotEmpty
               ? member.nickname
               : profileFallback?.nickname ?? '?';
-          final displayPhotoUrl =
-              member.photoUrl ?? profileFallback?.photoUrl;
+          final displayPhotoUrl = member.photoUrl ?? profileFallback?.photoUrl;
 
           return ListView(
             padding: const EdgeInsets.all(16),
@@ -190,13 +201,11 @@ class MemberProfileScreen extends ConsumerWidget {
                 label: l10n.member_profile_avg_score,
                 value: '${data.averageScore.toStringAsFixed(1)}/10',
               ),
-              if (data.showRadar) ...[
-                const SizedBox(height: 24),
-                RadarChartWidget(
-                  key: const Key('radar_chart'),
-                  entries: data.radarEntries,
-                ),
-              ],
+              const SizedBox(height: 24),
+              RadarChartWidget(
+                key: const Key('radar_chart'),
+                entries: data.radarEntries,
+              ),
               if (data.overflowEntries.isNotEmpty) ...[
                 const SizedBox(height: 16),
                 Text(
@@ -210,7 +219,8 @@ class MemberProfileScreen extends ConsumerWidget {
                     key: Key('overflow_task_${e.taskId}'),
                     dense: true,
                     leading: e.visualKind == 'emoji'
-                        ? Text(e.visualValue, style: const TextStyle(fontSize: 20))
+                        ? Text(e.visualValue,
+                            style: const TextStyle(fontSize: 20))
                         : const Icon(Icons.task_alt, size: 20),
                     title: Text(e.title),
                     trailing: Text(
@@ -221,23 +231,24 @@ class MemberProfileScreen extends ConsumerWidget {
                 ),
               ],
               // Gestión de rol (solo visible para el owner, sobre miembros ajenos)
-              if (data.canManageRoles &&
-                  member.role != MemberRole.owner) ...[
+              if (data.canManageRoles && member.role != MemberRole.owner) ...[
                 const Divider(height: 32),
                 OutlinedButton.icon(
                   key: const Key('btn_toggle_admin'),
-                  onPressed: () => _toggleAdminRole(
-                    context,
-                    ref,
-                    vm,
-                    data,
-                    l10n,
-                  ),
-                  icon: Icon(
-                    member.role == MemberRole.admin
-                        ? Icons.shield_outlined
-                        : Icons.shield,
-                  ),
+                  onPressed: _isLoading
+                      ? null
+                      : () => _toggleAdminRole(context, vm, data, l10n),
+                  icon: _isLoading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Icon(
+                          member.role == MemberRole.admin
+                              ? Icons.shield_outlined
+                              : Icons.shield,
+                        ),
                   label: Text(
                     member.role == MemberRole.admin
                         ? l10n.member_profile_demote_admin

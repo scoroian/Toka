@@ -251,6 +251,52 @@ adb exec-out screencap -p > /tmp/screen.png
 # Windows:     %LOCALAPPDATA%\Android\Sdk\platform-tools\adb.exe
 ```
 
+### Login en el emulador — IMPORTANTE
+
+**NUNCA uses `adb shell input tap` para hacer login en la pantalla de autenticación de Toka.**
+
+El motivo: al escribir el email con `adb shell input text`, Android muestra sugerencias de cuentas Google encima del teclado. Un tap posterior para ir al campo contraseña puede caer sobre esa sugerencia y abrir el flujo de Google Sign-in (OAuth), que colapsa Google Play Services en el emulador y bloquea la sesión.
+
+**Procedimiento correcto para autenticarse en el emulador (VERIFICADO):**
+
+```bash
+# 1. Tap en el campo email (coordenadas exactas en pantalla 1080x2400)
+adb shell input tap 540 1053
+
+# 2. Escribir el email
+adb shell input text "toka.qa.owner@gmail.com"
+
+# 3. Tap DIRECTO en el campo contraseña — ya no hay riesgo de autocomplete porque el email ya está escrito
+#    NO uses KEYCODE_TAB: en Flutter el TAB no sigue el orden email→contraseña y puede activar otros elementos
+adb shell input tap 540 1242
+
+# 4. Escribir la contraseña
+adb shell input text "TokaQA2024!"
+
+# 5. Tap en "Iniciar sesión"
+adb shell input tap 540 1441
+```
+
+**Por qué funciona:** el autocomplete de cuentas Google solo aparece mientras el campo email está activo y se está escribiendo. Al saltar al campo contraseña DESPUÉS de que el email ya está completamente escrito, el teclado ya no muestra sugerencias activas y el tap cae sobre el campo correcto.
+
+**Credenciales de cuentas QA** (ver `toka_qa_session/QA_SESSION.md` para el listado completo):
+
+| Rol | Email | Contraseña |
+|-----|-------|------------|
+| Owner | toka.qa.owner@gmail.com | TokaQA2024! |
+| Member | toka.qa.member@gmail.com | TokaQA2024! |
+| Admin | toka.qa.admin@gmail.com | TokaQA2024! |
+
+**Orden de tabs en la NavigationBar** (x en pantalla 1080px):
+
+| Tab | X | Descripción |
+|-----|---|-------------|
+| Hoy | 144 | Pantalla principal |
+| Historial | 342 | Eventos pasados |
+| Miembros | 540 | Lista de miembros + FAB Invitar |
+| Tareas | 738 | Lista de tareas |
+| Ajustes | 937 | Settings |
+
 ---
 
 ## Comandos útiles

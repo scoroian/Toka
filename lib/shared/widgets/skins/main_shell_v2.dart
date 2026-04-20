@@ -1,12 +1,15 @@
 // lib/shared/widgets/skins/main_shell_v2.dart
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/routes.dart';
 import '../../../core/theme/app_colors_v2.dart';
 import '../../../l10n/app_localizations.dart';
+import '../ad_banner.dart';
+import '../ad_banner_config_provider.dart';
 
-class MainShellV2 extends StatelessWidget {
+class MainShellV2 extends ConsumerWidget {
   const MainShellV2({super.key, required this.child});
   final Widget child;
 
@@ -20,33 +23,74 @@ class MainShellV2 extends StatelessWidget {
 
   // Altura total que la barra flotante ocupa desde el borde inferior de la pantalla.
   // Usada tanto para el placeholder transparente (MediaQuery) como para el Positioned.
-  static const double _kNavBarHeight  = 56;
-  static const double _kNavBarBottom  = 12;
+  // Públicas para que los inner Scaffolds puedan calcular el padding del FAB.
+  static const double kNavBarHeight  = 56;
+  static const double kNavBarBottom  = 12;
+  // Compatibilidad interna
+  static const double _kNavBarHeight = kNavBarHeight;
+  static const double _kNavBarBottom = kNavBarBottom;
+
+  // Gap entre el top de la NavBar y el bottom del banner.
+  static const double _kBannerGap = 6;
+
+  // Altura total reservada en la parte inferior cuando el banner está visible
+  // (sin contar safeBottom que se suma aparte).
+  // El Scaffold del shell reserva esto en su bottomNavigationBar para que el
+  // body no quede tapado por el banner ni la NavBar.
+  static double bannerSlotHeight({required bool bannerVisible}) {
+    if (!bannerVisible) return 0;
+    return AdBanner.kBannerHeight + _kBannerGap;
+  }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final location = GoRouterState.of(context).matchedLocation;
+    final tabIndex = _tabIndex(location);
     final safeBottom = MediaQuery.of(context).padding.bottom;
 
-    // El SizedBox transparente registra la altura de la barra en el Scaffold,
-    // lo que hace que Flutter ajuste automáticamente MediaQuery.padding.bottom
-    // para los hijos. Gracias a extendBody: true el body sigue extendiéndose
-    // por detrás — el blur sigue siendo visible — pero showModalBottomSheet,
-    // teclados y FABs ya posicionan su borde inferior por encima de la barra.
-    return Scaffold(
-      extendBody: true,
-      bottomNavigationBar: SizedBox(
-        height: _kNavBarHeight + _kNavBarBottom + safeBottom,
-      ),
-      body: Stack(
-        children: [
-          child,
-          Positioned(
-            left: 16, right: 16,
-            bottom: _kNavBarBottom + safeBottom,
-            child: _FloatingNavBar(selectedIndex: _tabIndex(location)),
-          ),
-        ],
+    final adConfig = ref.watch(adBannerConfigProvider);
+    final bannerVisible = adConfig.show && adConfig.unitId.isNotEmpty;
+    final bannerSlot = bannerSlotHeight(bannerVisible: bannerVisible);
+
+    // El SizedBox transparente registra la altura de la barra + banner en
+    // el Scaffold, de modo que MediaQuery.padding.bottom crece para los hijos.
+    // Gracias a extendBody: true el body sigue extendiéndose por detrás — el
+    // blur de la NavBar sigue siendo visible — pero showModalBottomSheet,
+    // teclados y FABs ya posicionan su borde inferior por encima del banner
+    // y la NavBar.
+    //
+    // PopScope intercepta el botón físico BACK de Android (y el gesto de iOS):
+    // - canPop == true solo en Hoy (índice 0): Flutter sale de la app normalmente.
+    // - canPop == false en cualquier otro tab: se llama onPopInvokedWithResult
+    //   que redirige a Hoy en lugar de salir.
+    return PopScope(
+      canPop: tabIndex == 0,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        context.go(AppRoutes.home);
+      },
+      child: Scaffold(
+        extendBody: true,
+        bottomNavigationBar: SizedBox(
+          height: _kNavBarHeight + _kNavBarBottom + safeBottom + bannerSlot,
+        ),
+        body: Stack(
+          children: [
+            child,
+            if (bannerVisible)
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: _kNavBarHeight + _kNavBarBottom + safeBottom + _kBannerGap,
+                child: const AdBanner(key: Key('ad_banner')),
+              ),
+            Positioned(
+              left: 16, right: 16,
+              bottom: _kNavBarBottom + safeBottom,
+              child: _FloatingNavBar(selectedIndex: tabIndex),
+            ),
+          ],
+        ),
       ),
     );
   }

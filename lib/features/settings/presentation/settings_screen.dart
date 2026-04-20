@@ -196,7 +196,7 @@ class SettingsScreen extends ConsumerWidget {
           const Divider(),
 
           // ── Apariencia ───────────────────────────────────────────────
-          const _SectionHeader(key: Key('settings_section_appearance'), title: 'Apariencia'),
+          _SectionHeader(key: const Key('settings_section_appearance'), title: l10n.appearance),
           const _ThemeModeSelector(key: Key('settings_theme_mode')),
           const Divider(),
 
@@ -231,7 +231,7 @@ class SettingsScreen extends ConsumerWidget {
             key: const Key('subscription_status_label'),
             leading: Icon(
               isPremium ? Icons.star : Icons.star_border,
-              color: isPremium ? Colors.amber : null, // TODO: move to AppColors
+              color: isPremium ? Theme.of(context).colorScheme.tertiary : null,
             ),
             title: Text(isPremium ? l10n.settings_plan_premium : l10n.settings_plan_free),
             onTap: () => context.push(AppRoutes.subscription),
@@ -264,9 +264,9 @@ class SettingsScreen extends ConsumerWidget {
             },
           ),
           ListTile(
-            leading: const Icon(Icons.exit_to_app, color: Colors.red), // TODO: move to AppColors
+            leading: Icon(Icons.exit_to_app, color: Theme.of(context).colorScheme.error),
             title: Text(l10n.settings_leave_home,
-                style: const TextStyle(color: Colors.red)), // TODO: move to AppColors
+                style: TextStyle(color: Theme.of(context).colorScheme.error)),
             onTap: () async {
               if (homeId.isEmpty || uid.isEmpty) return;
 
@@ -424,15 +424,16 @@ class _ThemeModeSelector extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final current = ref.watch(themeModeNotifierProvider);
     final notifier = ref.read(themeModeNotifierProvider.notifier);
+    final l10n = AppLocalizations.of(context);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: SegmentedButton<ThemeMode>(
         key: const Key('theme_mode_segmented'),
-        segments: const [
-          ButtonSegment(value: ThemeMode.light,  label: Text('Claro'),  icon: Icon(Icons.wb_sunny_outlined)),
-          ButtonSegment(value: ThemeMode.dark,   label: Text('Oscuro'), icon: Icon(Icons.nightlight_outlined)),
-          ButtonSegment(value: ThemeMode.system, label: Text('Sistema'),icon: Icon(Icons.phone_android_outlined)),
+        segments: [
+          ButtonSegment(value: ThemeMode.light,  label: Text(l10n.theme_light),  icon: const Icon(Icons.wb_sunny_outlined)),
+          ButtonSegment(value: ThemeMode.dark,   label: Text(l10n.theme_dark),   icon: const Icon(Icons.nightlight_outlined)),
+          ButtonSegment(value: ThemeMode.system, label: Text(l10n.theme_system), icon: const Icon(Icons.phone_android_outlined)),
         ],
         selected: {current},
         onSelectionChanged: (set) => notifier.setMode(set.first),

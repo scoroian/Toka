@@ -57,11 +57,31 @@ Future<void> _openDialog(
 }
 
 void main() {
-  testWidgets('muestra los dos valores de compliance', (tester) async {
+  testWidgets('muestra los dos valores de compliance cuando diff >= 1%',
+      (tester) async {
     await _openDialog(tester, compliance: 0.87, estimated: 0.81);
 
     expect(find.textContaining('87'), findsOneWidget);
     expect(find.textContaining('81'), findsOneWidget);
+  });
+
+  testWidgets('NO muestra banner rojo cuando diff < 1% (solo 1 miembro)',
+      (tester) async {
+    // 100% → ~99.0%: diff = 0.99 < 1 punto porcentual
+    await _openDialog(tester, compliance: 1.0, estimated: 100 / 101);
+
+    // El texto de advertencia no debe aparecer
+    expect(
+      find.textContaining('bajará'),
+      findsNothing,
+    );
+  });
+
+  testWidgets('muestra banner rojo cuando diff >= 1%', (tester) async {
+    await _openDialog(tester, compliance: 0.90, estimated: 0.80);
+
+    expect(find.textContaining('90'), findsOneWidget);
+    expect(find.textContaining('80'), findsOneWidget);
   });
 
   testWidgets('muestra nombre del siguiente responsable', (tester) async {

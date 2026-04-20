@@ -1,8 +1,10 @@
 // lib/features/history/presentation/skins/history_screen_v2.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../../core/constants/routes.dart';
 import '../../../../core/theme/app_colors_v2.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../application/history_view_model.dart';
@@ -80,7 +82,7 @@ class _HistoryScreenV2State extends ConsumerState<HistoryScreenV2> {
               return ListView.builder(
                 key: const Key('history_list'),
                 controller: _scroll,
-                padding: const EdgeInsets.only(bottom: 96),
+                padding: const EdgeInsets.only(bottom: 16),
                 itemCount: items.length + extras,
                 itemBuilder: (ctx, i) {
                   if (i < items.length) return _buildTile(items[i], vm);
@@ -110,14 +112,16 @@ class _HistoryScreenV2State extends ConsumerState<HistoryScreenV2> {
       actorName: item.actorName,
       actorPhotoUrl: item.actorPhotoUrl,
       toName: toName,
-      trailing: item.canRate
-          ? IconButton(
-              key: Key('rate_button_${item.raw.id}'),
-              icon: const Icon(Icons.star_border),
-              tooltip: AppLocalizations.of(context).history_rate_button,
-              onPressed: () => _showRateSheet(item, vm),
-            )
-          : null,
+      trailing: item.isRated
+          ? const Icon(Icons.star, color: Colors.amber, size: 22)
+          : item.canRate
+              ? IconButton(
+                  key: Key('rate_button_${item.raw.id}'),
+                  icon: const Icon(Icons.star_border),
+                  tooltip: AppLocalizations.of(context).history_rate_button,
+                  onPressed: () => _showRateSheet(item, vm),
+                )
+              : null,
     );
   }
 
@@ -161,7 +165,7 @@ class _PremiumBannerV2 extends StatelessWidget {
           width: double.infinity,
           child: ElevatedButton(
             key: const Key('btn_upgrade_premium'),
-            onPressed: () {},
+            onPressed: () => context.push(AppRoutes.paywall),
             child: Text(l10n.history_premium_banner_cta),
           ),
         ),

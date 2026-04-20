@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../l10n/app_localizations.dart';
-import '../../application/recurrence_provider.dart';
 import '../../application/task_form_provider.dart';
 import '../../domain/recurrence_rule.dart';
 
@@ -195,7 +193,6 @@ class _RecurrenceFormState extends ConsumerState<RecurrenceForm> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final upcoming = ref.watch(upcomingOccurrencesProvider(_buildRule()));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -230,18 +227,6 @@ class _RecurrenceFormState extends ConsumerState<RecurrenceForm> {
             _notifyChange();
           },
         ),
-        if (upcoming.isNotEmpty) ...[
-          const SizedBox(height: 16),
-          Text(l10n.tasks_recurrence_upcoming,
-              style: Theme.of(context).textTheme.labelMedium),
-          const SizedBox(height: 4),
-          ...upcoming.map((d) => Text(
-                DateFormat.yMMMd(Localizations.localeOf(context).toString())
-                    .add_Hm()
-                    .format(d),
-                style: Theme.of(context).textTheme.bodySmall,
-              )),
-        ],
       ],
     );
   }

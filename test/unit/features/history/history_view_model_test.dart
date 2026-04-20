@@ -1,4 +1,7 @@
 // test/unit/features/history/history_view_model_test.dart
+import 'dart:async';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -157,6 +160,77 @@ void main() {
       final state = container.read(historyNotifierProvider('home1'));
       expect(state.value, isEmpty);
       expect(notifier.hasMore, isTrue);
+    });
+
+    test(
+        'race: loadMore en vuelo con filtro viejo NO mergea sobre estado nuevo',
+        () async {
+      // Evento que devuelve el primer fetch (filtro vacío, todos los eventos).
+      final missedEvent = TaskEvent.missed(
+        id: 'missed1',
+        taskId: 't1',
+        taskTitleSnapshot: 'Aspirar',
+        taskVisualSnapshot: const TaskVisual(kind: 'emoji', value: '🧹'),
+        actorUid: 'uid1',
+        toUid: 'uid2',
+        penaltyApplied: true,
+        missedAt: DateTime(2024),
+        createdAt: DateTime(2024),
+      );
+      // Evento que devuelve el segundo fetch (filtro 'completed').
+      final completedEvent = TaskEvent.completed(
+        id: 'completed1',
+        taskId: 't1',
+        taskTitleSnapshot: 'Fregar',
+        taskVisualSnapshot: const TaskVisual(kind: 'emoji', value: '🍽️'),
+        actorUid: 'uid1',
+        performerUid: 'uid1',
+        completedAt: DateTime(2024, 1, 2),
+        createdAt: DateTime(2024, 1, 2),
+      );
+
+      // Retrasamos la respuesta del fetch sin filtro para simular el race.
+      final firstCompleter = Completer<(List<TaskEvent>, DocumentSnapshot?)>();
+      when(() => mockRepo.fetchPage(
+            homeId: any(named: 'homeId'),
+            filter: const HistoryFilter(),
+            startAfter: any(named: 'startAfter'),
+            limit: any(named: 'limit'),
+            isPremium: any(named: 'isPremium'),
+          )).thenAnswer((_) => firstCompleter.future);
+      when(() => mockRepo.fetchPage(
+            homeId: any(named: 'homeId'),
+            filter: const HistoryFilter(eventType: 'completed'),
+            startAfter: any(named: 'startAfter'),
+            limit: any(named: 'limit'),
+            isPremium: any(named: 'isPremium'),
+          )).thenAnswer((_) async => ([completedEvent], null));
+
+      final container = makeContainer();
+      addTearDown(container.dispose);
+      final notifier =
+          container.read(historyNotifierProvider('home1').notifier);
+
+      // 1. Usuario aterriza en la pantalla — loadMore inicial sin filtro (en vuelo).
+      final firstLoad = notifier.loadMore(isPremium: false);
+
+      // 2. Usuario toca chip "Completadas" antes de que el primer fetch acabe.
+      notifier.applyFilter(const HistoryFilter(eventType: 'completed'));
+      await notifier.loadMore(isPremium: false);
+
+      // El estado ahora debe contener SOLO el evento completado.
+      final stateAfterFilter =
+          container.read(historyNotifierProvider('home1'));
+      expect(stateAfterFilter.value, [completedEvent]);
+
+      // 3. El primer fetch (filtro viejo) se resuelve tarde: NO debe mergear.
+      firstCompleter.complete(([missedEvent], null));
+      await firstLoad;
+
+      final finalState = container.read(historyNotifierProvider('home1'));
+      expect(finalState.value, [completedEvent],
+          reason: 'El fetch con filtro vacío debe descartarse tras applyFilter');
+      expect(finalState.value, isNot(contains(missedEvent)));
     });
   });
 

@@ -15,14 +15,15 @@ class MemberActions extends _$MemberActions {
         () => ref.read(membersRepositoryProvider).inviteMember(homeId, email));
   }
 
-  Future<String> generateInviteCode(String homeId) async {
+  Future<({String code, DateTime expiresAt})> generateInviteCode(
+      String homeId) async {
     state = const AsyncValue.loading();
     try {
-      final code = await ref
+      final result = await ref
           .read(membersRepositoryProvider)
           .generateInviteCode(homeId);
       state = const AsyncValue.data(null);
-      return code;
+      return result;
     } catch (e, s) {
       state = AsyncValue.error(e, s);
       rethrow;

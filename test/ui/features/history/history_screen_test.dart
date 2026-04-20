@@ -80,6 +80,8 @@ class _FakeHistoryViewModel implements HistoryViewModel {
   @override
   bool get hasMore => false;
   @override
+  bool get hasHome => true;
+  @override
   void loadMore() {}
   @override
   void applyFilter(HistoryFilter newFilter) {}

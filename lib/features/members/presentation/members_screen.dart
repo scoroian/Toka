@@ -93,6 +93,9 @@ class MembersScreen extends ConsumerWidget {
               : null,
           body: ListView(
                   key: const Key('members_list'),
+                  padding: EdgeInsets.only(
+                    bottom: MainShellV2.bottomContentPadding(context, ref),
+                  ),
                   children: [
                     if (data.activeMembers.isNotEmpty) ...[
                       Padding(

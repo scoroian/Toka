@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../../../l10n/app_localizations.dart';
-import '../../../../shared/widgets/skins/main_shell_v2.dart';
+import '../../../../shared/widgets/bottom_sheet_padding.dart';
 import '../../application/member_actions_provider.dart';
 
 class InviteMemberSheet extends ConsumerStatefulWidget {
@@ -75,9 +75,8 @@ class _InviteMemberSheetState extends ConsumerState<InviteMemberSheet> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
 
-    final mq = MediaQuery.of(context);
-    const navBarExtra = MainShellV2.kNavBarHeight + MainShellV2.kNavBarBottom;
-    final bottomPadding = mq.viewInsets.bottom + mq.viewPadding.bottom + navBarExtra;
+    final bottomPadding =
+        bottomSheetSafeBottom(context, ref, hasNavBar: true);
     return Padding(
       padding: EdgeInsets.only(
         left: 16,

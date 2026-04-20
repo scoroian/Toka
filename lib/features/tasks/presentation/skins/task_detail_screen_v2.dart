@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/constants/routes.dart';
 import '../../../../core/theme/app_colors_v2.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/widgets/ad_aware_scaffold.dart';
 import '../../application/task_detail_view_model.dart';
 import '../../domain/task.dart';
 import '../../domain/task_status.dart';
@@ -48,15 +49,15 @@ class TaskDetailScreenV2 extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return vm.viewData.when(
-      loading: () => Scaffold(
+      loading: () => AdAwareScaffold(
           appBar: AppBar(leading: BackButton(onPressed: () => context.pop())),
           body: const Center(child: CircularProgressIndicator())),
-      error: (_, __) => Scaffold(
+      error: (_, __) => AdAwareScaffold(
           appBar: AppBar(leading: BackButton(onPressed: () => context.pop())),
           body: Center(child: Text(l10n.error_generic))),
       data: (data) {
         if (data == null) {
-          return Scaffold(
+          return AdAwareScaffold(
               appBar: AppBar(leading: BackButton(onPressed: () => context.pop())),
               body: const Center(child: CircularProgressIndicator()));
         }
@@ -65,7 +66,7 @@ class TaskDetailScreenV2 extends ConsumerWidget {
         final surf = isDark ? AppColorsV2.surfaceDark : AppColorsV2.surfaceLight;
         final bd = isDark ? AppColorsV2.borderDark : AppColorsV2.borderLight;
 
-        return Scaffold(
+        return AdAwareScaffold(
           backgroundColor: bg,
           appBar: AppBar(
             backgroundColor: bg,
@@ -95,7 +96,10 @@ class TaskDetailScreenV2 extends ConsumerWidget {
             ],
           ),
           body: ListView(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
+            padding: EdgeInsets.fromLTRB(
+              16, 8, 16,
+              AdAwareScaffold.bottomPaddingOf(context, ref),
+            ),
             children: [
               Row(children: [
                 taskVisualWidget(task.visualKind, task.visualValue, size: 36),

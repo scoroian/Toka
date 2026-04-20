@@ -1,21 +1,22 @@
 // lib/features/history/presentation/widgets/rate_event_sheet.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../l10n/app_localizations.dart';
-import '../../../../shared/widgets/skins/main_shell_v2.dart';
+import '../../../../shared/widgets/bottom_sheet_padding.dart';
 
 /// Bottom sheet para valorar un evento de tarea completada.
 /// Muestra un Slider (1.0–10.0) y un campo de nota opcional.
-class RateEventSheet extends StatefulWidget {
+class RateEventSheet extends ConsumerStatefulWidget {
   const RateEventSheet({super.key, required this.onSubmit});
 
   final void Function(double rating, String? note) onSubmit;
 
   @override
-  State<RateEventSheet> createState() => _RateEventSheetState();
+  ConsumerState<RateEventSheet> createState() => _RateEventSheetState();
 }
 
-class _RateEventSheetState extends State<RateEventSheet> {
+class _RateEventSheetState extends ConsumerState<RateEventSheet> {
   double _rating = 5.0;
   final _noteController = TextEditingController();
 
@@ -28,9 +29,8 @@ class _RateEventSheetState extends State<RateEventSheet> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final mq = MediaQuery.of(context);
-    const navBarExtra = MainShellV2.kNavBarHeight + MainShellV2.kNavBarBottom;
-    final bottomPadding = mq.viewInsets.bottom + mq.viewPadding.bottom + navBarExtra;
+    final bottomPadding =
+        bottomSheetSafeBottom(context, ref, hasNavBar: true);
     return Padding(
       padding: EdgeInsets.only(
         left: 24,

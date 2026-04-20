@@ -11,8 +11,8 @@ import 'ad_banner_config_provider.dart';
 ///   `MediaQuery.padding.bottom` crezca y sheets/teclados se posicionen
 ///   correctamente.
 /// - Pinta el banner en un `Stack` por encima cuando `adBannerConfig.show`.
-/// - Si hay `floatingActionButton`, lo sube con un `Padding` equivalente
-///   a la altura del banner.
+/// - El `floatingActionButton` queda automáticamente por encima del banner
+///   gracias a `extendBody: true` + el `bottomNavigationBar` reservado.
 ///
 /// Los `ScrollView` internos deben aplicar `bottomPaddingOf(ctx, ref)` como
 /// padding inferior para que su último ítem quede por encima del banner.
@@ -41,6 +41,8 @@ class AdAwareScaffold extends ConsumerWidget {
   /// su último ítem quede por encima del banner.
   ///
   ///   safeBottom + bannerSlot(bannerVisible)
+  ///
+  /// Debe llamarse desde un `build` o `Consumer.builder`: hace `ref.watch`.
   static double bottomPaddingOf(BuildContext ctx, WidgetRef ref) {
     final safeBottom = MediaQuery.of(ctx).padding.bottom;
     final cfg = ref.watch(adBannerConfigProvider);
@@ -72,12 +74,7 @@ class AdAwareScaffold extends ConsumerWidget {
             ),
         ],
       ),
-      floatingActionButton: floatingActionButton == null
-          ? null
-          : Padding(
-              padding: EdgeInsets.only(bottom: slot),
-              child: floatingActionButton,
-            ),
+      floatingActionButton: floatingActionButton,
     );
   }
 }

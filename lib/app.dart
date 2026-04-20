@@ -6,8 +6,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'core/constants/routes.dart';
 import 'core/services/locale_service.dart';
-import 'core/theme/app_skin.dart';
-import 'core/theme/app_theme.dart';
 import 'core/theme/app_theme_v2.dart';
 import 'core/theme/theme_mode_provider.dart';
 import 'features/auth/application/auth_provider.dart';
@@ -22,14 +20,8 @@ import 'features/i18n/application/locale_provider.dart';
 import 'features/homes/presentation/home_settings_screen.dart';
 import 'features/homes/presentation/my_homes_screen.dart';
 import 'features/onboarding/presentation/onboarding_flow_screen.dart';
-import 'features/tasks/presentation/all_tasks_screen.dart';
-import 'features/tasks/presentation/create_edit_task_screen.dart';
-import 'features/tasks/presentation/task_detail_screen.dart';
-import 'features/tasks/presentation/today_screen.dart';
 import 'features/members/presentation/members_screen.dart';
-import 'features/members/presentation/member_profile_screen.dart';
 import 'features/members/presentation/vacation_screen.dart';
-import 'features/history/presentation/history_screen.dart';
 import 'features/profile/presentation/own_profile_screen.dart';
 import 'features/profile/presentation/edit_profile_screen.dart';
 import 'features/subscription/presentation/paywall_screen.dart';
@@ -40,7 +32,6 @@ import 'features/notifications/application/notification_prefs_provider.dart';
 import 'features/notifications/presentation/notification_settings_screen.dart';
 import 'features/settings/presentation/settings_screen.dart';
 import 'l10n/app_localizations.dart';
-import 'shared/widgets/main_shell.dart';
 import 'features/tasks/presentation/skins/today_screen_v2.dart';
 import 'features/tasks/presentation/skins/all_tasks_screen_v2.dart';
 import 'features/tasks/presentation/skins/task_detail_screen_v2.dart';
@@ -191,21 +182,15 @@ GoRouter appRouter(AppRouterRef ref) {
 
       // ── Shell principal con NavigationBar ──────────────────────────
       ShellRoute(
-        builder: (context, state, child) => SkinConfig.current == AppSkin.v2
-            ? MainShellV2(child: child)
-            : MainShell(child: child),
+        builder: (context, state, child) => MainShellV2(child: child),
         routes: [
           GoRoute(
             path: AppRoutes.home,
-            builder: (_, __) => SkinConfig.current == AppSkin.v2
-                ? const TodayScreenV2()
-                : const TodayScreen(),
+            builder: (_, __) => const TodayScreenV2(),
           ),
           GoRoute(
             path: AppRoutes.history,
-            builder: (_, __) => SkinConfig.current == AppSkin.v2
-                ? const HistoryScreenV2()
-                : const HistoryScreen(),
+            builder: (_, __) => const HistoryScreenV2(),
           ),
           GoRoute(
             path: AppRoutes.members,
@@ -213,27 +198,21 @@ GoRouter appRouter(AppRouterRef ref) {
           ),
           GoRoute(
             path: AppRoutes.tasks,
-            builder: (_, __) => SkinConfig.current == AppSkin.v2
-                ? const AllTasksScreenV2()
-                : const AllTasksScreen(),
+            builder: (_, __) => const AllTasksScreenV2(),
             routes: [
               // 'new' debe ir ANTES de ':id' para que /tasks/new no sea
               // capturado por el parámetro :id (Bug #32).
               GoRoute(
                 parentNavigatorKey: _rootNavigatorKey,
                 path: 'new',
-                builder: (_, __) => SkinConfig.current == AppSkin.v2
-                    ? const CreateEditTaskScreenV2()
-                    : const CreateEditTaskScreen(),
+                builder: (_, __) => const CreateEditTaskScreenV2(),
               ),
               GoRoute(
                 parentNavigatorKey: _rootNavigatorKey,
                 path: ':id',
                 builder: (context, state) {
                   final id = state.pathParameters['id']!;
-                  return SkinConfig.current == AppSkin.v2
-                      ? TaskDetailScreenV2(taskId: id)
-                      : TaskDetailScreen(taskId: id);
+                  return TaskDetailScreenV2(taskId: id);
                 },
                 routes: [
                   GoRoute(
@@ -241,9 +220,7 @@ GoRouter appRouter(AppRouterRef ref) {
                     path: 'edit',
                     builder: (context, state) {
                       final id = state.pathParameters['id']!;
-                      return SkinConfig.current == AppSkin.v2
-                          ? CreateEditTaskScreenV2(editTaskId: id)
-                          : CreateEditTaskScreen(editTaskId: id);
+                      return CreateEditTaskScreenV2(editTaskId: id);
                     },
                   ),
                 ],
@@ -285,9 +262,7 @@ GoRouter appRouter(AppRouterRef ref) {
           final uid   = state.pathParameters['uid']!;
           final extra = state.extra as Map<String, dynamic>?;
           final homeId = extra?['homeId'] as String? ?? '';
-          return SkinConfig.current == AppSkin.v2
-              ? MemberProfileScreenV2(homeId: homeId, memberUid: uid)
-              : MemberProfileScreen(homeId: homeId, memberUid: uid);
+          return MemberProfileScreenV2(homeId: homeId, memberUid: uid);
         },
       ),
       GoRoute(
@@ -357,8 +332,8 @@ class TokaApp extends ConsumerWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      theme:      SkinConfig.current == AppSkin.v2 ? AppThemeV2.light : AppTheme.light,
-      darkTheme:  SkinConfig.current == AppSkin.v2 ? AppThemeV2.dark  : AppTheme.dark,
+      theme:      AppThemeV2.light,
+      darkTheme:  AppThemeV2.dark,
       themeMode:  themeMode,
       routerConfig: router,
     );

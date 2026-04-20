@@ -92,6 +92,10 @@ export const restorePremiumState = onCall(async (request) => {
         canUseVacations: true,
         canUseReviews: true,
       },
+      adFlags: {
+        showBanner: false,
+        bannerUnit: "",
+      },
       rescueFlags: { isInRescue: false, daysLeft: null },
       updatedAt: FieldValue.serverTimestamp(),
     },

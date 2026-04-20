@@ -3,6 +3,7 @@ import * as admin from "firebase-admin";
 import * as logger from "firebase-functions/logger";
 import { onSchedule } from "firebase-functions/v2/scheduler";
 import { autoSelectForDowngrade } from "./downgrade_helpers";
+import { DEFAULT_BANNER_UNIT_ID } from "../shared/ad_constants";
 
 /**
  * Cron cada 30 minutos. Aplica downgrade a hogares cuyo premiumEndsAt <= now
@@ -159,6 +160,10 @@ export const applyDowngradeJob = onSchedule("*/30 * * * *", async () => {
             canUseSmartDistribution: false,
             canUseVacations: false,
             canUseReviews: false,
+          },
+          adFlags: {
+            showBanner: true,
+            bannerUnit: DEFAULT_BANNER_UNIT_ID,
           },
           rescueFlags: { isInRescue: false, daysLeft: null },
           updatedAt: FieldValue.serverTimestamp(),

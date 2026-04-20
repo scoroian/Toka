@@ -5,6 +5,7 @@ import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { FieldValue, Timestamp } from "firebase-admin/firestore";
 import { unlockSlotIfEligibleTx } from "./slot_ledger";
 import { parseReceiptData } from "./sync_entitlement_helpers";
+import { DEFAULT_BANNER_UNIT_ID } from "../shared/ad_constants";
 
 const db = () => admin.firestore();
 
@@ -126,6 +127,10 @@ async function updatePremiumFlagsInDashboard(
         canUseSmartDistribution: isPremium,
         canUseVacations: isPremium,
         canUseReviews: isPremium,
+      },
+      adFlags: {
+        showBanner: !isPremium,
+        bannerUnit: isPremium ? "" : DEFAULT_BANNER_UNIT_ID,
       },
       updatedAt: FieldValue.serverTimestamp(),
     },

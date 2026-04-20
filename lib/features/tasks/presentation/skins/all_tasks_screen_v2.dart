@@ -12,7 +12,6 @@ import '../../../../shared/widgets/no_home_empty_state.dart';
 import '../../../../shared/widgets/skins/main_shell_v2.dart';
 import '../../application/all_tasks_view_model.dart';
 import '../../domain/task_status.dart';
-import '../utils/task_visual_utils.dart';
 import '../widgets/task_card.dart';
 
 class AllTasksScreenV2 extends ConsumerStatefulWidget {
@@ -126,9 +125,10 @@ class _AllTasksScreenV2State extends ConsumerState<AllTasksScreenV2>
                                 style: GoogleFonts.plusJakartaSans(
                                     fontWeight: FontWeight.w700),
                               ),
-                              secondary: taskVisualWidget(
-                                  task.visualKind, task.visualValue,
-                                  size: 24),
+                              secondary: task.visualKind == 'emoji'
+                                  ? Text(task.visualValue,
+                                      style: const TextStyle(fontSize: 24))
+                                  : const Icon(Icons.task_alt),
                               controlAffinity:
                                   ListTileControlAffinity.leading,
                             );

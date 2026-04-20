@@ -189,7 +189,7 @@ export const joinHome = onCall(async (request) => {
     }
 
     const expiresAt = (invData["expiresAt"] as admin.firestore.Timestamp | undefined)?.toDate();
-    if (expiresAt && new Date() > expiresAt) {
+    if (expiresAt && admin.firestore.Timestamp.now().toDate() > expiresAt) {
       throw new HttpsError("deadline-exceeded", "Invitation expired");
     }
 
@@ -266,7 +266,7 @@ export const joinHomeByCode = onCall(async (request) => {
   const invDoc = query.docs[0];
   const invData = invDoc.data();
   const expiresAt = (invData["expiresAt"] as admin.firestore.Timestamp | undefined)?.toDate();
-  if (expiresAt && new Date() > expiresAt) {
+  if (expiresAt && admin.firestore.Timestamp.now().toDate() > expiresAt) {
     throw new HttpsError("deadline-exceeded", "Invite code has expired");
   }
 

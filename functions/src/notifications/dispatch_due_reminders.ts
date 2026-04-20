@@ -13,7 +13,7 @@ const messaging = admin.messaging();
  * y hayan activado notifyOnDue.
  */
 export const dispatchDueReminders = onSchedule("*/15 * * * *", async () => {
-  const now = new Date();
+  const now = admin.firestore.Timestamp.now().toDate();
   const in15 = new Date(now.getTime() + 15 * 60 * 1000);
 
   const homesSnap = await db.collection("homes").get();

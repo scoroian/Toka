@@ -46,7 +46,7 @@ export const processExpiredTasks = onSchedule("5 0 * * *", async () => {
   const FieldValue = admin.firestore.FieldValue;
 
   // Corte: medianoche UTC del día actual
-  const cutoff = new Date();
+  const cutoff = admin.firestore.Timestamp.now().toDate();
   cutoff.setUTCHours(0, 0, 0, 0);
 
   logger.info(`processExpiredTasks: cutoff = ${cutoff.toISOString()}`);

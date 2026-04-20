@@ -75,7 +75,7 @@ export const applyTaskCompletion = onCall(async (request) => {
     }
 
     const currentDue = (task["nextDueAt"] as admin.firestore.Timestamp | undefined)
-      ?.toDate() ?? new Date();
+      ?.toDate() ?? admin.firestore.Timestamp.now().toDate();
     const recurrenceType: string = task["recurrenceType"] ?? "daily";
     const nextDueAt = addRecurrenceInterval(currentDue, recurrenceType);
 
@@ -106,14 +106,42 @@ export const applyTaskCompletion = onCall(async (request) => {
     const memberRef = db.collection("homes").doc(homeId).collection("members").doc(uid);
     const memberDocInSnap = membersSnap.docs.find((d) => d.id === uid);
     const member = memberDocInSnap?.data() ?? {};
-    const newCompleted = ((member["completedCount"] as number) ?? 0) + 1;
+    const newCompleted = ((member["tasksCompleted"] as number) ?? 0) + 1;
     const newPassed: number = (member["passedCount"] as number) ?? 0;
     const newCompliance = newCompleted / (newCompleted + newPassed);
 
+    // Calcular currentStreak
+    const lastCompletedAt: admin.firestore.Timestamp | undefined = member["lastCompletedAt"];
+    const now = admin.firestore.Timestamp.now().toDate();
+    let newStreak: number | ReturnType<typeof FieldValue.increment>;
+    if (lastCompletedAt) {
+      const last = lastCompletedAt.toDate();
+      const daysDiff = Math.floor(
+        (Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) -
+          Date.UTC(last.getFullYear(), last.getMonth(), last.getDate())) /
+          (1000 * 60 * 60 * 24)
+      );
+      if (daysDiff === 0) {
+        // Misma jornada: mantener el streak existente, pero al menos 1
+        const existingStreak = (member["currentStreak"] as number) ?? 0;
+        newStreak = Math.max(existingStreak, 1);
+      } else if (daysDiff === 1) {
+        // Día consecutivo: incrementar
+        newStreak = FieldValue.increment(1);
+      } else {
+        // Racha rota: reiniciar
+        newStreak = 1;
+      }
+    } else {
+      // Primera vez: streak = 1
+      newStreak = 1;
+    }
+
     tx.update(memberRef, {
-      completedCount: FieldValue.increment(1),
+      tasksCompleted: FieldValue.increment(1),
       completions60d: FieldValue.increment(1),
       complianceRate: newCompliance,
+      currentStreak: newStreak,
       lastCompletedAt: FieldValue.serverTimestamp(),
       lastActiveAt: FieldValue.serverTimestamp(),
     });

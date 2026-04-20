@@ -57,15 +57,20 @@ export async function updateHomeDashboard(homeId: string): Promise<void> {
     .where("status", "==", "active")
     .get();
 
-  const now = new Date();
+  const now = admin.firestore.Timestamp.now().toDate();
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const todayEnd = new Date(todayStart.getTime() + 24 * 60 * 60 * 1000);
 
   const activeTasksPreview: Record<string, unknown>[] = [];
+  let pendingTodayCount = 0; // tareas accionables hoy (vencidas + due today)
   for (const doc of tasksSnap.docs) {
     const t = doc.data();
     const nextDueAt = (t["nextDueAt"] as admin.firestore.Timestamp | undefined)?.toDate();
     if (!nextDueAt) continue;
+    // Incluir TODAS las tareas activas (también las de próximas semanas/meses/años)
+    // para que la pantalla Hoy muestre las próximas fechas de cada tarea.
+    // El cliente Flutter decide si el botón "Hecho" está activo según recurrenceType.
+    if (nextDueAt < todayEnd) pendingTodayCount++;
     const isOverdue = nextDueAt < todayStart;
 
     const assigneeUid = (t["currentAssigneeUid"] as string | null) ?? null;
@@ -157,7 +162,8 @@ export async function updateHomeDashboard(homeId: string): Promise<void> {
   const counters = {
     totalActiveTasks: tasksSnap.size,
     totalMembers: memberPreview.length,
-    tasksDueToday: activeTasksPreview.length,
+    // tareas pendientes de hoy (no incluye las ya completadas)
+    tasksDueToday: pendingTodayCount,
     tasksDoneToday: doneTasksPreview.length,
   };
 
@@ -174,8 +180,8 @@ export async function updateHomeDashboard(homeId: string): Promise<void> {
     updatedAt: FieldValue.serverTimestamp(),
   });
 
-  // Update hasPendingToday for each active member of this home
-  const hasPendingToday = activeTasksPreview.length > doneTasksPreview.length;
+  // Update hasPendingToday: hay alguna tarea accionable hoy que no está completada
+  const hasPendingToday = pendingTodayCount > 0;
   const membershipUpdates = memberPreview.map((m) =>
     db.collection("users").doc(m["uid"] as string)
       .collection("memberships").doc(homeId)

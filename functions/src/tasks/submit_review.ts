@@ -50,6 +50,8 @@ export const submitReview = onCall(async (request) => {
   const reviewRef = eventRef.collection("reviews").doc(reviewerUid);
 
   await db.runTransaction(async (tx) => {
+    // ── Phase 1: ALL reads first ──────────────────────────────────────────────
+
     // Re-read event inside transaction for consistency
     const eventSnapTx = await tx.get(eventRef);
     if (!eventSnapTx.exists) throw new HttpsError("not-found", "Task event not found");
@@ -72,6 +74,21 @@ export const submitReview = onCall(async (request) => {
       throw new HttpsError("already-exists", "You already reviewed this event");
     }
 
+    // Pre-compute refs needed for reads
+    const statsId = `${performerUidTx}_${taskId}`;
+    const statsRef = db.collection("homes").doc(homeId).collection("memberTaskStats").doc(statsId);
+    const performerRef = db.collection("homes").doc(homeId).collection("members").doc(performerUidTx);
+    const memberReviewsRef = db.collection("homes").doc(homeId)
+        .collection("memberReviews").doc(reviewerUid);
+
+    // Read stats and performer docs before any writes
+    const [statsSnap, performerSnap] = await Promise.all([
+      tx.get(statsRef),
+      tx.get(performerRef),
+    ]);
+
+    // ── Phase 2: ALL writes after reads ──────────────────────────────────────
+
     // Create review
     tx.set(reviewRef, {
       reviewerUid,
@@ -82,9 +99,6 @@ export const submitReview = onCall(async (request) => {
     });
 
     // Update memberTaskStats
-    const statsId = `${performerUidTx}_${taskId}`;
-    const statsRef = db.collection("homes").doc(homeId).collection("memberTaskStats").doc(statsId);
-    const statsSnap = await tx.get(statsRef);
     const stats = statsSnap.data() ?? { avgScore: 0, reviewCount: 0 };
     const oldCount: number = (stats["reviewCount"] as number) ?? 0;
     const oldAvg: number = (stats["avgScore"] as number) ?? 0;
@@ -100,17 +114,20 @@ export const submitReview = onCall(async (request) => {
     }, { merge: true });
 
     // Update performer's avgReviewScore
-    const performerRef = db.collection("homes").doc(homeId).collection("members").doc(performerUidTx);
-    const performerSnap = await tx.get(performerRef);
     const performerData = performerSnap.data() ?? {};
-    const pOldCount: number = (performerData["reviewCount"] as number) ?? 0;
-    const pOldAvg: number = (performerData["avgReviewScore"] as number) ?? 0;
+    const pOldCount: number = (performerData["ratingsCount"] as number) ?? 0;
+    const pOldAvg: number = (performerData["averageScore"] as number) ?? 0;
     const pNewCount = pOldCount + 1;
     const pNewAvg = (pOldAvg * pOldCount + score) / pNewCount;
 
     tx.set(performerRef, {
-      avgReviewScore: pNewAvg,
-      reviewCount: pNewCount,
+      averageScore: pNewAvg,
+      ratingsCount: pNewCount,
+    }, { merge: true });
+
+    // Track ratedEventIds per reviewer to allow fast isRated checks in Flutter
+    tx.set(memberReviewsRef, {
+      ratedEventIds: FieldValue.arrayUnion(taskEventId),
     }, { merge: true });
   });
 

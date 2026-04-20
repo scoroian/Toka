@@ -43,6 +43,23 @@ class MainShellV2 extends ConsumerWidget {
     return AdBanner.kBannerHeight + _kBannerGap;
   }
 
+  /// Padding inferior total que un `ScrollView` dentro de una pantalla tab
+  /// debe aplicar para que su último ítem quede por encima del banner y
+  /// la NavBar flotante.
+  ///
+  ///   safeBottom + kNavBarHeight + kNavBarBottom + bannerSlotHeight(...)
+  ///
+  /// Debe llamarse desde un `build` o `Consumer.builder`: hace `ref.watch`.
+  static double bottomContentPadding(BuildContext ctx, WidgetRef ref) {
+    final safeBottom = MediaQuery.of(ctx).padding.bottom;
+    final cfg = ref.watch(adBannerConfigProvider);
+    final visible = cfg.show && cfg.unitId.isNotEmpty;
+    return safeBottom
+        + kNavBarHeight
+        + kNavBarBottom
+        + bannerSlotHeight(bannerVisible: visible);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final location = GoRouterState.of(context).matchedLocation;

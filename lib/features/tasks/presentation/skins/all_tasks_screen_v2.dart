@@ -113,7 +113,10 @@ class _AllTasksScreenV2State extends ConsumerState<AllTasksScreenV2>
                   child: Text(l10n.tasks_empty_title))
               : ListView.builder(
                         key: const Key('tasks_list'),
-                        padding: const EdgeInsets.only(bottom: 96),
+                        padding: EdgeInsets.only(
+                          bottom:
+                              MainShellV2.bottomContentPadding(context, ref),
+                        ),
                         itemCount: data.tasks.length,
                         itemBuilder: (_, i) {
                           final task = data.tasks[i];

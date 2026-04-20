@@ -7,6 +7,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import 'app.dart';
 import 'firebase_options.dart';
@@ -22,6 +23,8 @@ void main() {
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,
       );
+
+      unawaited(MobileAds.instance.initialize());
 
       await FirebaseAppCheck.instance.activate(
         androidProvider: const bool.fromEnvironment('dart.vm.product')

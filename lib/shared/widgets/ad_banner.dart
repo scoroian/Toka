@@ -22,6 +22,8 @@ class AdBanner extends ConsumerStatefulWidget {
 class _AdBannerState extends ConsumerState<AdBanner> {
   BannerAd? _banner;
   bool _loaded = false;
+  bool _failed = false;
+  String? _loadedUnitId;
 
   String _effectiveUnitId(String fromServer) {
     if (kDebugMode) {
@@ -33,8 +35,17 @@ class _AdBannerState extends ConsumerState<AdBanner> {
     return fromServer;
   }
 
-  void _loadBanner(String unitId) {
+  void _disposeBanner() {
     _banner?.dispose();
+    _banner = null;
+    _loaded = false;
+    _loadedUnitId = null;
+  }
+
+  void _loadBanner(String unitId) {
+    _disposeBanner();
+    _failed = false;
+    _loadedUnitId = unitId;
     _banner = BannerAd(
       adUnitId: unitId,
       size: AdSize.banner,
@@ -50,10 +61,24 @@ class _AdBannerState extends ConsumerState<AdBanner> {
           setState(() {
             _banner = null;
             _loaded = false;
+            _failed = true;
           });
         },
       ),
     )..load();
+  }
+
+  void _syncWithConfig(AdBannerConfig config) {
+    if (!config.show || config.unitId.isEmpty) {
+      if (_banner != null || _loaded) {
+        setState(_disposeBanner);
+      }
+      return;
+    }
+    final effective = _effectiveUnitId(config.unitId);
+    if (_failed) return;
+    if (_banner != null && _loadedUnitId == effective) return;
+    _loadBanner(effective);
   }
 
   @override
@@ -64,19 +89,30 @@ class _AdBannerState extends ConsumerState<AdBanner> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<AdBannerConfig>(adBannerConfigProvider, (prev, next) {
+      _syncWithConfig(next);
+    });
+
     final config = ref.watch(adBannerConfigProvider);
+    // Inicializar el banner en el primer build si procede.
+    if (_banner == null && !_failed && config.show && config.unitId.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _syncWithConfig(config);
+      });
+    }
 
     if (!config.show || config.unitId.isEmpty) {
       return const SizedBox.shrink();
     }
 
-    final effective = _effectiveUnitId(config.unitId);
-    if (_banner == null) {
-      _loadBanner(effective);
+    if (_failed) {
+      // Una vez falló, no retry automático — mejor espacio vacío que loop infinito.
+      return const SizedBox.shrink();
     }
 
     if (!_loaded || _banner == null) {
-      return const SizedBox(height: 50); // reserva espacio equivalente al banner
+      return const SizedBox(height: 50);
     }
 
     return SizedBox(

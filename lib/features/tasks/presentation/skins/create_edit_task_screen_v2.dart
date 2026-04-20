@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/widgets/ad_aware_scaffold.dart';
 import '../../application/create_edit_task_view_model.dart';
 import '../../application/task_form_provider.dart';
 import '../widgets/assignment_form.dart';
@@ -90,7 +91,7 @@ class _CreateEditTaskScreenV2State
     final titleError = formState.fieldErrors['title'];
     final recurrenceError = formState.fieldErrors['recurrence'];
 
-    return Scaffold(
+    return AdAwareScaffold(
       appBar: AppBar(
         title: Text(vm.isEditing
             ? l10n.tasks_edit_title
@@ -118,7 +119,10 @@ class _CreateEditTaskScreenV2State
         ],
       ),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.fromLTRB(
+          16, 16, 16,
+          AdAwareScaffold.bottomPaddingOf(context, ref),
+        ),
         children: [
           // Visual picker
           TaskVisualPicker(

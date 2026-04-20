@@ -40,6 +40,22 @@ export const manualReassign = onCall(async (request) => {
     const taskSnap = await tx.get(taskRef);
     if (!taskSnap.exists) throw new HttpsError("not-found", "Task not found");
 
+    // Validar que newAssigneeUid es miembro activo del hogar
+    const newAssigneeRef = db
+      .collection("homes")
+      .doc(homeId)
+      .collection("members")
+      .doc(newAssigneeUid);
+    const newAssigneeSnap = await tx.get(newAssigneeRef);
+
+    if (!newAssigneeSnap.exists) {
+      throw new HttpsError("not-found", "new-assignee-not-in-home");
+    }
+    const newAssigneeStatus = newAssigneeSnap.data()?.["status"] as string | undefined;
+    if (newAssigneeStatus !== "active") {
+      throw new HttpsError("failed-precondition", "new-assignee-not-active");
+    }
+
     const task = taskSnap.data()!;
     const previousUid = task["currentAssigneeUid"] as string;
 

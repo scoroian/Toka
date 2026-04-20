@@ -3,7 +3,7 @@ import * as admin from "firebase-admin";
 import * as logger from "firebase-functions/logger";
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { FieldValue, Timestamp } from "firebase-admin/firestore";
-import { unlockSlotIfEligible } from "./slot_ledger";
+import { unlockSlotIfEligibleTx } from "./slot_ledger";
 import { parseReceiptData } from "./sync_entitlement_helpers";
 
 const db = () => admin.firestore();
@@ -55,7 +55,9 @@ export const syncEntitlement = onCall(async (request) => {
     updatedAt: FieldValue.serverTimestamp(),
   });
 
-  // Guardar historial del cargo
+  // Guardar historial del cargo + intentar unlock en UNA sola transacción.
+  // Esto previene la carrera en la que dos peticiones concurrentes con el
+  // mismo chargeId leen "charge no existe" y ambas incrementan el slot.
   const chargeRef = firestore
     .collection("homes")
     .doc(homeId)
@@ -63,29 +65,39 @@ export const syncEntitlement = onCall(async (request) => {
     .doc("history")
     .collection("charges")
     .doc(chargeId);
-  const chargeSnap = await chargeRef.get();
-  const validForUnlock = !chargeSnap.exists && status === "active";
 
-  await chargeRef.set(
-    {
-      chargeId,
-      uid,
-      plan,
-      platform,
-      status,
-      validForUnlock,
-      createdAt: FieldValue.serverTimestamp(),
-    },
-    { merge: true },
-  );
+  let unlocked = false;
+  try {
+    unlocked = await firestore.runTransaction(async (tx) => {
+      const chargeSnap = await tx.get(chargeRef);
+      if (chargeSnap.exists) {
+        return false; // ya procesado — idempotencia
+      }
 
-  // Intentar desbloquear plaza permanente si es un cobro válido nuevo
-  if (validForUnlock) {
-    try {
-      await unlockSlotIfEligible(firestore, uid, chargeId);
-    } catch (err) {
-      logger.error("Error unlocking slot", err);
-    }
+      const validForUnlock = status === "active";
+
+      tx.set(chargeRef, {
+        chargeId,
+        uid,
+        plan,
+        platform,
+        status,
+        validForUnlock,
+        createdAt: FieldValue.serverTimestamp(),
+      });
+
+      if (!validForUnlock) {
+        return false;
+      }
+
+      return await unlockSlotIfEligibleTx(tx, firestore, uid, chargeId);
+    });
+  } catch (err) {
+    logger.error("Error recording charge / unlocking slot", err);
+  }
+
+  if (unlocked) {
+    logger.info("Slot unlocked", { uid, chargeId });
   }
 
   // Actualizar premiumFlags en dashboard

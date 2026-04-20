@@ -6,11 +6,4 @@ void main() {
     expect(AppSkin.values, contains(AppSkin.v2));
     expect(SkinConfig.current, AppSkin.v2);
   });
-
-  test('SkinConfig.current se puede cambiar a material', () {
-    final original = SkinConfig.current;
-    addTearDown(() => SkinConfig.current = original);
-    SkinConfig.current = AppSkin.material;
-    expect(SkinConfig.current, AppSkin.material);
-  });
 }

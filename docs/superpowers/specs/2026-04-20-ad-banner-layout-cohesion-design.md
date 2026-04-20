@@ -181,9 +181,15 @@ static double bottomContentPadding(BuildContext ctx, WidgetRef ref) {
 9. **`RateEventSheet`**: aplicar el mismo helper con `hasNavBar: true` (se abre desde Historial).
 10. **Otros sheets** que resulten tapados durante las pruebas manuales: mismo patrón.
 
-## Eliminación de V1
+## Eliminación de V1 (código, no infraestructura)
 
-Eliminar (archivos completos):
+**Se mantiene** toda la infraestructura de skins, que seguirá viva para futuras V3, V4, etc.:
+
+- `lib/core/theme/app_skin.dart` — `AppSkin` enum y `SkinConfig.current`.
+- `SkinConfig.current` seguirá siendo el único punto de control.
+- Los ternarios `SkinConfig.current == AppSkin.v2 ? ... : ...` en `lib/app.dart` se **simplifican** (no se eliminan del todo): como hoy sólo hay una skin operativa, la rama `else` desaparece y queda el `if`/el valor directo. Cuando llegue una V3, se reintroduce el ternario con la comparación que corresponda.
+
+**Se elimina** el código V1 propiamente dicho (archivos completos):
 
 - `lib/shared/widgets/main_shell.dart`
 - `lib/features/tasks/presentation/today_screen.dart`
@@ -192,21 +198,35 @@ Eliminar (archivos completos):
 - `lib/features/tasks/presentation/create_edit_task_screen.dart`
 - `lib/features/history/presentation/history_screen.dart`
 - `lib/features/members/presentation/member_profile_screen.dart`
-- `lib/core/theme/app_skin.dart` (si no hay otros consumidores más allá de `app.dart`)
+- `lib/core/theme/app_theme.dart` (el tema de la skin V1; se mantiene `app_theme_v2.dart`).
 
-Renombrar (opcional, fuera del scope estricto pero recomendado): eliminar la carpeta `skins/` y mover las pantallas V2 a la raíz del feature, quitando el sufijo `V2`. Si renombrarlas resulta en muchos cambios colaterales (tests, imports), se deja como follow-up.
+Cambio en `AppSkin` enum:
+
+```dart
+// Antes
+enum AppSkin { material, v2 }
+
+// Después
+enum AppSkin { v2 }
+// Y cuando llegue la siguiente: enum AppSkin { v2, v3 }
+```
+
+El valor `material` se elimina porque ya no hay código que lo respalde. `v2` se deja igual para no tocar el único valor vivo.
 
 Refactor de `lib/app.dart`:
 
-- Quitar imports de V1 y de `SkinConfig`.
-- Cada `GoRoute.builder` devuelve directamente la versión V2.
-- Quitar el `builder` ternario del `ShellRoute`: ahora siempre `MainShellV2`.
-- Quitar el switch de `theme`/`darkTheme` entre `AppTheme` y `AppThemeV2`: dejar sólo V2.
+- Quitar imports de los archivos V1 eliminados.
+- Cada `GoRoute.builder` que hoy hace `SkinConfig.current == AppSkin.v2 ? V2() : Legacy()` pasa a devolver directamente `V2()`.
+- El `builder` del `ShellRoute` pasa a ser siempre `MainShellV2(child: child)`.
+- El switch `theme`/`darkTheme` entre `AppTheme` y `AppThemeV2` se resuelve a `AppThemeV2` directo.
+- **No se elimina** el import ni el uso de `SkinConfig`/`AppSkin` como concepto: si está ya en desuso en los builders tras la simplificación, quedarse un `SkinConfig` importado sin referencias es aceptable (o se deja solo en `app_skin.dart`). La clase sigue existiendo para cuando vuelva a usarse.
+
+Renombrar (fuera del scope estricto pero recomendado como follow-up): eliminar la carpeta `skins/` y mover las pantallas V2 a la raíz del feature, quitando el sufijo `V2`. Esto implicaría actualizar imports y tests. Se evalúa por separado.
 
 Tests afectados:
 
-- Tests que importan pantallas V1 → eliminarlos o migrarlos a V2. Listar en la fase de implementación.
-- Tests que usan `SkinConfig.set(AppSkin.v1)` → eliminarlos.
+- Tests que importan pantallas V1 → eliminarlos (no hay equivalencia que "migrar": los V2 ya tienen sus propios tests).
+- Tests que usan `SkinConfig.current = AppSkin.material` → eliminar la línea (la skin por defecto ya es V2 y es la única).
 
 ## Verificación visual
 

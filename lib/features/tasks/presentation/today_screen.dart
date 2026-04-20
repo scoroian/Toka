@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
-import '../../../core/constants/routes.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../shared/widgets/ad_banner.dart';
 import '../application/today_view_model.dart';
 import '../domain/home_dashboard.dart';
 import 'widgets/complete_task_dialog.dart';
 import 'widgets/home_dropdown_button.dart';
+import '../../../features/homes/presentation/home_selector_widget.dart';
 import 'widgets/pass_turn_dialog.dart';
 import 'widgets/today_empty_state.dart';
 import 'widgets/today_header_counters.dart';
@@ -79,8 +79,8 @@ class TodayScreen extends ConsumerWidget {
             ? HomeDropdownButton(
                 homes: vm.homes,
                 onSelect: vm.selectHome,
-                onCreateHome: () => context.go(AppRoutes.myHomes),
-                onJoinHome: () => context.go(AppRoutes.myHomes),
+                onCreateHome: () => showCreateHomeSheet(context, ref, vm.homes.length),
+                onJoinHome: () => showJoinHomeSheet(context, ref, vm.homes.length),
               )
             : Text(l10n.today_screen_title),
       ),
@@ -122,34 +122,15 @@ class TodayScreen extends ConsumerWidget {
                             _onPass(context, vm, task, data.currentUid)
                         : null,
                   ),
-              if (data.showAdBanner)
-                const SliverToBoxAdapter(
-                  child: _AdBannerPlaceholder(
-                    key: Key('ad_banner'),
-                  ),
-                ),
+              const SliverToBoxAdapter(
+                key: Key('ad_banner'),
+                child: AdBanner(),
+              ),
               const SliverToBoxAdapter(child: SizedBox(height: 32)),
             ],
           );
         },
       ),
-    );
-  }
-}
-
-class _AdBannerPlaceholder extends StatelessWidget {
-  const _AdBannerPlaceholder({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 60,
-      margin: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: const Center(child: Text('Ad')),
     );
   }
 }

@@ -2,6 +2,7 @@ import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { onDocumentUpdated } from "firebase-functions/v2/firestore";
 import * as admin from "firebase-admin";
 import * as logger from "firebase-functions/logger";
+import { buildNewMemberDoc } from "./member_factory";
 
 const db = admin.firestore();
 const FieldValue = admin.firestore.FieldValue;
@@ -76,21 +77,12 @@ export const createHome = onCall(async (request) => {
   const nickname = (userData2["nickname"] as string | undefined) ?? "";
   const photoUrl = (userData2["photoUrl"] as string | undefined) ?? null;
 
-  const memberData = {
+  const memberData = buildNewMemberDoc({
+    uid,
     nickname,
-    photoUrl,
-    bio: null,
-    phone: null,
-    phoneVisibility: "hidden",
     role: "owner",
-    status: "active",
-    joinedAt: now,
-    tasksCompleted: 0,
-    passedCount: 0,
-    complianceRate: 0.0,
-    currentStreak: 0,
-    averageScore: 0.0,
-  };
+    photoUrl,
+  });
 
   const batch = db.batch();
   batch.set(homeRef, homeData);
@@ -214,21 +206,12 @@ export const joinHome = onCall(async (request) => {
     // Crear documento de miembro en la subcolección del hogar con datos reales del usuario
     tx.set(
       db.collection("homes").doc(homeId).collection("members").doc(uid),
-      {
+      buildNewMemberDoc({
+        uid,
         nickname: memberNickname,
-        photoUrl: memberPhotoUrl,
-        bio: null,
-        phone: null,
-        phoneVisibility: "hidden",
         role: "member",
-        status: "active",
-        joinedAt: now,
-        tasksCompleted: 0,
-        passedCount: 0,
-        complianceRate: 0.0,
-        currentStreak: 0,
-        averageScore: 0.0,
-      },
+        photoUrl: memberPhotoUrl,
+      }),
       { merge: true }
     );
   });
@@ -307,21 +290,12 @@ export const joinHomeByCode = onCall(async (request) => {
     // Crear documento de miembro en la subcolección del hogar con datos reales del usuario
     tx.set(
       homeRef.collection("members").doc(uid),
-      {
+      buildNewMemberDoc({
+        uid,
         nickname: memberNickname,
-        photoUrl: memberPhotoUrl,
-        bio: null,
-        phone: null,
-        phoneVisibility: "hidden",
         role: "member",
-        status: "active",
-        joinedAt: now,
-        tasksCompleted: 0,
-        passedCount: 0,
-        complianceRate: 0.0,
-        currentStreak: 0,
-        averageScore: 0.0,
-      },
+        photoUrl: memberPhotoUrl,
+      }),
       { merge: true }
     );
   });

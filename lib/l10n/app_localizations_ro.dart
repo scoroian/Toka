@@ -588,6 +588,10 @@ class AppLocalizationsRo extends AppLocalizations {
   String get pass_turn_confirm_btn => 'Pasează rândul';
 
   @override
+  String get pass_turn_minimal_impact =>
+      'Impactul asupra respectării tale va fi minim.';
+
+  @override
   String get members_title => 'Membri';
 
   @override
@@ -650,6 +654,18 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get invite_sheet_code_copied => 'Cod copiat';
+
+  @override
+  String invite_code_expires_at(String date) {
+    return 'Expiră pe $date';
+  }
+
+  @override
+  String get invite_code_regenerate => 'Regenerează codul';
+
+  @override
+  String get invite_code_expired_error =>
+      'Acest cod a expirat. Proprietarul trebuie să genereze unul nou.';
 
   @override
   String get member_profile_home_stats => 'Statistici în acest cămin';
@@ -743,6 +759,10 @@ class AppLocalizationsRo extends AppLocalizations {
   @override
   String get members_error_cannot_remove_owner =>
       'Nu se poate elimina proprietarul locuinței';
+
+  @override
+  String get members_error_payer_locked =>
+      'Nu poți fi eliminat sau părăsi casa cât timp ești plătitorul abonamentului Premium activ. Anulează abonamentul sau așteaptă expirarea.';
 
   @override
   String get history_title => 'Istoric';
@@ -1059,6 +1079,18 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get settings_section_language => 'Limbă';
+
+  @override
+  String get appearance => 'Aspect';
+
+  @override
+  String get theme_light => 'Luminos';
+
+  @override
+  String get theme_dark => 'Întunecat';
+
+  @override
+  String get theme_system => 'Sistem';
 
   @override
   String get settings_section_notifications => 'Notificări';
@@ -1449,6 +1481,10 @@ class AppLocalizationsRo extends AppLocalizations {
   String get task_on_miss_next_rotation => 'Rotație la următor';
 
   @override
+  String get tasks_rotation_requires_two_members =>
+      'Rotația necesită cel puțin 2 membri';
+
+  @override
   String get task_detail_assignee => 'Responsabil';
 
   @override
@@ -1473,4 +1509,16 @@ class AppLocalizationsRo extends AppLocalizations {
   @override
   String get settings_delete_requires_reauth =>
       'Pentru securitate, deconectează-te și reconectează-te înainte de a șterge contul.';
+
+  @override
+  String get member_profile_remove_member => 'Eliminare din locuință';
+
+  @override
+  String member_profile_remove_member_confirm(String name) {
+    return 'Elimini pe $name din locuință? Această acțiune nu poate fi anulată.';
+  }
+
+  @override
+  String get error_cannot_remove_owner =>
+      'Proprietarul locuinței nu poate fi eliminat.';
 }

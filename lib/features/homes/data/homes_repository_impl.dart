@@ -77,7 +77,16 @@ class HomesRepositoryImpl implements HomesRepository {
     }
 
     final callable = _functions.httpsCallable('leaveHome');
-    await callable.call<void>({'homeId': homeId});
+    try {
+      await callable.call<void>({'homeId': homeId});
+    } on FirebaseFunctionsException catch (e) {
+      if (e.code == 'failed-precondition' &&
+          (e.message ?? '')
+              .contains('payer-cannot-leave-or-be-removed-while-premium-active')) {
+        throw const PayerLockedException();
+      }
+      rethrow;
+    }
   }
 
   @override

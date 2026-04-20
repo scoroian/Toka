@@ -181,3 +181,38 @@ describe("debugSetPremiumStatus — gate por emulador", () => {
     expect(isEmulatorEnv("1")).toBe(false);
   });
 });
+
+describe("payer protection — removeMember/leaveHome", () => {
+  const PROTECTED_STATUSES = ["active", "cancelledPendingEnd", "rescue"];
+
+  function isPayerLocked(
+    targetUid: string,
+    currentPayerUid: string | null,
+    premiumStatus: string
+  ): boolean {
+    if (targetUid !== currentPayerUid) return false;
+    return PROTECTED_STATUSES.includes(premiumStatus);
+  }
+
+  it("target === payer + status active → bloqueado", () => {
+    expect(isPayerLocked("u1", "u1", "active")).toBe(true);
+  });
+  it("target === payer + status cancelledPendingEnd → bloqueado", () => {
+    expect(isPayerLocked("u1", "u1", "cancelledPendingEnd")).toBe(true);
+  });
+  it("target === payer + status rescue → bloqueado", () => {
+    expect(isPayerLocked("u1", "u1", "rescue")).toBe(true);
+  });
+  it("target === payer + status free → permitido", () => {
+    expect(isPayerLocked("u1", "u1", "free")).toBe(false);
+  });
+  it("target === payer + status expiredFree → permitido", () => {
+    expect(isPayerLocked("u1", "u1", "expiredFree")).toBe(false);
+  });
+  it("target !== payer → permitido", () => {
+    expect(isPayerLocked("u2", "u1", "active")).toBe(false);
+  });
+  it("currentPayerUid null → permitido", () => {
+    expect(isPayerLocked("u1", null, "active")).toBe(false);
+  });
+});

@@ -392,6 +392,10 @@
   "@pass_turn_reason_hint": { "description": "Pass reason text field hint" },
   "pass_turn_confirm_btn": "Pasează rândul",
   "@pass_turn_confirm_btn": { "description": "Pass turn confirm button" },
+  "pass_turn_minimal_impact": "Impactul asupra respectării tale va fi minim.",
+  "@pass_turn_minimal_impact": {
+    "description": "Message shown when passing turn has negligible compliance impact (< 1 percentage point)"
+  },
   "members_title": "Membri",
   "@members_title": { "description": "Members screen title" },
   "members_invite_fab": "Invită",
@@ -434,6 +438,15 @@
   "@invite_sheet_copy_code": { "description": "Copy code button" },
   "invite_sheet_code_copied": "Cod copiat",
   "@invite_sheet_code_copied": { "description": "Code copied snackbar" },
+  "invite_code_expires_at": "Expiră pe {date}",
+  "@invite_code_expires_at": {
+    "description": "Invite code expiry date label",
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "invite_code_regenerate": "Regenerează codul",
+  "@invite_code_regenerate": { "description": "Regenerate invite code button" },
+  "invite_code_expired_error": "Acest cod a expirat. Proprietarul trebuie să genereze unul nou.",
+  "@invite_code_expired_error": { "description": "Expired invite code error message" },
   "invite_sheet_scan_qr": "Scanează QR",
   "@invite_sheet_scan_qr": { "description": "Scan QR button label" },
   "invite_sheet_qr_hint": "Îndreaptă camera spre codul QR",
@@ -502,6 +515,8 @@
   "@members_error_max_admins": { "description": "Max admins error" },
   "members_error_cannot_remove_owner": "Nu se poate elimina proprietarul locuinței",
   "@members_error_cannot_remove_owner": { "description": "Cannot remove owner error" },
+  "members_error_payer_locked": "Nu poți fi eliminat sau părăsi casa cât timp ești plătitorul abonamentului Premium activ. Anulează abonamentul sau așteaptă expirarea.",
+  "@members_error_payer_locked": { "description": "Payer cannot leave or be removed while Premium is active" },
   "history_title": "Istoric",
   "@history_title": { "description": "History screen title" },
   "history_filter_all": "Toate",
@@ -727,6 +742,14 @@
   "@settings_delete_account": { "description": "Delete account option" },
   "settings_section_language": "Limbă",
   "@settings_section_language": { "description": "Language settings" },
+  "appearance": "Aspect",
+  "@appearance": { "description": "Settings section title for appearance/theme options" },
+  "theme_light": "Luminos",
+  "@theme_light": { "description": "Light theme option label" },
+  "theme_dark": "Întunecat",
+  "@theme_dark": { "description": "Dark theme option label" },
+  "theme_system": "Sistem",
+  "@theme_system": { "description": "System theme option label" },
   "settings_section_notifications": "Notificări",
   "@settings_section_notifications": { "description": "Notifications settings" },
   "settings_section_privacy": "Confidențialitate",
@@ -891,7 +914,9 @@
   "@task_on_miss_same_assignee": {},
   "task_on_miss_next_rotation": "Rotație la următor",
   "@task_on_miss_next_rotation": {},
-  "task_detail_assignee": "Responsabil",
+  "tasks_rotation_requires_two_members": "Rotația necesită cel puțin 2 membri",
+  "@tasks_rotation_requires_two_members": { "description": "Hint shown below the on-miss selector when only 1 member is assigned" },
+"task_detail_assignee": "Responsabil",
   "@task_detail_assignee": {},
   "task_detail_next_due": "Următoarea dată",
   "@task_detail_next_due": {},
@@ -906,5 +931,14 @@
   "settings_delete_account_confirm_body": "Această acțiune este permanentă și ireversibilă. Vei pierde accesul la toate locuințele și datele tale.",
   "@settings_delete_account_confirm_body": { "description": "Delete account confirmation dialog body" },
   "settings_delete_requires_reauth": "Pentru securitate, deconectează-te și reconectează-te înainte de a șterge contul.",
-  "@settings_delete_requires_reauth": { "description": "Requires recent login to delete account" }
+  "@settings_delete_requires_reauth": { "description": "Requires recent login to delete account" },
+  "member_profile_remove_member": "Eliminare din locuință",
+  "@member_profile_remove_member": { "description": "Button: remove member from home" },
+  "member_profile_remove_member_confirm": "Elimini pe {name} din locuință? Această acțiune nu poate fi anulată.",
+  "@member_profile_remove_member_confirm": {
+    "description": "Confirm remove member dialog body",
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "error_cannot_remove_owner": "Proprietarul locuinței nu poate fi eliminat.",
+  "@error_cannot_remove_owner": { "description": "Cannot remove owner error" }
 }

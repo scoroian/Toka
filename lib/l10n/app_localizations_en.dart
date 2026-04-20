@@ -542,15 +542,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tasks_no_home_title => 'No tasks';
 
   @override
-  String get tasks_no_home_body =>
-      'Create or join a home to manage your tasks';
+  String get tasks_no_home_body => 'Create or join a home to manage your tasks';
 
   @override
   String get members_no_home_title => 'No members';
 
   @override
-  String get members_no_home_body =>
-      'Create or join a home to see its members';
+  String get members_no_home_body => 'Create or join a home to see its members';
 
   @override
   String get complete_task_dialog_body =>
@@ -581,6 +579,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pass_turn_confirm_btn => 'Pass turn';
+
+  @override
+  String get pass_turn_minimal_impact =>
+      'The impact on your compliance will be minimal.';
 
   @override
   String get members_title => 'Members';
@@ -645,6 +647,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get invite_sheet_code_copied => 'Code copied';
+
+  @override
+  String invite_code_expires_at(String date) {
+    return 'Expires on $date';
+  }
+
+  @override
+  String get invite_code_regenerate => 'Regenerate code';
+
+  @override
+  String get invite_code_expired_error =>
+      'This code has expired. The owner must generate a new one.';
 
   @override
   String get member_profile_home_stats => 'Stats in this home';
@@ -737,6 +751,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get members_error_cannot_remove_owner =>
       'Cannot remove the home owner';
+
+  @override
+  String get members_error_payer_locked =>
+      'You cannot be removed or leave while you are the active Premium payer. Cancel the subscription first or wait for it to expire.';
 
   @override
   String get history_title => 'History';
@@ -1053,6 +1071,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_section_language => 'Language';
+
+  @override
+  String get appearance => 'Appearance';
+
+  @override
+  String get theme_light => 'Light';
+
+  @override
+  String get theme_dark => 'Dark';
+
+  @override
+  String get theme_system => 'System';
 
   @override
   String get settings_section_notifications => 'Notifications';
@@ -1439,6 +1469,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get task_on_miss_next_rotation => 'Rotate to next';
 
   @override
+  String get tasks_rotation_requires_two_members =>
+      'Rotation requires at least 2 members';
+
+  @override
   String get task_detail_assignee => 'Assignee';
 
   @override
@@ -1463,4 +1497,15 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settings_delete_requires_reauth =>
       'For security, please sign out and sign in again before deleting your account.';
+
+  @override
+  String get member_profile_remove_member => 'Remove from home';
+
+  @override
+  String member_profile_remove_member_confirm(String name) {
+    return 'Remove $name from this home? This action cannot be undone.';
+  }
+
+  @override
+  String get error_cannot_remove_owner => 'The home owner cannot be removed.';
 }

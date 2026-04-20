@@ -23,6 +23,7 @@ class MembersRepositoryImpl implements MembersRepository {
         .collection('homes')
         .doc(homeId)
         .collection('members')
+        .where('status', isNotEqualTo: 'left')
         .snapshots()
         .map((snap) =>
             snap.docs.map((d) => MemberModel.fromFirestore(d, homeId)).toList());
@@ -54,11 +55,43 @@ class MembersRepositoryImpl implements MembersRepository {
   }
 
   @override
-  Future<String> generateInviteCode(String homeId) async {
+  Future<({String code, DateTime expiresAt})> generateInviteCode(
+      String homeId) async {
     final result = await _functions
         .httpsCallable('generateInviteCode')
         .call<Map<String, dynamic>>({'homeId': homeId});
-    return result.data['code'] as String;
+    final code = result.data['code'] as String;
+    final expiresAtIso = result.data['expiresAt'] as String?;
+    final expiresAt = expiresAtIso != null
+        ? DateTime.parse(expiresAtIso).toLocal()
+        : DateTime.now().add(const Duration(days: 7));
+    return (code: code, expiresAt: expiresAt);
+  }
+
+  @override
+  Stream<({String code, DateTime expiresAt})?> watchActiveInviteCode(
+      String homeId) {
+    final now = DateTime.now();
+    return _firestore
+        .collection('homes')
+        .doc(homeId)
+        .collection('invitations')
+        .where('used', isEqualTo: false)
+        .orderBy('createdAt', descending: true)
+        .limit(5)
+        .snapshots()
+        .map((snap) {
+      for (final doc in snap.docs) {
+        final data = doc.data();
+        final expiresAtTs = data['expiresAt'] as Timestamp?;
+        if (expiresAtTs == null) continue;
+        final expiresAt = expiresAtTs.toDate();
+        if (expiresAt.isAfter(now)) {
+          return (code: data['code'] as String, expiresAt: expiresAt.toLocal());
+        }
+      }
+      return null;
+    });
   }
 
   @override
@@ -69,7 +102,13 @@ class MembersRepositoryImpl implements MembersRepository {
         'targetUid': uid,
       });
     } on FirebaseFunctionsException catch (e) {
-      if (e.code == 'failed-precondition') throw const CannotRemoveOwnerException();
+      if (e.code == 'failed-precondition') {
+        if ((e.message ?? '')
+            .contains('payer-cannot-leave-or-be-removed-while-premium-active')) {
+          throw const PayerLockedException();
+        }
+        throw const CannotRemoveOwnerException();
+      }
       rethrow;
     }
   }
@@ -131,5 +170,25 @@ class MembersRepositoryImpl implements MembersRepository {
       if (vacMap == null) return null;
       return Vacation.fromMap(uid, homeId, vacMap);
     });
+  }
+
+  @override
+  Future<void> submitReview({
+    required String homeId,
+    required String taskEventId,
+    required double score,
+    String? note,
+  }) async {
+    try {
+      await _functions.httpsCallable('submitReview').call({
+        'homeId': homeId,
+        'taskEventId': taskEventId,
+        'score': score,
+        if (note != null) 'note': note,
+      });
+    } on FirebaseFunctionsException catch (e) {
+      if (e.code == 'already-exists') throw const AlreadyRatedException();
+      rethrow;
+    }
   }
 }

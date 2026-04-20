@@ -1150,6 +1150,12 @@ abstract class AppLocalizations {
   /// **'Pasar turno'**
   String get pass_turn_confirm_btn;
 
+  /// Message shown when passing turn has negligible compliance impact (< 1 percentage point)
+  ///
+  /// In es, this message translates to:
+  /// **'El impacto en tu cumplimiento será mínimo.'**
+  String get pass_turn_minimal_impact;
+
   /// Members screen title
   ///
   /// In es, this message translates to:
@@ -1269,6 +1275,24 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Código copiado'**
   String get invite_sheet_code_copied;
+
+  /// Invite code expiry date label
+  ///
+  /// In es, this message translates to:
+  /// **'Expira el {date}'**
+  String invite_code_expires_at(String date);
+
+  /// Regenerate invite code button
+  ///
+  /// In es, this message translates to:
+  /// **'Regenerar código'**
+  String get invite_code_regenerate;
+
+  /// Expired invite code error message
+  ///
+  /// In es, this message translates to:
+  /// **'Este código ha caducado. El propietario debe generar uno nuevo.'**
+  String get invite_code_expired_error;
 
   /// Section header: home statistics
   ///
@@ -1443,6 +1467,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'No se puede eliminar al propietario del hogar'**
   String get members_error_cannot_remove_owner;
+
+  /// Payer cannot leave or be removed while Premium is active
+  ///
+  /// In es, this message translates to:
+  /// **'No puedes expulsar ni salir del hogar mientras seas el pagador de la suscripción Premium activa. Cancela la suscripción primero o espera a que expire.'**
+  String get members_error_payer_locked;
 
   /// History screen title
   ///
@@ -2019,6 +2049,30 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Idioma'**
   String get settings_section_language;
+
+  /// Settings section title for appearance/theme options
+  ///
+  /// In es, this message translates to:
+  /// **'Apariencia'**
+  String get appearance;
+
+  /// Light theme option label
+  ///
+  /// In es, this message translates to:
+  /// **'Claro'**
+  String get theme_light;
+
+  /// Dark theme option label
+  ///
+  /// In es, this message translates to:
+  /// **'Oscuro'**
+  String get theme_dark;
+
+  /// System theme option label
+  ///
+  /// In es, this message translates to:
+  /// **'Sistema'**
+  String get theme_system;
 
   /// Notifications settings
   ///
@@ -2764,6 +2818,12 @@ abstract class AppLocalizations {
   /// **'Rotar al siguiente'**
   String get task_on_miss_next_rotation;
 
+  /// Hint shown below the on-miss selector when only 1 member is assigned
+  ///
+  /// In es, this message translates to:
+  /// **'La rotación requiere al menos 2 miembros'**
+  String get tasks_rotation_requires_two_members;
+
   /// No description provided for @task_detail_assignee.
   ///
   /// In es, this message translates to:
@@ -2811,6 +2871,24 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Por seguridad, cierra sesión y vuelve a iniciarla antes de eliminar tu cuenta.'**
   String get settings_delete_requires_reauth;
+
+  /// Button: remove member from home
+  ///
+  /// In es, this message translates to:
+  /// **'Expulsar del hogar'**
+  String get member_profile_remove_member;
+
+  /// Confirm remove member dialog body
+  ///
+  /// In es, this message translates to:
+  /// **'¿Expulsar a {name} del hogar? Esta acción no se puede deshacer.'**
+  String member_profile_remove_member_confirm(String name);
+
+  /// Cannot remove owner error
+  ///
+  /// In es, this message translates to:
+  /// **'No se puede expulsar al propietario del hogar.'**
+  String get error_cannot_remove_owner;
 }
 
 class _AppLocalizationsDelegate

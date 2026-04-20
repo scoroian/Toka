@@ -589,6 +589,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get pass_turn_confirm_btn => 'Pasar turno';
 
   @override
+  String get pass_turn_minimal_impact =>
+      'El impacto en tu cumplimiento será mínimo.';
+
+  @override
   String get members_title => 'Miembros';
 
   @override
@@ -651,6 +655,18 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get invite_sheet_code_copied => 'Código copiado';
+
+  @override
+  String invite_code_expires_at(String date) {
+    return 'Expira el $date';
+  }
+
+  @override
+  String get invite_code_regenerate => 'Regenerar código';
+
+  @override
+  String get invite_code_expired_error =>
+      'Este código ha caducado. El propietario debe generar uno nuevo.';
 
   @override
   String get member_profile_home_stats => 'Estadísticas en este hogar';
@@ -746,6 +762,10 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get members_error_cannot_remove_owner =>
       'No se puede eliminar al propietario del hogar';
+
+  @override
+  String get members_error_payer_locked =>
+      'No puedes expulsar ni salir del hogar mientras seas el pagador de la suscripción Premium activa. Cancela la suscripción primero o espera a que expire.';
 
   @override
   String get history_title => 'Historial';
@@ -1063,6 +1083,18 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get settings_section_language => 'Idioma';
+
+  @override
+  String get appearance => 'Apariencia';
+
+  @override
+  String get theme_light => 'Claro';
+
+  @override
+  String get theme_dark => 'Oscuro';
+
+  @override
+  String get theme_system => 'Sistema';
 
   @override
   String get settings_section_notifications => 'Notificaciones';
@@ -1451,6 +1483,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get task_on_miss_next_rotation => 'Rotar al siguiente';
 
   @override
+  String get tasks_rotation_requires_two_members =>
+      'La rotación requiere al menos 2 miembros';
+
+  @override
   String get task_detail_assignee => 'Responsable';
 
   @override
@@ -1475,4 +1511,16 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get settings_delete_requires_reauth =>
       'Por seguridad, cierra sesión y vuelve a iniciarla antes de eliminar tu cuenta.';
+
+  @override
+  String get member_profile_remove_member => 'Expulsar del hogar';
+
+  @override
+  String member_profile_remove_member_confirm(String name) {
+    return '¿Expulsar a $name del hogar? Esta acción no se puede deshacer.';
+  }
+
+  @override
+  String get error_cannot_remove_owner =>
+      'No se puede expulsar al propietario del hogar.';
 }

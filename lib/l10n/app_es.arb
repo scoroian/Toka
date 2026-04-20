@@ -392,6 +392,10 @@
   "@pass_turn_reason_hint": { "description": "Pass reason text field hint" },
   "pass_turn_confirm_btn": "Pasar turno",
   "@pass_turn_confirm_btn": { "description": "Pass turn confirm button" },
+  "pass_turn_minimal_impact": "El impacto en tu cumplimiento será mínimo.",
+  "@pass_turn_minimal_impact": {
+    "description": "Message shown when passing turn has negligible compliance impact (< 1 percentage point)"
+  },
   "members_title": "Miembros",
   "@members_title": { "description": "Members screen title" },
   "members_invite_fab": "Invitar",
@@ -438,6 +442,15 @@
   "@invite_sheet_qr_hint": { "description": "QR scanner hint" },
   "invite_sheet_code_copied": "Código copiado",
   "@invite_sheet_code_copied": { "description": "Code copied snackbar" },
+  "invite_code_expires_at": "Expira el {date}",
+  "@invite_code_expires_at": {
+    "description": "Invite code expiry date label",
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "invite_code_regenerate": "Regenerar código",
+  "@invite_code_regenerate": { "description": "Regenerate invite code button" },
+  "invite_code_expired_error": "Este código ha caducado. El propietario debe generar uno nuevo.",
+  "@invite_code_expired_error": { "description": "Expired invite code error message" },
   "member_profile_home_stats": "Estadísticas en este hogar",
   "@member_profile_home_stats": { "description": "Section header: home statistics" },
   "member_profile_tasks_completed": "Tareas completadas",
@@ -502,6 +515,8 @@
   "@members_error_max_admins": { "description": "Max admins error" },
   "members_error_cannot_remove_owner": "No se puede eliminar al propietario del hogar",
   "@members_error_cannot_remove_owner": { "description": "Cannot remove owner error" },
+  "members_error_payer_locked": "No puedes expulsar ni salir del hogar mientras seas el pagador de la suscripción Premium activa. Cancela la suscripción primero o espera a que expire.",
+  "@members_error_payer_locked": { "description": "Payer cannot leave or be removed while Premium is active" },
   "history_title": "Historial",
   "@history_title": { "description": "History screen title" },
   "history_filter_all": "Todos",
@@ -727,6 +742,14 @@
   "@settings_delete_account": { "description": "Delete account option" },
   "settings_section_language": "Idioma",
   "@settings_section_language": { "description": "Language settings" },
+  "appearance": "Apariencia",
+  "@appearance": { "description": "Settings section title for appearance/theme options" },
+  "theme_light": "Claro",
+  "@theme_light": { "description": "Light theme option label" },
+  "theme_dark": "Oscuro",
+  "@theme_dark": { "description": "Dark theme option label" },
+  "theme_system": "Sistema",
+  "@theme_system": { "description": "System theme option label" },
   "settings_section_notifications": "Notificaciones",
   "@settings_section_notifications": { "description": "Notifications settings" },
   "settings_section_privacy": "Privacidad",
@@ -891,7 +914,9 @@
   "@task_on_miss_same_assignee": {},
   "task_on_miss_next_rotation": "Rotar al siguiente",
   "@task_on_miss_next_rotation": {},
-  "task_detail_assignee": "Responsable",
+  "tasks_rotation_requires_two_members": "La rotación requiere al menos 2 miembros",
+  "@tasks_rotation_requires_two_members": { "description": "Hint shown below the on-miss selector when only 1 member is assigned" },
+"task_detail_assignee": "Responsable",
   "@task_detail_assignee": {},
   "task_detail_next_due": "Próxima vez",
   "@task_detail_next_due": {},
@@ -906,5 +931,14 @@
   "settings_delete_account_confirm_body": "Esta acción es permanente e irreversible. Perderás acceso a todos tus hogares y datos.",
   "@settings_delete_account_confirm_body": { "description": "Delete account confirmation dialog body" },
   "settings_delete_requires_reauth": "Por seguridad, cierra sesión y vuelve a iniciarla antes de eliminar tu cuenta.",
-  "@settings_delete_requires_reauth": { "description": "Requires recent login to delete account" }
+  "@settings_delete_requires_reauth": { "description": "Requires recent login to delete account" },
+  "member_profile_remove_member": "Expulsar del hogar",
+  "@member_profile_remove_member": { "description": "Button: remove member from home" },
+  "member_profile_remove_member_confirm": "¿Expulsar a {name} del hogar? Esta acción no se puede deshacer.",
+  "@member_profile_remove_member_confirm": {
+    "description": "Confirm remove member dialog body",
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "error_cannot_remove_owner": "No se puede expulsar al propietario del hogar.",
+  "@error_cannot_remove_owner": { "description": "Cannot remove owner error" }
 }

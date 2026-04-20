@@ -69,6 +69,12 @@ class _HomeSettingsScreenState extends ConsumerState<HomeSettingsScreen> {
           SnackBar(content: Text(l10n.homes_error_cannot_leave_as_owner)),
         );
       }
+    } on PayerLockedException {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.members_error_payer_locked)),
+        );
+      }
     }
   }
 

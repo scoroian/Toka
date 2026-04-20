@@ -2,7 +2,7 @@ import 'home.dart';
 import 'home_membership.dart';
 
 export '../../../core/errors/exceptions.dart'
-    show CannotLeaveAsOwnerException, NoAvailableSlotsException;
+    show CannotLeaveAsOwnerException, NoAvailableSlotsException, PayerLockedException;
 
 abstract interface class HomesRepository {
   /// Escucha en tiempo real las membresías del usuario en `users/{uid}/memberships`.

@@ -358,6 +358,27 @@ export const leaveHome = onCall(async (request) => {
     throw new HttpsError("failed-precondition", "Owner cannot leave home");
   }
 
+  // Guard: payer cannot leave while there's an active Premium billing period.
+  const homeRef = db.collection("homes").doc(homeId);
+  const homeDoc = await homeRef.get();
+  if (homeDoc.exists) {
+    const homeData = homeDoc.data()!;
+    const PROTECTED_STATUSES = ["active", "cancelledPendingEnd", "rescue"];
+    const currentPayerUid = homeData["currentPayerUid"] as string | null | undefined;
+    const premiumStatus = homeData["premiumStatus"] as string | undefined;
+
+    if (
+      uid === currentPayerUid &&
+      premiumStatus &&
+      PROTECTED_STATUSES.includes(premiumStatus)
+    ) {
+      throw new HttpsError(
+        "failed-precondition",
+        "payer-cannot-leave-or-be-removed-while-premium-active"
+      );
+    }
+  }
+
   await membershipRef.update({
     status: "left",
     leftAt: FieldValue.serverTimestamp(),

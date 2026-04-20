@@ -89,3 +89,20 @@ class CannotRemoveOwnerException implements Exception {
   @override
   String toString() => 'CannotRemoveOwnerException: $message';
 }
+
+class PayerLockedException implements Exception {
+  const PayerLockedException(
+      [this.message =
+          'Payer cannot leave or be removed while Premium is active']);
+  final String message;
+  @override
+  String toString() => 'PayerLockedException: $message';
+}
+
+class AlreadyRatedException implements Exception {
+  const AlreadyRatedException(
+      [this.message = 'You already reviewed this event']);
+  final String message;
+  @override
+  String toString() => 'AlreadyRatedException: $message';
+}

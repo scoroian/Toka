@@ -6,7 +6,9 @@ export '../../../core/errors/exceptions.dart'
     show
         MaxMembersReachedException,
         MaxAdminsReachedException,
-        CannotRemoveOwnerException;
+        CannotRemoveOwnerException,
+        PayerLockedException,
+        AlreadyRatedException;
 
 abstract interface class MembersRepository {
   /// Stream de todos los miembros (activos + congelados) del hogar.
@@ -19,8 +21,14 @@ abstract interface class MembersRepository {
   /// Lanza [MaxMembersReachedException] si el hogar está al límite.
   Future<void> inviteMember(String homeId, String? email);
 
-  /// Genera código de invitación de 6 chars con TTL de 48h.
-  Future<String> generateInviteCode(String homeId);
+  /// Genera código de invitación de 6 chars con TTL de 7 días.
+  /// Revoca los códigos activos previos del hogar.
+  /// Retorna el código y su fecha de expiración.
+  Future<({String code, DateTime expiresAt})> generateInviteCode(String homeId);
+
+  /// Observa el código de invitación activo y vigente del hogar.
+  /// Emite null si no hay ninguno activo/vigente.
+  Stream<({String code, DateTime expiresAt})?> watchActiveInviteCode(String homeId);
 
   /// Elimina a un miembro del hogar (vía CF).
   /// Lanza [CannotRemoveOwnerException] si el uid es el owner.
@@ -42,4 +50,13 @@ abstract interface class MembersRepository {
 
   /// Observa las vacaciones de un miembro.
   Stream<Vacation?> watchVacation(String homeId, String uid);
+
+  /// Envía una valoración de un evento completado (vía CF submitReview).
+  /// Lanza [AlreadyRatedException] si el usuario ya valoró este evento.
+  Future<void> submitReview({
+    required String homeId,
+    required String taskEventId,
+    required double score,
+    String? note,
+  });
 }

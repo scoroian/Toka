@@ -42,6 +42,48 @@ describe("createHome — control de slots disponibles", () => {
   });
 });
 
+describe("createHome — memberships abandonados no ocupan cupo", () => {
+  // Verifica que solo los memberships activos (status:"active") cuentan.
+  // Regresión: leaveHome pone status:"left" pero no borra el documento,
+  // por lo que la query de createHome debe filtrar WHERE status == "active".
+
+  function countActiveSlots(memberships: { status: string }[]): number {
+    return memberships.filter((m) => m.status === "active").length;
+  }
+
+  it("1 activo + 1 abandonado → cuenta 1 cupo usado", () => {
+    const memberships = [
+      { status: "active" },
+      { status: "left" },
+    ];
+    expect(countActiveSlots(memberships)).toBe(1);
+  });
+
+  it("3 abandonados → 0 cupos usados, puede crear hogar", () => {
+    const memberships = [
+      { status: "left" },
+      { status: "left" },
+      { status: "left" },
+    ];
+    expect(countActiveSlots(memberships)).toBe(0);
+    expect(hasAvailableSlot(2, 0, countActiveSlots(memberships))).toBe(true);
+  });
+
+  it("2 activos + 1 abandonado con 2 slots base → no disponible", () => {
+    const memberships = [
+      { status: "active" },
+      { status: "active" },
+      { status: "left" },
+    ];
+    expect(countActiveSlots(memberships)).toBe(2);
+    expect(hasAvailableSlot(2, 0, countActiveSlots(memberships))).toBe(false);
+  });
+
+  function hasAvailableSlot(baseSlots: number, lifetimeUnlocked: number, existingCount: number): boolean {
+    return existingCount < (baseSlots + lifetimeUnlocked);
+  }
+});
+
 describe("leaveHome — validación rol owner", () => {
   function canLeave(role: string): boolean {
     return role !== "owner";
@@ -118,5 +160,24 @@ describe("transferOwnership — validaciones de entrada", () => {
 
   it("inputs válidos con distinto destinatario → null", () => {
     expect(validateTransferOwnershipInput("uid1", "home1", "uid2")).toBeNull();
+  });
+});
+
+describe("debugSetPremiumStatus — gate por emulador", () => {
+  function isEmulatorEnv(envValue: string | undefined): boolean {
+    return envValue === "true";
+  }
+
+  it("FUNCTIONS_EMULATOR==='true' → permitido", () => {
+    expect(isEmulatorEnv("true")).toBe(true);
+  });
+  it("FUNCTIONS_EMULATOR===undefined → denegado", () => {
+    expect(isEmulatorEnv(undefined)).toBe(false);
+  });
+  it("FUNCTIONS_EMULATOR==='false' → denegado", () => {
+    expect(isEmulatorEnv("false")).toBe(false);
+  });
+  it("FUNCTIONS_EMULATOR==='1' → denegado (solo 'true' exacto)", () => {
+    expect(isEmulatorEnv("1")).toBe(false);
   });
 });

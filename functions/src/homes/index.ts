@@ -787,6 +787,13 @@ const DEBUG_VALID_STATUSES = [
 type DebugPremiumStatus = typeof DEBUG_VALID_STATUSES[number];
 
 export const debugSetPremiumStatus = onCall(async (request) => {
+  if (process.env.FUNCTIONS_EMULATOR !== "true") {
+    throw new HttpsError(
+      "permission-denied",
+      "Debug operations only available in emulator"
+    );
+  }
+
   if (!request.auth) {
     throw new HttpsError("unauthenticated", "Must be authenticated");
   }

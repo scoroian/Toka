@@ -153,7 +153,7 @@ class _AllTasksScreenV2State extends ConsumerState<AllTasksScreenV2>
                             },
                             child: TaskCard(
                               task: task,
-                              onTap: () => context.push('/tasks/${task.id}'),
+                              onTap: () => context.push(AppRoutes.taskDetail.replaceAll(':id', task.id)),
                               onLongPress: () => vm.toggleSelection(task.id),
                             ),
                           );

@@ -5,11 +5,13 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/constants/routes.dart';
 import '../../../../core/theme/app_colors_v2.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../application/task_detail_view_model.dart';
 import '../../domain/task.dart';
 import '../../domain/task_status.dart';
+import '../utils/task_visual_utils.dart';
 
 class TaskDetailScreenV2 extends ConsumerWidget {
   const TaskDetailScreenV2({super.key, required this.taskId});
@@ -47,15 +49,15 @@ class TaskDetailScreenV2 extends ConsumerWidget {
 
     return vm.viewData.when(
       loading: () => Scaffold(
-          appBar: AppBar(),
+          appBar: AppBar(leading: BackButton(onPressed: () => context.pop())),
           body: const Center(child: CircularProgressIndicator())),
       error: (_, __) => Scaffold(
-          appBar: AppBar(),
+          appBar: AppBar(leading: BackButton(onPressed: () => context.pop())),
           body: Center(child: Text(l10n.error_generic))),
       data: (data) {
         if (data == null) {
           return Scaffold(
-              appBar: AppBar(),
+              appBar: AppBar(leading: BackButton(onPressed: () => context.pop())),
               body: const Center(child: CircularProgressIndicator()));
         }
         final task = data.task;
@@ -67,8 +69,15 @@ class TaskDetailScreenV2 extends ConsumerWidget {
           backgroundColor: bg,
           appBar: AppBar(
             backgroundColor: bg,
+            leading: BackButton(onPressed: () => context.pop()),
             actions: [
               if (data.canManage) ...[
+                IconButton(
+                  icon: const Icon(Icons.edit_outlined),
+                  tooltip: l10n.editTask,
+                  onPressed: () =>
+                      context.push(AppRoutes.editTask.replaceAll(':id', task.id)),
+                ),
                 IconButton(
                   tooltip: task.status == TaskStatus.frozen
                       ? l10n.tasks_action_unfreeze
@@ -89,8 +98,7 @@ class TaskDetailScreenV2 extends ConsumerWidget {
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
             children: [
               Row(children: [
-                Text(task.visualValue,
-                    style: const TextStyle(fontSize: 36)),
+                taskVisualWidget(task.visualKind, task.visualValue, size: 36),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
@@ -123,7 +131,7 @@ class TaskDetailScreenV2 extends ConsumerWidget {
                   _InfoRow(
                     key: const Key('detail_next_due'),
                     label: l10n.task_detail_next_due,
-                    value: DateFormat('EEE d MMM', 'es').format(task.nextDueAt),
+                    value: DateFormat('EEE d MMM', 'es').format(task.nextDueAt.toLocal()),
                     isDark: isDark,
                   ),
                   Divider(color: bd),
@@ -152,7 +160,7 @@ class TaskDetailScreenV2 extends ConsumerWidget {
                       padding: const EdgeInsets.only(bottom: 4),
                       child: Row(children: [
                         Text(
-                          DateFormat('EEE d MMM', 'es').format(o.date),
+                          DateFormat('EEE d MMM HH:mm', 'es').format(o.date),
                           style: GoogleFonts.plusJakartaSans(
                               fontWeight: FontWeight.w700),
                         ),

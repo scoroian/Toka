@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/constants/routes.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/loading_widget.dart';
 import '../application/task_detail_view_model.dart';
@@ -88,7 +89,7 @@ class TaskDetailScreen extends ConsumerWidget {
                 IconButton(
                   key: const Key('edit_task_button'),
                   icon: const Icon(Icons.edit),
-                  onPressed: () => context.push('/task/$taskId/edit'),
+                  onPressed: () => context.push(AppRoutes.editTask.replaceAll(':id', taskId)),
                 ),
               ],
             ],

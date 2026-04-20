@@ -1,6 +1,5 @@
 // functions/src/entitlement/slot_ledger.ts
-import * as admin from "firebase-admin";
-import type { Firestore } from "firebase-admin/firestore";
+import type { Firestore, Transaction } from "firebase-admin/firestore";
 import { FieldValue } from "firebase-admin/firestore";
 
 export async function unlockSlotIfEligible(
@@ -45,8 +44,8 @@ export async function unlockSlotIfEligible(
  * evitar condiciones de carrera con el mismo chargeId en paralelo.
  */
 export async function unlockSlotIfEligibleTx(
-  tx: admin.firestore.Transaction,
-  firestore: admin.firestore.Firestore,
+  tx: Transaction,
+  firestore: Firestore,
   uid: string,
   chargeId: string,
 ): Promise<boolean> {

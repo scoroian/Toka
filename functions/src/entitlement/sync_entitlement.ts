@@ -66,38 +66,39 @@ export const syncEntitlement = onCall(async (request) => {
     .collection("charges")
     .doc(chargeId);
 
-  let unlocked = false;
-  try {
-    unlocked = await firestore.runTransaction(async (tx) => {
-      const chargeSnap = await tx.get(chargeRef);
-      if (chargeSnap.exists) {
-        return false; // ya procesado — idempotencia
-      }
+  // Importante: NO envolver en try/catch que trague el error. Si la transacción
+  // falla debe propagarse al cliente — de lo contrario el cargo no queda
+  // persistido, el slot no se desbloquea, y el cliente asume éxito, rompiendo
+  // la idempotencia que este flujo debe garantizar.
+  const unlocked = await firestore.runTransaction(async (tx) => {
+    const chargeSnap = await tx.get(chargeRef);
+    if (chargeSnap.exists) {
+      return false; // ya procesado — idempotencia
+    }
 
-      const validForUnlock = status === "active";
+    const validForUnlock = status === "active";
 
-      tx.set(chargeRef, {
-        chargeId,
-        uid,
-        plan,
-        platform,
-        status,
-        validForUnlock,
-        createdAt: FieldValue.serverTimestamp(),
-      });
-
-      if (!validForUnlock) {
-        return false;
-      }
-
-      return await unlockSlotIfEligibleTx(tx, firestore, uid, chargeId);
+    tx.set(chargeRef, {
+      chargeId,
+      uid,
+      plan,
+      platform,
+      status,
+      validForUnlock,
+      createdAt: FieldValue.serverTimestamp(),
     });
-  } catch (err) {
-    logger.error("Error recording charge / unlocking slot", err);
-  }
+
+    if (!validForUnlock) {
+      return false;
+    }
+
+    return await unlockSlotIfEligibleTx(tx, firestore, uid, chargeId);
+  });
 
   if (unlocked) {
     logger.info("Slot unlocked", { uid, chargeId });
+  } else {
+    logger.debug("Slot not unlocked", { uid, chargeId, status });
   }
 
   // Actualizar premiumFlags en dashboard

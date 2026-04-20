@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/routes.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../shared/widgets/ad_banner.dart';
 import '../../../shared/widgets/loading_widget.dart';
 import '../application/all_tasks_view_model.dart';
 import '../domain/task_status.dart';
@@ -127,56 +128,64 @@ class _AllTasksScreenState extends ConsumerState<AllTasksScreen> {
 
         return Scaffold(
           appBar: appBar,
-          body: data.tasks.isEmpty
-              ? Center(
-                  key: const Key('tasks_empty_state'),
-                  child: Text(l10n.tasks_empty_title))
-              : ListView.builder(
-                  key: const Key('tasks_list'),
-                  itemCount: data.tasks.length,
-                  itemBuilder: (_, i) {
-                    final task = data.tasks[i];
-                    final isSelected = selectedIds.contains(task.id);
+          body: Column(
+            children: [
+              Expanded(
+                child: data.tasks.isEmpty
+                    ? Center(
+                        key: const Key('tasks_empty_state'),
+                        child: Text(l10n.tasks_empty_title))
+                    : ListView.builder(
+                        key: const Key('tasks_list'),
+                        itemCount: data.tasks.length,
+                        itemBuilder: (_, i) {
+                          final task = data.tasks[i];
+                          final isSelected = selectedIds.contains(task.id);
 
-                    if (isSelectionMode) {
-                      return CheckboxListTile(
-                        key: Key('selectable_task_${task.id}'),
-                        value: isSelected,
-                        onChanged: (_) => vm.toggleSelection(task.id),
-                        title: Text(task.title),
-                        secondary: task.visualKind == 'emoji'
-                            ? Text(task.visualValue,
-                                style: const TextStyle(fontSize: 24))
-                            : const Icon(Icons.task_alt),
-                        controlAffinity: ListTileControlAffinity.leading,
-                      );
-                    }
+                          if (isSelectionMode) {
+                            return CheckboxListTile(
+                              key: Key('selectable_task_${task.id}'),
+                              value: isSelected,
+                              onChanged: (_) => vm.toggleSelection(task.id),
+                              title: Text(task.title),
+                              secondary: task.visualKind == 'emoji'
+                                  ? Text(task.visualValue,
+                                      style: const TextStyle(fontSize: 24))
+                                  : const Icon(Icons.task_alt),
+                              controlAffinity:
+                                  ListTileControlAffinity.leading,
+                            );
+                          }
 
-                    return Dismissible(
-                      key: Key('dismissible_${task.id}'),
-                      background: _FreezeBackground(l10n: l10n),
-                      secondaryBackground: _DeleteBackground(l10n: l10n),
-                      confirmDismiss: (direction) async {
-                        if (direction == DismissDirection.startToEnd) {
-                          await vm.toggleFreeze(task);
-                          return false;
-                        } else {
-                          return _confirmSingleDelete(context, l10n);
-                        }
-                      },
-                      onDismissed: (direction) async {
-                        if (direction == DismissDirection.endToStart) {
-                          await vm.deleteTask(task);
-                        }
-                      },
-                      child: TaskCard(
-                        task: task,
-                        onTap: () => context.go('/task/${task.id}'),
-                        onLongPress: () => vm.toggleSelection(task.id),
+                          return Dismissible(
+                            key: Key('dismissible_${task.id}'),
+                            background: _FreezeBackground(l10n: l10n),
+                            secondaryBackground: _DeleteBackground(l10n: l10n),
+                            confirmDismiss: (direction) async {
+                              if (direction == DismissDirection.startToEnd) {
+                                await vm.toggleFreeze(task);
+                                return false;
+                              } else {
+                                return _confirmSingleDelete(context, l10n);
+                              }
+                            },
+                            onDismissed: (direction) async {
+                              if (direction == DismissDirection.endToStart) {
+                                await vm.deleteTask(task);
+                              }
+                            },
+                            child: TaskCard(
+                              task: task,
+                              onTap: () => context.go('/task/${task.id}'),
+                              onLongPress: () => vm.toggleSelection(task.id),
+                            ),
+                          );
+                        },
                       ),
-                    );
-                  },
-                ),
+              ),
+              const AdBanner(key: Key('ad_banner')),
+            ],
+          ),
           floatingActionButton: (!isSelectionMode && data.canManage)
               ? FloatingActionButton(
                   key: const Key('create_task_fab'),

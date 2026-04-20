@@ -7,10 +7,12 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/routes.dart';
 import '../../../../core/theme/app_colors_v2.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/widgets/ad_banner.dart';
 import '../../../../shared/widgets/no_home_empty_state.dart';
 import '../../../../shared/widgets/skins/main_shell_v2.dart';
 import '../../application/all_tasks_view_model.dart';
 import '../../domain/task_status.dart';
+import '../utils/task_visual_utils.dart';
 import '../widgets/task_card.dart';
 
 class AllTasksScreenV2 extends ConsumerStatefulWidget {
@@ -101,59 +103,66 @@ class _AllTasksScreenV2State extends ConsumerState<AllTasksScreenV2>
 
         return Scaffold(
           appBar: _buildAppBar(l10n, vm, isDark),
-          body: data.tasks.isEmpty
-              ? Center(
-                  key: const Key('tasks_empty_state'),
-                  child: Text(l10n.tasks_empty_title))
-              : ListView.builder(
-                  key: const Key('tasks_list'),
-                  padding: const EdgeInsets.only(bottom: 96),
-                  itemCount: data.tasks.length,
-                  itemBuilder: (_, i) {
-                    final task = data.tasks[i];
-                    if (vm.isSelectionMode) {
-                      return CheckboxListTile(
-                        key: Key('selectable_task_${task.id}'),
-                        value: vm.selectedIds.contains(task.id),
-                        onChanged: (_) => vm.toggleSelection(task.id),
-                        title: Text(
-                          task.title,
-                          style: GoogleFonts.plusJakartaSans(
-                              fontWeight: FontWeight.w700),
-                        ),
-                        secondary: task.visualKind == 'emoji'
-                            ? Text(task.visualValue,
-                                style: const TextStyle(fontSize: 24))
-                            : const Icon(Icons.task_alt),
-                        controlAffinity: ListTileControlAffinity.leading,
-                      );
-                    }
-                    return Dismissible(
-                      key: Key('dismissible_${task.id}'),
-                      background:
-                          _FreezeBackground(l10n: l10n, isDark: isDark),
-                      secondaryBackground:
-                          _DeleteBackground(l10n: l10n, isDark: isDark),
-                      confirmDismiss: (dir) async {
-                        if (dir == DismissDirection.startToEnd) {
-                          await vm.toggleFreeze(task);
-                          return false;
-                        }
-                        return _confirmDelete(l10n);
-                      },
-                      onDismissed: (dir) async {
-                        if (dir == DismissDirection.endToStart) {
-                          await vm.deleteTask(task);
-                        }
-                      },
-                      child: TaskCard(
-                        task: task,
-                        onTap: () => context.push('/tasks/${task.id}'),
-                        onLongPress: () => vm.toggleSelection(task.id),
+          body: Column(
+            children: [
+              Expanded(
+                child: data.tasks.isEmpty
+                    ? Center(
+                        key: const Key('tasks_empty_state'),
+                        child: Text(l10n.tasks_empty_title))
+                    : ListView.builder(
+                        key: const Key('tasks_list'),
+                        padding: const EdgeInsets.only(bottom: 96),
+                        itemCount: data.tasks.length,
+                        itemBuilder: (_, i) {
+                          final task = data.tasks[i];
+                          if (vm.isSelectionMode) {
+                            return CheckboxListTile(
+                              key: Key('selectable_task_${task.id}'),
+                              value: vm.selectedIds.contains(task.id),
+                              onChanged: (_) => vm.toggleSelection(task.id),
+                              title: Text(
+                                task.title,
+                                style: GoogleFonts.plusJakartaSans(
+                                    fontWeight: FontWeight.w700),
+                              ),
+                              secondary: taskVisualWidget(
+                                  task.visualKind, task.visualValue,
+                                  size: 24),
+                              controlAffinity:
+                                  ListTileControlAffinity.leading,
+                            );
+                          }
+                          return Dismissible(
+                            key: Key('dismissible_${task.id}'),
+                            background:
+                                _FreezeBackground(l10n: l10n, isDark: isDark),
+                            secondaryBackground:
+                                _DeleteBackground(l10n: l10n, isDark: isDark),
+                            confirmDismiss: (dir) async {
+                              if (dir == DismissDirection.startToEnd) {
+                                await vm.toggleFreeze(task);
+                                return false;
+                              }
+                              return _confirmDelete(l10n);
+                            },
+                            onDismissed: (dir) async {
+                              if (dir == DismissDirection.endToStart) {
+                                await vm.deleteTask(task);
+                              }
+                            },
+                            child: TaskCard(
+                              task: task,
+                              onTap: () => context.push('/tasks/${task.id}'),
+                              onLongPress: () => vm.toggleSelection(task.id),
+                            ),
+                          );
+                        },
                       ),
-                    );
-                  },
-                ),
+              ),
+              const AdBanner(key: Key('ad_banner')),
+            ],
+          ),
           floatingActionButton: (!vm.isSelectionMode && data.canManage)
               ? Padding(
                   padding: const EdgeInsets.only(

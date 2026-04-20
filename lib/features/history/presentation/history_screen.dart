@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/app_localizations.dart';
+import '../../../shared/widgets/ad_banner.dart';
 import '../../../shared/widgets/loading_widget.dart';
 import '../application/history_view_model.dart';
 import '../domain/task_event.dart';
@@ -68,39 +69,50 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                   return const HistoryEmptyState();
                 }
                 final isPremium = vm.isPremium;
-                final showBanner = !isPremium;
                 final showLoadMore = vm.hasMore;
-                final extraItems =
-                    (showBanner ? 1 : 0) + (showLoadMore ? 1 : 0);
 
-                return ListView.builder(
-                  key: const Key('history_list'),
-                  controller: _scrollController,
-                  itemCount: items.length + extraItems,
-                  itemBuilder: (context, index) {
-                    if (index < items.length) {
-                      return _buildEventTile(items[index]);
-                    }
-                    final extra = index - items.length;
-                    if (showBanner && extra == 0) {
-                      return _PremiumBanner(l10n: l10n);
-                    }
-                    return Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Center(
-                        child: TextButton(
-                          key: const Key('btn_load_more'),
-                          onPressed: () =>
-                              ref.read(historyViewModelProvider).loadMore(),
-                          child: Text(l10n.history_load_more),
-                        ),
-                      ),
+                return LayoutBuilder(
+                  builder: (context, constraints) {
+                    const kHistoryItemApproxHeight = 88.0;
+                    final visibleCount =
+                        (constraints.maxHeight / kHistoryItemApproxHeight).floor();
+                    final hiddenCount = items.length - visibleCount;
+                    final showUpsell = !isPremium && hiddenCount >= 5;
+
+                    final extraItems =
+                        (showUpsell ? 1 : 0) + (showLoadMore ? 1 : 0);
+
+                    return ListView.builder(
+                      key: const Key('history_list'),
+                      controller: _scrollController,
+                      itemCount: items.length + extraItems,
+                      itemBuilder: (context, index) {
+                        if (index < items.length) {
+                          return _buildEventTile(items[index]);
+                        }
+                        final extra = index - items.length;
+                        if (showUpsell && extra == 0) {
+                          return _PremiumBanner(l10n: l10n);
+                        }
+                        return Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Center(
+                            child: TextButton(
+                              key: const Key('btn_load_more'),
+                              onPressed: () =>
+                                  ref.read(historyViewModelProvider).loadMore(),
+                              child: Text(l10n.history_load_more),
+                            ),
+                          ),
+                        );
+                      },
                     );
                   },
                 );
               },
             ),
           ),
+          const AdBanner(key: Key('ad_banner')),
         ],
       ),
     );

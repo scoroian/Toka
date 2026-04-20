@@ -216,3 +216,69 @@ describe("payer protection — removeMember/leaveHome", () => {
     expect(isPayerLocked("u1", null, "active")).toBe(false);
   });
 });
+
+describe("removeMember — validaciones", () => {
+  function validateRemoveInputs(
+    callerUid: string,
+    homeId: string | undefined,
+    targetUid: string | undefined
+  ): string | null {
+    if (!homeId?.trim() || !targetUid?.trim()) {
+      return "homeId and targetUid are required";
+    }
+    if (callerUid === targetUid) {
+      return "cannot-remove-self-use-leave-home";
+    }
+    return null;
+  }
+
+  it("homeId vacío → invalid-argument", () => {
+    expect(validateRemoveInputs("u1", "", "u2")).toBe("homeId and targetUid are required");
+  });
+  it("targetUid vacío → invalid-argument", () => {
+    expect(validateRemoveInputs("u1", "h1", "")).toBe("homeId and targetUid are required");
+  });
+  it("auto-target (caller === target) → precondition", () => {
+    expect(validateRemoveInputs("u1", "h1", "u1")).toBe("cannot-remove-self-use-leave-home");
+  });
+  it("inputs válidos y target distinto → null", () => {
+    expect(validateRemoveInputs("u1", "h1", "u2")).toBeNull();
+  });
+});
+
+describe("removeMember — matriz de roles", () => {
+  type Role = "owner" | "admin" | "member";
+  function canRemove(callerRole: Role, targetRole: Role): { ok: boolean; code?: string } {
+    if (targetRole === "owner") return { ok: false, code: "cannot-remove-owner" };
+    if (callerRole === "owner") return { ok: true };
+    if (callerRole === "admin" && targetRole === "member") return { ok: true };
+    if (callerRole === "admin" && targetRole === "admin") {
+      return { ok: false, code: "admin-cannot-remove-admin" };
+    }
+    return { ok: false, code: "insufficient-role" };
+  }
+
+  it("owner puede expulsar member", () => {
+    expect(canRemove("owner", "member")).toEqual({ ok: true });
+  });
+  it("owner puede expulsar admin", () => {
+    expect(canRemove("owner", "admin")).toEqual({ ok: true });
+  });
+  it("nadie puede expulsar owner", () => {
+    expect(canRemove("owner", "owner")).toEqual({ ok: false, code: "cannot-remove-owner" });
+    expect(canRemove("admin", "owner")).toEqual({ ok: false, code: "cannot-remove-owner" });
+  });
+  it("admin puede expulsar member", () => {
+    expect(canRemove("admin", "member")).toEqual({ ok: true });
+  });
+  it("admin NO puede expulsar otro admin", () => {
+    expect(canRemove("admin", "admin")).toEqual({
+      ok: false,
+      code: "admin-cannot-remove-admin",
+    });
+  });
+  it("member no puede expulsar a nadie", () => {
+    expect(canRemove("member", "member")).toEqual({ ok: false, code: "insufficient-role" });
+    expect(canRemove("member", "admin")).toEqual({ ok: false, code: "insufficient-role" });
+  });
+});

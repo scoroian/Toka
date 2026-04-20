@@ -386,6 +386,110 @@ export const leaveHome = onCall(async (request) => {
 });
 
 // ---------------------------------------------------------------------------
+// removeMember
+// Owner/admin expulsa a un miembro del hogar. Marca status="left" en ambos
+// documentos (homes/{homeId}/members/{targetUid} y
+// users/{targetUid}/memberships/{homeId}).
+// Input:  { homeId: string, targetUid: string }
+// ---------------------------------------------------------------------------
+export const removeMember = onCall(async (request) => {
+  if (!request.auth) {
+    throw new HttpsError("unauthenticated", "Must be authenticated");
+  }
+
+  const callerUid = request.auth.uid;
+  const { homeId, targetUid } = request.data as {
+    homeId?: string;
+    targetUid?: string;
+  };
+
+  if (!homeId?.trim() || !targetUid?.trim()) {
+    throw new HttpsError(
+      "invalid-argument",
+      "homeId and targetUid are required"
+    );
+  }
+  if (callerUid === targetUid) {
+    throw new HttpsError(
+      "failed-precondition",
+      "cannot-remove-self-use-leave-home"
+    );
+  }
+
+  const homeRef = db.collection("homes").doc(homeId);
+  const callerMemberRef = homeRef.collection("members").doc(callerUid);
+  const targetMemberRef = homeRef.collection("members").doc(targetUid);
+  const targetMembershipRef = db
+    .collection("users")
+    .doc(targetUid)
+    .collection("memberships")
+    .doc(homeId);
+
+  await db.runTransaction(async (tx) => {
+    const [homeDoc, callerDoc, targetDoc] = await Promise.all([
+      tx.get(homeRef),
+      tx.get(callerMemberRef),
+      tx.get(targetMemberRef),
+    ]);
+
+    if (!callerDoc.exists) {
+      throw new HttpsError("permission-denied", "caller-not-member");
+    }
+    if (!targetDoc.exists) {
+      throw new HttpsError("not-found", "target-not-member");
+    }
+
+    const callerRole = callerDoc.data()!["role"] as string | undefined;
+    const targetRole = targetDoc.data()!["role"] as string | undefined;
+
+    if (targetRole === "owner") {
+      throw new HttpsError("failed-precondition", "cannot-remove-owner");
+    }
+    if (callerRole !== "owner" && callerRole !== "admin") {
+      throw new HttpsError("permission-denied", "insufficient-role");
+    }
+    if (callerRole === "admin" && targetRole === "admin") {
+      throw new HttpsError("permission-denied", "admin-cannot-remove-admin");
+    }
+
+    // Payer protection — misma regla que leaveHome.
+    if (homeDoc.exists) {
+      const homeData = homeDoc.data()!;
+      const PROTECTED_STATUSES = ["active", "cancelledPendingEnd", "rescue"];
+      const currentPayerUid = homeData["currentPayerUid"] as
+        | string
+        | null
+        | undefined;
+      const premiumStatus = homeData["premiumStatus"] as string | undefined;
+
+      if (
+        targetUid === currentPayerUid &&
+        premiumStatus &&
+        PROTECTED_STATUSES.includes(premiumStatus)
+      ) {
+        throw new HttpsError(
+          "failed-precondition",
+          "payer-cannot-leave-or-be-removed-while-premium-active"
+        );
+      }
+    }
+
+    tx.update(targetMemberRef, {
+      status: "left",
+      leftAt: FieldValue.serverTimestamp(),
+    });
+    tx.update(targetMembershipRef, {
+      status: "left",
+      leftAt: FieldValue.serverTimestamp(),
+    });
+  });
+
+  logger.info(
+    `removeMember: target=${targetUid} in home=${homeId} by caller=${callerUid}`
+  );
+});
+
+// ---------------------------------------------------------------------------
 // closeHome
 // Input:  { homeId: string }
 // ---------------------------------------------------------------------------

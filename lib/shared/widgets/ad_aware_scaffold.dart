@@ -1,21 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'ad_banner.dart';
-import 'ad_banner_config_provider.dart';
-
-/// Wrapper de [Scaffold] para pantallas push (fuera del `MainShellV2`)
-/// que necesitan mostrar el [AdBanner] al pie.
+/// Wrapper de [Scaffold] para pantallas push.
 ///
-/// - Reserva espacio inferior vía `bottomNavigationBar` para que
-///   `MediaQuery.padding.bottom` crezca y sheets/teclados se posicionen
-///   correctamente.
-/// - Pinta el banner en un `Stack` por encima cuando `adBannerConfig.show`.
-/// - El `floatingActionButton` queda automáticamente por encima del banner
-///   gracias a `extendBody: true` + el `bottomNavigationBar` reservado.
+/// Históricamente instanciaba un [AdBanner] propio, pero eso provocaba que,
+/// al entrar en create/edit task, task detail o member detail, Google cargara
+/// una impresión nueva — una penalización potencial por parte de AdMob.
 ///
-/// Los `ScrollView` internos deben aplicar `bottomPaddingOf(ctx, ref)` como
-/// padding inferior para que su último ítem quede por encima del banner.
+/// La única instancia del banner vive en `MainShellV2`. Estas pantallas, al
+/// estar dentro del ShellRoute, heredan ese banner. `AdAwareScaffold` queda
+/// como pasarela a [Scaffold] para no romper call sites; el método estático
+/// `bottomPaddingOf` se mantiene por compatibilidad pero devuelve solo
+/// `safeBottom` porque el shell ya reserva el espacio del banner via su
+/// propio Scaffold.
 class AdAwareScaffold extends ConsumerWidget {
   const AdAwareScaffold({
     super.key,
@@ -30,50 +27,19 @@ class AdAwareScaffold extends ConsumerWidget {
   final Widget? floatingActionButton;
   final Color? backgroundColor;
 
-  /// Altura total que el banner ocupa (contenedor + gap) cuando está visible.
-  /// No incluye `safeBottom`.
-  static double bannerSlot({required bool bannerVisible}) {
-    if (!bannerVisible) return 0;
-    return AdBanner.kBannerHeight + AdBanner.kBannerGap;
-  }
-
   /// Padding inferior que los scrollables del `body` deben aplicar para que
-  /// su último ítem quede por encima del banner.
-  ///
-  ///   safeBottom + bannerSlot(bannerVisible)
-  ///
-  /// Debe llamarse desde un `build` o `Consumer.builder`: hace `ref.watch`.
+  /// el último ítem no quede tapado por el safe area del sistema.
+  /// El espacio del banner ya lo reserva el shell padre.
   static double bottomPaddingOf(BuildContext ctx, WidgetRef ref) {
-    final safeBottom = MediaQuery.of(ctx).padding.bottom;
-    final cfg = ref.watch(adBannerConfigProvider);
-    final visible = cfg.show && cfg.unitId.isNotEmpty;
-    return safeBottom + bannerSlot(bannerVisible: visible);
+    return MediaQuery.of(ctx).padding.bottom;
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cfg = ref.watch(adBannerConfigProvider);
-    final visible = cfg.show && cfg.unitId.isNotEmpty;
-    final safeBottom = MediaQuery.of(context).padding.bottom;
-    final slot = bannerSlot(bannerVisible: visible);
-
     return Scaffold(
-      extendBody: true,
       backgroundColor: backgroundColor,
       appBar: appBar,
-      bottomNavigationBar: SizedBox(height: safeBottom + slot),
-      body: Stack(
-        children: [
-          body,
-          if (visible)
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: safeBottom + AdBanner.kBannerGap,
-              child: const AdBanner(key: Key('ad_banner')),
-            ),
-        ],
-      ),
+      body: body,
       floatingActionButton: floatingActionButton,
     );
   }

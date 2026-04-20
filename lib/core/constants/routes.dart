@@ -21,7 +21,7 @@ abstract class AppRoutes {
   static const String homeSettingsMembers = '/home-settings/members';
   static const String editProfile = '/profile/edit';
   static const String members = '/members';
-  static const String memberProfile = '/member/:uid';
+  static const String memberProfile = '/members/:uid';
   static const String vacation = '/vacation';
   static const String history = '/history';
   static const String notificationSettings = '/notification-settings';

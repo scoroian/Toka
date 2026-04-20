@@ -7,7 +7,6 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/routes.dart';
 import '../../../../core/theme/app_colors_v2.dart';
 import '../../../../l10n/app_localizations.dart';
-import '../../../../shared/widgets/ad_banner_config_provider.dart';
 import '../../../../shared/widgets/no_home_empty_state.dart';
 import '../../../../shared/widgets/skins/main_shell_v2.dart';
 import '../../application/all_tasks_view_model.dart';
@@ -100,11 +99,6 @@ class _AllTasksScreenV2State extends ConsumerState<AllTasksScreenV2>
           );
         }
 
-        final adConfig = ref.watch(adBannerConfigProvider);
-        final bannerVisible = adConfig.show && adConfig.unitId.isNotEmpty;
-        final bannerSlot =
-            MainShellV2.bannerSlotHeight(bannerVisible: bannerVisible);
-
         return Scaffold(
           appBar: _buildAppBar(l10n, vm, isDark),
           body: data.tasks.isEmpty
@@ -166,7 +160,9 @@ class _AllTasksScreenV2State extends ConsumerState<AllTasksScreenV2>
                       ),
           floatingActionButton: (!vm.isSelectionMode && data.canManage)
               ? Padding(
-                  padding: EdgeInsets.only(bottom: bannerSlot),
+                  padding: EdgeInsets.only(
+                    bottom: MainShellV2.fabBottomPadding(context, ref),
+                  ),
                   child: ScaleTransition(
                     scale: CurvedAnimation(
                         parent: _fabCtrl, curve: Curves.elasticOut),

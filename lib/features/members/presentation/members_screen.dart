@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/routes.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../../shared/widgets/ad_banner_config_provider.dart';
 import '../../../shared/widgets/loading_widget.dart';
 import '../../../shared/widgets/no_home_empty_state.dart';
 import '../../../shared/widgets/skins/main_shell_v2.dart';
@@ -69,16 +68,13 @@ class MembersScreen extends ConsumerWidget {
           );
         }
 
-        final adConfig = ref.watch(adBannerConfigProvider);
-        final bannerVisible = adConfig.show && adConfig.unitId.isNotEmpty;
-        final bannerSlot =
-            MainShellV2.bannerSlotHeight(bannerVisible: bannerVisible);
-
         return Scaffold(
           appBar: AppBar(title: Text(l10n.members_title)),
           floatingActionButton: data.canInvite
               ? Padding(
-                  padding: EdgeInsets.only(bottom: bannerSlot),
+                  padding: EdgeInsets.only(
+                    bottom: MainShellV2.fabBottomPadding(context, ref),
+                  ),
                   child: FloatingActionButton.extended(
                     key: const Key('fab_invite'),
                     onPressed: () => showModalBottomSheet(

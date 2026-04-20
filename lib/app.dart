@@ -195,6 +195,18 @@ GoRouter appRouter(AppRouterRef ref) {
           GoRoute(
             path: AppRoutes.members,
             builder: (_, __) => const MembersScreen(),
+            routes: [
+              GoRoute(
+                path: ':uid',
+                builder: (context, state) {
+                  final uid = state.pathParameters['uid']!;
+                  final extra = state.extra as Map<String, dynamic>?;
+                  final homeId = extra?['homeId'] as String? ?? '';
+                  return MemberProfileScreenV2(
+                      homeId: homeId, memberUid: uid);
+                },
+              ),
+            ],
           ),
           GoRoute(
             path: AppRoutes.tasks,
@@ -202,13 +214,14 @@ GoRouter appRouter(AppRouterRef ref) {
             routes: [
               // 'new' debe ir ANTES de ':id' para que /tasks/new no sea
               // capturado por el parámetro :id (Bug #32).
+              // Sin parentNavigatorKey → estas pantallas quedan DENTRO del
+              // shell y reutilizan la misma instancia de AdBanner, evitando
+              // recargas que Google AdMob podría penalizar.
               GoRoute(
-                parentNavigatorKey: _rootNavigatorKey,
                 path: 'new',
                 builder: (_, __) => const CreateEditTaskScreenV2(),
               ),
               GoRoute(
-                parentNavigatorKey: _rootNavigatorKey,
                 path: ':id',
                 builder: (context, state) {
                   final id = state.pathParameters['id']!;
@@ -216,7 +229,6 @@ GoRouter appRouter(AppRouterRef ref) {
                 },
                 routes: [
                   GoRoute(
-                    parentNavigatorKey: _rootNavigatorKey,
                     path: 'edit',
                     builder: (context, state) {
                       final id = state.pathParameters['id']!;
@@ -255,15 +267,6 @@ GoRouter appRouter(AppRouterRef ref) {
             builder: (_, __) => const MembersScreen(),
           ),
         ],
-      ),
-      GoRoute(
-        path: AppRoutes.memberProfile,
-        builder: (context, state) {
-          final uid   = state.pathParameters['uid']!;
-          final extra = state.extra as Map<String, dynamic>?;
-          final homeId = extra?['homeId'] as String? ?? '';
-          return MemberProfileScreenV2(homeId: homeId, memberUid: uid);
-        },
       ),
       GoRoute(
         path: AppRoutes.vacation,

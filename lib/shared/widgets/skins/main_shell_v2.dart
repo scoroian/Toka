@@ -21,6 +21,11 @@ class MainShellV2 extends ConsumerWidget {
     return 0;
   }
 
+  // Rutas del shell donde NO mostramos el banner (legales/formales).
+  static bool _suppressBannerFor(String location) {
+    return location.startsWith(AppRoutes.settings);
+  }
+
   // Altura total que la barra flotante ocupa desde el borde inferior de la pantalla.
   // Usada tanto para el placeholder transparente (MediaQuery) como para el Positioned.
   // Públicas para que los inner Scaffolds puedan calcular el padding del FAB.
@@ -53,9 +58,30 @@ class MainShellV2 extends ConsumerWidget {
   static double bottomContentPadding(BuildContext ctx, WidgetRef ref) {
     final safeBottom = MediaQuery.of(ctx).padding.bottom;
     final cfg = ref.watch(adBannerConfigProvider);
-    final visible = cfg.show && cfg.unitId.isNotEmpty;
+    final location = GoRouterState.of(ctx).matchedLocation;
+    final visible = cfg.show
+        && cfg.unitId.isNotEmpty
+        && !_suppressBannerFor(location);
     return safeBottom
         + kNavBarHeight
+        + kNavBarBottom
+        + bannerSlotHeight(bannerVisible: visible);
+  }
+
+  /// Padding inferior que un `floatingActionButton` dentro de una pantalla tab
+  /// debe aplicar para quedar por encima del banner + NavBar.
+  ///
+  ///   kNavBarHeight + kNavBarBottom + bannerSlotHeight(...)
+  ///
+  /// `safeBottom` NO se incluye: el Scaffold interno ya lo aporta vía
+  /// `MediaQuery.padding.bottom` (el shell reserva ese espacio).
+  static double fabBottomPadding(BuildContext ctx, WidgetRef ref) {
+    final cfg = ref.watch(adBannerConfigProvider);
+    final location = GoRouterState.of(ctx).matchedLocation;
+    final visible = cfg.show
+        && cfg.unitId.isNotEmpty
+        && !_suppressBannerFor(location);
+    return kNavBarHeight
         + kNavBarBottom
         + bannerSlotHeight(bannerVisible: visible);
   }
@@ -67,7 +93,9 @@ class MainShellV2 extends ConsumerWidget {
     final safeBottom = MediaQuery.of(context).padding.bottom;
 
     final adConfig = ref.watch(adBannerConfigProvider);
-    final bannerVisible = adConfig.show && adConfig.unitId.isNotEmpty;
+    final bannerVisible = adConfig.show
+        && adConfig.unitId.isNotEmpty
+        && !_suppressBannerFor(location);
     final bannerSlot = bannerSlotHeight(bannerVisible: bannerVisible);
 
     // El SizedBox transparente registra la altura de la barra + banner en

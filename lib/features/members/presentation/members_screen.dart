@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/routes.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../shared/widgets/ad_banner.dart';
 import '../../../shared/widgets/loading_widget.dart';
 import '../../../shared/widgets/no_home_empty_state.dart';
 import '../../../shared/widgets/skins/main_shell_v2.dart';
@@ -87,43 +88,50 @@ class MembersScreen extends ConsumerWidget {
                   ),
                 )
               : null,
-          body: ListView(
-            key: const Key('members_list'),
+          body: Column(
             children: [
-              if (data.activeMembers.isNotEmpty) ...[
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-                  child: Text(
-                    l10n.members_section_active,
-                    key: const Key('section_active'),
-                    style: Theme.of(context).textTheme.labelLarge,
-                  ),
-                ),
-                ...data.activeMembers.map((m) => MemberCard(
-                      member: enrich(m),
-                      onTap: () => context.push(
-                        AppRoutes.memberProfile.replaceFirst(':uid', m.uid),
-                        extra: {'homeId': data.homeId},
+              Expanded(
+                child: ListView(
+                  key: const Key('members_list'),
+                  children: [
+                    if (data.activeMembers.isNotEmpty) ...[
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+                        child: Text(
+                          l10n.members_section_active,
+                          key: const Key('section_active'),
+                          style: Theme.of(context).textTheme.labelLarge,
+                        ),
                       ),
-                    )),
-              ],
-              if (data.frozenMembers.isNotEmpty) ...[
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-                  child: Text(
-                    l10n.members_section_frozen,
-                    key: const Key('section_frozen'),
-                    style: Theme.of(context).textTheme.labelLarge,
-                  ),
-                ),
-                ...data.frozenMembers.map((m) => MemberCard(
-                      member: enrich(m),
-                      onTap: () => context.push(
-                        AppRoutes.memberProfile.replaceFirst(':uid', m.uid),
-                        extra: {'homeId': data.homeId},
+                      ...data.activeMembers.map((m) => MemberCard(
+                            member: enrich(m),
+                            onTap: () => context.push(
+                              AppRoutes.memberProfile.replaceFirst(':uid', m.uid),
+                              extra: {'homeId': data.homeId},
+                            ),
+                          )),
+                    ],
+                    if (data.frozenMembers.isNotEmpty) ...[
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+                        child: Text(
+                          l10n.members_section_frozen,
+                          key: const Key('section_frozen'),
+                          style: Theme.of(context).textTheme.labelLarge,
+                        ),
                       ),
-                    )),
-              ],
+                      ...data.frozenMembers.map((m) => MemberCard(
+                            member: enrich(m),
+                            onTap: () => context.push(
+                              AppRoutes.memberProfile.replaceFirst(':uid', m.uid),
+                              extra: {'homeId': data.homeId},
+                            ),
+                          )),
+                    ],
+                  ],
+                ),
+              ),
+              const AdBanner(key: Key('ad_banner')),
             ],
           ),
         );

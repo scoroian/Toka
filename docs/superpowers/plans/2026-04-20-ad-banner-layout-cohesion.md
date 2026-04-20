@@ -238,7 +238,8 @@ import 'skins/main_shell_v2.dart';
 ///
 /// Fórmula:
 ///   viewInsets.bottom (teclado)
-/// + viewPadding.bottom (gesture area)
+/// + padding.bottom    (safe area efectiva; colapsa a 0 con teclado abierto
+///                      para no doblar con viewInsets)
 /// + kNavBarHeight + kNavBarBottom      (si hasNavBar)
 /// + AdBanner.kBannerHeight + kBannerGap (si el banner está visible)
 double bottomSheetSafeBottom(
@@ -257,7 +258,7 @@ double bottomSheetSafeBottom(
       ? AdBanner.kBannerHeight + AdBanner.kBannerGap
       : 0.0;
 
-  return mq.viewInsets.bottom + mq.viewPadding.bottom + navBar + banner;
+  return mq.viewInsets.bottom + mq.padding.bottom + navBar + banner;
 }
 ```
 

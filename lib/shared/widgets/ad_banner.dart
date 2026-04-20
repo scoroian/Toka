@@ -21,6 +21,11 @@ class AdBanner extends ConsumerStatefulWidget {
   // banner está visible, y por los FABs para levantarse por encima.
   static const double kBannerHeight = 58;
 
+  // Gap vertical entre el banner y el elemento que tenga inmediatamente
+  // por encima (la NavBar del shell, o el borde inferior de una pantalla
+  // push). Fuente única para MainShellV2 y AdAwareScaffold.
+  static const double kBannerGap = 6;
+
   @override
   ConsumerState<AdBanner> createState() => _AdBannerState();
 }

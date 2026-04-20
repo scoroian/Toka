@@ -31,7 +31,8 @@ class MainShellV2 extends ConsumerWidget {
   static const double _kNavBarBottom = kNavBarBottom;
 
   // Gap entre el top de la NavBar y el bottom del banner.
-  static const double _kBannerGap = 6;
+  // Fuente única en AdBanner.kBannerGap.
+  static double get _kBannerGap => AdBanner.kBannerGap;
 
   // Altura total reservada en la parte inferior cuando el banner está visible
   // (sin contar safeBottom que se suma aparte).

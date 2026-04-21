@@ -74,11 +74,17 @@ void main() {
         frozenMembers: [],
         canInvite: false,
         homeId: 'home1',
+        isPremium: true,
+        activeMembersCount: 0,
+        maxMembersFree: 3,
+        freeLimitReached: false,
       );
       expect(data.homeId, 'home1');
       expect(data.canInvite, isFalse);
       expect(data.activeMembers, isEmpty);
       expect(data.frozenMembers, isEmpty);
+      expect(data.isPremium, isTrue);
+      expect(data.freeLimitReached, isFalse);
     });
   });
 }

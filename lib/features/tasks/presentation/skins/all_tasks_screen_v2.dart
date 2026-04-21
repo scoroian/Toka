@@ -4,14 +4,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../../core/constants/free_limits.dart';
 import '../../../../core/constants/routes.dart';
 import '../../../../core/theme/app_colors_v2.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/no_home_empty_state.dart';
 import '../../../../shared/widgets/skins/main_shell_v2.dart';
+import '../../../homes/application/dashboard_provider.dart';
 import '../../application/all_tasks_view_model.dart';
+import '../../domain/task.dart';
 import '../../domain/task_status.dart';
 import '../widgets/task_card.dart';
+import '../widgets/unfreeze_blocked_dialog.dart';
 
 class AllTasksScreenV2 extends ConsumerStatefulWidget {
   const AllTasksScreenV2({super.key});
@@ -35,6 +39,25 @@ class _AllTasksScreenV2State extends ConsumerState<AllTasksScreenV2>
   void dispose() {
     _fabCtrl.dispose();
     super.dispose();
+  }
+
+  Future<void> _handleToggleFreeze(AllTasksViewModel vm, Task task) async {
+    final dashboard = ref.read(dashboardProvider).valueOrNull;
+    final isPremium = dashboard?.premiumFlags.isPremium ?? true;
+    final planCounters = dashboard?.planCounters;
+    final isUnfreezing = task.status == TaskStatus.frozen;
+    if (isUnfreezing &&
+        !isPremium &&
+        planCounters != null &&
+        planCounters.activeTasks >= FreeLimits.maxActiveTasks) {
+      await showUnfreezeBlockedDialog(
+        context,
+        current: planCounters.activeTasks,
+        limit: FreeLimits.maxActiveTasks,
+      );
+      return;
+    }
+    await vm.toggleFreeze(task);
   }
 
   Future<bool> _confirmBulkDelete(AppLocalizations l10n, int count) async =>
@@ -140,7 +163,7 @@ class _AllTasksScreenV2State extends ConsumerState<AllTasksScreenV2>
                                 _DeleteBackground(l10n: l10n, isDark: isDark),
                             confirmDismiss: (dir) async {
                               if (dir == DismissDirection.startToEnd) {
-                                await vm.toggleFreeze(task);
+                                await _handleToggleFreeze(vm, task);
                                 return false;
                               }
                               return _confirmDelete(l10n);

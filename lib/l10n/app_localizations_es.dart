@@ -1523,4 +1523,57 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get error_cannot_remove_owner =>
       'No se puede expulsar al propietario del hogar.';
+
+  @override
+  String get free_limit_members_reached =>
+      'Tu plan Free permite hasta 3 miembros. Hazte Premium para añadir más.';
+
+  @override
+  String get free_limit_tasks_reached =>
+      'Tu plan Free permite hasta 4 tareas activas.';
+
+  @override
+  String get free_limit_recurring_reached =>
+      'Tu plan Free permite hasta 3 tareas con recurrencia. Crea una puntual o hazte Premium.';
+
+  @override
+  String get free_admins_locked_to_owner =>
+      'Los roles de admin están disponibles en Premium.';
+
+  @override
+  String get free_reviews_disabled =>
+      'Las valoraciones están disponibles en Premium.';
+
+  @override
+  String get free_reviews_upgrade_title => 'Valoraciones solo en Premium';
+
+  @override
+  String get free_reviews_upgrade_body =>
+      'Actualiza a Premium para valorar las tareas completadas por otros miembros del hogar.';
+
+  @override
+  String get free_go_premium_cta => 'Hazte Premium';
+
+  @override
+  String free_members_counter(int current, int limit) {
+    return '$current / $limit miembros — límite del plan Free';
+  }
+
+  @override
+  String get free_unfreeze_blocked_title => 'Límite de tareas alcanzado';
+
+  @override
+  String free_unfreeze_blocked_body(int current, int limit) {
+    return 'Ya tienes $current de $limit tareas activas en tu plan Free. Congela otra tarea antes de descongelar esta, o hazte Premium para tener más tareas activas.';
+  }
+
+  @override
+  String get free_unfreeze_blocked_understood => 'Entendido';
+
+  @override
+  String get recurrence_one_time => 'Puntual';
+
+  @override
+  String get recurrence_one_time_help =>
+      'Se completa una sola vez y desaparece del listado.';
 }

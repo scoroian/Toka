@@ -167,12 +167,41 @@ class RescueFlags with _$RescueFlags {
       const RescueFlags(isInRescue: false, daysLeft: null);
 }
 
+/// Contadores del plan del hogar (independientes de la pantalla Hoy). Se
+/// escriben tanto en Free como en Premium para que la UI pueda:
+/// - En Free: mostrar "X / Y" y desactivar acciones al alcanzar el tope.
+/// - En Premium: mostrar información de uso en Ajustes del hogar.
+@freezed
+class PlanCounters with _$PlanCounters {
+  const factory PlanCounters({
+    required int activeMembers,
+    required int activeTasks,
+    required int automaticRecurringTasks,
+    required int totalAdmins,
+  }) = _PlanCounters;
+
+  factory PlanCounters.fromMap(Map<String, dynamic> map) => PlanCounters(
+        activeMembers: (map['activeMembers'] as int?) ?? 0,
+        activeTasks: (map['activeTasks'] as int?) ?? 0,
+        automaticRecurringTasks: (map['automaticRecurringTasks'] as int?) ?? 0,
+        totalAdmins: (map['totalAdmins'] as int?) ?? 0,
+      );
+
+  factory PlanCounters.empty() => const PlanCounters(
+        activeMembers: 0,
+        activeTasks: 0,
+        automaticRecurringTasks: 0,
+        totalAdmins: 0,
+      );
+}
+
 @freezed
 class HomeDashboard with _$HomeDashboard {
   const factory HomeDashboard({
     required List<TaskPreview> activeTasksPreview,
     required List<DoneTaskPreview> doneTasksPreview,
     required DashboardCounters counters,
+    required PlanCounters planCounters,
     required List<MemberPreview> memberPreview,
     required PremiumFlags premiumFlags,
     required AdFlags adFlags,
@@ -204,6 +233,9 @@ class HomeDashboard with _$HomeDashboard {
       activeTasksPreview: activeList,
       doneTasksPreview: doneList,
       counters: DashboardCounters.fromMap(asStringMap(data['counters'])),
+      planCounters: data.containsKey('planCounters')
+          ? PlanCounters.fromMap(asStringMap(data['planCounters']))
+          : PlanCounters.empty(),
       memberPreview: memberList,
       premiumFlags: PremiumFlags.fromMap(asStringMap(data['premiumFlags'])),
       adFlags: AdFlags.fromMap(asStringMap(data['adFlags'])),

@@ -6,6 +6,7 @@ import '../../../core/constants/routes.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/loading_widget.dart';
 import '../../../shared/widgets/no_home_empty_state.dart';
+import '../../../shared/widgets/premium_upgrade_banner.dart';
 import '../../../shared/widgets/skins/main_shell_v2.dart';
 import '../../profile/application/profile_provider.dart';
 import '../../profile/domain/user_profile.dart';
@@ -93,6 +94,21 @@ class MembersScreen extends ConsumerWidget {
                     bottom: MainShellV2.bottomContentPadding(context, ref),
                   ),
                   children: [
+                    if (data.freeLimitReached)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                        child: PremiumUpgradeBanner(
+                          key: const Key('members_free_limit_banner'),
+                          message: l10n.free_limit_members_reached,
+                          highlight: l10n.free_members_counter(
+                            data.activeMembersCount,
+                            data.maxMembersFree,
+                          ),
+                          cta: l10n.free_go_premium_cta,
+                          ctaKey: const Key('members_free_limit_banner_cta'),
+                          onCta: () => context.push(AppRoutes.paywall),
+                        ),
+                      ),
                     if (data.activeMembers.isNotEmpty) ...[
                       Padding(
                         padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
@@ -134,3 +150,4 @@ class MembersScreen extends ConsumerWidget {
     );
   }
 }
+

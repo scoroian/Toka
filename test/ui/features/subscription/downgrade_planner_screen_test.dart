@@ -134,6 +134,7 @@ HomeDashboard _emptyDashboard() => HomeDashboard(
       activeTasksPreview: [],
       doneTasksPreview: [],
       counters: DashboardCounters.empty(),
+      planCounters: PlanCounters.empty(),
       memberPreview: [],
       premiumFlags: PremiumFlags.free(),
       adFlags: AdFlags.empty(),

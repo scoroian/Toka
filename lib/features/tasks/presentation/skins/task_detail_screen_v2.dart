@@ -5,14 +5,17 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/constants/free_limits.dart';
 import '../../../../core/constants/routes.dart';
 import '../../../../core/theme/app_colors_v2.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/ad_aware_scaffold.dart';
+import '../../../homes/application/dashboard_provider.dart';
 import '../../application/task_detail_view_model.dart';
 import '../../domain/task.dart';
 import '../../domain/task_status.dart';
 import '../utils/task_visual_utils.dart';
+import '../widgets/unfreeze_blocked_dialog.dart';
 
 class TaskDetailScreenV2 extends ConsumerWidget {
   const TaskDetailScreenV2({super.key, required this.taskId});
@@ -39,6 +42,26 @@ class TaskDetailScreenV2 extends ConsumerWidget {
       await vm.deleteTask(task);
       if (ctx.mounted) ctx.pop();
     }
+  }
+
+  Future<void> _handleToggleFreeze(BuildContext ctx, WidgetRef ref,
+      TaskDetailViewModel vm, Task task) async {
+    final dashboard = ref.read(dashboardProvider).valueOrNull;
+    final isPremium = dashboard?.premiumFlags.isPremium ?? true;
+    final planCounters = dashboard?.planCounters;
+    final isUnfreezing = task.status == TaskStatus.frozen;
+    if (isUnfreezing &&
+        !isPremium &&
+        planCounters != null &&
+        planCounters.activeTasks >= FreeLimits.maxActiveTasks) {
+      await showUnfreezeBlockedDialog(
+        ctx,
+        current: planCounters.activeTasks,
+        limit: FreeLimits.maxActiveTasks,
+      );
+      return;
+    }
+    await vm.toggleFreeze(task);
   }
 
   @override
@@ -86,7 +109,7 @@ class TaskDetailScreenV2 extends ConsumerWidget {
                   icon: Icon(task.status == TaskStatus.frozen
                       ? Icons.play_circle_outline
                       : Icons.pause_circle_outline),
-                  onPressed: () => vm.toggleFreeze(task),
+                  onPressed: () => _handleToggleFreeze(context, ref, vm, task),
                 ),
                 IconButton(
                   icon: const Icon(Icons.delete_outline),

@@ -7,6 +7,15 @@ import '../../../../l10n/app_localizations.dart';
 import '../../domain/task_event.dart';
 import '../../../profile/presentation/widgets/review_dialog.dart';
 
+/// Envuelve el trailing en una caja fija para que los iconos (estrella, check,
+/// flechas de pasar turno, reloj de vencida) queden a la misma altura visual
+/// independientemente de si el hijo es un `Icon` plano o un `IconButton`.
+Widget _wrapTrailing(Widget child) => SizedBox(
+      width: 48,
+      height: 48,
+      child: Center(child: child),
+    );
+
 String _formatRelativeTime(AppLocalizations l10n, DateTime dt) {
   final diff = DateTime.now().difference(dt);
   if (diff.inMinutes < 1) return l10n.history_time_now;
@@ -119,6 +128,7 @@ class _CompletedTile extends StatelessWidget {
   final Widget? trailingOverride;
 
   bool get _canReview =>
+      isPremium &&
       homeId != null &&
       currentUid != null &&
       currentUid != event.performerUid;
@@ -164,7 +174,7 @@ class _CompletedTile extends StatelessWidget {
               style: const TextStyle(fontSize: 12, color: Colors.grey)),
         ],
       ),
-      trailing: effectiveTrailing,
+      trailing: _wrapTrailing(effectiveTrailing),
       isThreeLine: true,
     );
   }
@@ -222,7 +232,9 @@ class _PassedTile extends StatelessWidget {
               style: const TextStyle(fontSize: 12, color: Colors.grey)),
         ],
       ),
-      trailing: trailingOverride ?? const Icon(Icons.swap_horiz, color: Colors.orange),
+      trailing: _wrapTrailing(
+        trailingOverride ?? const Icon(Icons.swap_horiz, color: Colors.orange),
+      ),
       isThreeLine: true,
     );
   }
@@ -263,7 +275,9 @@ class _MissedTile extends StatelessWidget {
               style: const TextStyle(fontSize: 12, color: Colors.grey)),
         ],
       ),
-      trailing: trailingOverride ?? const Icon(Icons.timer_off_outlined, color: Colors.orange),
+      trailing: _wrapTrailing(
+        trailingOverride ?? const Icon(Icons.timer_off_outlined, color: Colors.orange),
+      ),
       isThreeLine: true,
     );
   }

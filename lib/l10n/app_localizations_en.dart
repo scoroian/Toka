@@ -1508,4 +1508,56 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get error_cannot_remove_owner => 'The home owner cannot be removed.';
+
+  @override
+  String get free_limit_members_reached =>
+      'Your Free plan allows up to 3 members. Go Premium to add more.';
+
+  @override
+  String get free_limit_tasks_reached =>
+      'Your Free plan allows up to 4 active tasks.';
+
+  @override
+  String get free_limit_recurring_reached =>
+      'Your Free plan allows up to 3 recurring tasks. Create a one-time task or go Premium.';
+
+  @override
+  String get free_admins_locked_to_owner =>
+      'Admin roles are available on Premium.';
+
+  @override
+  String get free_reviews_disabled => 'Reviews are available on Premium.';
+
+  @override
+  String get free_reviews_upgrade_title => 'Reviews only on Premium';
+
+  @override
+  String get free_reviews_upgrade_body =>
+      'Upgrade to Premium to rate the tasks completed by other home members.';
+
+  @override
+  String get free_go_premium_cta => 'Go Premium';
+
+  @override
+  String free_members_counter(int current, int limit) {
+    return '$current / $limit members — Free plan limit';
+  }
+
+  @override
+  String get free_unfreeze_blocked_title => 'Task limit reached';
+
+  @override
+  String free_unfreeze_blocked_body(int current, int limit) {
+    return 'You already have $current of $limit active tasks on your Free plan. Freeze another task before unfreezing this one, or go Premium to have more active tasks.';
+  }
+
+  @override
+  String get free_unfreeze_blocked_understood => 'Got it';
+
+  @override
+  String get recurrence_one_time => 'One-time';
+
+  @override
+  String get recurrence_one_time_help =>
+      'Completed only once and disappears from the list.';
 }

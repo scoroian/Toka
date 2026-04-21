@@ -84,6 +84,7 @@ List<UpcomingOccurrence> _computeUpcomingOccurrences(
     Task task, List<DateTime> dates, Map<String, String?> nameMap) {
   final order = task.assignmentOrder;
   final timezone = switch (task.recurrenceRule) {
+    OneTimeRule r => r.timezone,
     HourlyRule r => r.timezone,
     DailyRule r => r.timezone,
     WeeklyRule r => r.timezone,

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../auth/application/auth_provider.dart';
+import '../../homes/application/dashboard_provider.dart';
 import '../../homes/domain/home_membership.dart';
 import '../../profile/application/member_radar_provider.dart';
 import '../../profile/application/profile_provider.dart';
@@ -36,6 +37,8 @@ class MemberProfileViewData {
     required this.compliancePct,
     required this.radarEntries,
     required this.canManageRoles,
+    required this.canPromoteToAdmin,
+    required this.adminsLockedToOwner,
     required this.canRemoveMember,
     required this.completedCount,
     required this.streakCount,
@@ -48,8 +51,14 @@ class MemberProfileViewData {
   final String? visiblePhone;
   final String compliancePct;
   final List<RadarEntry> radarEntries;
-  /// True si el usuario actual es owner del hogar y puede promover/degradar.
+  /// True si el usuario actual es owner del hogar y puede degradar admins.
   final bool canManageRoles;
+  /// True si, además de poder gestionar roles, el plan permite PROMOVER a un
+  /// nuevo admin (en Free solo el owner puede ser admin).
+  final bool canPromoteToAdmin;
+  /// True cuando el hogar es Free: el botón "Hacer admin" se reemplaza por un
+  /// mensaje informativo.
+  final bool adminsLockedToOwner;
   /// True si el usuario actual es owner y puede expulsar a este miembro.
   final bool canRemoveMember;
   final int completedCount;
@@ -144,6 +153,12 @@ MemberProfileViewModel memberProfileViewModel(
 
   final canManageRoles = isOwner && !isSelf;
 
+  // Dashboard: para saber si el hogar es Premium. En Free solo el owner puede
+  // ser admin → canPromoteToAdmin=false, y mostramos info.
+  final dashboard = ref.watch(dashboardProvider).valueOrNull;
+  final isPremium = dashboard?.premiumFlags.isPremium ?? true;
+  final adminsLockedToOwner = !isPremium;
+
   final viewData = memberAsync.whenData((member) {
     // Enriquecer con datos de users/{uid} si el doc de miembro tiene campos vacíos
     final enriched = member.copyWith(
@@ -155,6 +170,9 @@ MemberProfileViewModel memberProfileViewModel(
     );
     final canRemoveMember =
         isOwner && !isSelf && member.role != MemberRole.owner;
+    // En Free permitimos DEGRADAR admins, pero no PROMOVER nuevos.
+    final canPromoteToAdmin = canManageRoles &&
+        (isPremium || member.role == MemberRole.admin);
     return MemberProfileViewData(
         member: enriched,
         isSelf: isSelf,
@@ -162,6 +180,8 @@ MemberProfileViewModel memberProfileViewModel(
         compliancePct: (member.complianceRate * 100).toStringAsFixed(1),
         radarEntries: visibleRadarEntries,
         canManageRoles: canManageRoles,
+        canPromoteToAdmin: canPromoteToAdmin,
+        adminsLockedToOwner: adminsLockedToOwner,
         canRemoveMember: canRemoveMember,
         completedCount: member.tasksCompleted,
         streakCount: member.currentStreak,

@@ -39,6 +39,7 @@ beforeEach(async () => {
     await setDoc(doc(db, `homes/${HOME1}`), {
       ownerUid: ADMIN_UID,
       name: 'Test Home',
+      premiumStatus: 'active',
     });
 
     await setDoc(doc(db, `homes/${HOME1}/tasks/task1`), {

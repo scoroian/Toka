@@ -216,6 +216,7 @@ TaskPreview _taskToPreview(
   final todayStart = DateTime(now.year, now.month, now.day);
   final isOverdue = task.nextDueAt.isBefore(todayStart);
   final recurrenceType = switch (task.recurrenceRule) {
+    OneTimeRule _ => 'oneTime',
     HourlyRule _ => 'hourly',
     DailyRule _ => 'daily',
     WeeklyRule _ => 'weekly',

@@ -940,5 +940,39 @@
     "placeholders": { "name": { "type": "String" } }
   },
   "error_cannot_remove_owner": "The home owner cannot be removed.",
-  "@error_cannot_remove_owner": { "description": "Cannot remove owner error" }
+  "@error_cannot_remove_owner": { "description": "Cannot remove owner error" },
+  "free_limit_members_reached": "Your Free plan allows up to 3 members. Go Premium to add more.",
+  "@free_limit_members_reached": { "description": "Banner when Free home reached 3 active members" },
+  "free_limit_tasks_reached": "Your Free plan allows up to 4 active tasks.",
+  "@free_limit_tasks_reached": { "description": "Banner when Free home reached 4 active tasks" },
+  "free_limit_recurring_reached": "Your Free plan allows up to 3 recurring tasks. Create a one-time task or go Premium.",
+  "@free_limit_recurring_reached": { "description": "Banner when Free home reached 3 automatic recurring tasks" },
+  "free_admins_locked_to_owner": "Admin roles are available on Premium.",
+  "@free_admins_locked_to_owner": { "description": "Shown in place of the Make Admin toggle on Free" },
+  "free_reviews_disabled": "Reviews are available on Premium.",
+  "@free_reviews_disabled": { "description": "Shown in place of the Rate button on Free" },
+  "free_reviews_upgrade_title": "Reviews only on Premium",
+  "@free_reviews_upgrade_title": { "description": "Title of the upgrade bottom sheet shown when a Free user taps the gray rate star" },
+  "free_reviews_upgrade_body": "Upgrade to Premium to rate the tasks completed by other home members.",
+  "@free_reviews_upgrade_body": { "description": "Body of the upgrade bottom sheet shown when a Free user taps the gray rate star" },
+  "free_go_premium_cta": "Go Premium",
+  "@free_go_premium_cta": { "description": "CTA that opens the paywall from Free-limit banners" },
+  "free_members_counter": "{current} / {limit} members — Free plan limit",
+  "@free_members_counter": {
+    "description": "Info string shown in Members screen when Free",
+    "placeholders": { "current": { "type": "int" }, "limit": { "type": "int" } }
+  },
+  "free_unfreeze_blocked_title": "Task limit reached",
+  "@free_unfreeze_blocked_title": { "description": "Title of the dialog shown when a Free user tries to unfreeze a task but is already at maxActiveTasks" },
+  "free_unfreeze_blocked_body": "You already have {current} of {limit} active tasks on your Free plan. Freeze another task before unfreezing this one, or go Premium to have more active tasks.",
+  "@free_unfreeze_blocked_body": {
+    "description": "Body of the unfreeze-blocked dialog",
+    "placeholders": { "current": { "type": "int" }, "limit": { "type": "int" } }
+  },
+  "free_unfreeze_blocked_understood": "Got it",
+  "@free_unfreeze_blocked_understood": { "description": "Dismiss CTA of the unfreeze-blocked dialog" },
+  "recurrence_one_time": "One-time",
+  "@recurrence_one_time": { "description": "Chip label for one-time tasks" },
+  "recurrence_one_time_help": "Completed only once and disappears from the list.",
+  "@recurrence_one_time_help": { "description": "Helper text below the Puntual chip" }
 }

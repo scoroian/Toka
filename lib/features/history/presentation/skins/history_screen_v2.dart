@@ -8,7 +8,9 @@ import '../../../../core/constants/routes.dart';
 import '../../../../core/theme/app_colors_v2.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../application/history_view_model.dart';
+import '../../../../shared/widgets/bottom_sheet_padding.dart';
 import '../../../../shared/widgets/no_home_empty_state.dart';
+import '../../../../shared/widgets/premium_upgrade_banner.dart';
 import '../widgets/history_empty_state.dart';
 import '../widgets/history_event_tile.dart';
 import '../widgets/history_filter_bar.dart';
@@ -87,7 +89,19 @@ class _HistoryScreenV2State extends ConsumerState<HistoryScreenV2> {
                 itemBuilder: (ctx, i) {
                   if (i < items.length) return _buildTile(items[i], vm);
                   final extra = i - items.length;
-                  if (!vm.isPremium && extra == 0) return _PremiumBannerV2(l10n: l10n, isDark: isDark);
+                  if (!vm.isPremium && extra == 0) {
+                    return Padding(
+                      key: const Key('premium_banner'),
+                      padding: const EdgeInsets.all(16),
+                      child: PremiumUpgradeBanner(
+                        title: l10n.history_premium_banner_title,
+                        message: l10n.history_premium_banner_body,
+                        cta: l10n.history_premium_banner_cta,
+                        ctaKey: const Key('btn_upgrade_premium'),
+                        onCta: () => context.push(AppRoutes.paywall),
+                      ),
+                    );
+                  }
                   return Padding(
                     padding: const EdgeInsets.all(16),
                     child: Center(child: TextButton(
@@ -107,21 +121,36 @@ class _HistoryScreenV2State extends ConsumerState<HistoryScreenV2> {
 
   Widget _buildTile(TaskEventItem item, HistoryViewModel vm) {
     final toName = item.raw is PassedEvent ? (item.raw as PassedEvent).toUid : null;
+    final l10n = AppLocalizations.of(context);
+    Widget? trailing;
+    if (vm.isPremium) {
+      if (item.isRated) {
+        trailing = const Icon(Icons.star, color: Colors.amber, size: 22);
+      } else if (item.canRate) {
+        trailing = IconButton(
+          key: Key('rate_button_${item.raw.id}'),
+          icon: const Icon(Icons.star_border),
+          tooltip: l10n.history_rate_button,
+          onPressed: () => _showRateSheet(item, vm),
+        );
+      }
+    } else {
+      final isRateable = item.raw is CompletedEvent && !item.isOwnEvent;
+      if (isRateable) {
+        trailing = IconButton(
+          key: Key('rate_upgrade_${item.raw.id}'),
+          icon: Icon(Icons.star_border, color: Colors.grey.shade500),
+          tooltip: l10n.free_reviews_upgrade_title,
+          onPressed: _showUpgradeSheet,
+        );
+      }
+    }
     return HistoryEventTile(
       event: item.raw,
       actorName: item.actorName,
       actorPhotoUrl: item.actorPhotoUrl,
       toName: toName,
-      trailing: item.isRated
-          ? const Icon(Icons.star, color: Colors.amber, size: 22)
-          : item.canRate
-              ? IconButton(
-                  key: Key('rate_button_${item.raw.id}'),
-                  icon: const Icon(Icons.star_border),
-                  tooltip: AppLocalizations.of(context).history_rate_button,
-                  onPressed: () => _showRateSheet(item, vm),
-                )
-              : null,
+      trailing: trailing,
     );
   }
 
@@ -133,43 +162,52 @@ class _HistoryScreenV2State extends ConsumerState<HistoryScreenV2> {
       ),
     );
   }
-}
 
-class _PremiumBannerV2 extends StatelessWidget {
-  const _PremiumBannerV2({required this.l10n, required this.isDark});
-  final AppLocalizations l10n;
-  final bool isDark;
-
-  @override
-  Widget build(BuildContext context) {
-    final bg = isDark ? AppColorsV2.surfaceDark : AppColorsV2.surfaceLight;
-    final bd = isDark ? AppColorsV2.borderDark  : AppColorsV2.borderLight;
-    return Container(
-      key: const Key('premium_banner'),
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: bd),
-      ),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(l10n.history_premium_banner_title,
-            style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800)),
-        const SizedBox(height: 4),
-        Text(l10n.history_premium_banner_body,
-            style: GoogleFonts.plusJakartaSans(
-                color: isDark ? AppColorsV2.textSecondaryDark : AppColorsV2.textSecondaryLight)),
-        const SizedBox(height: 12),
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            key: const Key('btn_upgrade_premium'),
-            onPressed: () => context.push(AppRoutes.paywall),
-            child: Text(l10n.history_premium_banner_cta),
-          ),
+  void _showUpgradeSheet() {
+    final l10n = AppLocalizations.of(context);
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (sheetCtx) => Padding(
+        padding: EdgeInsets.fromLTRB(
+          24,
+          24,
+          24,
+          24 + bottomSheetSafeBottom(sheetCtx, ref, hasNavBar: true),
         ),
-      ]),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(children: [
+              const Icon(Icons.star, color: Colors.amber),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  l10n.free_reviews_upgrade_title,
+                  style: GoogleFonts.plusJakartaSans(
+                      fontSize: 18, fontWeight: FontWeight.w800),
+                ),
+              ),
+            ]),
+            const SizedBox(height: 12),
+            Text(l10n.free_reviews_upgrade_body),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                key: const Key('btn_upgrade_from_rate'),
+                onPressed: () {
+                  Navigator.of(sheetCtx).pop();
+                  context.push(AppRoutes.paywall);
+                },
+                child: Text(l10n.free_go_premium_cta),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
+

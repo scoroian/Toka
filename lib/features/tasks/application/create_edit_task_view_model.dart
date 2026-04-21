@@ -183,6 +183,7 @@ class CreateEditTaskViewModelNotifier
     final nameMap = {for (final m in members) m.uid: m.nickname};
 
     final timezone = switch (rule) {
+      OneTimeRule r => r.timezone,
       HourlyRule r => r.timezone,
       DailyRule r => r.timezone,
       WeeklyRule r => r.timezone,

@@ -216,22 +216,52 @@ class _MemberProfileScreenV2State extends ConsumerState<MemberProfileScreenV2> {
               RadarChartWidget(entries: data.radarEntries),
               if (data.canManageRoles && !data.isSelf) ...[
                 const SizedBox(height: 20),
-                ElevatedButton(
-                  key: const Key('toggle_admin_button'),
-                  onPressed: _isLoading
-                      ? null
-                      : () => _toggleAdminRole(context, vm, data, l10n),
-                  child: _isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                              strokeWidth: 2, color: Colors.white),
-                        )
-                      : Text(member.role == MemberRole.admin
-                          ? l10n.member_profile_demote_admin
-                          : l10n.member_profile_promote_admin),
-                ),
+                if (data.canPromoteToAdmin)
+                  ElevatedButton(
+                    key: const Key('toggle_admin_button'),
+                    onPressed: _isLoading
+                        ? null
+                        : () => _toggleAdminRole(context, vm, data, l10n),
+                    child: _isLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2, color: Colors.white),
+                          )
+                        : Text(member.role == MemberRole.admin
+                            ? l10n.member_profile_demote_admin
+                            : l10n.member_profile_promote_admin),
+                  )
+                else if (data.adminsLockedToOwner &&
+                    member.role != MemberRole.admin)
+                  Container(
+                    key: const Key('admins_locked_info'),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.errorContainer,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.lock_outline,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onErrorContainer),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            l10n.free_admins_locked_to_owner,
+                            style: TextStyle(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onErrorContainer),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
               ],
               if (data.canRemoveMember) ...[
                 const SizedBox(height: 12),

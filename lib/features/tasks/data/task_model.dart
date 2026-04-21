@@ -79,6 +79,7 @@ class TaskModel {
   // ── serialización RecurrenceRule ────────────────────────────────────
 
   static String _recurrenceTypeFromRule(RecurrenceRule rule) => switch (rule) {
+        OneTimeRule _ => 'oneTime',
         HourlyRule _ => 'hourly',
         DailyRule _ => 'daily',
         WeeklyRule _ => 'weekly',
@@ -90,6 +91,13 @@ class TaskModel {
 
   static Map<String, dynamic> _ruleToMap(RecurrenceRule rule) =>
       switch (rule) {
+        OneTimeRule r => {
+            'type': 'oneTime',
+            'kind': 'oneTime',
+            'date': r.date,
+            'time': r.time,
+            'timezone': r.timezone,
+          },
         HourlyRule r => {
             'type': 'hourly',
             'every': r.every,
@@ -140,8 +148,16 @@ class TaskModel {
       };
 
   static RecurrenceRule _ruleFromMap(Map<String, dynamic> map) {
-    final type = map['type'] as String? ?? 'daily';
+    // Compatibilidad: algunos documentos guardan el discriminante en "kind"
+    // (spec 2026-04-21) y otros en "type".
+    final type =
+        (map['kind'] as String?) ?? (map['type'] as String?) ?? 'daily';
     return switch (type) {
+      'oneTime' => RecurrenceRule.oneTime(
+          date: map['date'] as String? ?? '1970-01-01',
+          time: map['time'] as String? ?? '09:00',
+          timezone: map['timezone'] as String? ?? 'UTC',
+        ),
       'hourly' => RecurrenceRule.hourly(
           every: (map['every'] as int?) ?? 1,
           startTime: map['startTime'] as String? ?? '08:00',

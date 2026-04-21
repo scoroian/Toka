@@ -271,6 +271,7 @@ void main() {
           raw: completedEvent,
           isOwnEvent: false,
           isRated: false,
+          canUseReviews: true,
         ),
       );
       expect(item.canRate, isTrue);
@@ -287,6 +288,7 @@ void main() {
           raw: completedEvent,
           isOwnEvent: true,
           isRated: false,
+          canUseReviews: true,
         ),
       );
       expect(item.canRate, isFalse);
@@ -303,6 +305,7 @@ void main() {
           raw: completedEvent,
           isOwnEvent: false,
           isRated: true,
+          canUseReviews: true,
         ),
       );
       expect(item.canRate, isFalse);
@@ -319,6 +322,25 @@ void main() {
           raw: passedEvent,
           isOwnEvent: false,
           isRated: false,
+          canUseReviews: true,
+        ),
+      );
+      expect(item.canRate, isFalse);
+    });
+
+    test('canRate false: completedEvent pero plan Free (canUseReviews=false)',
+        () {
+      final item = TaskEventItem(
+        raw: completedEvent,
+        actorName: 'Ana',
+        actorPhotoUrl: null,
+        isOwnEvent: false,
+        isRated: false,
+        canRate: TaskEventItem.computeCanRate(
+          raw: completedEvent,
+          isOwnEvent: false,
+          isRated: false,
+          canUseReviews: false,
         ),
       );
       expect(item.canRate, isFalse);

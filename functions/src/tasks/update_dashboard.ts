@@ -3,6 +3,7 @@ import * as admin from "firebase-admin";
 import * as logger from "firebase-functions/logger";
 import { onSchedule } from "firebase-functions/v2/scheduler";
 import { onCall, HttpsError } from "firebase-functions/v2/https";
+import { isPremium as isHomePremium } from "../shared/free_limits";
 
 const db = admin.firestore();
 const FieldValue = admin.firestore.FieldValue;
@@ -63,8 +64,11 @@ export async function updateHomeDashboard(homeId: string): Promise<void> {
 
   const activeTasksPreview: Record<string, unknown>[] = [];
   let pendingTodayCount = 0; // tareas accionables hoy (vencidas + due today)
+  let automaticRecurringTasks = 0; // tareas activas con recurrencia automática (no oneTime)
   for (const doc of tasksSnap.docs) {
     const t = doc.data();
+    const recurrenceType = (t["recurrenceType"] as string) ?? "daily";
+    if (recurrenceType !== "oneTime") automaticRecurringTasks++;
     const nextDueAt = (t["nextDueAt"] as admin.firestore.Timestamp | undefined)?.toDate();
     if (!nextDueAt) continue;
     // Incluir TODAS las tareas activas (también las de próximas semanas/meses/años)
@@ -123,25 +127,31 @@ export async function updateHomeDashboard(homeId: string): Promise<void> {
 
   // --- 4. Construir memberPreview desde el memberMap ya cargado ---
   const memberPreview: Record<string, unknown>[] = [];
+  let totalAdmins = 0;
   for (const doc of membersSnap.docs) {
     const m = doc.data();
     if (m["status"] !== "active") continue;
     const memberTaskCount = activeTasksPreview.filter(
       (t) => t["currentAssigneeUid"] === doc.id
     ).length;
+    const role = (m["role"] as string) ?? "member";
+    // Para los límites Free, contamos como "admin" a owner + admin. El owner
+    // siempre es admin-equivalente, así que maxAdminsTotal = 1 implica que
+    // sólo el owner puede tener role ∈ {owner, admin}.
+    if (role === "admin" || role === "owner") totalAdmins++;
     memberPreview.push({
       uid: doc.id,
       name: (m["nickname"] as string) ?? "",
       photoUrl: m["photoUrl"] ?? null,
-      role: m["role"] ?? "member",
+      role,
       status: "active",
       tasksDueCount: memberTaskCount,
     });
   }
 
   // --- 5. Flags premium ---
-  const isPremium = homeData["premiumStatus"] !== "free" &&
-    homeData["premiumStatus"] !== "expiredFree";
+  const premiumStatus = homeData["premiumStatus"] as string | undefined;
+  const isPremium = isHomePremium(premiumStatus);
   const premiumFlags = {
     isPremium,
     showAds: !isPremium,
@@ -167,12 +177,22 @@ export async function updateHomeDashboard(homeId: string): Promise<void> {
     tasksDoneToday: doneTasksPreview.length,
   };
 
+  // Contadores exigidos por la política Free (spec 2026-04-21). Se escriben
+  // también en Premium para que la UI pueda mostrarlos como información.
+  const planCounters = {
+    activeMembers: memberPreview.length,
+    activeTasks: tasksSnap.size,
+    automaticRecurringTasks,
+    totalAdmins,
+  };
+
   // --- 7. Escribir dashboard ---
   const dashboardRef = homeRef.collection("views").doc("dashboard");
   await dashboardRef.set({
     activeTasksPreview,
     doneTasksPreview,
     counters,
+    planCounters,
     memberPreview,
     premiumFlags,
     adFlags,

@@ -3,6 +3,7 @@ import { onDocumentUpdated } from "firebase-functions/v2/firestore";
 import * as admin from "firebase-admin";
 import * as logger from "firebase-functions/logger";
 import { buildNewMemberDoc } from "./member_factory";
+import { FREE_LIMITS, FREE_LIMIT_CODES, isPremium } from "../shared/free_limits";
 
 const db = admin.firestore();
 const FieldValue = admin.firestore.FieldValue;
@@ -115,6 +116,12 @@ export const createHome = onCall(async (request) => {
         status: "active",
         tasksDueCount: 0,
       }],
+      planCounters: {
+        activeMembers: 1,
+        activeTasks: 0,
+        automaticRecurringTasks: 0,
+        totalAdmins: 1, // el owner cuenta como admin-equivalente
+      },
       premiumFlags: {
         isPremium: false,
         showAds: true,
@@ -187,7 +194,23 @@ export const joinHome = onCall(async (request) => {
       throw new HttpsError("deadline-exceeded", "Invitation expired");
     }
 
-    const homeName = homeDoc.data()!["name"] as string;
+    // Free-plan gate: max N active members per home. Solo contamos como nuevo
+    // si no existe doc previo o si estaba en estado distinto a "active"
+    // (rejoin). El owner siempre cuenta en el total.
+    const homeDataTx = homeDoc.data()!;
+    const isAlreadyActiveMember = existingMember.exists &&
+      existingMember.data()?.["status"] === "active";
+    if (!isPremium(homeDataTx["premiumStatus"] as string | undefined) &&
+        !isAlreadyActiveMember) {
+      const activeMembersSnap = await tx.get(
+        homeRef.collection("members").where("status", "==", "active")
+      );
+      if (activeMembersSnap.size >= FREE_LIMITS.maxActiveMembers) {
+        throw new HttpsError("failed-precondition", FREE_LIMIT_CODES.members);
+      }
+    }
+
+    const homeName = homeDataTx["name"] as string;
     const userDataTx = userDoc.data() ?? {};
     const memberNickname = (userDataTx["nickname"] as string | undefined) ?? "";
     const memberPhotoUrl = (userDataTx["photoUrl"] as string | undefined) ?? null;
@@ -284,7 +307,21 @@ export const joinHomeByCode = onCall(async (request) => {
       throw new HttpsError("deadline-exceeded", "Invite code already used");
     }
 
-    const homeName = homeDoc.data()!["name"] as string;
+    // Free-plan gate: max N active members per home (ver joinHome).
+    const homeDataTx = homeDoc.data()!;
+    const isAlreadyActiveMember = existingMember.exists &&
+      existingMember.data()?.["status"] === "active";
+    if (!isPremium(homeDataTx["premiumStatus"] as string | undefined) &&
+        !isAlreadyActiveMember) {
+      const activeMembersSnap = await tx.get(
+        homeRef.collection("members").where("status", "==", "active")
+      );
+      if (activeMembersSnap.size >= FREE_LIMITS.maxActiveMembers) {
+        throw new HttpsError("failed-precondition", FREE_LIMIT_CODES.members);
+      }
+    }
+
+    const homeName = homeDataTx["name"] as string;
     const userDataTx = userDoc.data() ?? {};
     const memberNickname = (userDataTx["nickname"] as string | undefined) ?? "";
     const memberPhotoUrl = (userDataTx["photoUrl"] as string | undefined) ?? null;
@@ -705,8 +742,13 @@ export const promoteToAdmin = onCall(async (request) => {
     .collection("memberships").doc(homeId);
 
   await db.runTransaction(async (tx) => {
-    const [callerDoc, targetDoc] = await Promise.all([tx.get(callerRef), tx.get(targetRef)]);
+    const [homeDoc, callerDoc, targetDoc] = await Promise.all([
+      tx.get(homeRef),
+      tx.get(callerRef),
+      tx.get(targetRef),
+    ]);
 
+    if (!homeDoc.exists) throw new HttpsError("not-found", "Home not found");
     if (!callerDoc.exists) throw new HttpsError("permission-denied", "Caller is not a member");
     if (callerDoc.data()!["role"] !== "owner") {
       throw new HttpsError("permission-denied", "Only the owner can promote members");
@@ -714,6 +756,13 @@ export const promoteToAdmin = onCall(async (request) => {
     if (!targetDoc.exists) throw new HttpsError("not-found", "Target member not found");
     if (targetDoc.data()!["role"] !== "member") {
       throw new HttpsError("failed-precondition", "Target is not a regular member");
+    }
+
+    // Free-plan: solo el owner puede tener rol admin. Bloqueamos cualquier
+    // promoción mientras el hogar no esté en Premium activo.
+    const premiumStatus = homeDoc.data()!["premiumStatus"] as string | undefined;
+    if (!isPremium(premiumStatus)) {
+      throw new HttpsError("failed-precondition", FREE_LIMIT_CODES.admins);
     }
 
     // Actualizar rol en ambos documentos para que las reglas Firestore

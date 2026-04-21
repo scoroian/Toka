@@ -1521,4 +1521,56 @@ class AppLocalizationsRo extends AppLocalizations {
   @override
   String get error_cannot_remove_owner =>
       'Proprietarul locuinței nu poate fi eliminat.';
+
+  @override
+  String get free_limit_members_reached =>
+      'Planul Free permite până la 3 membri. Treci la Premium pentru a adăuga mai mulți.';
+
+  @override
+  String get free_limit_tasks_reached =>
+      'Planul Free permite până la 4 sarcini active.';
+
+  @override
+  String get free_limit_recurring_reached =>
+      'Planul Free permite până la 3 sarcini recurente. Creează una punctuală sau treci la Premium.';
+
+  @override
+  String get free_admins_locked_to_owner =>
+      'Rolurile de admin sunt disponibile în Premium.';
+
+  @override
+  String get free_reviews_disabled => 'Evaluările sunt disponibile în Premium.';
+
+  @override
+  String get free_reviews_upgrade_title => 'Evaluări doar în Premium';
+
+  @override
+  String get free_reviews_upgrade_body =>
+      'Treci la Premium pentru a evalua sarcinile finalizate de ceilalți membri ai casei.';
+
+  @override
+  String get free_go_premium_cta => 'Treci la Premium';
+
+  @override
+  String free_members_counter(int current, int limit) {
+    return '$current / $limit membri — limita planului Free';
+  }
+
+  @override
+  String get free_unfreeze_blocked_title => 'Limita de sarcini atinsă';
+
+  @override
+  String free_unfreeze_blocked_body(int current, int limit) {
+    return 'Ai deja $current din $limit sarcini active pe planul Free. Îngheață altă sarcină înainte de a o dezgheța pe aceasta, sau treci la Premium pentru mai multe sarcini active.';
+  }
+
+  @override
+  String get free_unfreeze_blocked_understood => 'Am înțeles';
+
+  @override
+  String get recurrence_one_time => 'Punctuală';
+
+  @override
+  String get recurrence_one_time_help =>
+      'Se finalizează o singură dată și dispare din listă.';
 }

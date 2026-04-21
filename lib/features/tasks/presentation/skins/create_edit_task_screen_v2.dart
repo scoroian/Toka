@@ -3,10 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/constants/free_limits.dart';
+import '../../../../core/constants/routes.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/ad_aware_scaffold.dart';
+import '../../../../shared/widgets/premium_upgrade_banner.dart';
+import '../../../homes/application/dashboard_provider.dart';
 import '../../application/create_edit_task_view_model.dart';
 import '../../application/task_form_provider.dart';
+import '../../domain/recurrence_rule.dart';
 import '../widgets/assignment_form.dart';
 import '../widgets/recurrence_form.dart';
 import '../widgets/task_visual_picker.dart';
@@ -91,6 +96,29 @@ class _CreateEditTaskScreenV2State
     final titleError = formState.fieldErrors['title'];
     final recurrenceError = formState.fieldErrors['recurrence'];
 
+    // Free-plan gate: lee planCounters/premiumFlags del dashboard. Si todavía
+    // no ha llegado, asume Premium para no bloquear la primera render (el
+    // backend y las reglas Firestore siempre son el backstop).
+    final dashboard = ref.watch(dashboardProvider).valueOrNull;
+    final isPremium = dashboard?.premiumFlags.isPremium ?? true;
+    final planCounters = dashboard?.planCounters;
+    final currentRule = formState.recurrenceRule;
+    final isOneTimeSelected = currentRule is OneTimeRule;
+    // En edición, la propia tarea ya está contada en los counters; la
+    // consideramos "espacio libre" por simplicidad (si se desborda, el
+    // backend/rules paran la escritura).
+    final blockTasksLimit = !isPremium &&
+        !vm.isEditing &&
+        planCounters != null &&
+        planCounters.activeTasks >= FreeLimits.maxActiveTasks;
+    final blockRecurringLimit = !isPremium &&
+        !vm.isEditing &&
+        !isOneTimeSelected &&
+        planCounters != null &&
+        planCounters.automaticRecurringTasks >=
+            FreeLimits.maxAutomaticRecurringTasks;
+    final freeBlocked = blockTasksLimit || blockRecurringLimit;
+
     return AdAwareScaffold(
       appBar: AppBar(
         title: Text(vm.isEditing
@@ -107,12 +135,14 @@ class _CreateEditTaskScreenV2State
             )
           else
             Tooltip(
-              message: vm.canSave
+              message: vm.canSave && !freeBlocked
                   ? ''
-                  : _saveDisabledReason(formState, l10n),
+                  : _saveDisabledReason(formState, l10n,
+                      blockTasks: blockTasksLimit,
+                      blockRecurring: blockRecurringLimit),
               child: TextButton(
                 key: const Key('save_task_button'),
-                onPressed: vm.canSave ? vm.save : null,
+                onPressed: (vm.canSave && !freeBlocked) ? vm.save : null,
                 child: Text(l10n.save),
               ),
             ),
@@ -124,6 +154,18 @@ class _CreateEditTaskScreenV2State
           AdAwareScaffold.bottomPaddingOf(context, ref),
         ),
         children: [
+          if (freeBlocked)
+            PremiumUpgradeBanner(
+              key: const Key('free_limit_banner'),
+              message: blockTasksLimit
+                  ? l10n.free_limit_tasks_reached
+                  : l10n.free_limit_recurring_reached,
+              cta: l10n.free_go_premium_cta,
+              ctaKey: const Key('free_limit_banner_cta'),
+              onCta: () => context.push(AppRoutes.paywall),
+            ),
+          if (freeBlocked) const SizedBox(height: 12),
+
           // Visual picker
           TaskVisualPicker(
             selectedKind: formState.visualKind,
@@ -277,7 +319,14 @@ class _CreateEditTaskScreenV2State
     return null;
   }
 
-  String _saveDisabledReason(TaskFormState state, AppLocalizations l10n) {
+  String _saveDisabledReason(
+    TaskFormState state,
+    AppLocalizations l10n, {
+    bool blockTasks = false,
+    bool blockRecurring = false,
+  }) {
+    if (blockTasks) return l10n.free_limit_tasks_reached;
+    if (blockRecurring) return l10n.free_limit_recurring_reached;
     if (state.title.trim().isEmpty) return l10n.tasks_validation_title_empty;
     if (state.assignmentOrder.isEmpty) return l10n.tasks_validation_no_assignees;
     return '';

@@ -2,6 +2,7 @@
 import * as admin from "firebase-admin";
 import * as logger from "firebase-functions/logger";
 import { onCall, HttpsError } from "firebase-functions/v2/https";
+import { isPremium, FREE_LIMIT_CODES } from "../shared/free_limits";
 
 const db = admin.firestore();
 const FieldValue = admin.firestore.FieldValue;
@@ -29,13 +30,13 @@ export const submitReview = onCall(async (request) => {
     throw new HttpsError("invalid-argument", "note exceeds 300 characters");
   }
 
-  // 1. Verificar Premium del hogar
+  // 1. Verificar Premium del hogar (fuente de verdad: isPremium compartido)
   const homeSnap = await db.collection("homes").doc(homeId).get();
   if (!homeSnap.exists) throw new HttpsError("not-found", "Home not found");
   const homeData = homeSnap.data()!;
   const premiumStatus: string = homeData["premiumStatus"] ?? "free";
-  if (!["active", "cancelled_pending_end", "rescue"].includes(premiumStatus)) {
-    throw new HttpsError("failed-precondition", "Reviews require Premium");
+  if (!isPremium(premiumStatus)) {
+    throw new HttpsError("failed-precondition", FREE_LIMIT_CODES.reviews);
   }
 
   // 2. Verificar que el reviewer es miembro activo

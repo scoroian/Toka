@@ -4,8 +4,13 @@ import '../../features/tasks/domain/recurrence_rule.dart';
 
 class RecurrenceCalculator {
   /// Calcula la próxima ocurrencia DESPUÉS de [from].
+  ///
+  /// Para [OneTimeRule] la "próxima" ocurrencia es el instante exacto de la
+  /// regla. Si ese instante ya está en el pasado respecto a [from], devuelve
+  /// el mismo instante igualmente (el caller decide si la tarea ya expiró).
   static DateTime nextDue(RecurrenceRule rule, DateTime from) {
     return switch (rule) {
+      OneTimeRule r => _nextOneTime(r),
       HourlyRule r => _nextHourly(r, from),
       DailyRule r => _nextDaily(r, from),
       WeeklyRule r => _nextWeekly(r, from),
@@ -17,8 +22,12 @@ class RecurrenceCalculator {
   }
 
   /// Devuelve las próximas [n] ocurrencias a partir de [from].
+  /// Las tareas puntuales devuelven una única ocurrencia.
   static List<DateTime> nextNOccurrences(
       RecurrenceRule rule, DateTime from, int n) {
+    if (rule is OneTimeRule) {
+      return [_nextOneTime(rule)];
+    }
     final result = <DateTime>[];
     var current = from;
     for (var i = 0; i < n; i++) {
@@ -27,6 +36,20 @@ class RecurrenceCalculator {
       current = next;
     }
     return result;
+  }
+
+  static DateTime _nextOneTime(OneTimeRule rule) {
+    final location = tz.getLocation(rule.timezone);
+    final dateParts = rule.date.split('-');
+    final timeParts = rule.time.split(':');
+    return tz.TZDateTime(
+      location,
+      int.parse(dateParts[0]),
+      int.parse(dateParts[1]),
+      int.parse(dateParts[2]),
+      int.parse(timeParts[0]),
+      int.parse(timeParts[1]),
+    ).toLocal();
   }
 
   // ── helpers ────────────────────────────────────────────────────────

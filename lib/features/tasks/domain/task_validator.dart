@@ -1,3 +1,4 @@
+import 'recurrence_rule.dart';
 import 'task.dart';
 
 sealed class ValidationResult {
@@ -39,6 +40,25 @@ class TaskValidator {
       return ValidationResult.error(
           'difficulty', 'tasks_validation_difficulty_range');
     }
+
+    // Reglas específicas para tareas puntuales:
+    //   * date debe ser parseable como "YYYY-MM-DD"
+    //   * date no puede estar en el pasado más allá de 24 h
+    final rule = input.recurrenceRule;
+    if (rule is OneTimeRule) {
+      final parsed = DateTime.tryParse(rule.date);
+      if (parsed == null) {
+        return ValidationResult.error(
+            'recurrence', 'tasks_validation_one_time_date_invalid');
+      }
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      if (parsed.isBefore(today.subtract(const Duration(days: 1)))) {
+        return ValidationResult.error(
+            'recurrence', 'tasks_validation_one_time_date_past');
+      }
+    }
+
     return ValidationResult.ok;
   }
 }

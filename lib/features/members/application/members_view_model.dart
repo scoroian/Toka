@@ -2,8 +2,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../core/constants/free_limits.dart';
 import '../../auth/application/auth_provider.dart';
 import '../../homes/application/current_home_provider.dart';
+import '../../homes/application/dashboard_provider.dart';
 import '../../homes/application/homes_provider.dart';
 import '../../homes/domain/home_membership.dart';
 import '../domain/member.dart';
@@ -17,11 +19,21 @@ class MembersViewData {
     required this.frozenMembers,
     required this.canInvite,
     required this.homeId,
+    required this.isPremium,
+    required this.activeMembersCount,
+    required this.maxMembersFree,
+    required this.freeLimitReached,
   });
   final List<Member> activeMembers;
   final List<Member> frozenMembers;
+  /// True cuando rol permite invitar Y no se ha alcanzado el límite Free.
   final bool canInvite;
   final String homeId;
+  final bool isPremium;
+  final int activeMembersCount;
+  final int maxMembersFree;
+  /// True cuando el hogar es Free y `activeMembersCount >= maxMembersFree`.
+  final bool freeLimitReached;
 }
 
 abstract class MembersViewModel {
@@ -49,19 +61,36 @@ MembersViewModel membersViewModel(MembersViewModelRef ref) {
         ?.where((m) => m.homeId == home.id)
         .cast<HomeMembership?>()
         .firstOrNull;
-    final canInvite = myMembership?.role == MemberRole.owner ||
+    final roleCanInvite = myMembership?.role == MemberRole.owner ||
         myMembership?.role == MemberRole.admin;
 
     final membersAsync = ref.watch(homeMembersProvider(home.id));
     final allMembers = membersAsync.valueOrNull ?? [];
+    final activeMembers =
+        allMembers.where((m) => m.status == MemberStatus.active).toList();
+    final frozenMembers =
+        allMembers.where((m) => m.status == MemberStatus.frozen).toList();
+
+    // Free plan gating: obtenemos premium/counters del dashboard. Fallback
+    // conservador: asumimos Premium hasta que llegue el dashboard (el backend
+    // siempre es el backstop).
+    final dashboard = ref.watch(dashboardProvider).valueOrNull;
+    final isPremium = dashboard?.premiumFlags.isPremium ?? true;
+    final activeMembersCount =
+        dashboard?.planCounters.activeMembers ?? activeMembers.length;
+    const maxMembersFree = FreeLimits.maxActiveMembers;
+    final freeLimitReached =
+        !isPremium && activeMembersCount >= maxMembersFree;
 
     return MembersViewData(
-      activeMembers:
-          allMembers.where((m) => m.status == MemberStatus.active).toList(),
-      frozenMembers:
-          allMembers.where((m) => m.status == MemberStatus.frozen).toList(),
-      canInvite: canInvite,
+      activeMembers: activeMembers,
+      frozenMembers: frozenMembers,
+      canInvite: roleCanInvite && !freeLimitReached,
       homeId: home.id,
+      isPremium: isPremium,
+      activeMembersCount: activeMembersCount,
+      maxMembersFree: maxMembersFree,
+      freeLimitReached: freeLimitReached,
     );
   });
 

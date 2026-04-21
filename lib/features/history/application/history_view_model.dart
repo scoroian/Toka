@@ -35,8 +35,9 @@ class TaskEventItem {
     required TaskEvent raw,
     required bool isOwnEvent,
     required bool isRated,
+    required bool canUseReviews,
   }) =>
-      raw is CompletedEvent && !isOwnEvent && !isRated;
+      canUseReviews && raw is CompletedEvent && !isOwnEvent && !isRated;
 }
 
 @riverpod
@@ -122,8 +123,10 @@ class _HistoryViewModelImpl implements HistoryViewModel {
 HistoryViewModel historyViewModel(HistoryViewModelRef ref) {
   final homeId = ref.watch(currentHomeProvider).valueOrNull?.id;
   final filter = ref.watch(historyFilterNotifierProvider);
-  final isPremium =
-      ref.watch(dashboardProvider).valueOrNull?.premiumFlags.isPremium ?? false;
+  final premiumFlags =
+      ref.watch(dashboardProvider).valueOrNull?.premiumFlags;
+  final isPremium = premiumFlags?.isPremium ?? false;
+  final canUseReviews = premiumFlags?.canUseReviews ?? false;
   final auth = ref.watch(authProvider);
   final currentUid = auth.whenOrNull(authenticated: (u) => u.uid) ?? '';
 
@@ -169,6 +172,7 @@ HistoryViewModel historyViewModel(HistoryViewModelRef ref) {
             raw: e,
             isOwnEvent: isOwnEvent,
             isRated: isRated,
+            canUseReviews: canUseReviews,
           ),
         );
       }).toList());

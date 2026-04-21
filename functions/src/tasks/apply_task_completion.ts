@@ -8,6 +8,7 @@ import {
   getNextAssigneeRoundRobin,
   getNextAssigneeSmart,
   addRecurrenceInterval,
+  isTerminalRecurrence,
 } from "./task_assignment_helpers";
 
 const db = admin.firestore();
@@ -77,6 +78,7 @@ export const applyTaskCompletion = onCall(async (request) => {
     const currentDue = (task["nextDueAt"] as admin.firestore.Timestamp | undefined)
       ?.toDate() ?? admin.firestore.Timestamp.now().toDate();
     const recurrenceType: string = task["recurrenceType"] ?? "daily";
+    const isOneTime = isTerminalRecurrence(recurrenceType);
     const nextDueAt = addRecurrenceInterval(currentDue, recurrenceType);
 
     const eventRef = db.collection("homes").doc(homeId).collection("taskEvents").doc();
@@ -95,12 +97,19 @@ export const applyTaskCompletion = onCall(async (request) => {
       penaltyApplied: false,
     });
 
-    tx.update(taskRef, {
-      currentAssigneeUid: nextAssigneeUid,
+    // Tarea puntual: al completarla deja de contar como activa y no vuelve a
+    // aparecer en el dashboard. Conservamos nextDueAt para que el historial
+    // muestre la fecha original del evento.
+    const taskUpdate: Record<string, unknown> = {
+      currentAssigneeUid: isOneTime ? null : nextAssigneeUid,
       nextDueAt: admin.firestore.Timestamp.fromDate(nextDueAt),
       completedCount90d: FieldValue.increment(1),
       updatedAt: FieldValue.serverTimestamp(),
-    });
+    };
+    if (isOneTime) {
+      taskUpdate["status"] = "completedOneTime";
+    }
+    tx.update(taskRef, taskUpdate);
 
     // Usamos el snapshot ya leído de membersSnap para evitar read-after-write en la transacción
     const memberRef = db.collection("homes").doc(homeId).collection("members").doc(uid);

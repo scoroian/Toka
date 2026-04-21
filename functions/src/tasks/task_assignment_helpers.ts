@@ -46,6 +46,18 @@ export function addRecurrenceInterval(base: Date, recurrenceType: string): Date 
     case "weekly":  d.setUTCDate(d.getUTCDate() + 7); break;
     case "monthly": d.setUTCMonth(d.getUTCMonth() + 1); break;
     case "yearly":  d.setUTCFullYear(d.getUTCFullYear() + 1); break;
+    // oneTime: no hay siguiente ocurrencia. Devolvemos la base sin modificar;
+    // los callers deben tratar oneTime como terminal antes de llamar aquí.
+    case "oneTime": break;
   }
   return d;
+}
+
+/**
+ * `true` si la recurrencia no produce más ocurrencias tras la primera
+ * ejecución. Usado para decidir si una tarea pasa a `status=completedOneTime`
+ * al completarla o pasar turno.
+ */
+export function isTerminalRecurrence(recurrenceType: string): boolean {
+  return recurrenceType === "oneTime";
 }

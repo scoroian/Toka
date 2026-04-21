@@ -24,9 +24,13 @@ class _RecurrenceFormState extends ConsumerState<RecurrenceForm> {
   String _weekday = 'MON';
   int _month = 1;
   String _timezone = 'Europe/Madrid';
+  // Estado específico para la opción "Puntual" (oneTime). Formato local del
+  // usuario: fecha YYYY-MM-DD + hora HH:mm. Inicialmente "hoy + 1h".
+  late String _oneTimeDate;
+  late String _oneTimeTime;
 
   static const _types = [
-    'hourly', 'daily', 'weekly',
+    'oneTime', 'hourly', 'daily', 'weekly',
     'monthlyFixed', 'monthlyNth',
     'yearlyFixed', 'yearlyNth',
   ];
@@ -40,6 +44,12 @@ class _RecurrenceFormState extends ConsumerState<RecurrenceForm> {
   @override
   void initState() {
     super.initState();
+    // Inicializar oneTime a "hoy + 1 hora" por defecto.
+    final now = DateTime.now().add(const Duration(hours: 1));
+    _oneTimeDate =
+        '${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+    _oneTimeTime =
+        '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
     final existing = ref.read(taskFormNotifierProvider).recurrenceRule;
     if (existing != null) {
       _loadFromRule(existing);
@@ -53,6 +63,11 @@ class _RecurrenceFormState extends ConsumerState<RecurrenceForm> {
 
   void _loadFromRule(RecurrenceRule rule) {
     switch (rule) {
+      case OneTimeRule r:
+        _selectedType = 'oneTime';
+        _oneTimeDate = r.date;
+        _oneTimeTime = r.time;
+        _timezone = r.timezone;
       case HourlyRule r:
         _selectedType = 'hourly';
         _every = r.every;
@@ -98,6 +113,8 @@ class _RecurrenceFormState extends ConsumerState<RecurrenceForm> {
 
   RecurrenceRule _buildRule() {
     return switch (_selectedType) {
+      'oneTime' => RecurrenceRule.oneTime(
+          date: _oneTimeDate, time: _oneTimeTime, timezone: _timezone),
       'hourly' => RecurrenceRule.hourly(
           every: _every,
           startTime: _startTime,
@@ -133,6 +150,7 @@ class _RecurrenceFormState extends ConsumerState<RecurrenceForm> {
   }
 
   String _typeLabel(String type, AppLocalizations l10n) => switch (type) {
+        'oneTime' => l10n.recurrence_one_time,
         'hourly' => l10n.tasks_recurrence_hourly_label,
         'daily' => l10n.tasks_recurrence_daily_label,
         'weekly' => l10n.tasks_recurrence_weekly_label,
@@ -197,20 +215,32 @@ class _RecurrenceFormState extends ConsumerState<RecurrenceForm> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        DropdownButtonFormField<String>(
-          value: _selectedType,
-          decoration:
-              InputDecoration(label: Text(l10n.tasks_field_recurrence)),
-          items: _types
-              .map((t) => DropdownMenuItem(
-                  value: t, child: Text(_typeLabel(t, l10n))))
+        // Chips de tipos de recurrencia. "Puntual" es el primero — selecciónalo
+        // para crear una tarea que se ejecuta una sola vez.
+        Wrap(
+          spacing: 8,
+          runSpacing: 4,
+          children: _types
+              .map((t) => ChoiceChip(
+                    label: Text(_typeLabel(t, l10n)),
+                    selected: _selectedType == t,
+                    onSelected: (v) {
+                      if (!v) return;
+                      setState(() => _selectedType = t);
+                      _notifyChange();
+                    },
+                  ))
               .toList(),
-          onChanged: (v) {
-            if (v == null) return;
-            setState(() => _selectedType = v);
-            _notifyChange();
-          },
         ),
+        if (_selectedType == 'oneTime') ...[
+          const SizedBox(height: 6),
+          Text(
+            l10n.recurrence_one_time_help,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+          ),
+        ],
         const SizedBox(height: 12),
         _buildSubForm(context, l10n),
         const SizedBox(height: 12),
@@ -233,6 +263,31 @@ class _RecurrenceFormState extends ConsumerState<RecurrenceForm> {
 
   Widget _buildSubForm(BuildContext context, AppLocalizations l10n) {
     return switch (_selectedType) {
+      'oneTime' => _OneTimeSubForm(
+          date: _oneTimeDate,
+          time: _oneTimeTime,
+          l10n: l10n,
+          onDateTap: () async {
+            final parts = _oneTimeDate.split('-').map(int.parse).toList();
+            final picked = await showDatePicker(
+              context: context,
+              initialDate: DateTime(parts[0], parts[1], parts[2]),
+              firstDate: DateTime.now().subtract(const Duration(days: 1)),
+              lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
+            );
+            if (picked != null) {
+              setState(() {
+                _oneTimeDate =
+                    '${picked.year.toString().padLeft(4, '0')}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}';
+              });
+              _notifyChange();
+            }
+          },
+          onTimeTap: () => _pickTime(context, _oneTimeTime, (v) {
+                setState(() => _oneTimeTime = v);
+                _notifyChange();
+              }),
+        ),
       'hourly' => _HourlySubForm(
           every: _every,
           startTime: _startTime,
@@ -362,6 +417,39 @@ class _RecurrenceFormState extends ConsumerState<RecurrenceForm> {
 }
 
 // ── Sub-formularios ─────────────────────────────────────────────────────────
+
+class _OneTimeSubForm extends StatelessWidget {
+  const _OneTimeSubForm({
+    required this.date,
+    required this.time,
+    required this.onDateTap,
+    required this.onTimeTap,
+    required this.l10n,
+  });
+  final String date;
+  final String time;
+  final VoidCallback onDateTap;
+  final VoidCallback onTimeTap;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) => Column(children: [
+        ListTile(
+          dense: true,
+          leading: const Icon(Icons.event),
+          title: Text(l10n.tasks_recurrence_day_of_month),
+          trailing: Text(date),
+          onTap: onDateTap,
+        ),
+        ListTile(
+          dense: true,
+          leading: const Icon(Icons.access_time),
+          title: Text(l10n.tasks_recurrence_time),
+          trailing: Text(time),
+          onTap: onTimeTap,
+        ),
+      ]);
+}
 
 class _HourlySubForm extends StatelessWidget {
   const _HourlySubForm({

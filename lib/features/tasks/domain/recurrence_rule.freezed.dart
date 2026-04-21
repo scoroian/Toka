@@ -16,10 +16,12 @@ final _privateConstructorUsedError = UnsupportedError(
 
 /// @nodoc
 mixin _$RecurrenceRule {
-// "HH:mm" opcional
+// "HH:mm"
   String get timezone => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
+    required TResult Function(String date, String time, String timezone)
+        oneTime,
     required TResult Function(
             int every, String startTime, String? endTime, String timezone)
         hourly,
@@ -41,6 +43,7 @@ mixin _$RecurrenceRule {
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function(String date, String time, String timezone)? oneTime,
     TResult? Function(
             int every, String startTime, String? endTime, String timezone)?
         hourly,
@@ -60,6 +63,7 @@ mixin _$RecurrenceRule {
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
+    TResult Function(String date, String time, String timezone)? oneTime,
     TResult Function(
             int every, String startTime, String? endTime, String timezone)?
         hourly,
@@ -80,6 +84,7 @@ mixin _$RecurrenceRule {
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
+    required TResult Function(OneTimeRule value) oneTime,
     required TResult Function(HourlyRule value) hourly,
     required TResult Function(DailyRule value) daily,
     required TResult Function(WeeklyRule value) weekly,
@@ -91,6 +96,7 @@ mixin _$RecurrenceRule {
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(OneTimeRule value)? oneTime,
     TResult? Function(HourlyRule value)? hourly,
     TResult? Function(DailyRule value)? daily,
     TResult? Function(WeeklyRule value)? weekly,
@@ -102,6 +108,7 @@ mixin _$RecurrenceRule {
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
+    TResult Function(OneTimeRule value)? oneTime,
     TResult Function(HourlyRule value)? hourly,
     TResult Function(DailyRule value)? daily,
     TResult Function(WeeklyRule value)? weekly,
@@ -153,6 +160,238 @@ class _$RecurrenceRuleCopyWithImpl<$Res, $Val extends RecurrenceRule>
               as String,
     ) as $Val);
   }
+}
+
+/// @nodoc
+abstract class _$$OneTimeRuleImplCopyWith<$Res>
+    implements $RecurrenceRuleCopyWith<$Res> {
+  factory _$$OneTimeRuleImplCopyWith(
+          _$OneTimeRuleImpl value, $Res Function(_$OneTimeRuleImpl) then) =
+      __$$OneTimeRuleImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({String date, String time, String timezone});
+}
+
+/// @nodoc
+class __$$OneTimeRuleImplCopyWithImpl<$Res>
+    extends _$RecurrenceRuleCopyWithImpl<$Res, _$OneTimeRuleImpl>
+    implements _$$OneTimeRuleImplCopyWith<$Res> {
+  __$$OneTimeRuleImplCopyWithImpl(
+      _$OneTimeRuleImpl _value, $Res Function(_$OneTimeRuleImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of RecurrenceRule
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? date = null,
+    Object? time = null,
+    Object? timezone = null,
+  }) {
+    return _then(_$OneTimeRuleImpl(
+      date: null == date
+          ? _value.date
+          : date // ignore: cast_nullable_to_non_nullable
+              as String,
+      time: null == time
+          ? _value.time
+          : time // ignore: cast_nullable_to_non_nullable
+              as String,
+      timezone: null == timezone
+          ? _value.timezone
+          : timezone // ignore: cast_nullable_to_non_nullable
+              as String,
+    ));
+  }
+}
+
+/// @nodoc
+
+class _$OneTimeRuleImpl implements OneTimeRule {
+  const _$OneTimeRuleImpl(
+      {required this.date, required this.time, required this.timezone});
+
+  @override
+  final String date;
+// "YYYY-MM-DD"
+  @override
+  final String time;
+// "HH:mm"
+  @override
+  final String timezone;
+
+  @override
+  String toString() {
+    return 'RecurrenceRule.oneTime(date: $date, time: $time, timezone: $timezone)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$OneTimeRuleImpl &&
+            (identical(other.date, date) || other.date == date) &&
+            (identical(other.time, time) || other.time == time) &&
+            (identical(other.timezone, timezone) ||
+                other.timezone == timezone));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, date, time, timezone);
+
+  /// Create a copy of RecurrenceRule
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$OneTimeRuleImplCopyWith<_$OneTimeRuleImpl> get copyWith =>
+      __$$OneTimeRuleImplCopyWithImpl<_$OneTimeRuleImpl>(this, _$identity);
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function(String date, String time, String timezone)
+        oneTime,
+    required TResult Function(
+            int every, String startTime, String? endTime, String timezone)
+        hourly,
+    required TResult Function(int every, String time, String timezone) daily,
+    required TResult Function(
+            List<String> weekdays, String time, String timezone)
+        weekly,
+    required TResult Function(int day, String time, String timezone)
+        monthlyFixed,
+    required TResult Function(
+            int weekOfMonth, String weekday, String time, String timezone)
+        monthlyNth,
+    required TResult Function(int month, int day, String time, String timezone)
+        yearlyFixed,
+    required TResult Function(int month, int weekOfMonth, String weekday,
+            String time, String timezone)
+        yearlyNth,
+  }) {
+    return oneTime(date, time, timezone);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function(String date, String time, String timezone)? oneTime,
+    TResult? Function(
+            int every, String startTime, String? endTime, String timezone)?
+        hourly,
+    TResult? Function(int every, String time, String timezone)? daily,
+    TResult? Function(List<String> weekdays, String time, String timezone)?
+        weekly,
+    TResult? Function(int day, String time, String timezone)? monthlyFixed,
+    TResult? Function(
+            int weekOfMonth, String weekday, String time, String timezone)?
+        monthlyNth,
+    TResult? Function(int month, int day, String time, String timezone)?
+        yearlyFixed,
+    TResult? Function(int month, int weekOfMonth, String weekday, String time,
+            String timezone)?
+        yearlyNth,
+  }) {
+    return oneTime?.call(date, time, timezone);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function(String date, String time, String timezone)? oneTime,
+    TResult Function(
+            int every, String startTime, String? endTime, String timezone)?
+        hourly,
+    TResult Function(int every, String time, String timezone)? daily,
+    TResult Function(List<String> weekdays, String time, String timezone)?
+        weekly,
+    TResult Function(int day, String time, String timezone)? monthlyFixed,
+    TResult Function(
+            int weekOfMonth, String weekday, String time, String timezone)?
+        monthlyNth,
+    TResult Function(int month, int day, String time, String timezone)?
+        yearlyFixed,
+    TResult Function(int month, int weekOfMonth, String weekday, String time,
+            String timezone)?
+        yearlyNth,
+    required TResult orElse(),
+  }) {
+    if (oneTime != null) {
+      return oneTime(date, time, timezone);
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(OneTimeRule value) oneTime,
+    required TResult Function(HourlyRule value) hourly,
+    required TResult Function(DailyRule value) daily,
+    required TResult Function(WeeklyRule value) weekly,
+    required TResult Function(MonthlyFixedRule value) monthlyFixed,
+    required TResult Function(MonthlyNthRule value) monthlyNth,
+    required TResult Function(YearlyFixedRule value) yearlyFixed,
+    required TResult Function(YearlyNthRule value) yearlyNth,
+  }) {
+    return oneTime(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(OneTimeRule value)? oneTime,
+    TResult? Function(HourlyRule value)? hourly,
+    TResult? Function(DailyRule value)? daily,
+    TResult? Function(WeeklyRule value)? weekly,
+    TResult? Function(MonthlyFixedRule value)? monthlyFixed,
+    TResult? Function(MonthlyNthRule value)? monthlyNth,
+    TResult? Function(YearlyFixedRule value)? yearlyFixed,
+    TResult? Function(YearlyNthRule value)? yearlyNth,
+  }) {
+    return oneTime?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(OneTimeRule value)? oneTime,
+    TResult Function(HourlyRule value)? hourly,
+    TResult Function(DailyRule value)? daily,
+    TResult Function(WeeklyRule value)? weekly,
+    TResult Function(MonthlyFixedRule value)? monthlyFixed,
+    TResult Function(MonthlyNthRule value)? monthlyNth,
+    TResult Function(YearlyFixedRule value)? yearlyFixed,
+    TResult Function(YearlyNthRule value)? yearlyNth,
+    required TResult orElse(),
+  }) {
+    if (oneTime != null) {
+      return oneTime(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class OneTimeRule implements RecurrenceRule {
+  const factory OneTimeRule(
+      {required final String date,
+      required final String time,
+      required final String timezone}) = _$OneTimeRuleImpl;
+
+  String get date; // "YYYY-MM-DD"
+  String get time; // "HH:mm"
+  @override
+  String get timezone;
+
+  /// Create a copy of RecurrenceRule
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$OneTimeRuleImplCopyWith<_$OneTimeRuleImpl> get copyWith =>
+      throw _privateConstructorUsedError;
 }
 
 /// @nodoc
@@ -258,6 +497,8 @@ class _$HourlyRuleImpl implements HourlyRule {
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
+    required TResult Function(String date, String time, String timezone)
+        oneTime,
     required TResult Function(
             int every, String startTime, String? endTime, String timezone)
         hourly,
@@ -282,6 +523,7 @@ class _$HourlyRuleImpl implements HourlyRule {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function(String date, String time, String timezone)? oneTime,
     TResult? Function(
             int every, String startTime, String? endTime, String timezone)?
         hourly,
@@ -304,6 +546,7 @@ class _$HourlyRuleImpl implements HourlyRule {
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
+    TResult Function(String date, String time, String timezone)? oneTime,
     TResult Function(
             int every, String startTime, String? endTime, String timezone)?
         hourly,
@@ -330,6 +573,7 @@ class _$HourlyRuleImpl implements HourlyRule {
   @override
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
+    required TResult Function(OneTimeRule value) oneTime,
     required TResult Function(HourlyRule value) hourly,
     required TResult Function(DailyRule value) daily,
     required TResult Function(WeeklyRule value) weekly,
@@ -344,6 +588,7 @@ class _$HourlyRuleImpl implements HourlyRule {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(OneTimeRule value)? oneTime,
     TResult? Function(HourlyRule value)? hourly,
     TResult? Function(DailyRule value)? daily,
     TResult? Function(WeeklyRule value)? weekly,
@@ -358,6 +603,7 @@ class _$HourlyRuleImpl implements HourlyRule {
   @override
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
+    TResult Function(OneTimeRule value)? oneTime,
     TResult Function(HourlyRule value)? hourly,
     TResult Function(DailyRule value)? daily,
     TResult Function(WeeklyRule value)? weekly,
@@ -484,6 +730,8 @@ class _$DailyRuleImpl implements DailyRule {
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
+    required TResult Function(String date, String time, String timezone)
+        oneTime,
     required TResult Function(
             int every, String startTime, String? endTime, String timezone)
         hourly,
@@ -508,6 +756,7 @@ class _$DailyRuleImpl implements DailyRule {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function(String date, String time, String timezone)? oneTime,
     TResult? Function(
             int every, String startTime, String? endTime, String timezone)?
         hourly,
@@ -530,6 +779,7 @@ class _$DailyRuleImpl implements DailyRule {
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
+    TResult Function(String date, String time, String timezone)? oneTime,
     TResult Function(
             int every, String startTime, String? endTime, String timezone)?
         hourly,
@@ -556,6 +806,7 @@ class _$DailyRuleImpl implements DailyRule {
   @override
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
+    required TResult Function(OneTimeRule value) oneTime,
     required TResult Function(HourlyRule value) hourly,
     required TResult Function(DailyRule value) daily,
     required TResult Function(WeeklyRule value) weekly,
@@ -570,6 +821,7 @@ class _$DailyRuleImpl implements DailyRule {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(OneTimeRule value)? oneTime,
     TResult? Function(HourlyRule value)? hourly,
     TResult? Function(DailyRule value)? daily,
     TResult? Function(WeeklyRule value)? weekly,
@@ -584,6 +836,7 @@ class _$DailyRuleImpl implements DailyRule {
   @override
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
+    TResult Function(OneTimeRule value)? oneTime,
     TResult Function(HourlyRule value)? hourly,
     TResult Function(DailyRule value)? daily,
     TResult Function(WeeklyRule value)? weekly,
@@ -718,6 +971,8 @@ class _$WeeklyRuleImpl implements WeeklyRule {
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
+    required TResult Function(String date, String time, String timezone)
+        oneTime,
     required TResult Function(
             int every, String startTime, String? endTime, String timezone)
         hourly,
@@ -742,6 +997,7 @@ class _$WeeklyRuleImpl implements WeeklyRule {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function(String date, String time, String timezone)? oneTime,
     TResult? Function(
             int every, String startTime, String? endTime, String timezone)?
         hourly,
@@ -764,6 +1020,7 @@ class _$WeeklyRuleImpl implements WeeklyRule {
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
+    TResult Function(String date, String time, String timezone)? oneTime,
     TResult Function(
             int every, String startTime, String? endTime, String timezone)?
         hourly,
@@ -790,6 +1047,7 @@ class _$WeeklyRuleImpl implements WeeklyRule {
   @override
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
+    required TResult Function(OneTimeRule value) oneTime,
     required TResult Function(HourlyRule value) hourly,
     required TResult Function(DailyRule value) daily,
     required TResult Function(WeeklyRule value) weekly,
@@ -804,6 +1062,7 @@ class _$WeeklyRuleImpl implements WeeklyRule {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(OneTimeRule value)? oneTime,
     TResult? Function(HourlyRule value)? hourly,
     TResult? Function(DailyRule value)? daily,
     TResult? Function(WeeklyRule value)? weekly,
@@ -818,6 +1077,7 @@ class _$WeeklyRuleImpl implements WeeklyRule {
   @override
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
+    TResult Function(OneTimeRule value)? oneTime,
     TResult Function(HourlyRule value)? hourly,
     TResult Function(DailyRule value)? daily,
     TResult Function(WeeklyRule value)? weekly,
@@ -943,6 +1203,8 @@ class _$MonthlyFixedRuleImpl implements MonthlyFixedRule {
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
+    required TResult Function(String date, String time, String timezone)
+        oneTime,
     required TResult Function(
             int every, String startTime, String? endTime, String timezone)
         hourly,
@@ -967,6 +1229,7 @@ class _$MonthlyFixedRuleImpl implements MonthlyFixedRule {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function(String date, String time, String timezone)? oneTime,
     TResult? Function(
             int every, String startTime, String? endTime, String timezone)?
         hourly,
@@ -989,6 +1252,7 @@ class _$MonthlyFixedRuleImpl implements MonthlyFixedRule {
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
+    TResult Function(String date, String time, String timezone)? oneTime,
     TResult Function(
             int every, String startTime, String? endTime, String timezone)?
         hourly,
@@ -1015,6 +1279,7 @@ class _$MonthlyFixedRuleImpl implements MonthlyFixedRule {
   @override
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
+    required TResult Function(OneTimeRule value) oneTime,
     required TResult Function(HourlyRule value) hourly,
     required TResult Function(DailyRule value) daily,
     required TResult Function(WeeklyRule value) weekly,
@@ -1029,6 +1294,7 @@ class _$MonthlyFixedRuleImpl implements MonthlyFixedRule {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(OneTimeRule value)? oneTime,
     TResult? Function(HourlyRule value)? hourly,
     TResult? Function(DailyRule value)? daily,
     TResult? Function(WeeklyRule value)? weekly,
@@ -1043,6 +1309,7 @@ class _$MonthlyFixedRuleImpl implements MonthlyFixedRule {
   @override
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
+    TResult Function(OneTimeRule value)? oneTime,
     TResult Function(HourlyRule value)? hourly,
     TResult Function(DailyRule value)? daily,
     TResult Function(WeeklyRule value)? weekly,
@@ -1182,6 +1449,8 @@ class _$MonthlyNthRuleImpl implements MonthlyNthRule {
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
+    required TResult Function(String date, String time, String timezone)
+        oneTime,
     required TResult Function(
             int every, String startTime, String? endTime, String timezone)
         hourly,
@@ -1206,6 +1475,7 @@ class _$MonthlyNthRuleImpl implements MonthlyNthRule {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function(String date, String time, String timezone)? oneTime,
     TResult? Function(
             int every, String startTime, String? endTime, String timezone)?
         hourly,
@@ -1228,6 +1498,7 @@ class _$MonthlyNthRuleImpl implements MonthlyNthRule {
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
+    TResult Function(String date, String time, String timezone)? oneTime,
     TResult Function(
             int every, String startTime, String? endTime, String timezone)?
         hourly,
@@ -1254,6 +1525,7 @@ class _$MonthlyNthRuleImpl implements MonthlyNthRule {
   @override
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
+    required TResult Function(OneTimeRule value) oneTime,
     required TResult Function(HourlyRule value) hourly,
     required TResult Function(DailyRule value) daily,
     required TResult Function(WeeklyRule value) weekly,
@@ -1268,6 +1540,7 @@ class _$MonthlyNthRuleImpl implements MonthlyNthRule {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(OneTimeRule value)? oneTime,
     TResult? Function(HourlyRule value)? hourly,
     TResult? Function(DailyRule value)? daily,
     TResult? Function(WeeklyRule value)? weekly,
@@ -1282,6 +1555,7 @@ class _$MonthlyNthRuleImpl implements MonthlyNthRule {
   @override
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
+    TResult Function(OneTimeRule value)? oneTime,
     TResult Function(HourlyRule value)? hourly,
     TResult Function(DailyRule value)? daily,
     TResult Function(WeeklyRule value)? weekly,
@@ -1420,6 +1694,8 @@ class _$YearlyFixedRuleImpl implements YearlyFixedRule {
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
+    required TResult Function(String date, String time, String timezone)
+        oneTime,
     required TResult Function(
             int every, String startTime, String? endTime, String timezone)
         hourly,
@@ -1444,6 +1720,7 @@ class _$YearlyFixedRuleImpl implements YearlyFixedRule {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function(String date, String time, String timezone)? oneTime,
     TResult? Function(
             int every, String startTime, String? endTime, String timezone)?
         hourly,
@@ -1466,6 +1743,7 @@ class _$YearlyFixedRuleImpl implements YearlyFixedRule {
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
+    TResult Function(String date, String time, String timezone)? oneTime,
     TResult Function(
             int every, String startTime, String? endTime, String timezone)?
         hourly,
@@ -1492,6 +1770,7 @@ class _$YearlyFixedRuleImpl implements YearlyFixedRule {
   @override
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
+    required TResult Function(OneTimeRule value) oneTime,
     required TResult Function(HourlyRule value) hourly,
     required TResult Function(DailyRule value) daily,
     required TResult Function(WeeklyRule value) weekly,
@@ -1506,6 +1785,7 @@ class _$YearlyFixedRuleImpl implements YearlyFixedRule {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(OneTimeRule value)? oneTime,
     TResult? Function(HourlyRule value)? hourly,
     TResult? Function(DailyRule value)? daily,
     TResult? Function(WeeklyRule value)? weekly,
@@ -1520,6 +1800,7 @@ class _$YearlyFixedRuleImpl implements YearlyFixedRule {
   @override
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
+    TResult Function(OneTimeRule value)? oneTime,
     TResult Function(HourlyRule value)? hourly,
     TResult Function(DailyRule value)? daily,
     TResult Function(WeeklyRule value)? weekly,
@@ -1672,6 +1953,8 @@ class _$YearlyNthRuleImpl implements YearlyNthRule {
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
+    required TResult Function(String date, String time, String timezone)
+        oneTime,
     required TResult Function(
             int every, String startTime, String? endTime, String timezone)
         hourly,
@@ -1696,6 +1979,7 @@ class _$YearlyNthRuleImpl implements YearlyNthRule {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function(String date, String time, String timezone)? oneTime,
     TResult? Function(
             int every, String startTime, String? endTime, String timezone)?
         hourly,
@@ -1718,6 +2002,7 @@ class _$YearlyNthRuleImpl implements YearlyNthRule {
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
+    TResult Function(String date, String time, String timezone)? oneTime,
     TResult Function(
             int every, String startTime, String? endTime, String timezone)?
         hourly,
@@ -1744,6 +2029,7 @@ class _$YearlyNthRuleImpl implements YearlyNthRule {
   @override
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
+    required TResult Function(OneTimeRule value) oneTime,
     required TResult Function(HourlyRule value) hourly,
     required TResult Function(DailyRule value) daily,
     required TResult Function(WeeklyRule value) weekly,
@@ -1758,6 +2044,7 @@ class _$YearlyNthRuleImpl implements YearlyNthRule {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(OneTimeRule value)? oneTime,
     TResult? Function(HourlyRule value)? hourly,
     TResult? Function(DailyRule value)? daily,
     TResult? Function(WeeklyRule value)? weekly,
@@ -1772,6 +2059,7 @@ class _$YearlyNthRuleImpl implements YearlyNthRule {
   @override
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
+    TResult Function(OneTimeRule value)? oneTime,
     TResult Function(HourlyRule value)? hourly,
     TResult Function(DailyRule value)? daily,
     TResult Function(WeeklyRule value)? weekly,

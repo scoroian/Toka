@@ -1,7 +1,10 @@
 enum TaskStatus {
   active,
   frozen,
-  deleted;
+  deleted,
+  /// Tarea puntual ya completada. No vuelve a aparecer en la lista Hoy ni
+  /// se cuenta como tarea activa, pero se conserva para historial.
+  completedOneTime;
 
   static TaskStatus fromString(String value) {
     return TaskStatus.values.firstWhere(

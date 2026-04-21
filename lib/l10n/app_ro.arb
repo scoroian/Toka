@@ -940,5 +940,39 @@
     "placeholders": { "name": { "type": "String" } }
   },
   "error_cannot_remove_owner": "Proprietarul locuinței nu poate fi eliminat.",
-  "@error_cannot_remove_owner": { "description": "Cannot remove owner error" }
+  "@error_cannot_remove_owner": { "description": "Cannot remove owner error" },
+  "free_limit_members_reached": "Planul Free permite până la 3 membri. Treci la Premium pentru a adăuga mai mulți.",
+  "@free_limit_members_reached": { "description": "Banner when Free home reached 3 active members" },
+  "free_limit_tasks_reached": "Planul Free permite până la 4 sarcini active.",
+  "@free_limit_tasks_reached": { "description": "Banner when Free home reached 4 active tasks" },
+  "free_limit_recurring_reached": "Planul Free permite până la 3 sarcini recurente. Creează una punctuală sau treci la Premium.",
+  "@free_limit_recurring_reached": { "description": "Banner when Free home reached 3 automatic recurring tasks" },
+  "free_admins_locked_to_owner": "Rolurile de admin sunt disponibile în Premium.",
+  "@free_admins_locked_to_owner": { "description": "Shown in place of the Make Admin toggle on Free" },
+  "free_reviews_disabled": "Evaluările sunt disponibile în Premium.",
+  "@free_reviews_disabled": { "description": "Shown in place of the Rate button on Free" },
+  "free_reviews_upgrade_title": "Evaluări doar în Premium",
+  "@free_reviews_upgrade_title": { "description": "Title of the upgrade bottom sheet shown when a Free user taps the gray rate star" },
+  "free_reviews_upgrade_body": "Treci la Premium pentru a evalua sarcinile finalizate de ceilalți membri ai casei.",
+  "@free_reviews_upgrade_body": { "description": "Body of the upgrade bottom sheet shown when a Free user taps the gray rate star" },
+  "free_go_premium_cta": "Treci la Premium",
+  "@free_go_premium_cta": { "description": "CTA that opens the paywall from Free-limit banners" },
+  "free_members_counter": "{current} / {limit} membri — limita planului Free",
+  "@free_members_counter": {
+    "description": "Info string shown in Members screen when Free",
+    "placeholders": { "current": { "type": "int" }, "limit": { "type": "int" } }
+  },
+  "free_unfreeze_blocked_title": "Limita de sarcini atinsă",
+  "@free_unfreeze_blocked_title": { "description": "Title of the dialog shown when a Free user tries to unfreeze a task but is already at maxActiveTasks" },
+  "free_unfreeze_blocked_body": "Ai deja {current} din {limit} sarcini active pe planul Free. Îngheață altă sarcină înainte de a o dezgheța pe aceasta, sau treci la Premium pentru mai multe sarcini active.",
+  "@free_unfreeze_blocked_body": {
+    "description": "Body of the unfreeze-blocked dialog",
+    "placeholders": { "current": { "type": "int" }, "limit": { "type": "int" } }
+  },
+  "free_unfreeze_blocked_understood": "Am înțeles",
+  "@free_unfreeze_blocked_understood": { "description": "Dismiss CTA of the unfreeze-blocked dialog" },
+  "recurrence_one_time": "Punctuală",
+  "@recurrence_one_time": { "description": "Chip label for one-time tasks" },
+  "recurrence_one_time_help": "Se finalizează o singură dată și dispare din listă.",
+  "@recurrence_one_time_help": { "description": "Helper text below the Puntual chip" }
 }

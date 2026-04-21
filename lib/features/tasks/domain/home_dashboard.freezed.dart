@@ -1621,12 +1621,211 @@ abstract class _RescueFlags implements RescueFlags {
 }
 
 /// @nodoc
+mixin _$PlanCounters {
+  int get activeMembers => throw _privateConstructorUsedError;
+  int get activeTasks => throw _privateConstructorUsedError;
+  int get automaticRecurringTasks => throw _privateConstructorUsedError;
+  int get totalAdmins => throw _privateConstructorUsedError;
+
+  /// Create a copy of PlanCounters
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $PlanCountersCopyWith<PlanCounters> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $PlanCountersCopyWith<$Res> {
+  factory $PlanCountersCopyWith(
+          PlanCounters value, $Res Function(PlanCounters) then) =
+      _$PlanCountersCopyWithImpl<$Res, PlanCounters>;
+  @useResult
+  $Res call(
+      {int activeMembers,
+      int activeTasks,
+      int automaticRecurringTasks,
+      int totalAdmins});
+}
+
+/// @nodoc
+class _$PlanCountersCopyWithImpl<$Res, $Val extends PlanCounters>
+    implements $PlanCountersCopyWith<$Res> {
+  _$PlanCountersCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of PlanCounters
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? activeMembers = null,
+    Object? activeTasks = null,
+    Object? automaticRecurringTasks = null,
+    Object? totalAdmins = null,
+  }) {
+    return _then(_value.copyWith(
+      activeMembers: null == activeMembers
+          ? _value.activeMembers
+          : activeMembers // ignore: cast_nullable_to_non_nullable
+              as int,
+      activeTasks: null == activeTasks
+          ? _value.activeTasks
+          : activeTasks // ignore: cast_nullable_to_non_nullable
+              as int,
+      automaticRecurringTasks: null == automaticRecurringTasks
+          ? _value.automaticRecurringTasks
+          : automaticRecurringTasks // ignore: cast_nullable_to_non_nullable
+              as int,
+      totalAdmins: null == totalAdmins
+          ? _value.totalAdmins
+          : totalAdmins // ignore: cast_nullable_to_non_nullable
+              as int,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$PlanCountersImplCopyWith<$Res>
+    implements $PlanCountersCopyWith<$Res> {
+  factory _$$PlanCountersImplCopyWith(
+          _$PlanCountersImpl value, $Res Function(_$PlanCountersImpl) then) =
+      __$$PlanCountersImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call(
+      {int activeMembers,
+      int activeTasks,
+      int automaticRecurringTasks,
+      int totalAdmins});
+}
+
+/// @nodoc
+class __$$PlanCountersImplCopyWithImpl<$Res>
+    extends _$PlanCountersCopyWithImpl<$Res, _$PlanCountersImpl>
+    implements _$$PlanCountersImplCopyWith<$Res> {
+  __$$PlanCountersImplCopyWithImpl(
+      _$PlanCountersImpl _value, $Res Function(_$PlanCountersImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of PlanCounters
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? activeMembers = null,
+    Object? activeTasks = null,
+    Object? automaticRecurringTasks = null,
+    Object? totalAdmins = null,
+  }) {
+    return _then(_$PlanCountersImpl(
+      activeMembers: null == activeMembers
+          ? _value.activeMembers
+          : activeMembers // ignore: cast_nullable_to_non_nullable
+              as int,
+      activeTasks: null == activeTasks
+          ? _value.activeTasks
+          : activeTasks // ignore: cast_nullable_to_non_nullable
+              as int,
+      automaticRecurringTasks: null == automaticRecurringTasks
+          ? _value.automaticRecurringTasks
+          : automaticRecurringTasks // ignore: cast_nullable_to_non_nullable
+              as int,
+      totalAdmins: null == totalAdmins
+          ? _value.totalAdmins
+          : totalAdmins // ignore: cast_nullable_to_non_nullable
+              as int,
+    ));
+  }
+}
+
+/// @nodoc
+
+class _$PlanCountersImpl implements _PlanCounters {
+  const _$PlanCountersImpl(
+      {required this.activeMembers,
+      required this.activeTasks,
+      required this.automaticRecurringTasks,
+      required this.totalAdmins});
+
+  @override
+  final int activeMembers;
+  @override
+  final int activeTasks;
+  @override
+  final int automaticRecurringTasks;
+  @override
+  final int totalAdmins;
+
+  @override
+  String toString() {
+    return 'PlanCounters(activeMembers: $activeMembers, activeTasks: $activeTasks, automaticRecurringTasks: $automaticRecurringTasks, totalAdmins: $totalAdmins)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$PlanCountersImpl &&
+            (identical(other.activeMembers, activeMembers) ||
+                other.activeMembers == activeMembers) &&
+            (identical(other.activeTasks, activeTasks) ||
+                other.activeTasks == activeTasks) &&
+            (identical(
+                    other.automaticRecurringTasks, automaticRecurringTasks) ||
+                other.automaticRecurringTasks == automaticRecurringTasks) &&
+            (identical(other.totalAdmins, totalAdmins) ||
+                other.totalAdmins == totalAdmins));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, activeMembers, activeTasks,
+      automaticRecurringTasks, totalAdmins);
+
+  /// Create a copy of PlanCounters
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$PlanCountersImplCopyWith<_$PlanCountersImpl> get copyWith =>
+      __$$PlanCountersImplCopyWithImpl<_$PlanCountersImpl>(this, _$identity);
+}
+
+abstract class _PlanCounters implements PlanCounters {
+  const factory _PlanCounters(
+      {required final int activeMembers,
+      required final int activeTasks,
+      required final int automaticRecurringTasks,
+      required final int totalAdmins}) = _$PlanCountersImpl;
+
+  @override
+  int get activeMembers;
+  @override
+  int get activeTasks;
+  @override
+  int get automaticRecurringTasks;
+  @override
+  int get totalAdmins;
+
+  /// Create a copy of PlanCounters
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$PlanCountersImplCopyWith<_$PlanCountersImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
 mixin _$HomeDashboard {
   List<TaskPreview> get activeTasksPreview =>
       throw _privateConstructorUsedError;
   List<DoneTaskPreview> get doneTasksPreview =>
       throw _privateConstructorUsedError;
   DashboardCounters get counters => throw _privateConstructorUsedError;
+  PlanCounters get planCounters => throw _privateConstructorUsedError;
   List<MemberPreview> get memberPreview => throw _privateConstructorUsedError;
   PremiumFlags get premiumFlags => throw _privateConstructorUsedError;
   AdFlags get adFlags => throw _privateConstructorUsedError;
@@ -1650,6 +1849,7 @@ abstract class $HomeDashboardCopyWith<$Res> {
       {List<TaskPreview> activeTasksPreview,
       List<DoneTaskPreview> doneTasksPreview,
       DashboardCounters counters,
+      PlanCounters planCounters,
       List<MemberPreview> memberPreview,
       PremiumFlags premiumFlags,
       AdFlags adFlags,
@@ -1657,6 +1857,7 @@ abstract class $HomeDashboardCopyWith<$Res> {
       DateTime updatedAt});
 
   $DashboardCountersCopyWith<$Res> get counters;
+  $PlanCountersCopyWith<$Res> get planCounters;
   $PremiumFlagsCopyWith<$Res> get premiumFlags;
   $AdFlagsCopyWith<$Res> get adFlags;
   $RescueFlagsCopyWith<$Res> get rescueFlags;
@@ -1680,6 +1881,7 @@ class _$HomeDashboardCopyWithImpl<$Res, $Val extends HomeDashboard>
     Object? activeTasksPreview = null,
     Object? doneTasksPreview = null,
     Object? counters = null,
+    Object? planCounters = null,
     Object? memberPreview = null,
     Object? premiumFlags = null,
     Object? adFlags = null,
@@ -1699,6 +1901,10 @@ class _$HomeDashboardCopyWithImpl<$Res, $Val extends HomeDashboard>
           ? _value.counters
           : counters // ignore: cast_nullable_to_non_nullable
               as DashboardCounters,
+      planCounters: null == planCounters
+          ? _value.planCounters
+          : planCounters // ignore: cast_nullable_to_non_nullable
+              as PlanCounters,
       memberPreview: null == memberPreview
           ? _value.memberPreview
           : memberPreview // ignore: cast_nullable_to_non_nullable
@@ -1729,6 +1935,16 @@ class _$HomeDashboardCopyWithImpl<$Res, $Val extends HomeDashboard>
   $DashboardCountersCopyWith<$Res> get counters {
     return $DashboardCountersCopyWith<$Res>(_value.counters, (value) {
       return _then(_value.copyWith(counters: value) as $Val);
+    });
+  }
+
+  /// Create a copy of HomeDashboard
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $PlanCountersCopyWith<$Res> get planCounters {
+    return $PlanCountersCopyWith<$Res>(_value.planCounters, (value) {
+      return _then(_value.copyWith(planCounters: value) as $Val);
     });
   }
 
@@ -1775,6 +1991,7 @@ abstract class _$$HomeDashboardImplCopyWith<$Res>
       {List<TaskPreview> activeTasksPreview,
       List<DoneTaskPreview> doneTasksPreview,
       DashboardCounters counters,
+      PlanCounters planCounters,
       List<MemberPreview> memberPreview,
       PremiumFlags premiumFlags,
       AdFlags adFlags,
@@ -1783,6 +2000,8 @@ abstract class _$$HomeDashboardImplCopyWith<$Res>
 
   @override
   $DashboardCountersCopyWith<$Res> get counters;
+  @override
+  $PlanCountersCopyWith<$Res> get planCounters;
   @override
   $PremiumFlagsCopyWith<$Res> get premiumFlags;
   @override
@@ -1807,6 +2026,7 @@ class __$$HomeDashboardImplCopyWithImpl<$Res>
     Object? activeTasksPreview = null,
     Object? doneTasksPreview = null,
     Object? counters = null,
+    Object? planCounters = null,
     Object? memberPreview = null,
     Object? premiumFlags = null,
     Object? adFlags = null,
@@ -1826,6 +2046,10 @@ class __$$HomeDashboardImplCopyWithImpl<$Res>
           ? _value.counters
           : counters // ignore: cast_nullable_to_non_nullable
               as DashboardCounters,
+      planCounters: null == planCounters
+          ? _value.planCounters
+          : planCounters // ignore: cast_nullable_to_non_nullable
+              as PlanCounters,
       memberPreview: null == memberPreview
           ? _value._memberPreview
           : memberPreview // ignore: cast_nullable_to_non_nullable
@@ -1857,6 +2081,7 @@ class _$HomeDashboardImpl implements _HomeDashboard {
       {required final List<TaskPreview> activeTasksPreview,
       required final List<DoneTaskPreview> doneTasksPreview,
       required this.counters,
+      required this.planCounters,
       required final List<MemberPreview> memberPreview,
       required this.premiumFlags,
       required this.adFlags,
@@ -1886,6 +2111,8 @@ class _$HomeDashboardImpl implements _HomeDashboard {
 
   @override
   final DashboardCounters counters;
+  @override
+  final PlanCounters planCounters;
   final List<MemberPreview> _memberPreview;
   @override
   List<MemberPreview> get memberPreview {
@@ -1905,7 +2132,7 @@ class _$HomeDashboardImpl implements _HomeDashboard {
 
   @override
   String toString() {
-    return 'HomeDashboard(activeTasksPreview: $activeTasksPreview, doneTasksPreview: $doneTasksPreview, counters: $counters, memberPreview: $memberPreview, premiumFlags: $premiumFlags, adFlags: $adFlags, rescueFlags: $rescueFlags, updatedAt: $updatedAt)';
+    return 'HomeDashboard(activeTasksPreview: $activeTasksPreview, doneTasksPreview: $doneTasksPreview, counters: $counters, planCounters: $planCounters, memberPreview: $memberPreview, premiumFlags: $premiumFlags, adFlags: $adFlags, rescueFlags: $rescueFlags, updatedAt: $updatedAt)';
   }
 
   @override
@@ -1919,6 +2146,8 @@ class _$HomeDashboardImpl implements _HomeDashboard {
                 .equals(other._doneTasksPreview, _doneTasksPreview) &&
             (identical(other.counters, counters) ||
                 other.counters == counters) &&
+            (identical(other.planCounters, planCounters) ||
+                other.planCounters == planCounters) &&
             const DeepCollectionEquality()
                 .equals(other._memberPreview, _memberPreview) &&
             (identical(other.premiumFlags, premiumFlags) ||
@@ -1936,6 +2165,7 @@ class _$HomeDashboardImpl implements _HomeDashboard {
       const DeepCollectionEquality().hash(_activeTasksPreview),
       const DeepCollectionEquality().hash(_doneTasksPreview),
       counters,
+      planCounters,
       const DeepCollectionEquality().hash(_memberPreview),
       premiumFlags,
       adFlags,
@@ -1956,6 +2186,7 @@ abstract class _HomeDashboard implements HomeDashboard {
       {required final List<TaskPreview> activeTasksPreview,
       required final List<DoneTaskPreview> doneTasksPreview,
       required final DashboardCounters counters,
+      required final PlanCounters planCounters,
       required final List<MemberPreview> memberPreview,
       required final PremiumFlags premiumFlags,
       required final AdFlags adFlags,
@@ -1968,6 +2199,8 @@ abstract class _HomeDashboard implements HomeDashboard {
   List<DoneTaskPreview> get doneTasksPreview;
   @override
   DashboardCounters get counters;
+  @override
+  PlanCounters get planCounters;
   @override
   List<MemberPreview> get memberPreview;
   @override

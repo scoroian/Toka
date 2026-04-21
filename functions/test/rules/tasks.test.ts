@@ -44,7 +44,14 @@ beforeEach(async () => {
   await testEnv.withSecurityRulesDisabled(async (ctx) => {
     const db = ctx.firestore();
 
-    await setDoc(doc(db, `homes/${HOME1}`), { ownerUid: OWNER_UID, name: 'Test Home' });
+    // premiumStatus='active' para no activar gates Free en los tests existentes.
+    // Los tests Free tienen su propio bloque al final del archivo con homes
+    // separados (premiumStatus='free' + planCounters en dashboard).
+    await setDoc(doc(db, `homes/${HOME1}`), {
+      ownerUid: OWNER_UID,
+      name: 'Test Home',
+      premiumStatus: 'active',
+    });
     await setDoc(doc(db, `homes/${HOME1}/tasks/task1`), {
       title: 'Limpiar cocina',
       status: 'active',
@@ -196,5 +203,125 @@ describe('tasks — delete (siempre denegado — soft delete via update)', () =>
   it('no autenticado NO puede borrar tarea físicamente', async () => {
     const ctx = testEnv.unauthenticatedContext();
     await assertFails(deleteDoc(doc(ctx.firestore(), `homes/${HOME1}/tasks/task1`)));
+  });
+});
+
+// ─── FREE LIMITS ───────────────────────────────────────────────────────────────
+
+describe('tasks — create (Free plan limits)', () => {
+  const FREE_HOME = 'home_free';
+
+  beforeEach(async () => {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      const db = ctx.firestore();
+      await setDoc(doc(db, `homes/${FREE_HOME}`), {
+        ownerUid: OWNER_UID,
+        name: 'Free Home',
+        premiumStatus: 'free',
+      });
+      await setDoc(
+        doc(db, `users/${OWNER_UID}/memberships/${FREE_HOME}`),
+        { status: 'active', role: 'owner' },
+      );
+    });
+  });
+
+  it('Free: permite crear puntual cuando activeTasks=3 y oneTime', async () => {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(
+        doc(ctx.firestore(), `homes/${FREE_HOME}/views/dashboard`),
+        {
+          planCounters: {
+            activeTasks: 3,
+            automaticRecurringTasks: 3,
+            activeMembers: 1,
+            totalAdmins: 1,
+          },
+        },
+      );
+    });
+    const ctx = testEnv.authenticatedContext(OWNER_UID);
+    await assertSucceeds(
+      setDoc(doc(ctx.firestore(), `homes/${FREE_HOME}/tasks/t_ot`), {
+        title: 'Puntual',
+        status: 'active',
+        recurrenceRule: { kind: 'oneTime' },
+      }),
+    );
+  });
+
+  it('Free: bloquea crear cuando activeTasks ya es 4', async () => {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(
+        doc(ctx.firestore(), `homes/${FREE_HOME}/views/dashboard`),
+        {
+          planCounters: {
+            activeTasks: 4,
+            automaticRecurringTasks: 1,
+            activeMembers: 1,
+            totalAdmins: 1,
+          },
+        },
+      );
+    });
+    const ctx = testEnv.authenticatedContext(OWNER_UID);
+    await assertFails(
+      setDoc(doc(ctx.firestore(), `homes/${FREE_HOME}/tasks/t_fail`), {
+        title: 'Extra',
+        status: 'active',
+        recurrenceRule: { kind: 'oneTime' },
+      }),
+    );
+  });
+
+  it('Free: bloquea crear recurrente cuando automaticRecurringTasks=3', async () => {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(
+        doc(ctx.firestore(), `homes/${FREE_HOME}/views/dashboard`),
+        {
+          planCounters: {
+            activeTasks: 3,
+            automaticRecurringTasks: 3,
+            activeMembers: 1,
+            totalAdmins: 1,
+          },
+        },
+      );
+    });
+    const ctx = testEnv.authenticatedContext(OWNER_UID);
+    await assertFails(
+      setDoc(doc(ctx.firestore(), `homes/${FREE_HOME}/tasks/t_rec`), {
+        title: 'Recurrente',
+        status: 'active',
+        recurrenceRule: { kind: 'daily' },
+      }),
+    );
+  });
+
+  it('Premium: ignora los contadores aunque estén al tope', async () => {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      const db = ctx.firestore();
+      await setDoc(doc(db, `homes/${FREE_HOME}`), {
+        ownerUid: OWNER_UID,
+        name: 'Premium Home',
+        premiumStatus: 'active',
+      });
+      await setDoc(doc(db, `homes/${FREE_HOME}/views/dashboard`), {
+        planCounters: {
+          activeTasks: 99,
+          automaticRecurringTasks: 99,
+          activeMembers: 1,
+          totalAdmins: 1,
+        },
+      });
+    });
+    const ctx = testEnv.authenticatedContext(OWNER_UID);
+    await assertSucceeds(
+      setDoc(doc(ctx.firestore(), `homes/${FREE_HOME}/tasks/t_premium`), {
+        title: 'Ilimitado',
+        status: 'active',
+        recurrenceRule: { kind: 'weekly' },
+      }),
+    );
   });
 });

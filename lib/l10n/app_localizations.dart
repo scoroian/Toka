@@ -2889,6 +2889,90 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'No se puede expulsar al propietario del hogar.'**
   String get error_cannot_remove_owner;
+
+  /// Banner when Free home reached 3 active members
+  ///
+  /// In es, this message translates to:
+  /// **'Tu plan Free permite hasta 3 miembros. Hazte Premium para añadir más.'**
+  String get free_limit_members_reached;
+
+  /// Banner when Free home reached 4 active tasks
+  ///
+  /// In es, this message translates to:
+  /// **'Tu plan Free permite hasta 4 tareas activas.'**
+  String get free_limit_tasks_reached;
+
+  /// Banner when Free home reached 3 automatic recurring tasks
+  ///
+  /// In es, this message translates to:
+  /// **'Tu plan Free permite hasta 3 tareas con recurrencia. Crea una puntual o hazte Premium.'**
+  String get free_limit_recurring_reached;
+
+  /// Shown in place of the Make Admin toggle on Free
+  ///
+  /// In es, this message translates to:
+  /// **'Los roles de admin están disponibles en Premium.'**
+  String get free_admins_locked_to_owner;
+
+  /// Shown in place of the Rate button on Free
+  ///
+  /// In es, this message translates to:
+  /// **'Las valoraciones están disponibles en Premium.'**
+  String get free_reviews_disabled;
+
+  /// Title of the upgrade bottom sheet shown when a Free user taps the gray rate star
+  ///
+  /// In es, this message translates to:
+  /// **'Valoraciones solo en Premium'**
+  String get free_reviews_upgrade_title;
+
+  /// Body of the upgrade bottom sheet shown when a Free user taps the gray rate star
+  ///
+  /// In es, this message translates to:
+  /// **'Actualiza a Premium para valorar las tareas completadas por otros miembros del hogar.'**
+  String get free_reviews_upgrade_body;
+
+  /// CTA that opens the paywall from Free-limit banners
+  ///
+  /// In es, this message translates to:
+  /// **'Hazte Premium'**
+  String get free_go_premium_cta;
+
+  /// Info string shown in Members screen when Free
+  ///
+  /// In es, this message translates to:
+  /// **'{current} / {limit} miembros — límite del plan Free'**
+  String free_members_counter(int current, int limit);
+
+  /// Title of the dialog shown when a Free user tries to unfreeze a task but is already at maxActiveTasks
+  ///
+  /// In es, this message translates to:
+  /// **'Límite de tareas alcanzado'**
+  String get free_unfreeze_blocked_title;
+
+  /// Body of the unfreeze-blocked dialog
+  ///
+  /// In es, this message translates to:
+  /// **'Ya tienes {current} de {limit} tareas activas en tu plan Free. Congela otra tarea antes de descongelar esta, o hazte Premium para tener más tareas activas.'**
+  String free_unfreeze_blocked_body(int current, int limit);
+
+  /// Dismiss CTA of the unfreeze-blocked dialog
+  ///
+  /// In es, this message translates to:
+  /// **'Entendido'**
+  String get free_unfreeze_blocked_understood;
+
+  /// Chip label for one-time tasks
+  ///
+  /// In es, this message translates to:
+  /// **'Puntual'**
+  String get recurrence_one_time;
+
+  /// Helper text below the Puntual chip
+  ///
+  /// In es, this message translates to:
+  /// **'Se completa una sola vez y desaparece del listado.'**
+  String get recurrence_one_time_help;
 }
 
 class _AppLocalizationsDelegate

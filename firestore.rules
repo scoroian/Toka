@@ -32,6 +32,30 @@ service cloud.firestore {
       return isMemberOfHome(homeId) && getMembership(homeId).role == 'owner';
     }
 
+    // ─── Premium / límites Free ────────────────────────────────────────────────
+    // Los límites del plan Free se centralizan en functions/src/shared/free_limits.ts
+    // y en lib/core/constants/free_limits.dart. Las reglas de aquí DEBEN mantener
+    // los mismos números como defensa en profundidad (el cliente y el backend ya
+    // gatean en primera línea).
+
+    function isHomePremium(homeId) {
+      return get(/databases/$(database)/documents/homes/$(homeId)).data.premiumStatus
+        in ['active', 'cancelledPendingEnd', 'rescue'];
+    }
+
+    function dashboardPlanCounters(homeId) {
+      return get(/databases/$(database)/documents/homes/$(homeId)/views/dashboard).data.planCounters;
+    }
+
+    function freeCanCreateTask(homeId) {
+      // 4 activas total + 3 recurrentes automáticas (oneTime no cuenta).
+      return dashboardPlanCounters(homeId).activeTasks < 4
+        && (
+          request.resource.data.recurrenceRule.kind == 'oneTime'
+          || dashboardPlanCounters(homeId).automaticRecurringTasks < 3
+        );
+    }
+
     // ─── Idiomas (pública) ──────────────────────────────────────────────────────
 
     match /languages/{code} {
@@ -93,7 +117,11 @@ service cloud.firestore {
       // Tareas
       match /tasks/{taskId} {
         allow read: if isMemberOfHome(homeId);
-        allow create: if isAdminOrOwner(homeId) && isActiveMember(homeId);
+        // Create: admin/owner activo Y (Premium O por debajo del límite Free).
+        // El "recurrenceRule.kind" en el payload decide si cuenta como
+        // recurrente automática o como puntual.
+        allow create: if isAdminOrOwner(homeId) && isActiveMember(homeId)
+                         && (isHomePremium(homeId) || freeCanCreateTask(homeId));
         allow update: if isAdminOrOwner(homeId) && isActiveMember(homeId);
         allow delete: if false; // Soft delete via update
       }

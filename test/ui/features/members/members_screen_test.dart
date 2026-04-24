@@ -12,7 +12,7 @@ import 'package:toka/features/homes/domain/home_limits.dart';
 import 'package:toka/features/homes/domain/home_membership.dart';
 import 'package:toka/features/members/application/members_provider.dart';
 import 'package:toka/features/members/domain/member.dart';
-import 'package:toka/features/members/presentation/members_screen.dart';
+import 'package:toka/features/members/presentation/skins/members_screen_v2.dart';
 import 'package:toka/l10n/app_localizations.dart';
 
 const _ownerUser = AuthUser(
@@ -137,7 +137,7 @@ void main() {
     testWidgets('muestra lista con roles y badges correctos', (tester) async {
       await tester.pumpWidget(
         _wrap(
-          const MembersScreen(),
+          const MembersScreenV2(),
           overrides: _baseOverrides(
               membersValue: AsyncData(_fakeMembers)),
         ),
@@ -153,7 +153,7 @@ void main() {
     testWidgets('owner ve FAB de invitar', (tester) async {
       await tester.pumpWidget(
         _wrap(
-          const MembersScreen(),
+          const MembersScreenV2(),
           overrides: _baseOverrides(
               membersValue: AsyncData(_fakeMembers)),
         ),
@@ -168,7 +168,7 @@ void main() {
       // MembersScreen no tiene botón de cerrar hogar. Solo HomeSettingsScreen lo tiene.
       await tester.pumpWidget(
         _wrap(
-          const MembersScreen(),
+          const MembersScreenV2(),
           overrides: _baseOverrides(
               membersValue: AsyncData(_fakeMembers),
               myRole: MemberRole.admin),
@@ -187,7 +187,7 @@ void main() {
 
       await tester.pumpWidget(
         _wrap(
-          const MembersScreen(),
+          const MembersScreenV2(),
           overrides: _baseOverrides(
               membersValue: AsyncData(_fakeMembers)),
         ),

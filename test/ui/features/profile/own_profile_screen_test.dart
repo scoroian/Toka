@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:toka/features/profile/application/own_profile_view_model.dart';
 import 'package:toka/features/profile/domain/user_profile.dart';
-import 'package:toka/features/profile/presentation/own_profile_screen.dart';
+import 'package:toka/features/profile/presentation/skins/own_profile_screen_v2.dart';
 import 'package:toka/l10n/app_localizations.dart';
 import 'package:toka/shared/widgets/loading_widget.dart';
 
@@ -55,7 +55,7 @@ Widget _wrap(OwnProfileViewModel vm) => ProviderScope(
           GlobalCupertinoLocalizations.delegate,
         ],
         supportedLocales: [Locale('es')],
-        home: OwnProfileScreen(),
+        home: OwnProfileScreenV2(),
       ),
     );
 

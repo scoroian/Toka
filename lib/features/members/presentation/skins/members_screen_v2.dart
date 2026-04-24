@@ -2,22 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/constants/routes.dart';
-import '../../../l10n/app_localizations.dart';
-import '../../../shared/widgets/ad_aware_bottom_padding.dart';
-import '../../../shared/widgets/loading_widget.dart';
-import '../../../shared/widgets/no_home_empty_state.dart';
-import '../../../shared/widgets/premium_upgrade_banner.dart';
-import '../../../shared/widgets/skins/main_shell_v2.dart';
-import '../../profile/application/profile_provider.dart';
-import '../../profile/domain/user_profile.dart';
-import '../application/members_view_model.dart';
-import '../domain/member.dart';
-import 'widgets/invite_member_sheet.dart';
-import 'widgets/member_card.dart';
+import '../../../../core/constants/routes.dart';
+import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/widgets/ad_aware_bottom_padding.dart';
+import '../../../../shared/widgets/loading_widget.dart';
+import '../../../../shared/widgets/no_home_empty_state.dart';
+import '../../../../shared/widgets/premium_upgrade_banner.dart';
+import '../../../../shared/widgets/skins/main_shell_v2.dart';
+import '../../../profile/application/profile_provider.dart';
+import '../../../profile/domain/user_profile.dart';
+import '../../application/members_view_model.dart';
+import '../../domain/member.dart';
+import '../widgets/invite_member_sheet.dart';
+import '../widgets/member_card.dart';
 
-class MembersScreen extends ConsumerWidget {
-  const MembersScreen({super.key});
+class MembersScreenV2 extends ConsumerWidget {
+  const MembersScreenV2({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

@@ -3,16 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/constants/routes.dart';
-import '../../../l10n/app_localizations.dart';
-import '../../../shared/widgets/loading_widget.dart';
-import '../application/own_profile_view_model.dart';
-import 'widgets/access_management_section.dart';
-import 'widgets/radar_chart_widget.dart';
-import 'widgets/stats_section.dart';
+import '../../../../core/constants/routes.dart';
+import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/widgets/loading_widget.dart';
+import '../../application/own_profile_view_model.dart';
+import '../widgets/access_management_section.dart';
+import '../widgets/radar_chart_widget.dart';
+import '../widgets/stats_section.dart';
 
-class OwnProfileScreen extends ConsumerWidget {
-  const OwnProfileScreen({super.key});
+class OwnProfileScreenV2 extends ConsumerWidget {
+  const OwnProfileScreenV2({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

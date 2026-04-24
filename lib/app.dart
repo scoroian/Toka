@@ -28,9 +28,9 @@ import 'features/homes/presentation/home_settings_screen.dart';
 import 'features/homes/presentation/my_homes_screen.dart';
 import 'features/onboarding/presentation/notification_rationale_screen.dart';
 import 'features/onboarding/presentation/onboarding_flow_screen.dart';
-import 'features/members/presentation/members_screen.dart';
+import 'features/members/presentation/skins/members_screen_v2.dart';
 import 'features/members/presentation/vacation_screen.dart';
-import 'features/profile/presentation/own_profile_screen.dart';
+import 'features/profile/presentation/skins/own_profile_screen_v2.dart';
 import 'features/profile/presentation/edit_profile_screen.dart';
 import 'features/subscription/presentation/paywall_entry_context.dart';
 import 'features/subscription/presentation/paywall_screen.dart';
@@ -211,7 +211,7 @@ GoRouter appRouter(AppRouterRef ref) {
           ),
           GoRoute(
             path: AppRoutes.members,
-            builder: (_, __) => const MembersScreen(),
+            builder: (_, __) => const MembersScreenV2(),
             routes: [
               GoRoute(
                 path: ':uid',
@@ -287,7 +287,7 @@ GoRouter appRouter(AppRouterRef ref) {
       ),
       GoRoute(
         path: AppRoutes.profile,
-        builder: (_, __) => const OwnProfileScreen(),
+        builder: (_, __) => const OwnProfileScreenV2(),
       ),
       GoRoute(
         path: AppRoutes.editProfile,

@@ -86,6 +86,11 @@ class _FormView extends StatelessWidget {
           TextFormField(
             controller: emailCtrl,
             keyboardType: TextInputType.emailAddress,
+            // BUG-01: neutralizar autocorrector del teclado (MIUI/Gboard).
+            autocorrect: false,
+            enableSuggestions: false,
+            textCapitalization: TextCapitalization.none,
+            autofillHints: const [AutofillHints.email],
             decoration: InputDecoration(labelText: l10n.auth_email_label),
             validator: (v) {
               if (v == null || v.trim().isEmpty) {

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/widgets/ad_aware_bottom_padding.dart';
+import '../../../subscription/presentation/widgets/premium_state_banner.dart';
 import '../../application/today_view_model.dart';
 import '../../domain/home_dashboard.dart';
 import '../widgets/complete_task_dialog.dart';
@@ -67,6 +69,7 @@ class TodayScreenV2 extends ConsumerWidget {
           if (data == null) return const TodayEmptyState();
           return CustomScrollView(
             slivers: [
+              const SliverToBoxAdapter(child: PremiumStateBanner()),
               SliverToBoxAdapter(
                 child: TodayHeaderCountersV2(counters: data.counters)),
               for (final recType in data.recurrenceOrder)
@@ -81,7 +84,11 @@ class TodayScreenV2 extends ConsumerWidget {
                     onPass: data.homeId.isNotEmpty
                         ? (t) => _onPass(context, vm, t, data.currentUid) : null,
                   ),
-              const SliverToBoxAdapter(child: SizedBox(height: 16)),
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: adAwareBottomPadding(context, ref, extra: 16),
+                ),
+              ),
             ],
           );
         },

@@ -1,8 +1,9 @@
 // lib/features/homes/application/home_settings_view_model.dart
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../core/utils/toka_dates.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/application/auth_provider.dart';
 import '../domain/home.dart';
@@ -18,9 +19,8 @@ class HomeSettingsViewData {
     required this.homeName,
     required this.planLabel,
     required this.canEdit,
-    required this.canManageSubscription,
+    required this.isPayer,
     required this.isOwner,
-    required this.canGenerateCode,
     required this.uid,
     // DEBUG PREMIUM — REMOVE BEFORE PRODUCTION
     required this.premiumStatusCode,
@@ -32,9 +32,8 @@ class HomeSettingsViewData {
   final String homeName;
   final String planLabel;
   final bool canEdit;
-  final bool canManageSubscription;
+  final bool isPayer;
   final bool isOwner;
-  final bool canGenerateCode;
   final String uid;
   // DEBUG PREMIUM — REMOVE BEFORE PRODUCTION
   final String premiumStatusCode;
@@ -118,7 +117,8 @@ String _planLabel(Home home, AppLocalizations l10n) {
   }
   final endsAt = home.premiumEndsAt;
   if (endsAt != null) {
-    final formatted = DateFormat.yMd().format(endsAt);
+    final formatted =
+        TokaDates.dateShort(endsAt, Locale(l10n.localeName));
     return '${l10n.homes_plan_premium} · ${l10n.homes_plan_ends(formatted)}';
   }
   return l10n.homes_plan_premium;
@@ -154,9 +154,8 @@ HomeSettingsViewModel homeSettingsViewModel(
       homeName: home.name,
       planLabel: _planLabel(home, l10n),
       canEdit: canEdit,
-      canManageSubscription: isOwner || isCurrentPayer,
+      isPayer: isCurrentPayer,
       isOwner: isOwner,
-      canGenerateCode: canEdit,
       uid: uid,
       // DEBUG PREMIUM — REMOVE BEFORE PRODUCTION
       premiumStatusCode: home.premiumStatus.name,

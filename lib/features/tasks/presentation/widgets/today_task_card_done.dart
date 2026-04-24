@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/toka_dates.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/home_dashboard.dart';
 
@@ -13,7 +13,8 @@ class TodayTaskCardDone extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final timeStr = DateFormat('HH:mm').format(task.completedAt.toLocal());
+    final timeStr = TokaDates.timeShort(
+        task.completedAt.toLocal(), Localizations.localeOf(context));
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),

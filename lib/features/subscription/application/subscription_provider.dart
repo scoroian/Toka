@@ -8,6 +8,7 @@ import '../../homes/domain/home.dart';
 import '../data/subscription_repository_impl.dart';
 import '../domain/subscription_repository.dart';
 import '../domain/subscription_state.dart';
+import 'days_left.dart';
 
 part 'subscription_provider.g.dart';
 
@@ -48,7 +49,7 @@ SubscriptionState _fromHome(Home home) {
       );
     case HomePremiumStatus.rescue:
       final daysLeft = home.premiumEndsAt != null
-          ? home.premiumEndsAt!.difference(DateTime.now()).inDays.clamp(0, 3)
+          ? daysLeftFrom(home.premiumEndsAt!).clamp(0, 3)
           : 0;
       return SubscriptionState.rescue(
         plan: home.premiumPlan ?? 'monthly',

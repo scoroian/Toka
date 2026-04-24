@@ -9,6 +9,8 @@
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
+    "check:release-safety": "node scripts/check-debug-premium.js",
+    "deploy:release": "npm run check:release-safety && npm run build && firebase deploy --only functions",
     "logs": "firebase functions:log"
   },
   "engines": { "node": "20" },

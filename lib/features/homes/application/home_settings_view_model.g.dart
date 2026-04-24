@@ -7,7 +7,7 @@ part of 'home_settings_view_model.dart';
 // **************************************************************************
 
 String _$homeSettingsViewModelHash() =>
-    r'e89d4e03bb0fd657014b76dcaf2d29687b908493';
+    r'0aa8f579d9b5d116a1fdb29c0898d21b683d5b43';
 
 /// Copied from Dart SDK
 class _SystemHash {

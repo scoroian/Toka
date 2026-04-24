@@ -4,9 +4,9 @@ import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../../core/theme/app_colors_v2.dart';
+import '../../../../../core/utils/toka_dates.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../domain/home_dashboard.dart';
 import '../../../presentation/utils/task_visual_utils.dart';
@@ -95,21 +95,23 @@ class _TodayTaskCardTodoV2State extends ConsumerState<TodayTaskCardTodoV2>
 
   /// Formatea la fecha de vencimiento para el mensaje informativo según el tipo de recurrencia.
   String _formatDueForMessage(BuildContext context) {
-    final locale = Localizations.localeOf(context).toString();
+    final locale = Localizations.localeOf(context);
     final due = widget.task.nextDueAt.toLocal();
     switch (widget.task.recurrenceType) {
       case 'hourly':
-        return DateFormat('HH:mm', locale).format(due);
+        return TokaDates.timeShort(due, locale);
       case 'daily':
-        return DateFormat('EEE d MMM · HH:mm', locale).format(due);
+        return '${TokaDates.dateMediumWithWeekday(due, locale)} · '
+            '${TokaDates.timeShort(due, locale)}';
       case 'weekly':
-        return DateFormat('EEE d MMM', locale).format(due);
+        return TokaDates.dateMediumWithWeekday(due, locale);
       case 'monthly':
-        return DateFormat('d MMMM', locale).format(due);
+        return TokaDates.dateLongDayMonth(due, locale);
       case 'yearly':
-        return DateFormat('MMMM yyyy', locale).format(due);
+        return TokaDates.monthYearLong(due, locale);
       default:
-        return DateFormat('EEE d MMM · HH:mm', locale).format(due);
+        return '${TokaDates.dateMediumWithWeekday(due, locale)} · '
+            '${TokaDates.timeShort(due, locale)}';
     }
   }
 
@@ -138,10 +140,18 @@ class _TodayTaskCardTodoV2State extends ConsumerState<TodayTaskCardTodoV2>
     if (widget.task.isOverdue) return l10n.today_overdue;
     final now      = widget.now ?? DateTime.now();
     final due      = widget.task.nextDueAt.toLocal();
-    final timeStr  = DateFormat('HH:mm').format(due);
+    final locale   = Localizations.localeOf(context);
+    final timeStr  = TokaDates.timeShort(due, locale);
     final isToday  = due.year == now.year && due.month == now.month && due.day == now.day;
     if (isToday) return l10n.today_due_today(timeStr);
-    final weekday = DateFormat('EEE', Localizations.localeOf(context).toString()).format(due);
+    // BUG-23: para tareas anuales a más de 30 días vista, mostrar fecha
+    // completa con año para no confundir con tareas mensuales.
+    final isYearly = widget.task.recurrenceType == 'yearly';
+    final daysAway = due.difference(now).inDays;
+    if (isYearly && daysAway > 30) {
+      return TokaDates.dateLongFull(due, locale);
+    }
+    final weekday = TokaDates.weekdayShort(due, locale);
     return l10n.today_due_weekday(weekday, timeStr);
   }
 

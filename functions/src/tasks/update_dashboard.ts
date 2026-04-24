@@ -163,9 +163,16 @@ export async function updateHomeDashboard(homeId: string): Promise<void> {
     showBanner: !isPremium,
     bannerUnit: "ca-app-pub-3940256099942544/6300978111", // test unit
   };
+  // BUG-16: daysLeft se calcula con Math.ceil para no mostrar "0 días"
+  // mientras aún quedan unas horas. Si faltan 2.9 días → 3, no 2.
+  const premiumEndsAt = (homeData["premiumEndsAt"] as admin.firestore.Timestamp | undefined)?.toDate();
+  const rescueDaysLeft =
+    homeData["premiumStatus"] === "rescue" && premiumEndsAt
+      ? Math.max(0, Math.ceil((premiumEndsAt.getTime() - Date.now()) / 86400000))
+      : null;
   const rescueFlags = {
     isInRescue: homeData["premiumStatus"] === "rescue",
-    daysLeft: null as number | null,
+    daysLeft: rescueDaysLeft as number | null,
   };
 
   // --- 6. Contadores ---

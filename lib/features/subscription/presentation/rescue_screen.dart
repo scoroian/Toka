@@ -15,6 +15,13 @@ class RescueScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final vm = ref.watch(rescueViewModelProvider);
 
+    // Si quedan <24h mostramos el countdown en horas (precisión alta);
+    // a partir de 24h (1 día) pasamos a días. daysLeft usa ceil, así
+    // que para 7h daysLeft=1 pero queremos "Quedan 7 horas".
+    final countdownLabel = vm.hoursLeft < 24
+        ? l10n.rescue_banner_hours_left(vm.hoursLeft)
+        : l10n.rescue_banner_text(vm.daysLeft);
+
     return Scaffold(
       appBar: AppBar(title: Text(l10n.rescue_screen_title)),
       body: SingleChildScrollView(
@@ -28,12 +35,17 @@ class RescueScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              l10n.rescue_banner_text(vm.daysLeft),
+              countdownLabel,
+              key: const Key('rescue_countdown'),
               style: TextStyle(
                 color: Theme.of(context).colorScheme.error,
                 fontWeight: FontWeight.bold,
               ),
             ),
+            if (vm.lastBillingError != null) ...[
+              const SizedBox(height: 16),
+              _LastBillingErrorTile(message: vm.lastBillingError!),
+            ],
             const SizedBox(height: 24),
             const PlanComparisonCard(),
             const SizedBox(height: 24),
@@ -60,6 +72,51 @@ class RescueScreen extends ConsumerWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _LastBillingErrorTile extends StatelessWidget {
+  const _LastBillingErrorTile({required this.message});
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      key: const Key('rescue_last_billing_error'),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: cs.errorContainer,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.error_outline, color: cs.onErrorContainer, size: 20),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.rescue_last_billing_error_title,
+                  style: TextStyle(
+                    color: cs.onErrorContainer,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  message,
+                  style: TextStyle(color: cs.onErrorContainer),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -25,6 +25,7 @@ mixin _$NotificationPreferences {
   String? get dailySummaryTime => throw _privateConstructorUsedError;
   List<String> get silencedTypes => throw _privateConstructorUsedError;
   String? get fcmToken => throw _privateConstructorUsedError;
+  bool? get systemAuthorized => throw _privateConstructorUsedError;
 
   /// Create a copy of NotificationPreferences
   /// with the given fields replaced by the non-null parameter values.
@@ -48,7 +49,8 @@ abstract class $NotificationPreferencesCopyWith<$Res> {
       bool dailySummary,
       String? dailySummaryTime,
       List<String> silencedTypes,
-      String? fcmToken});
+      String? fcmToken,
+      bool? systemAuthorized});
 }
 
 /// @nodoc
@@ -76,6 +78,7 @@ class _$NotificationPreferencesCopyWithImpl<$Res,
     Object? dailySummaryTime = freezed,
     Object? silencedTypes = null,
     Object? fcmToken = freezed,
+    Object? systemAuthorized = freezed,
   }) {
     return _then(_value.copyWith(
       homeId: null == homeId
@@ -114,6 +117,10 @@ class _$NotificationPreferencesCopyWithImpl<$Res,
           ? _value.fcmToken
           : fcmToken // ignore: cast_nullable_to_non_nullable
               as String?,
+      systemAuthorized: freezed == systemAuthorized
+          ? _value.systemAuthorized
+          : systemAuthorized // ignore: cast_nullable_to_non_nullable
+              as bool?,
     ) as $Val);
   }
 }
@@ -136,7 +143,8 @@ abstract class _$$NotificationPreferencesImplCopyWith<$Res>
       bool dailySummary,
       String? dailySummaryTime,
       List<String> silencedTypes,
-      String? fcmToken});
+      String? fcmToken,
+      bool? systemAuthorized});
 }
 
 /// @nodoc
@@ -163,6 +171,7 @@ class __$$NotificationPreferencesImplCopyWithImpl<$Res>
     Object? dailySummaryTime = freezed,
     Object? silencedTypes = null,
     Object? fcmToken = freezed,
+    Object? systemAuthorized = freezed,
   }) {
     return _then(_$NotificationPreferencesImpl(
       homeId: null == homeId
@@ -201,6 +210,10 @@ class __$$NotificationPreferencesImplCopyWithImpl<$Res>
           ? _value.fcmToken
           : fcmToken // ignore: cast_nullable_to_non_nullable
               as String?,
+      systemAuthorized: freezed == systemAuthorized
+          ? _value.systemAuthorized
+          : systemAuthorized // ignore: cast_nullable_to_non_nullable
+              as bool?,
     ));
   }
 }
@@ -217,7 +230,8 @@ class _$NotificationPreferencesImpl extends _NotificationPreferences {
       this.dailySummary = false,
       this.dailySummaryTime,
       final List<String> silencedTypes = const [],
-      this.fcmToken})
+      this.fcmToken,
+      this.systemAuthorized})
       : _silencedTypes = silencedTypes,
         super._();
 
@@ -250,10 +264,12 @@ class _$NotificationPreferencesImpl extends _NotificationPreferences {
 
   @override
   final String? fcmToken;
+  @override
+  final bool? systemAuthorized;
 
   @override
   String toString() {
-    return 'NotificationPreferences(homeId: $homeId, uid: $uid, notifyOnDue: $notifyOnDue, notifyBefore: $notifyBefore, minutesBefore: $minutesBefore, dailySummary: $dailySummary, dailySummaryTime: $dailySummaryTime, silencedTypes: $silencedTypes, fcmToken: $fcmToken)';
+    return 'NotificationPreferences(homeId: $homeId, uid: $uid, notifyOnDue: $notifyOnDue, notifyBefore: $notifyBefore, minutesBefore: $minutesBefore, dailySummary: $dailySummary, dailySummaryTime: $dailySummaryTime, silencedTypes: $silencedTypes, fcmToken: $fcmToken, systemAuthorized: $systemAuthorized)';
   }
 
   @override
@@ -276,7 +292,9 @@ class _$NotificationPreferencesImpl extends _NotificationPreferences {
             const DeepCollectionEquality()
                 .equals(other._silencedTypes, _silencedTypes) &&
             (identical(other.fcmToken, fcmToken) ||
-                other.fcmToken == fcmToken));
+                other.fcmToken == fcmToken) &&
+            (identical(other.systemAuthorized, systemAuthorized) ||
+                other.systemAuthorized == systemAuthorized));
   }
 
   @override
@@ -290,7 +308,8 @@ class _$NotificationPreferencesImpl extends _NotificationPreferences {
       dailySummary,
       dailySummaryTime,
       const DeepCollectionEquality().hash(_silencedTypes),
-      fcmToken);
+      fcmToken,
+      systemAuthorized);
 
   /// Create a copy of NotificationPreferences
   /// with the given fields replaced by the non-null parameter values.
@@ -312,7 +331,8 @@ abstract class _NotificationPreferences extends NotificationPreferences {
       final bool dailySummary,
       final String? dailySummaryTime,
       final List<String> silencedTypes,
-      final String? fcmToken}) = _$NotificationPreferencesImpl;
+      final String? fcmToken,
+      final bool? systemAuthorized}) = _$NotificationPreferencesImpl;
   const _NotificationPreferences._() : super._();
 
   @override
@@ -333,6 +353,8 @@ abstract class _NotificationPreferences extends NotificationPreferences {
   List<String> get silencedTypes;
   @override
   String? get fcmToken;
+  @override
+  bool? get systemAuthorized;
 
   /// Create a copy of NotificationPreferences
   /// with the given fields replaced by the non-null parameter values.

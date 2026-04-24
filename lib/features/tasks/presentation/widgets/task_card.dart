@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
+import '../../../../core/utils/toka_dates.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/task.dart';
 import '../../domain/task_status.dart';
@@ -22,9 +22,8 @@ class TaskCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final isFrozen = task.status == TaskStatus.frozen;
-    final dateStr = DateFormat.MMMd(Localizations.localeOf(context).toString())
-        .add_Hm()
-        .format(task.nextDueAt);
+    final dateStr = TokaDates.dayMonthTimeShort(
+        task.nextDueAt, Localizations.localeOf(context));
 
     // Suppress unused warning
     // ignore: unused_local_variable

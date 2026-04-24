@@ -158,5 +158,23 @@ class _UpcomingOccurrencesProviderElement
   @override
   RecurrenceRule? get rule => (origin as UpcomingOccurrencesProvider).rule;
 }
+
+String _$recurrenceNotifierHash() =>
+    r'5e37495d587be544cacbf2fbea41d294122fd4a5';
+
+/// See also [RecurrenceNotifier].
+@ProviderFor(RecurrenceNotifier)
+final recurrenceNotifierProvider = AutoDisposeNotifierProvider<
+    RecurrenceNotifier, RecurrenceFormState>.internal(
+  RecurrenceNotifier.new,
+  name: r'recurrenceNotifierProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$recurrenceNotifierHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef _$RecurrenceNotifier = AutoDisposeNotifier<RecurrenceFormState>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

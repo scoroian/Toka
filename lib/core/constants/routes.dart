@@ -5,6 +5,7 @@ abstract class AppRoutes {
   static const String forgotPassword = '/forgot-password';
   static const String verifyEmail = '/verify-email';
   static const String onboarding = '/onboarding';
+  static const String notificationRationale = '/onboarding/notifications';
   static const String home = '/home';
   static const String tasks = '/tasks';
   static const String createTask = '/tasks/new';
@@ -18,12 +19,12 @@ abstract class AppRoutes {
   static const String downgradePlanner = '/subscription/downgrade-planner';
   static const String myHomes = '/my-homes';
   static const String homeSettings = '/home-settings';
-  static const String homeSettingsMembers = '/home-settings/members';
   static const String editProfile = '/profile/edit';
   static const String members = '/members';
   static const String memberProfile = '/members/:uid';
   static const String vacation = '/vacation';
   static const String history = '/history';
+  static const String historyEventDetail = '/history/:homeId/:eventId';
   static const String notificationSettings = '/notification-settings';
 
   static const List<String> all = [
@@ -33,6 +34,7 @@ abstract class AppRoutes {
     forgotPassword,
     verifyEmail,
     onboarding,
+    notificationRationale,
     home,
     taskDetail,
     profile,
@@ -43,12 +45,12 @@ abstract class AppRoutes {
     downgradePlanner,
     myHomes,
     homeSettings,
-    homeSettingsMembers,
     editProfile,
     members,
     memberProfile,
     vacation,
     history,
+    historyEventDetail,
     notificationSettings,
   ];
 }

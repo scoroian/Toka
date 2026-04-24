@@ -18,6 +18,7 @@ class TaskEventItem {
     required this.raw,
     required this.actorName,
     this.actorPhotoUrl,
+    this.toName,
     required this.isOwnEvent,
     required this.isRated,
     required this.canRate,
@@ -26,6 +27,9 @@ class TaskEventItem {
   final TaskEvent raw;
   final String    actorName;
   final String?   actorPhotoUrl;
+  /// Nombre resuelto del destinatario en PassedEvent / MissedEvent (toUid).
+  /// Null para CompletedEvent, donde no aplica.
+  final String?   toName;
   final bool      isOwnEvent;
   final bool      isRated;
   /// Solo true cuando raw es CompletedEvent && !isOwnEvent && !isRated.
@@ -160,12 +164,18 @@ HistoryViewModel historyViewModel(HistoryViewModelRef ref) {
           PassedEvent p    => p.actorUid,
           MissedEvent m    => m.actorUid,
         };
+        final toUid = switch (e) {
+          CompletedEvent _ => null,
+          PassedEvent p    => p.toUid,
+          MissedEvent m    => m.toUid,
+        };
         final isOwnEvent = actorUid == currentUid;
         final isRated = ratedIds.contains(e.id);
         return TaskEventItem(
           raw: e,
-          actorName: nameMap[actorUid] ?? actorUid,
+          actorName: nameMap[actorUid] ?? '?',
           actorPhotoUrl: photoMap[actorUid],
+          toName: toUid == null ? null : (nameMap[toUid] ?? '?'),
           isOwnEvent: isOwnEvent,
           isRated: isRated,
           canRate: TaskEventItem.computeCanRate(

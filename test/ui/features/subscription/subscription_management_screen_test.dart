@@ -3,28 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
-import 'package:toka/features/homes/application/current_home_provider.dart';
 import 'package:toka/features/homes/domain/home.dart';
-import 'package:toka/features/homes/domain/home_limits.dart';
 import 'package:toka/features/subscription/application/paywall_provider.dart';
-import 'package:toka/features/subscription/application/subscription_provider.dart';
+import 'package:toka/features/subscription/application/subscription_dashboard_provider.dart';
 import 'package:toka/features/subscription/domain/purchase_result.dart';
-import 'package:toka/features/subscription/domain/subscription_repository.dart';
-import 'package:toka/features/subscription/domain/subscription_state.dart';
+import 'package:toka/features/subscription/domain/subscription_dashboard.dart';
 import 'package:toka/features/subscription/presentation/subscription_management_screen.dart';
+import 'package:toka/features/tasks/domain/home_dashboard.dart';
 import 'package:toka/l10n/app_localizations.dart';
-
-class _MockSubscriptionRepository extends Mock
-    implements SubscriptionRepository {}
-
-class _FakeCurrentHome extends CurrentHome {
-  final Home? _home;
-  _FakeCurrentHome(this._home);
-
-  @override
-  Future<Home?> build() async => _home;
-}
 
 class _FakePaywall extends Paywall {
   @override
@@ -50,31 +36,23 @@ class _FakePaywall extends Paywall {
   Future<void> restorePremium({required String homeId}) async {}
 }
 
-Home _makeHome(HomePremiumStatus status) => Home(
-      id: 'h1',
-      name: 'Test',
-      ownerUid: 'u1',
-      currentPayerUid: null,
-      lastPayerUid: null,
-      premiumStatus: status,
-      premiumPlan: 'monthly',
-      premiumEndsAt: DateTime(2026, 5),
+SubscriptionDashboard _makeDashboard(HomePremiumStatus status) =>
+    SubscriptionDashboard(
+      homeId: 'h1',
+      status: status,
+      plan: 'monthly',
+      endsAt: DateTime(2026, 5),
       restoreUntil: DateTime(2026, 6),
-      autoRenewEnabled: false,
-      limits: const HomeLimits(maxMembers: 10),
-      createdAt: DateTime(2026),
-      updatedAt: DateTime(2026),
+      autoRenew: false,
+      currentPayerUid: null,
+      planCounters: PlanCounters.empty(),
     );
 
-List<Override> _overridesFor(SubscriptionState subState, Home home) {
-  final mockRepo = _MockSubscriptionRepository();
-  return [
-    currentHomeProvider.overrideWith(() => _FakeCurrentHome(home)),
-    subscriptionRepositoryProvider.overrideWithValue(mockRepo),
-    subscriptionStateProvider.overrideWith((_) => subState),
-    paywallProvider.overrideWith(() => _FakePaywall()),
-  ];
-}
+List<Override> _overridesFor(SubscriptionDashboard dashboard) => [
+      subscriptionDashboardProvider()
+          .overrideWith((_) => Stream.value(dashboard)),
+      paywallProvider.overrideWith(() => _FakePaywall()),
+    ];
 
 Widget _wrap(Widget child, {List<Override> overrides = const []}) =>
     ProviderScope(
@@ -92,84 +70,80 @@ Widget _wrap(Widget child, {List<Override> overrides = const []}) =>
     );
 
 void main() {
-  testWidgets(
-      'SubscriptionManagementScreen: sin spinner para SubscriptionState.active',
+  testWidgets('SubscriptionManagementScreen: estado active muestra card y sin spinner',
       (tester) async {
-    final subState = SubscriptionState.active(
-      plan: 'annual',
-      endsAt: DateTime(2027),
-      autoRenew: true,
-    );
-    final home = _makeHome(HomePremiumStatus.active);
-
     await tester.pumpWidget(_wrap(
       const SubscriptionManagementScreen(),
-      overrides: _overridesFor(subState, home),
+      overrides: _overridesFor(_makeDashboard(HomePremiumStatus.active)),
     ));
     await tester.pumpAndSettle();
 
     expect(find.byType(CircularProgressIndicator), findsNothing);
-    expect(find.byKey(const Key('subscription_status_tile')), findsOneWidget);
+    expect(find.byKey(const Key('plan_summary_card')), findsOneWidget);
+    expect(find.byKey(const Key('btn_manage_billing')), findsOneWidget);
   });
 
-  testWidgets(
-      'SubscriptionManagementScreen: se renderiza para SubscriptionState.free',
+  testWidgets('SubscriptionManagementScreen: estado free muestra btn_go_premium',
       (tester) async {
-    const subState = SubscriptionState.free();
-    final home = _makeHome(HomePremiumStatus.free);
-
     await tester.pumpWidget(_wrap(
       const SubscriptionManagementScreen(),
-      overrides: _overridesFor(subState, home),
+      overrides: _overridesFor(_makeDashboard(HomePremiumStatus.free)),
     ));
     await tester.pumpAndSettle();
 
-    expect(find.byType(Scaffold), findsOneWidget);
-    expect(find.byKey(const Key('subscription_status_tile')), findsOneWidget);
-    // En estado free debe mostrarse el botón de actualizar a premium
+    expect(find.byKey(const Key('plan_summary_card')), findsOneWidget);
     expect(find.byKey(const Key('btn_go_premium')), findsOneWidget);
   });
 
   testWidgets(
-      'SubscriptionManagementScreen: se renderiza para SubscriptionState.restorable',
+      'SubscriptionManagementScreen: estado restorable muestra btn_restore_premium',
       (tester) async {
-    final subState = SubscriptionState.restorable(
-      restoreUntil: DateTime(2026, 6),
-    );
-    final home = _makeHome(HomePremiumStatus.restorable);
-
     await tester.pumpWidget(_wrap(
       const SubscriptionManagementScreen(),
-      overrides: _overridesFor(subState, home),
+      overrides: _overridesFor(_makeDashboard(HomePremiumStatus.restorable)),
     ));
     await tester.pumpAndSettle();
 
-    expect(find.byType(Scaffold), findsOneWidget);
-    expect(find.byKey(const Key('subscription_status_tile')), findsOneWidget);
-    // En estado restorable debe mostrarse el botón de restaurar premium
+    expect(find.byKey(const Key('plan_summary_card')), findsOneWidget);
     expect(find.byKey(const Key('btn_restore_premium')), findsOneWidget);
   });
 
-  test(
-      'SubscriptionManagementViewModel: isLoading es false con FakePaywall en estado data',
-      () {
-    final mockRepo = _MockSubscriptionRepository();
-    final container = ProviderContainer(overrides: [
-      currentHomeProvider
-          .overrideWith(() => _FakeCurrentHome(_makeHome(HomePremiumStatus.active))),
-      subscriptionRepositoryProvider.overrideWithValue(mockRepo),
-      subscriptionStateProvider.overrideWith(
-        (_) => SubscriptionState.active(
-          plan: 'monthly',
-          endsAt: DateTime(2027),
-          autoRenew: true,
-        ),
-      ),
-      paywallProvider.overrideWith(() => _FakePaywall()),
-    ]);
-    addTearDown(container.dispose);
+  testWidgets(
+      'SubscriptionManagementScreen: estado cancelledPendingEnd muestra btn_reactivate_renewal',
+      (tester) async {
+    await tester.pumpWidget(_wrap(
+      const SubscriptionManagementScreen(),
+      overrides:
+          _overridesFor(_makeDashboard(HomePremiumStatus.cancelledPendingEnd)),
+    ));
+    await tester.pumpAndSettle();
 
-    final paywall = container.read(paywallProvider);
-    expect(paywall.isLoading, isFalse);
+    expect(find.byKey(const Key('btn_reactivate_renewal')), findsOneWidget);
+    expect(find.byKey(const Key('btn_change_plan')), findsOneWidget);
+  });
+
+  testWidgets('SubscriptionManagementScreen: estado rescue muestra btn_renew',
+      (tester) async {
+    await tester.pumpWidget(_wrap(
+      const SubscriptionManagementScreen(),
+      overrides: _overridesFor(_makeDashboard(HomePremiumStatus.rescue)),
+    ));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('rescue_warning_banner')), findsOneWidget);
+    expect(find.byKey(const Key('btn_renew')), findsOneWidget);
+    expect(find.byKey(const Key('btn_plan_downgrade')), findsOneWidget);
+  });
+
+  testWidgets(
+      'SubscriptionManagementScreen: estado expiredFree muestra btn_reactivate_premium',
+      (tester) async {
+    await tester.pumpWidget(_wrap(
+      const SubscriptionManagementScreen(),
+      overrides: _overridesFor(_makeDashboard(HomePremiumStatus.expiredFree)),
+    ));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('btn_reactivate_premium')), findsOneWidget);
   });
 }

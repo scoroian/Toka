@@ -7,7 +7,9 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/routes.dart';
 import '../../../../core/theme/app_colors_v2.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../homes/application/current_home_provider.dart';
 import '../../application/history_view_model.dart';
+import '../../../../shared/widgets/ad_aware_bottom_padding.dart';
 import '../../../../shared/widgets/bottom_sheet_padding.dart';
 import '../../../../shared/widgets/no_home_empty_state.dart';
 import '../../../../shared/widgets/premium_upgrade_banner.dart';
@@ -84,7 +86,9 @@ class _HistoryScreenV2State extends ConsumerState<HistoryScreenV2> {
               return ListView.builder(
                 key: const Key('history_list'),
                 controller: _scroll,
-                padding: const EdgeInsets.only(bottom: 16),
+                padding: EdgeInsets.only(
+                  bottom: adAwareBottomPadding(context, ref, extra: 16),
+                ),
                 itemCount: items.length + extras,
                 itemBuilder: (ctx, i) {
                   if (i < items.length) return _buildTile(items[i], vm);
@@ -120,7 +124,6 @@ class _HistoryScreenV2State extends ConsumerState<HistoryScreenV2> {
   }
 
   Widget _buildTile(TaskEventItem item, HistoryViewModel vm) {
-    final toName = item.raw is PassedEvent ? (item.raw as PassedEvent).toUid : null;
     final l10n = AppLocalizations.of(context);
     Widget? trailing;
     if (vm.isPremium) {
@@ -145,12 +148,29 @@ class _HistoryScreenV2State extends ConsumerState<HistoryScreenV2> {
         );
       }
     }
-    return HistoryEventTile(
+    final tile = HistoryEventTile(
       event: item.raw,
       actorName: item.actorName,
       actorPhotoUrl: item.actorPhotoUrl,
-      toName: toName,
+      toName: item.toName,
       trailing: trailing,
+    );
+
+    // Sólo los tipos con posibles reviews asociadas son tapables.
+    final isDetailable = item.raw is CompletedEvent || item.raw is PassedEvent;
+    if (!isDetailable) return tile;
+
+    final homeId = ref.read(currentHomeProvider).valueOrNull?.id;
+    if (homeId == null) return tile;
+
+    return InkWell(
+      key: Key('history_tile_tap_${item.raw.id}'),
+      onTap: () => context.push(
+        AppRoutes.historyEventDetail
+            .replaceFirst(':homeId', homeId)
+            .replaceFirst(':eventId', item.raw.id),
+      ),
+      child: tile,
     );
   }
 

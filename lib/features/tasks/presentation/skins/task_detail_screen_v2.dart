@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../core/constants/free_limits.dart';
 import '../../../../core/constants/routes.dart';
 import '../../../../core/theme/app_colors_v2.dart';
+import '../../../../core/utils/toka_dates.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/ad_aware_scaffold.dart';
 import '../../../homes/application/dashboard_provider.dart';
@@ -38,9 +38,19 @@ class TaskDetailScreenV2 extends ConsumerWidget {
         ],
       ),
     );
-    if (confirmed == true && ctx.mounted) {
+    if (confirmed != true || !ctx.mounted) return;
+
+    // BUG-08: navegar ANTES de awaitear el callable. Si no, el stream del
+    // detalle emite null cuando Firestore borra el documento y la pantalla
+    // queda colgada con un CircularProgressIndicator eterno.
+    final messenger = ScaffoldMessenger.of(ctx);
+    final errorText = l10n.error_generic;
+    ctx.pop();
+
+    try {
       await vm.deleteTask(task);
-      if (ctx.mounted) ctx.pop();
+    } catch (_) {
+      messenger.showSnackBar(SnackBar(content: Text(errorText)));
     }
   }
 
@@ -158,7 +168,9 @@ class TaskDetailScreenV2 extends ConsumerWidget {
                   _InfoRow(
                     key: const Key('detail_next_due'),
                     label: l10n.task_detail_next_due,
-                    value: DateFormat('EEE d MMM', 'es').format(task.nextDueAt.toLocal()),
+                    value: TokaDates.dateMediumWithWeekday(
+                        task.nextDueAt.toLocal(),
+                        Localizations.localeOf(context)),
                     isDark: isDark,
                   ),
                   Divider(color: bd),
@@ -187,7 +199,8 @@ class TaskDetailScreenV2 extends ConsumerWidget {
                       padding: const EdgeInsets.only(bottom: 4),
                       child: Row(children: [
                         Text(
-                          DateFormat('EEE d MMM HH:mm', 'es').format(o.date),
+                          '${TokaDates.dateMediumWithWeekday(o.date, Localizations.localeOf(context))} '
+                          '${TokaDates.timeShort(o.date, Localizations.localeOf(context))}',
                           style: GoogleFonts.plusJakartaSans(
                               fontWeight: FontWeight.w700),
                         ),

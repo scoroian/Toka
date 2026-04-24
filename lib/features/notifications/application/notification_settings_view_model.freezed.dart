@@ -15,188 +15,192 @@ final _privateConstructorUsedError = UnsupportedError(
     'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 /// @nodoc
-mixin _$NotifVMState {
-  bool get isLoaded => throw _privateConstructorUsedError;
+mixin _$NotificationSettingsView {
+  NotificationPreferences get prefs => throw _privateConstructorUsedError;
   bool get isPremium => throw _privateConstructorUsedError;
-  NotificationPreferences? get prefs => throw _privateConstructorUsedError;
+  bool get systemAuthorized => throw _privateConstructorUsedError;
 
-  /// Create a copy of _NotifVMState
+  /// Create a copy of NotificationSettingsView
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
-  _$NotifVMStateCopyWith<_NotifVMState> get copyWith =>
+  $NotificationSettingsViewCopyWith<NotificationSettingsView> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class _$NotifVMStateCopyWith<$Res> {
-  factory _$NotifVMStateCopyWith(
-          _NotifVMState value, $Res Function(_NotifVMState) then) =
-      __$NotifVMStateCopyWithImpl<$Res, _NotifVMState>;
+abstract class $NotificationSettingsViewCopyWith<$Res> {
+  factory $NotificationSettingsViewCopyWith(NotificationSettingsView value,
+          $Res Function(NotificationSettingsView) then) =
+      _$NotificationSettingsViewCopyWithImpl<$Res, NotificationSettingsView>;
   @useResult
-  $Res call({bool isLoaded, bool isPremium, NotificationPreferences? prefs});
+  $Res call(
+      {NotificationPreferences prefs, bool isPremium, bool systemAuthorized});
 
-  $NotificationPreferencesCopyWith<$Res>? get prefs;
+  $NotificationPreferencesCopyWith<$Res> get prefs;
 }
 
 /// @nodoc
-class __$NotifVMStateCopyWithImpl<$Res, $Val extends _NotifVMState>
-    implements _$NotifVMStateCopyWith<$Res> {
-  __$NotifVMStateCopyWithImpl(this._value, this._then);
+class _$NotificationSettingsViewCopyWithImpl<$Res,
+        $Val extends NotificationSettingsView>
+    implements $NotificationSettingsViewCopyWith<$Res> {
+  _$NotificationSettingsViewCopyWithImpl(this._value, this._then);
 
   // ignore: unused_field
   final $Val _value;
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of _NotifVMState
+  /// Create a copy of NotificationSettingsView
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? isLoaded = null,
+    Object? prefs = null,
     Object? isPremium = null,
-    Object? prefs = freezed,
+    Object? systemAuthorized = null,
   }) {
     return _then(_value.copyWith(
-      isLoaded: null == isLoaded
-          ? _value.isLoaded
-          : isLoaded // ignore: cast_nullable_to_non_nullable
-              as bool,
+      prefs: null == prefs
+          ? _value.prefs
+          : prefs // ignore: cast_nullable_to_non_nullable
+              as NotificationPreferences,
       isPremium: null == isPremium
           ? _value.isPremium
           : isPremium // ignore: cast_nullable_to_non_nullable
               as bool,
-      prefs: freezed == prefs
-          ? _value.prefs
-          : prefs // ignore: cast_nullable_to_non_nullable
-              as NotificationPreferences?,
+      systemAuthorized: null == systemAuthorized
+          ? _value.systemAuthorized
+          : systemAuthorized // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 
-  /// Create a copy of _NotifVMState
+  /// Create a copy of NotificationSettingsView
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
-  $NotificationPreferencesCopyWith<$Res>? get prefs {
-    if (_value.prefs == null) {
-      return null;
-    }
-
-    return $NotificationPreferencesCopyWith<$Res>(_value.prefs!, (value) {
+  $NotificationPreferencesCopyWith<$Res> get prefs {
+    return $NotificationPreferencesCopyWith<$Res>(_value.prefs, (value) {
       return _then(_value.copyWith(prefs: value) as $Val);
     });
   }
 }
 
 /// @nodoc
-abstract class _$$_NotifVMStateImplCopyWith<$Res>
-    implements _$NotifVMStateCopyWith<$Res> {
-  factory _$$_NotifVMStateImplCopyWith(
-          _$_NotifVMStateImpl value, $Res Function(_$_NotifVMStateImpl) then) =
-      __$$_NotifVMStateImplCopyWithImpl<$Res>;
+abstract class _$$NotificationSettingsViewImplCopyWith<$Res>
+    implements $NotificationSettingsViewCopyWith<$Res> {
+  factory _$$NotificationSettingsViewImplCopyWith(
+          _$NotificationSettingsViewImpl value,
+          $Res Function(_$NotificationSettingsViewImpl) then) =
+      __$$NotificationSettingsViewImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({bool isLoaded, bool isPremium, NotificationPreferences? prefs});
+  $Res call(
+      {NotificationPreferences prefs, bool isPremium, bool systemAuthorized});
 
   @override
-  $NotificationPreferencesCopyWith<$Res>? get prefs;
+  $NotificationPreferencesCopyWith<$Res> get prefs;
 }
 
 /// @nodoc
-class __$$_NotifVMStateImplCopyWithImpl<$Res>
-    extends __$NotifVMStateCopyWithImpl<$Res, _$_NotifVMStateImpl>
-    implements _$$_NotifVMStateImplCopyWith<$Res> {
-  __$$_NotifVMStateImplCopyWithImpl(
-      _$_NotifVMStateImpl _value, $Res Function(_$_NotifVMStateImpl) _then)
+class __$$NotificationSettingsViewImplCopyWithImpl<$Res>
+    extends _$NotificationSettingsViewCopyWithImpl<$Res,
+        _$NotificationSettingsViewImpl>
+    implements _$$NotificationSettingsViewImplCopyWith<$Res> {
+  __$$NotificationSettingsViewImplCopyWithImpl(
+      _$NotificationSettingsViewImpl _value,
+      $Res Function(_$NotificationSettingsViewImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of _NotifVMState
+  /// Create a copy of NotificationSettingsView
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? isLoaded = null,
+    Object? prefs = null,
     Object? isPremium = null,
-    Object? prefs = freezed,
+    Object? systemAuthorized = null,
   }) {
-    return _then(_$_NotifVMStateImpl(
-      isLoaded: null == isLoaded
-          ? _value.isLoaded
-          : isLoaded // ignore: cast_nullable_to_non_nullable
-              as bool,
+    return _then(_$NotificationSettingsViewImpl(
+      prefs: null == prefs
+          ? _value.prefs
+          : prefs // ignore: cast_nullable_to_non_nullable
+              as NotificationPreferences,
       isPremium: null == isPremium
           ? _value.isPremium
           : isPremium // ignore: cast_nullable_to_non_nullable
               as bool,
-      prefs: freezed == prefs
-          ? _value.prefs
-          : prefs // ignore: cast_nullable_to_non_nullable
-              as NotificationPreferences?,
+      systemAuthorized: null == systemAuthorized
+          ? _value.systemAuthorized
+          : systemAuthorized // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
 
 /// @nodoc
 
-class _$_NotifVMStateImpl implements __NotifVMState {
-  const _$_NotifVMStateImpl(
-      {this.isLoaded = false, this.isPremium = false, this.prefs});
+class _$NotificationSettingsViewImpl implements _NotificationSettingsView {
+  const _$NotificationSettingsViewImpl(
+      {required this.prefs,
+      required this.isPremium,
+      required this.systemAuthorized});
 
   @override
-  @JsonKey()
-  final bool isLoaded;
+  final NotificationPreferences prefs;
   @override
-  @JsonKey()
   final bool isPremium;
   @override
-  final NotificationPreferences? prefs;
+  final bool systemAuthorized;
 
   @override
   String toString() {
-    return '_NotifVMState(isLoaded: $isLoaded, isPremium: $isPremium, prefs: $prefs)';
+    return 'NotificationSettingsView(prefs: $prefs, isPremium: $isPremium, systemAuthorized: $systemAuthorized)';
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$_NotifVMStateImpl &&
-            (identical(other.isLoaded, isLoaded) ||
-                other.isLoaded == isLoaded) &&
+            other is _$NotificationSettingsViewImpl &&
+            (identical(other.prefs, prefs) || other.prefs == prefs) &&
             (identical(other.isPremium, isPremium) ||
                 other.isPremium == isPremium) &&
-            (identical(other.prefs, prefs) || other.prefs == prefs));
+            (identical(other.systemAuthorized, systemAuthorized) ||
+                other.systemAuthorized == systemAuthorized));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, isLoaded, isPremium, prefs);
+  int get hashCode =>
+      Object.hash(runtimeType, prefs, isPremium, systemAuthorized);
 
-  /// Create a copy of _NotifVMState
+  /// Create a copy of NotificationSettingsView
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
-  _$$_NotifVMStateImplCopyWith<_$_NotifVMStateImpl> get copyWith =>
-      __$$_NotifVMStateImplCopyWithImpl<_$_NotifVMStateImpl>(this, _$identity);
+  _$$NotificationSettingsViewImplCopyWith<_$NotificationSettingsViewImpl>
+      get copyWith => __$$NotificationSettingsViewImplCopyWithImpl<
+          _$NotificationSettingsViewImpl>(this, _$identity);
 }
 
-abstract class __NotifVMState implements _NotifVMState {
-  const factory __NotifVMState(
-      {final bool isLoaded,
-      final bool isPremium,
-      final NotificationPreferences? prefs}) = _$_NotifVMStateImpl;
+abstract class _NotificationSettingsView implements NotificationSettingsView {
+  const factory _NotificationSettingsView(
+      {required final NotificationPreferences prefs,
+      required final bool isPremium,
+      required final bool systemAuthorized}) = _$NotificationSettingsViewImpl;
 
   @override
-  bool get isLoaded;
+  NotificationPreferences get prefs;
   @override
   bool get isPremium;
   @override
-  NotificationPreferences? get prefs;
+  bool get systemAuthorized;
 
-  /// Create a copy of _NotifVMState
+  /// Create a copy of NotificationSettingsView
   /// with the given fields replaced by the non-null parameter values.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$_NotifVMStateImplCopyWith<_$_NotifVMStateImpl> get copyWith =>
-      throw _privateConstructorUsedError;
+  _$$NotificationSettingsViewImplCopyWith<_$NotificationSettingsViewImpl>
+      get copyWith => throw _privateConstructorUsedError;
 }

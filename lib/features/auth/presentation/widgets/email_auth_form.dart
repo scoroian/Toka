@@ -58,6 +58,13 @@ class _EmailAuthFormState extends State<EmailAuthForm> {
             key: const Key('email_field'),
             controller: _emailCtrl,
             keyboardType: TextInputType.emailAddress,
+            // BUG-01: neutralizar autocorrector/sugerencias de MIUI, Samsung
+            // Keyboard y Gboard, que sustituyen letras al escribir rápido un
+            // email.
+            autocorrect: false,
+            enableSuggestions: false,
+            textCapitalization: TextCapitalization.none,
+            autofillHints: const [AutofillHints.email],
             decoration: InputDecoration(labelText: l10n.auth_email_label),
             validator: (v) {
               if (v == null || v.trim().isEmpty) {

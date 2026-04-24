@@ -61,3 +61,14 @@ void fcmTokenInit(FcmTokenInitRef ref) {
   final sub = service.listenForTokenRefresh(home.id, uid);
   ref.onDispose(sub.cancel);
 }
+
+/// Estado actual del permiso de notificaciones a nivel de sistema operativo.
+/// Se invalida manualmente al volver al foreground para forzar una relectura.
+@riverpod
+Future<bool> systemNotificationsAuthorized(
+  SystemNotificationsAuthorizedRef ref,
+) async {
+  final settings = await FirebaseMessaging.instance.getNotificationSettings();
+  return settings.authorizationStatus == AuthorizationStatus.authorized ||
+      settings.authorizationStatus == AuthorizationStatus.provisional;
+}

@@ -14,7 +14,6 @@ import '../../i18n/presentation/language_selector_widget.dart';
 import '../../members/application/members_provider.dart';
 import '../../members/domain/member.dart';
 import '../../homes/domain/home_membership.dart';
-import '../../members/presentation/widgets/invite_member_sheet.dart';
 import '../application/settings_view_model.dart';
 import '../../../core/theme/theme_mode_provider.dart';
 
@@ -249,19 +248,6 @@ class SettingsScreen extends ConsumerWidget {
             leading: const Icon(Icons.home_outlined),
             title: Text(l10n.settings_home_settings),
             onTap: () => context.push(AppRoutes.homeSettings),
-          ),
-          ListTile(
-            leading: const Icon(Icons.qr_code),
-            title: Text(l10n.settings_invite_code),
-            onTap: () {
-              if (homeId.isNotEmpty) {
-                showModalBottomSheet<void>(
-                  context: context,
-                  isScrollControlled: true,
-                  builder: (_) => InviteMemberSheet(homeId: homeId),
-                );
-              }
-            },
           ),
           ListTile(
             leading: Icon(Icons.exit_to_app, color: Theme.of(context).colorScheme.error),

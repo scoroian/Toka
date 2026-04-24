@@ -20,4 +20,23 @@ describe("getNextEligibleMember", () => {
   it("un solo miembro siempre devuelve ese mismo", () => {
     expect(getNextEligibleMember(["u1"], "u1", [])).toBe("u1");
   });
+
+  // ── BUG-06: 2 miembros deben alternar A ↔ B al pasar turno ────────────────
+  describe("BUG-06 — 2 miembros alternan A ↔ B", () => {
+    it("A → pasa turno → B", () => {
+      expect(getNextEligibleMember(["A", "B"], "A", [])).toBe("B");
+    });
+    it("B → pasa turno → A", () => {
+      expect(getNextEligibleMember(["A", "B"], "B", [])).toBe("A");
+    });
+    it("A → B → A (alternancia estable)", () => {
+      const step1 = getNextEligibleMember(["A", "B"], "A", []);
+      expect(step1).toBe("B");
+      const step2 = getNextEligibleMember(["A", "B"], step1, []);
+      expect(step2).toBe("A");
+    });
+    it("con B frozen, A no rota (único activo)", () => {
+      expect(getNextEligibleMember(["A", "B"], "A", ["B"])).toBe("A");
+    });
+  });
 });

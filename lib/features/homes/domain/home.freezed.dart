@@ -29,6 +29,7 @@ mixin _$Home {
   HomeLimits get limits => throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
   DateTime get updatedAt => throw _privateConstructorUsedError;
+  String? get lastBillingError => throw _privateConstructorUsedError;
 
   /// Create a copy of Home
   /// with the given fields replaced by the non-null parameter values.
@@ -54,7 +55,8 @@ abstract class $HomeCopyWith<$Res> {
       bool autoRenewEnabled,
       HomeLimits limits,
       DateTime createdAt,
-      DateTime updatedAt});
+      DateTime updatedAt,
+      String? lastBillingError});
 
   $HomeLimitsCopyWith<$Res> get limits;
 }
@@ -87,6 +89,7 @@ class _$HomeCopyWithImpl<$Res, $Val extends Home>
     Object? limits = null,
     Object? createdAt = null,
     Object? updatedAt = null,
+    Object? lastBillingError = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -141,6 +144,10 @@ class _$HomeCopyWithImpl<$Res, $Val extends Home>
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
               as DateTime,
+      lastBillingError: freezed == lastBillingError
+          ? _value.lastBillingError
+          : lastBillingError // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 
@@ -175,7 +182,8 @@ abstract class _$$HomeImplCopyWith<$Res> implements $HomeCopyWith<$Res> {
       bool autoRenewEnabled,
       HomeLimits limits,
       DateTime createdAt,
-      DateTime updatedAt});
+      DateTime updatedAt,
+      String? lastBillingError});
 
   @override
   $HomeLimitsCopyWith<$Res> get limits;
@@ -206,6 +214,7 @@ class __$$HomeImplCopyWithImpl<$Res>
     Object? limits = null,
     Object? createdAt = null,
     Object? updatedAt = null,
+    Object? lastBillingError = freezed,
   }) {
     return _then(_$HomeImpl(
       id: null == id
@@ -260,6 +269,10 @@ class __$$HomeImplCopyWithImpl<$Res>
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
               as DateTime,
+      lastBillingError: freezed == lastBillingError
+          ? _value.lastBillingError
+          : lastBillingError // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -280,7 +293,8 @@ class _$HomeImpl implements _Home {
       required this.autoRenewEnabled,
       required this.limits,
       required this.createdAt,
-      required this.updatedAt});
+      required this.updatedAt,
+      this.lastBillingError});
 
   @override
   final String id;
@@ -308,10 +322,12 @@ class _$HomeImpl implements _Home {
   final DateTime createdAt;
   @override
   final DateTime updatedAt;
+  @override
+  final String? lastBillingError;
 
   @override
   String toString() {
-    return 'Home(id: $id, name: $name, ownerUid: $ownerUid, currentPayerUid: $currentPayerUid, lastPayerUid: $lastPayerUid, premiumStatus: $premiumStatus, premiumPlan: $premiumPlan, premiumEndsAt: $premiumEndsAt, restoreUntil: $restoreUntil, autoRenewEnabled: $autoRenewEnabled, limits: $limits, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'Home(id: $id, name: $name, ownerUid: $ownerUid, currentPayerUid: $currentPayerUid, lastPayerUid: $lastPayerUid, premiumStatus: $premiumStatus, premiumPlan: $premiumPlan, premiumEndsAt: $premiumEndsAt, restoreUntil: $restoreUntil, autoRenewEnabled: $autoRenewEnabled, limits: $limits, createdAt: $createdAt, updatedAt: $updatedAt, lastBillingError: $lastBillingError)';
   }
 
   @override
@@ -341,7 +357,9 @@ class _$HomeImpl implements _Home {
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt));
+                other.updatedAt == updatedAt) &&
+            (identical(other.lastBillingError, lastBillingError) ||
+                other.lastBillingError == lastBillingError));
   }
 
   @override
@@ -359,7 +377,8 @@ class _$HomeImpl implements _Home {
       autoRenewEnabled,
       limits,
       createdAt,
-      updatedAt);
+      updatedAt,
+      lastBillingError);
 
   /// Create a copy of Home
   /// with the given fields replaced by the non-null parameter values.
@@ -384,7 +403,8 @@ abstract class _Home implements Home {
       required final bool autoRenewEnabled,
       required final HomeLimits limits,
       required final DateTime createdAt,
-      required final DateTime updatedAt}) = _$HomeImpl;
+      required final DateTime updatedAt,
+      final String? lastBillingError}) = _$HomeImpl;
 
   @override
   String get id;
@@ -412,6 +432,8 @@ abstract class _Home implements Home {
   DateTime get createdAt;
   @override
   DateTime get updatedAt;
+  @override
+  String? get lastBillingError;
 
   /// Create a copy of Home
   /// with the given fields replaced by the non-null parameter values.

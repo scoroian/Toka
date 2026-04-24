@@ -4,10 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'package:go_router/go_router.dart';
+
+import '../../../../core/constants/routes.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/theme/app_colors_v2.dart';
+import '../../../../core/utils/toka_dates.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/ad_aware_scaffold.dart';
+import '../../../auth/application/auth_provider.dart';
+import '../../../history/application/member_reviews_provider.dart';
 import '../../../homes/domain/home_membership.dart';
 import '../../application/member_profile_view_model.dart';
 import '../widgets/member_role_badge.dart';
@@ -281,10 +287,96 @@ class _MemberProfileScreenV2State extends ConsumerState<MemberProfileScreenV2> {
                   ),
                 ),
               ],
+              const SizedBox(height: 24),
+              _LastReviewsSection(
+                homeId: widget.homeId,
+                memberUid: widget.memberUid,
+                l10n: l10n,
+              ),
             ],
           );
         },
       ),
+    );
+  }
+}
+
+class _LastReviewsSection extends ConsumerWidget {
+  const _LastReviewsSection({
+    required this.homeId,
+    required this.memberUid,
+    required this.l10n,
+  });
+
+  final String homeId;
+  final String memberUid;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final viewerUid =
+        ref.watch(authProvider).whenOrNull(authenticated: (u) => u.uid) ?? '';
+    if (viewerUid.isEmpty) return const SizedBox.shrink();
+
+    final reviewsAsync = ref.watch(memberVisibleReviewsProvider(
+      memberUid: memberUid,
+      viewerUid: viewerUid,
+    ));
+
+    return reviewsAsync.when(
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (reviews) {
+        if (reviews.isEmpty) return const SizedBox.shrink();
+        return Column(
+          key: const Key('last_reviews_section'),
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l10n.memberProfileLastReviews,
+                style: const TextStyle(fontWeight: FontWeight.w800)),
+            const SizedBox(height: 8),
+            ...reviews.map((r) => _LastReviewTile(
+                  summary: r,
+                  onTap: () => context.push(
+                    AppRoutes.historyEventDetail
+                        .replaceFirst(':homeId', r.homeId)
+                        .replaceFirst(':eventId', r.eventId),
+                  ),
+                )),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _LastReviewTile extends StatelessWidget {
+  const _LastReviewTile({required this.summary, required this.onTap});
+
+  final MemberReviewSummary summary;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final r = summary.review;
+    final dateStr = r.createdAt == null
+        ? ''
+        : TokaDates.dateLongFull(r.createdAt!, Localizations.localeOf(context));
+    return ListTile(
+      key: Key('last_review_${summary.eventId}'),
+      dense: true,
+      contentPadding: EdgeInsets.zero,
+      leading: const Icon(Icons.star, color: Colors.amber),
+      title: Text(r.score.toStringAsFixed(1)),
+      subtitle: Text(
+        r.note != null && r.note!.isNotEmpty
+            ? '${r.note}${dateStr.isNotEmpty ? ' · $dateStr' : ''}'
+            : dateStr,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+      ),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: onTap,
     );
   }
 }

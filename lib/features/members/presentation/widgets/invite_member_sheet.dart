@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
+import '../../../../core/utils/toka_dates.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/bottom_sheet_padding.dart';
 import '../../application/member_actions_provider.dart';
@@ -158,7 +158,8 @@ class _InviteMemberSheetState extends ConsumerState<InviteMemberSheet> {
                     const SizedBox(height: 6),
                     Text(
                       l10n.invite_code_expires_at(
-                        DateFormat('dd MMM yyyy · HH:mm').format(_expiresAt!),
+                        '${TokaDates.dateMediumWithWeekday(_expiresAt!, Localizations.localeOf(context))} · '
+                        '${TokaDates.timeShort(_expiresAt!, Localizations.localeOf(context))}',
                       ),
                       key: const Key('invite_code_expiry'),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -210,6 +211,11 @@ class _InviteMemberSheetState extends ConsumerState<InviteMemberSheet> {
                 border: const OutlineInputBorder(),
               ),
               keyboardType: TextInputType.emailAddress,
+              // BUG-01: neutralizar autocorrector del teclado (MIUI/Gboard).
+              autocorrect: false,
+              enableSuggestions: false,
+              textCapitalization: TextCapitalization.none,
+              autofillHints: const [AutofillHints.email],
             ),
             const SizedBox(height: 12),
             ElevatedButton(

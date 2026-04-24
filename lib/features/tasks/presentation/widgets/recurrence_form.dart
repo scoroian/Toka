@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../l10n/app_localizations.dart';
+import '../../application/recurrence_provider.dart';
 import '../../application/task_form_provider.dart';
 import '../../domain/recurrence_rule.dart';
 
@@ -29,6 +30,8 @@ class _RecurrenceFormState extends ConsumerState<RecurrenceForm> {
   late String _oneTimeDate;
   late String _oneTimeTime;
 
+  int _lastHydrationVersion = 0;
+
   static const _types = [
     'oneTime', 'hourly', 'daily', 'weekly',
     'monthlyFixed', 'monthlyNth',
@@ -50,6 +53,8 @@ class _RecurrenceFormState extends ConsumerState<RecurrenceForm> {
         '${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
     _oneTimeTime =
         '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+    _lastHydrationVersion =
+        ref.read(recurrenceNotifierProvider).hydrationVersion;
     final existing = ref.read(taskFormNotifierProvider).recurrenceRule;
     if (existing != null) {
       _loadFromRule(existing);
@@ -59,6 +64,25 @@ class _RecurrenceFormState extends ConsumerState<RecurrenceForm> {
         if (mounted) _notifyChange();
       });
     }
+  }
+
+  /// Copia los campos del [RecurrenceFormState] hidratado al estado local del
+  /// widget. Se invoca cuando el ViewModel llama a
+  /// [RecurrenceNotifier.hydrateFrom] al cargar una tarea existente (BUG-07).
+  void _applyHydratedState(RecurrenceFormState s) {
+    _selectedType = s.selectedType;
+    _every = s.every;
+    _time = s.time;
+    _startTime = s.startTime;
+    _endTime = s.endTime;
+    _weekdays = List<String>.from(s.weekdays);
+    _dayOfMonth = s.dayOfMonth;
+    _weekOfMonth = s.weekOfMonth;
+    _weekday = s.weekday;
+    _month = s.month;
+    _timezone = s.timezone;
+    if (s.oneTimeDate.isNotEmpty) _oneTimeDate = s.oneTimeDate;
+    if (s.oneTimeTime.isNotEmpty) _oneTimeTime = s.oneTimeTime;
   }
 
   void _loadFromRule(RecurrenceRule rule) {
@@ -211,6 +235,18 @@ class _RecurrenceFormState extends ConsumerState<RecurrenceForm> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+
+    // Escucha hidrataciones externas del RecurrenceNotifier. Cuando el
+    // ViewModel llama a hydrateFrom tras cargar una tarea existente, el
+    // hydrationVersion cambia y copiamos los campos decodificados al estado
+    // local del widget para reflejar la recurrencia actual.
+    ref.listen<RecurrenceFormState>(recurrenceNotifierProvider, (prev, next) {
+      if (next.hydrationVersion != _lastHydrationVersion) {
+        _lastHydrationVersion = next.hydrationVersion;
+        setState(() => _applyHydratedState(next));
+        _notifyChange();
+      }
+    });
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

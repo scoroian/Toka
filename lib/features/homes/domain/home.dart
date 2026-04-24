@@ -37,5 +37,6 @@ class Home with _$Home {
     required HomeLimits limits,
     required DateTime createdAt,
     required DateTime updatedAt,
+    String? lastBillingError,
   }) = _Home;
 }

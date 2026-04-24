@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/routes.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../shared/widgets/ad_aware_bottom_padding.dart';
 import '../../../shared/widgets/loading_widget.dart';
 import '../../../shared/widgets/no_home_empty_state.dart';
 import '../../../shared/widgets/premium_upgrade_banner.dart';
@@ -91,7 +92,7 @@ class MembersScreen extends ConsumerWidget {
           body: ListView(
                   key: const Key('members_list'),
                   padding: EdgeInsets.only(
-                    bottom: MainShellV2.bottomContentPadding(context, ref),
+                    bottom: adAwareBottomPadding(context, ref, extra: 16),
                   ),
                   children: [
                     if (data.freeLimitReached)

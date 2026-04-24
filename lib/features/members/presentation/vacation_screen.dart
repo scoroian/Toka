@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
+import '../../../core/utils/toka_dates.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/vacation_view_model.dart';
 
@@ -53,7 +53,7 @@ class _VacationScreenState extends ConsumerState<VacationScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final fmt = DateFormat.yMd();
+    final locale = Localizations.localeOf(context);
 
     final notifier = ref.watch(
       vacationViewModelNotifierProvider(widget.homeId, widget.uid).notifier,
@@ -90,7 +90,9 @@ class _VacationScreenState extends ConsumerState<VacationScreen> {
                   leading: const Icon(Icons.calendar_today),
                   title: Text(l10n.vacation_start_date),
                   subtitle: Text(
-                    vm.startDate != null ? fmt.format(vm.startDate!) : '—',
+                    vm.startDate != null
+                        ? TokaDates.dateShort(vm.startDate!, locale)
+                        : '—',
                   ),
                   onTap: () => _pickDate(notifier, true),
                 ),
@@ -98,7 +100,9 @@ class _VacationScreenState extends ConsumerState<VacationScreen> {
                   leading: const Icon(Icons.event_available),
                   title: Text(l10n.vacation_end_date),
                   subtitle: Text(
-                    vm.endDate != null ? fmt.format(vm.endDate!) : '—',
+                    vm.endDate != null
+                        ? TokaDates.dateShort(vm.endDate!, locale)
+                        : '—',
                   ),
                   onTap: () => _pickDate(notifier, false),
                 ),

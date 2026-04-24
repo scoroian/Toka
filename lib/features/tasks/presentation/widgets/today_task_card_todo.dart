@@ -1,9 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/toka_dates.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../profile/application/profile_provider.dart';
 import '../../domain/home_dashboard.dart';
@@ -30,15 +30,13 @@ class TodayTaskCardTodo extends ConsumerWidget {
     if (task.isOverdue) return l10n.today_overdue;
     final effectiveNow = now ?? DateTime.now();
     final dueDate = task.nextDueAt.toLocal();
-    final timeStr = DateFormat('HH:mm').format(dueDate);
+    final locale = Localizations.localeOf(context);
+    final timeStr = TokaDates.timeShort(dueDate, locale);
     final isToday = dueDate.year == effectiveNow.year &&
         dueDate.month == effectiveNow.month &&
         dueDate.day == effectiveNow.day;
     if (isToday) return l10n.today_due_today(timeStr);
-    final weekday = DateFormat(
-      'EEE',
-      Localizations.localeOf(context).toString(),
-    ).format(dueDate);
+    final weekday = TokaDates.weekdayShort(dueDate, locale);
     return l10n.today_due_weekday(weekday, timeStr);
   }
 

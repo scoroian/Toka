@@ -15,6 +15,7 @@ class NotificationPreferences with _$NotificationPreferences {
     String? dailySummaryTime,
     @Default([]) List<String> silencedTypes,
     String? fcmToken,
+    bool? systemAuthorized,
   }) = _NotificationPreferences;
 
   const NotificationPreferences._();
@@ -34,6 +35,7 @@ class NotificationPreferences with _$NotificationPreferences {
       dailySummaryTime: map['dailySummaryTime'] as String?,
       silencedTypes: (map['silencedTypes'] as List<dynamic>?)?.cast<String>() ?? [],
       fcmToken: map['fcmToken'] as String?,
+      systemAuthorized: map['systemAuthorized'] as bool?,
     );
   }
 
@@ -46,6 +48,7 @@ class NotificationPreferences with _$NotificationPreferences {
       'silencedTypes': silencedTypes,
       if (dailySummaryTime != null) 'dailySummaryTime': dailySummaryTime!,
       if (fcmToken != null) 'fcmToken': fcmToken!,
+      if (systemAuthorized != null) 'systemAuthorized': systemAuthorized!,
     };
   }
 }

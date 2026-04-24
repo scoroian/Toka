@@ -1,5 +1,10 @@
 // functions/src/homes/homes_callables.test.ts
 
+import {
+  parseDebugPremiumAllowedUids,
+  isDebugPremiumAllowed,
+} from "./debug_premium_allowlist";
+
 // Testea la lógica de negocio de createHome: validación nombre, control de slots, error si sin nombre
 
 describe("createHome — validaciones de entrada", () => {
@@ -163,22 +168,58 @@ describe("transferOwnership — validaciones de entrada", () => {
   });
 });
 
-describe("debugSetPremiumStatus — gate por emulador", () => {
-  function isEmulatorEnv(envValue: string | undefined): boolean {
-    return envValue === "true";
-  }
+describe("debugSetPremiumStatus — parseDebugPremiumAllowedUids", () => {
+  it("undefined → set vacío", () => {
+    expect(parseDebugPremiumAllowedUids(undefined).size).toBe(0);
+  });
+  it("string vacía → set vacío", () => {
+    expect(parseDebugPremiumAllowedUids("").size).toBe(0);
+  });
+  it("un uid → set con ese uid", () => {
+    const set = parseDebugPremiumAllowedUids("uid1");
+    expect(set.has("uid1")).toBe(true);
+    expect(set.size).toBe(1);
+  });
+  it("CSV con espacios → trimea y separa", () => {
+    const set = parseDebugPremiumAllowedUids(" uid1 , uid2 ,uid3");
+    expect(set.has("uid1")).toBe(true);
+    expect(set.has("uid2")).toBe(true);
+    expect(set.has("uid3")).toBe(true);
+    expect(set.size).toBe(3);
+  });
+  it("CSV con entradas vacías → las ignora", () => {
+    const set = parseDebugPremiumAllowedUids("uid1,,uid2,");
+    expect(set.size).toBe(2);
+  });
+});
 
-  it("FUNCTIONS_EMULATOR==='true' → permitido", () => {
-    expect(isEmulatorEnv("true")).toBe(true);
+describe("debugSetPremiumStatus — isDebugPremiumAllowed", () => {
+  const empty: ReadonlySet<string> = new Set();
+  const allowed: ReadonlySet<string> = new Set(["uid1", "uid2"]);
+
+  it("emulador true → permitido aunque uid undefined", () => {
+    expect(isDebugPremiumAllowed("true", undefined, empty)).toBe(true);
   });
-  it("FUNCTIONS_EMULATOR===undefined → denegado", () => {
-    expect(isEmulatorEnv(undefined)).toBe(false);
+  it("emulador true → permitido aunque uid no esté en allowlist", () => {
+    expect(isDebugPremiumAllowed("true", "otro", empty)).toBe(true);
   });
-  it("FUNCTIONS_EMULATOR==='false' → denegado", () => {
-    expect(isEmulatorEnv("false")).toBe(false);
+  it("emulador false + uid en allowlist → permitido", () => {
+    expect(isDebugPremiumAllowed("false", "uid1", allowed)).toBe(true);
   });
-  it("FUNCTIONS_EMULATOR==='1' → denegado (solo 'true' exacto)", () => {
-    expect(isEmulatorEnv("1")).toBe(false);
+  it("emulador undefined + uid en allowlist → permitido", () => {
+    expect(isDebugPremiumAllowed(undefined, "uid2", allowed)).toBe(true);
+  });
+  it("emulador false + uid NO en allowlist → denegado", () => {
+    expect(isDebugPremiumAllowed("false", "otro", allowed)).toBe(false);
+  });
+  it("emulador false + uid undefined → denegado", () => {
+    expect(isDebugPremiumAllowed("false", undefined, allowed)).toBe(false);
+  });
+  it("emulador false + allowlist vacía + uid cualquiera → denegado", () => {
+    expect(isDebugPremiumAllowed("false", "uid1", empty)).toBe(false);
+  });
+  it("emulador '1' (no 'true' exacto) + uid no allowlist → denegado", () => {
+    expect(isDebugPremiumAllowed("1", "otro", allowed)).toBe(false);
   });
 });
 

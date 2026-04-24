@@ -1,8 +1,8 @@
 // lib/features/history/presentation/widgets/history_event_tile.dart
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
+import '../../../../core/utils/toka_dates.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/task_event.dart';
 import '../../../profile/presentation/widgets/review_dialog.dart';
@@ -16,13 +16,14 @@ Widget _wrapTrailing(Widget child) => SizedBox(
       child: Center(child: child),
     );
 
-String _formatRelativeTime(AppLocalizations l10n, DateTime dt) {
+String _formatRelativeTime(AppLocalizations l10n, DateTime dt, Locale locale) {
   final diff = DateTime.now().difference(dt);
   if (diff.inMinutes < 1) return l10n.history_time_now;
   if (diff.inHours < 1) return l10n.history_time_minutes_ago(diff.inMinutes);
   if (diff.inHours < 24) return l10n.history_time_hours_ago(diff.inHours);
   if (diff.inDays < 7) return l10n.history_time_days_ago(diff.inDays);
-  return DateFormat('EEE d MMM, HH:mm').format(dt);
+  return '${TokaDates.dateMediumWithWeekday(dt, locale)}, '
+      '${TokaDates.timeShort(dt, locale)}';
 }
 
 class HistoryEventTile extends StatelessWidget {
@@ -52,12 +53,13 @@ class HistoryEventTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context);
     return event.map(
       completed: (e) => _CompletedTile(
         event: e,
         actorName: actorName,
         actorPhotoUrl: actorPhotoUrl,
-        timestamp: _formatRelativeTime(l10n, e.createdAt),
+        timestamp: _formatRelativeTime(l10n, e.createdAt, locale),
         l10n: l10n,
         homeId: homeId,
         currentUid: currentUid,
@@ -69,7 +71,7 @@ class HistoryEventTile extends StatelessWidget {
         actorName: actorName,
         actorPhotoUrl: actorPhotoUrl,
         toName: toName ?? '?',
-        timestamp: _formatRelativeTime(l10n, e.createdAt),
+        timestamp: _formatRelativeTime(l10n, e.createdAt, locale),
         l10n: l10n,
         trailingOverride: trailing,
       ),
@@ -77,7 +79,7 @@ class HistoryEventTile extends StatelessWidget {
         event: e,
         actorName: actorName,
         actorPhotoUrl: actorPhotoUrl,
-        timestamp: _formatRelativeTime(l10n, e.missedAt),
+        timestamp: _formatRelativeTime(l10n, e.missedAt, locale),
         l10n: l10n,
         trailingOverride: trailing,
       ),

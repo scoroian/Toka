@@ -48,17 +48,56 @@ void main() {
 
   group('NotificationPreferences defaults', () {
     test('default prefs have notifyOnDue = true and notifyBefore = false', () {
-      final prefs = NotificationPreferences(homeId: 'h1', uid: 'u1');
+      const prefs = NotificationPreferences(homeId: 'h1', uid: 'u1');
       expect(prefs.notifyOnDue, isTrue);
       expect(prefs.notifyBefore, isFalse);
       expect(prefs.minutesBefore, 30);
     });
 
     test('copyWith updates notifyBefore correctly', () {
-      final prefs = NotificationPreferences(homeId: 'h1', uid: 'u1');
+      const prefs = NotificationPreferences(homeId: 'h1', uid: 'u1');
       final updated = prefs.copyWith(notifyBefore: true, minutesBefore: 60);
       expect(updated.notifyBefore, isTrue);
       expect(updated.minutesBefore, 60);
+    });
+
+    test('systemAuthorized round-trips through toMap/fromMap', () {
+      const prefs = NotificationPreferences(
+        homeId: 'h1',
+        uid: 'u1',
+        systemAuthorized: false,
+      );
+      final roundTripped =
+          NotificationPreferences.fromMap('h1', 'u1', prefs.toMap());
+      expect(roundTripped.systemAuthorized, isFalse);
+    });
+
+    test('systemAuthorized is null by default', () {
+      const prefs = NotificationPreferences(homeId: 'h1', uid: 'u1');
+      expect(prefs.systemAuthorized, isNull);
+    });
+  });
+
+  group('Toggle enable logic for systemAuthorized', () {
+    // Replica la condición que usa la UI (NotificationSettingsScreen) para
+    // decidir si un toggle queda deshabilitado cuando el sistema bloquea las
+    // notificaciones. No levantamos el widget; verificamos la regla.
+    bool togglesEnabled({required bool isPremium, required bool systemOn}) {
+      return isPremium && systemOn;
+    }
+
+    test(
+        'premium + system bloqueado => toggles deshabilitados (onChanged nulo)',
+        () {
+      expect(togglesEnabled(isPremium: true, systemOn: false), isFalse);
+    });
+
+    test('premium + system activo => toggles habilitados', () {
+      expect(togglesEnabled(isPremium: true, systemOn: true), isTrue);
+    });
+
+    test('free + system bloqueado => toggles deshabilitados', () {
+      expect(togglesEnabled(isPremium: false, systemOn: false), isFalse);
     });
   });
 }

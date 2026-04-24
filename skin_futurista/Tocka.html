@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<title>Tocka — Diseño completo</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
+<style>
+  html, body { margin: 0; padding: 0; background: #e8e6e1; font-family: 'Inter', system-ui, sans-serif; color: #111; }
+  * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+  button { font-family: inherit; cursor: pointer; }
+  .tweaks {
+    position: fixed; right: 16px; bottom: 16px; z-index: 9999;
+    background: #0B0F16; color: #E8EEF7; border: 1px solid rgba(226,232,240,0.14);
+    border-radius: 16px; padding: 14px; width: 240px;
+    box-shadow: 0 20px 50px -20px rgba(0,0,0,0.6);
+    font-family: 'Inter', sans-serif;
+  }
+  .tweaks h4 { margin: 0 0 10px; font-size: 11px; letter-spacing: 1.4px; text-transform: uppercase; color: rgba(226,232,240,0.5); font-family: 'JetBrains Mono', monospace; font-weight: 700; }
+  .tweak-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; font-size: 13px; }
+  .tgl { width: 42px; height: 24px; border-radius: 999px; background: #1A2235; border: 1px solid rgba(226,232,240,0.1); position: relative; cursor: pointer; transition: all .2s; }
+  .tgl.on { background: #38BDF8; border-color: transparent; }
+  .tgl::after { content:''; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%; background: #E8EEF7; transition: all .2s; }
+  .tgl.on::after { left: 20px; background: #001018; }
+  .tweak-row span { color: rgba(226,232,240,0.8); font-weight: 600; }
+</style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+<div id="tweaks-root"></div>
+<div id="root"></div>
+
+<script type="text/babel" src="tokens.jsx"></script>
+<script type="text/babel" src="icons.jsx"></script>
+<script type="text/babel" src="ios-frame.jsx"></script>
+<script type="text/babel" src="android-frame.jsx"></script>
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="components.jsx"></script>
+<script type="text/babel" src="screens-hoy.jsx"></script>
+<script type="text/babel" src="screens-tareas.jsx"></script>
+<script type="text/babel" src="screens-people.jsx"></script>
+<script type="text/babel" src="screens-meta.jsx"></script>
+
+<script type="text/babel" data-presets="react">
+const { useState, useEffect } = React;
+
+// Tweaks defaults — EDITMODE-enabled
+const TWEAKS = /*EDITMODE-BEGIN*/{
+  "premium": false,
+  "dark": false
+}/*EDITMODE-END*/;
+
+function Phone({ platform, dark, children, label }) {
+  if (platform === 'android') {
+    return <AndroidDevice dark={dark} width={380} height={800}>{children}</AndroidDevice>;
+  }
+  return <IOSDevice dark={dark} width={380} height={800}>{children}</IOSDevice>;
+}
+
+// Scrollable area helper — most screens are taller than 800px
+function Scroll({ children, dark }) {
+  return (
+    <div style={{ width: '100%', height: '100%', overflowY: 'auto', overflowX: 'hidden', background: dark ? '#07090E' : '#F6F7FB' }}>
+      {children}
+    </div>
+  );
+}
+
+function App() {
+  const [premium, setPremium] = useState(TWEAKS.premium);
+  const [dark, setDark] = useState(TWEAKS.dark);
+
+  useEffect(() => {
+    // Listen for edit mode
+    const handler = (e) => {
+      if (!e.data) return;
+      if (e.data.type === '__activate_edit_mode') document.getElementById('tweaks-panel').style.display = 'block';
+      if (e.data.type === '__deactivate_edit_mode') document.getElementById('tweaks-panel').style.display = 'none';
+    };
+    window.addEventListener('message', handler);
+    window.parent.postMessage({ type: '__edit_mode_available' }, '*');
+    return () => window.removeEventListener('message', handler);
+  }, []);
+
+  const toggle = (k, v) => {
+    if (k === 'premium') setPremium(v);
+    if (k === 'dark') setDark(v);
+    window.parent.postMessage({ type: '__edit_mode_set_keys', edits: { [k]: v } }, '*');
+  };
+
+  // Render tweaks panel into its own root
+  useEffect(() => {
+    const el = document.getElementById('tweaks-root');
+    ReactDOM.render(
+      <div id="tweaks-panel" className="tweaks" style={{ display: 'none' }}>
+        <h4>Tweaks</h4>
+        <div className="tweak-row">
+          <span>Plan Premium</span>
+          <div className={`tgl ${premium ? 'on' : ''}`} onClick={() => toggle('premium', !premium)}/>
+        </div>
+        <div className="tweak-row">
+          <span>Dark mode</span>
+          <div className={`tgl ${dark ? 'on' : ''}`} onClick={() => toggle('dark', !dark)}/>
+        </div>
+        <div style={{ fontSize: 10, fontFamily: 'JetBrains Mono,monospace', color: 'rgba(226,232,240,0.4)', marginTop: 8, letterSpacing: 0.3 }}>
+          {premium ? 'SIN publicidad · 10 miembros' : 'CON banner AdMob · 3 miembros'}
+        </div>
+      </div>,
+      el
+    );
+  }, [premium, dark]);
+
+  const screens = [
+    // HOY
+    { cat: 'hoy', label: 'Hoy · Lista por recurrencia', C: HoyScreenA, platforms: ['ios','android'] },
+    { cat: 'hoy', label: 'Hoy · Modular', C: HoyScreenB, platforms: ['ios'] },
+    { cat: 'hoy', label: 'Hoy · Timeline', C: HoyScreenC, platforms: ['ios'] },
+    // TAREAS
+    { cat: 'tareas', label: 'Todas las tareas', C: TareasScreen, platforms: ['ios','android'] },
+    { cat: 'tareas', label: 'Ficha de tarea', C: FichaTareaScreen, platforms: ['ios'], noTopBar: true },
+    { cat: 'tareas', label: 'Crear tarea', C: CrearTareaScreen, platforms: ['ios'], noTopBar: true },
+    // GENTE
+    { cat: 'gente', label: 'Historial', C: HistorialScreen, platforms: ['ios'] },
+    { cat: 'gente', label: 'Miembros', C: MiembrosScreen, platforms: ['ios'] },
+    { cat: 'gente', label: 'Perfil + Radar', C: PerfilScreen, platforms: ['ios'], noTopBar: true },
+    // META
+    { cat: 'meta', label: 'Onboarding', C: OnboardingScreen, platforms: ['ios'], noTopBar: true },
+    { cat: 'meta', label: 'Selector multi-hogar', C: SelectorHogarScreen, platforms: ['ios'], noTopBar: true },
+    { cat: 'meta', label: 'Paywall Premium', C: PaywallScreen, platforms: ['ios'], noTopBar: true },
+    { cat: 'meta', label: 'Rescue · downgrade', C: RescueScreen, platforms: ['ios'], noTopBar: true },
+    { cat: 'meta', label: 'Ajustes del hogar', C: AjustesHogarScreen, platforms: ['ios'], noTopBar: true },
+  ];
+
+  const cats = [
+    { id: 'hoy', title: 'Pantalla Hoy', subtitle: 'Home del hogar · 3 variaciones en iOS + 1 Android' },
+    { id: 'tareas', title: 'Tareas', subtitle: 'Lista · ficha · crear/editar' },
+    { id: 'gente', title: 'Gente & perfiles', subtitle: 'Historial · miembros · perfil con radar' },
+    { id: 'meta', title: 'Cuenta, hogar & monetización', subtitle: 'Onboarding · multi-hogar · paywall · rescue · ajustes' },
+  ];
+
+  return (
+    <DesignCanvas>
+      {/* Intro section */}
+      <DCSection id="intro" title="Tocka" subtitle="App del hogar · Diseño futurista, atractivo, minimalista">
+        <DCArtboard id="brand" label="Brand" width={720} height={420}>
+          <div style={{ width: '100%', height: '100%', background: '#07090E', color: '#E8EEF7',
+            padding: 40, display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+            position: 'relative', overflow: 'hidden',
+          }}>
+            <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(600px 300px at 20% 0%, rgba(56,189,248,0.25), transparent 60%)' }}/>
+            <div style={{ position: 'absolute', bottom: -100, right: -80, width: 360, height: 360, borderRadius: '50%', background: 'radial-gradient(closest-side, rgba(167,139,250,0.35), transparent)', filter: 'blur(20px)' }}/>
+            <div style={{ position: 'relative' }}>
+              <div style={{ fontFamily: FONT_MONO, fontSize: 11, letterSpacing: 2.2, color: 'rgba(226,232,240,0.5)', textTransform: 'uppercase', fontWeight: 700 }}>Tocka · v0.9 design</div>
+              <div style={{ fontFamily: FONT_DISPLAY, fontSize: 64, fontWeight: 800, letterSpacing: -2.4, lineHeight: 1, marginTop: 16 }}>
+                El hogar, <span style={{ color: '#38BDF8' }}>en equilibrio.</span>
+              </div>
+              <div style={{ fontSize: 15, color: 'rgba(226,232,240,0.7)', marginTop: 14, maxWidth: 440, lineHeight: 1.5 }}>
+                Reparto de tareas del hogar con recurrencias, rotación justa y reparto inteligente.
+                Dark-first · Pagas una vez · Beneficia a todo el hogar.
+              </div>
+            </div>
+            <div style={{ position: 'relative', display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+              {['Futurista','Minimalista','Dark-first','Tarea-primero','Monetizable','Rápida'].map(t => (
+                <div key={t} style={{
+                  padding: '6px 12px', borderRadius: 999,
+                  background: 'rgba(56,189,248,0.12)', border: '1px solid rgba(56,189,248,0.3)',
+                  color: '#38BDF8', fontSize: 12, fontWeight: 600, fontFamily: FONT_SANS,
+                }}>{t}</div>
+              ))}
+            </div>
+          </div>
+        </DCArtboard>
+        <DCArtboard id="sistema" label="Sistema" width={420} height={420}>
+          <div style={{ width: '100%', height: '100%', background: '#0B0F16', color: '#E8EEF7', padding: 24, fontFamily: FONT_SANS }}>
+            <div style={{ fontSize: 10, letterSpacing: 1.6, color: 'rgba(226,232,240,0.5)', textTransform: 'uppercase', fontFamily: FONT_MONO, fontWeight: 700 }}>Sistema visual</div>
+            <div style={{ fontFamily: FONT_DISPLAY, fontSize: 22, fontWeight: 800, letterSpacing: -0.6, marginTop: 6 }}>Tocka Design System</div>
+
+            <div style={{ marginTop: 16, display: 'flex', gap: 6 }}>
+              {['#07090E','#0B0F16','#121826','#1A2235','#38BDF8','#A78BFA','#F5B544','#34D399'].map(c => (
+                <div key={c} style={{ width: 32, height: 32, borderRadius: 8, background: c, border: '1px solid rgba(226,232,240,0.1)' }}/>
+              ))}
+            </div>
+            <div style={{ fontSize: 11, fontFamily: FONT_MONO, color: 'rgba(226,232,240,0.5)', marginTop: 8 }}>Space · paneles · brand · miembros</div>
+
+            <div style={{ marginTop: 18, paddingTop: 14, borderTop: '1px solid rgba(226,232,240,0.1)' }}>
+              <div style={{ fontFamily: FONT_DISPLAY, fontSize: 32, fontWeight: 800, letterSpacing: -1 }}>En equilibrio</div>
+              <div style={{ fontFamily: FONT_SANS, fontSize: 13, color: 'rgba(226,232,240,0.7)', marginTop: 2 }}>Inter · Display & Sans</div>
+              <div style={{ fontFamily: FONT_MONO, fontSize: 11, color: 'rgba(226,232,240,0.5)', letterSpacing: 0.4, marginTop: 6 }}>JETBRAINS MONO · 11PX</div>
+            </div>
+
+            <div style={{ marginTop: 18, display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 8 }}>
+              {['ring','tri','hex','square','diamond','plus','star4','arcs','dot','cross'].map(k => (
+                <div key={k} style={{ aspectRatio: '1/1', borderRadius: 10, background: 'rgba(56,189,248,0.08)', border: '1px solid rgba(56,189,248,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <TaskGlyph kind={k} color="#38BDF8" size={20}/>
+                </div>
+              ))}
+            </div>
+          </div>
+        </DCArtboard>
+      </DCSection>
+
+      {cats.map(cat => (
+        <DCSection key={cat.id} id={cat.id} title={cat.title} subtitle={cat.subtitle}>
+          {screens.filter(s => s.cat === cat.id).flatMap(s =>
+            s.platforms.map(p => (
+              <DCArtboard key={s.label + p} id={s.label + '-' + p} label={`${s.label} · ${p === 'ios' ? 'iOS' : 'Android'}`} width={420} height={900}>
+                <div style={{ width: '100%', height: '100%', background: dark ? '#07090E' : '#F6F7FB', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+                  <Phone platform={p} dark={dark}>
+                    <Scroll dark={dark}>
+                      <s.C dark={dark} isPremium={premium} platform={p}/>
+                    </Scroll>
+                  </Phone>
+                </div>
+              </DCArtboard>
+            ))
+          )}
+        </DCSection>
+      ))}
+    </DesignCanvas>
+  );
+}
+
+const rootEl = document.getElementById('root');
+ReactDOM.createRoot(rootEl).render(<App/>);
+</script>
+
+</body>
+</html>

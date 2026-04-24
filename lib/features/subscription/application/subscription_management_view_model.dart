@@ -2,15 +2,18 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../homes/application/current_home_provider.dart';
-import '../domain/subscription_state.dart';
+import '../domain/subscription_dashboard.dart';
 import 'paywall_provider.dart';
-import 'subscription_provider.dart';
+import 'subscription_dashboard_provider.dart';
 
 part 'subscription_management_view_model.g.dart';
 
+/// ViewModel de la pantalla *Ajustes → Gestionar suscripción*. Expone el
+/// `SubscriptionDashboard` actual (derivado del stream) junto con el mapa de
+/// acciones en curso para deshabilitar botones mientras se ejecutan callables.
 abstract class SubscriptionManagementViewModel {
-  SubscriptionState get subscriptionState;
+  AsyncValue<SubscriptionDashboard> get dashboard;
+  Map<String, bool> get pending;
   bool get isLoading;
   String get homeId;
   Future<void> restorePremium();
@@ -19,13 +22,16 @@ abstract class SubscriptionManagementViewModel {
 class _SubscriptionManagementViewModelImpl
     implements SubscriptionManagementViewModel {
   const _SubscriptionManagementViewModelImpl({
-    required this.subscriptionState,
+    required this.dashboard,
+    required this.pending,
     required this.isLoading,
     required this.homeId,
     required this.ref,
   });
   @override
-  final SubscriptionState subscriptionState;
+  final AsyncValue<SubscriptionDashboard> dashboard;
+  @override
+  final Map<String, bool> pending;
   @override
   final bool isLoading;
   @override
@@ -40,12 +46,14 @@ class _SubscriptionManagementViewModelImpl
 @riverpod
 SubscriptionManagementViewModel subscriptionManagementViewModel(
     SubscriptionManagementViewModelRef ref) {
-  final subState = ref.watch(subscriptionStateProvider);
-  final homeId = ref.watch(currentHomeProvider).valueOrNull?.id ?? '';
-  final isLoading = ref.watch(paywallProvider).isLoading;
+  final dashAsync = ref.watch(subscriptionDashboardProvider());
+  final homeId = dashAsync.valueOrNull?.homeId ?? '';
+  final paywallAsync = ref.watch(paywallProvider);
+  final isLoading = paywallAsync.isLoading;
 
   return _SubscriptionManagementViewModelImpl(
-    subscriptionState: subState,
+    dashboard: dashAsync,
+    pending: {'restore': isLoading},
     isLoading: isLoading,
     homeId: homeId,
     ref: ref,

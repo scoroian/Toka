@@ -165,7 +165,7 @@ class _CreateEditTaskViewModelProviderElement
 }
 
 String _$createEditTaskViewModelNotifierHash() =>
-    r'21ef3efe0396b23aff4ca814a7d6644caca34ebe';
+    r'619b69d44ced825bd23c90512eadf7afa8810b5b';
 
 abstract class _$CreateEditTaskViewModelNotifier
     extends BuildlessAutoDisposeNotifier<_CreateEditVMState> {

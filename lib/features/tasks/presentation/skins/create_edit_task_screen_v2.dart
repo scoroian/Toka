@@ -285,6 +285,7 @@ class _CreateEditTaskScreenV2State
             UpcomingDatesPreview(
               key: const Key('upcoming_dates_preview'),
               dates: vm.upcomingDates,
+              recurrenceRule: formState.recurrenceRule,
             ),
           ],
 

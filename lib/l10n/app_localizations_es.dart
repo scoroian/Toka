@@ -340,6 +340,16 @@ class AppLocalizationsEs extends AppLocalizations {
   String get homes_members => 'Miembros';
 
   @override
+  String get homes_manage_members => 'Gestionar miembros';
+
+  @override
+  String get homes_payer_info_body =>
+      'Tu cuenta está pagando el Premium de este hogar.';
+
+  @override
+  String get homes_payer_info_action => 'Gestionar en Ajustes';
+
+  @override
   String get homes_invite_code => 'Código de invitación';
 
   @override
@@ -895,6 +905,75 @@ class AppLocalizationsEs extends AppLocalizations {
   String get rescue_banner_renew => 'Renovar';
 
   @override
+  String rescue_banner_title(int days) {
+    return 'Tu Premium vence en $days días — renueva para no perder features';
+  }
+
+  @override
+  String get rescue_banner_last_day =>
+      'Tu Premium vence hoy. Renueva antes de medianoche.';
+
+  @override
+  String rescue_banner_hours_left(int hours) {
+    return 'Quedan $hours horas';
+  }
+
+  @override
+  String get rescue_last_billing_error_title => 'Último intento de cobro';
+
+  @override
+  String cancelled_ends_banner_title(String date) {
+    return 'No se renovará tras el $date. Puedes reactivar cuando quieras.';
+  }
+
+  @override
+  String get cancelled_ends_banner_cta => 'Reactivar renovación';
+
+  @override
+  String expired_free_banner_title(String date) {
+    return 'Tu Premium expiró el $date. Reactívalo cuando quieras.';
+  }
+
+  @override
+  String get expired_free_banner_cta => 'Reactivar Premium';
+
+  @override
+  String restorable_banner_title(String date) {
+    return 'Puedes restaurar tu Premium hasta el $date';
+  }
+
+  @override
+  String get restorable_banner_cta => 'Restaurar';
+
+  @override
+  String get paywall_title_from_expired => 'Reactivar Premium';
+
+  @override
+  String paywall_subtitle_from_expired(String date) {
+    return 'Tu Premium expiró el $date. Reactívalo cuando quieras.';
+  }
+
+  @override
+  String get paywall_title_from_rescue =>
+      'Renueva antes de perder tus capacidades';
+
+  @override
+  String paywall_subtitle_from_rescue(int days) {
+    return 'Quedan $days días para renovar.';
+  }
+
+  @override
+  String get paywall_title_from_restorable => 'Restaurar tu Premium';
+
+  @override
+  String paywall_subtitle_from_restorable(int days) {
+    return 'Quedan $days días de la ventana de restauración.';
+  }
+
+  @override
+  String get paywall_cta_reactivate => 'Reactivar Premium';
+
+  @override
   String get subscription_management_title => 'Tu suscripción';
 
   @override
@@ -930,6 +1009,71 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get subscription_plan_downgrade => 'Planear downgrade';
+
+  @override
+  String get subscription_free_benefits_title => 'Con Premium desbloqueas';
+
+  @override
+  String subscription_counter_members(int used, int max) {
+    return '$used/$max miembros';
+  }
+
+  @override
+  String subscription_counter_tasks(int used, int max) {
+    return '$used/$max tareas automáticas';
+  }
+
+  @override
+  String subscription_next_renewal(String date) {
+    return 'Próxima renovación: $date';
+  }
+
+  @override
+  String get subscription_no_auto_renew => 'No se renovará automáticamente';
+
+  @override
+  String subscription_premium_until(String date) {
+    return 'Premium hasta el $date';
+  }
+
+  @override
+  String subscription_expired_on(String date) {
+    return 'Premium expirado el $date';
+  }
+
+  @override
+  String subscription_restorable_until(String date, int days) {
+    return 'Puedes restaurar tu Premium hasta el $date ($days días)';
+  }
+
+  @override
+  String subscription_rescue_warning(int days) {
+    return 'Tu Premium vence en $days días — renueva para no perder capacidades';
+  }
+
+  @override
+  String get subscription_manage_billing => 'Gestionar facturación';
+
+  @override
+  String get subscription_cancel_renewal => 'Cancelar renovación';
+
+  @override
+  String get subscription_reactivate_renewal => 'Reactivar renovación';
+
+  @override
+  String get subscription_change_plan => 'Cambiar de plan';
+
+  @override
+  String get subscription_reactivate_premium => 'Reactivar Premium';
+
+  @override
+  String get subscription_payer_label => 'Pagador';
+
+  @override
+  String get subscription_payer_you => 'tú';
+
+  @override
+  String get subscription_payer_other => 'otro miembro';
 
   @override
   String get downgrade_planner_title => 'Planear downgrade';
@@ -1576,4 +1720,142 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get recurrence_one_time_help =>
       'Se completa una sola vez y desaparece del listado.';
+
+  @override
+  String get notifRationaleTitle => 'Toka te avisará sólo de lo importante';
+
+  @override
+  String get notifRationaleBullet1 => 'Nueva tarea asignada';
+
+  @override
+  String get notifRationaleBullet2 => 'Cambios de turno';
+
+  @override
+  String get notifRationaleBullet3 => 'Valoraciones recibidas';
+
+  @override
+  String get notifRationaleCtaEnable => 'Activar notificaciones';
+
+  @override
+  String get notifRationaleCtaLater => 'Ahora no';
+
+  @override
+  String get notifSystemBlockedBanner =>
+      'Notificaciones bloqueadas por el sistema. Activa los permisos en Ajustes de Android para recibir avisos de Toka.';
+
+  @override
+  String get notifSystemBlockedAction => 'Abrir ajustes';
+
+  @override
+  String get notifTestSectionTitle => 'Probar notificaciones';
+
+  @override
+  String get notifTestSectionHint =>
+      'Dispara una muestra de cada tipo para ver cómo se verán.';
+
+  @override
+  String get notifTestDeadline => 'Probar «Tarea por vencer»';
+
+  @override
+  String get notifTestAssignment => 'Probar «Tarea asignada»';
+
+  @override
+  String get notifTestReminder => 'Probar «Recordatorio previo»';
+
+  @override
+  String get notifTestDailySummary => 'Probar «Resumen diario»';
+
+  @override
+  String get notifTestFeedback => 'Probar «Valoración recibida»';
+
+  @override
+  String get notifTestRotation => 'Probar «Rotación de turno»';
+
+  @override
+  String get notifTestSent => 'Notificación de prueba enviada';
+
+  @override
+  String get historyEventDetailTitle => 'Detalle del evento';
+
+  @override
+  String get historyEventUnknownMember => 'miembro desconocido';
+
+  @override
+  String get noReviewsOnEvent => 'Aún no hay valoraciones para este evento';
+
+  @override
+  String reviewByLabel(String name) {
+    return 'Valoración de $name';
+  }
+
+  @override
+  String get reviewPrivateNoteLabel => 'Nota privada';
+
+  @override
+  String reviewPrivateNoteHint(String name) {
+    return 'Sólo tú y $name veis esta nota';
+  }
+
+  @override
+  String get memberProfileLastReviews => 'Últimas valoraciones';
+
+  @override
+  String daysUntil(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'en $count días',
+      one: 'en 1 día',
+      zero: 'hoy',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String tasksActiveCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tareas activas',
+      one: '1 tarea activa',
+      zero: 'sin tareas activas',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String membersCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count miembros',
+      one: '1 miembro',
+      zero: 'sin miembros',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String daysLeft(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'quedan $count días',
+      one: 'queda 1 día',
+      zero: 'último día',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reviewsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count valoraciones',
+      one: '1 valoración',
+      zero: 'sin valoraciones',
+    );
+    return '$_temp0';
+  }
 }

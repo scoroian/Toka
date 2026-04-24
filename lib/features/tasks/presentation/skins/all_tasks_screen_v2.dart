@@ -8,6 +8,7 @@ import '../../../../core/constants/free_limits.dart';
 import '../../../../core/constants/routes.dart';
 import '../../../../core/theme/app_colors_v2.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/widgets/ad_aware_bottom_padding.dart';
 import '../../../../shared/widgets/no_home_empty_state.dart';
 import '../../../../shared/widgets/skins/main_shell_v2.dart';
 import '../../../homes/application/dashboard_provider.dart';
@@ -131,8 +132,7 @@ class _AllTasksScreenV2State extends ConsumerState<AllTasksScreenV2>
               : ListView.builder(
                         key: const Key('tasks_list'),
                         padding: EdgeInsets.only(
-                          bottom:
-                              MainShellV2.bottomContentPadding(context, ref),
+                          bottom: adAwareBottomPadding(context, ref, extra: 16),
                         ),
                         itemCount: data.tasks.length,
                         itemBuilder: (_, i) {

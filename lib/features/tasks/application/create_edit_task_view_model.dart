@@ -129,6 +129,12 @@ class CreateEditTaskViewModelNotifier
     final task =
         await ref.read(tasksRepositoryProvider).fetchTask(homeId, taskId);
     _form.initEdit(task);
+    // Hidrata el estado del formulario de recurrencia con la regla existente
+    // para que el RecurrenceForm muestre la recurrencia actual preseleccionada
+    // al editar la tarea (BUG-07).
+    ref.read(recurrenceNotifierProvider.notifier).hydrateFrom(
+          task.recurrenceRule,
+        );
     state = state.copyWith(
       loadedTitle: task.title,
       loadedDescription: task.description ?? '',

@@ -712,6 +712,24 @@ abstract class AppLocalizations {
   /// **'Miembros'**
   String get homes_members;
 
+  /// Manage members tile in home settings (opens MembersScreen)
+  ///
+  /// In es, this message translates to:
+  /// **'Gestionar miembros'**
+  String get homes_manage_members;
+
+  /// Subtle info shown to payer in home settings
+  ///
+  /// In es, this message translates to:
+  /// **'Tu cuenta está pagando el Premium de este hogar.'**
+  String get homes_payer_info_body;
+
+  /// Link to Settings → Manage subscription from payer info tile
+  ///
+  /// In es, this message translates to:
+  /// **'Gestionar en Ajustes'**
+  String get homes_payer_info_action;
+
   /// Invite code section label
   ///
   /// In es, this message translates to:
@@ -1702,6 +1720,108 @@ abstract class AppLocalizations {
   /// **'Renovar'**
   String get rescue_banner_renew;
 
+  /// Rescue banner title when >=1 day left
+  ///
+  /// In es, this message translates to:
+  /// **'Tu Premium vence en {days} días — renueva para no perder features'**
+  String rescue_banner_title(int days);
+
+  /// Rescue banner title when <1 day left
+  ///
+  /// In es, this message translates to:
+  /// **'Tu Premium vence hoy. Renueva antes de medianoche.'**
+  String get rescue_banner_last_day;
+
+  /// Countdown in hours when less than a day remains
+  ///
+  /// In es, this message translates to:
+  /// **'Quedan {hours} horas'**
+  String rescue_banner_hours_left(int hours);
+
+  /// Section header for last billing error
+  ///
+  /// In es, this message translates to:
+  /// **'Último intento de cobro'**
+  String get rescue_last_billing_error_title;
+
+  /// Banner for cancelledPendingEnd state
+  ///
+  /// In es, this message translates to:
+  /// **'No se renovará tras el {date}. Puedes reactivar cuando quieras.'**
+  String cancelled_ends_banner_title(String date);
+
+  /// CTA on cancelledPendingEnd banner
+  ///
+  /// In es, this message translates to:
+  /// **'Reactivar renovación'**
+  String get cancelled_ends_banner_cta;
+
+  /// Banner for expiredFree state
+  ///
+  /// In es, this message translates to:
+  /// **'Tu Premium expiró el {date}. Reactívalo cuando quieras.'**
+  String expired_free_banner_title(String date);
+
+  /// CTA on expiredFree banner
+  ///
+  /// In es, this message translates to:
+  /// **'Reactivar Premium'**
+  String get expired_free_banner_cta;
+
+  /// Banner for restorable state
+  ///
+  /// In es, this message translates to:
+  /// **'Puedes restaurar tu Premium hasta el {date}'**
+  String restorable_banner_title(String date);
+
+  /// CTA on restorable banner
+  ///
+  /// In es, this message translates to:
+  /// **'Restaurar'**
+  String get restorable_banner_cta;
+
+  /// Paywall title when coming from expiredFree
+  ///
+  /// In es, this message translates to:
+  /// **'Reactivar Premium'**
+  String get paywall_title_from_expired;
+
+  /// Paywall subtitle when coming from expiredFree
+  ///
+  /// In es, this message translates to:
+  /// **'Tu Premium expiró el {date}. Reactívalo cuando quieras.'**
+  String paywall_subtitle_from_expired(String date);
+
+  /// Paywall title when coming from rescue
+  ///
+  /// In es, this message translates to:
+  /// **'Renueva antes de perder tus capacidades'**
+  String get paywall_title_from_rescue;
+
+  /// Paywall subtitle when coming from rescue
+  ///
+  /// In es, this message translates to:
+  /// **'Quedan {days} días para renovar.'**
+  String paywall_subtitle_from_rescue(int days);
+
+  /// Paywall title when coming from restorable
+  ///
+  /// In es, this message translates to:
+  /// **'Restaurar tu Premium'**
+  String get paywall_title_from_restorable;
+
+  /// Paywall subtitle when coming from restorable
+  ///
+  /// In es, this message translates to:
+  /// **'Quedan {days} días de la ventana de restauración.'**
+  String paywall_subtitle_from_restorable(int days);
+
+  /// Paywall primary CTA when reactivating
+  ///
+  /// In es, this message translates to:
+  /// **'Reactivar Premium'**
+  String get paywall_cta_reactivate;
+
   /// Subscription management screen title
   ///
   /// In es, this message translates to:
@@ -1761,6 +1881,108 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Planear downgrade'**
   String get subscription_plan_downgrade;
+
+  /// Free plan benefits section title
+  ///
+  /// In es, this message translates to:
+  /// **'Con Premium desbloqueas'**
+  String get subscription_free_benefits_title;
+
+  /// Usage counter for members
+  ///
+  /// In es, this message translates to:
+  /// **'{used}/{max} miembros'**
+  String subscription_counter_members(int used, int max);
+
+  /// Usage counter for automatic tasks
+  ///
+  /// In es, this message translates to:
+  /// **'{used}/{max} tareas automáticas'**
+  String subscription_counter_tasks(int used, int max);
+
+  /// Next renewal date
+  ///
+  /// In es, this message translates to:
+  /// **'Próxima renovación: {date}'**
+  String subscription_next_renewal(String date);
+
+  /// Auto-renew disabled notice
+  ///
+  /// In es, this message translates to:
+  /// **'No se renovará automáticamente'**
+  String get subscription_no_auto_renew;
+
+  /// Premium valid until date
+  ///
+  /// In es, this message translates to:
+  /// **'Premium hasta el {date}'**
+  String subscription_premium_until(String date);
+
+  /// Premium expired on date
+  ///
+  /// In es, this message translates to:
+  /// **'Premium expirado el {date}'**
+  String subscription_expired_on(String date);
+
+  /// Restorable premium with days left
+  ///
+  /// In es, this message translates to:
+  /// **'Puedes restaurar tu Premium hasta el {date} ({days} días)'**
+  String subscription_restorable_until(String date, int days);
+
+  /// Rescue warning message
+  ///
+  /// In es, this message translates to:
+  /// **'Tu Premium vence en {days} días — renueva para no perder capacidades'**
+  String subscription_rescue_warning(int days);
+
+  /// Manage billing button
+  ///
+  /// In es, this message translates to:
+  /// **'Gestionar facturación'**
+  String get subscription_manage_billing;
+
+  /// Cancel auto-renewal button
+  ///
+  /// In es, this message translates to:
+  /// **'Cancelar renovación'**
+  String get subscription_cancel_renewal;
+
+  /// Reactivate auto-renewal button
+  ///
+  /// In es, this message translates to:
+  /// **'Reactivar renovación'**
+  String get subscription_reactivate_renewal;
+
+  /// Change plan button
+  ///
+  /// In es, this message translates to:
+  /// **'Cambiar de plan'**
+  String get subscription_change_plan;
+
+  /// Reactivate premium button
+  ///
+  /// In es, this message translates to:
+  /// **'Reactivar Premium'**
+  String get subscription_reactivate_premium;
+
+  /// Payer label
+  ///
+  /// In es, this message translates to:
+  /// **'Pagador'**
+  String get subscription_payer_label;
+
+  /// Self payer label
+  ///
+  /// In es, this message translates to:
+  /// **'tú'**
+  String get subscription_payer_you;
+
+  /// Other payer placeholder
+  ///
+  /// In es, this message translates to:
+  /// **'otro miembro'**
+  String get subscription_payer_other;
 
   /// Downgrade planner screen title
   ///
@@ -2973,6 +3195,180 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Se completa una sola vez y desaparece del listado.'**
   String get recurrence_one_time_help;
+
+  /// Title shown in the onboarding notification rationale screen
+  ///
+  /// In es, this message translates to:
+  /// **'Toka te avisará sólo de lo importante'**
+  String get notifRationaleTitle;
+
+  /// Rationale bullet 1: new task assigned
+  ///
+  /// In es, this message translates to:
+  /// **'Nueva tarea asignada'**
+  String get notifRationaleBullet1;
+
+  /// Rationale bullet 2: turn changes
+  ///
+  /// In es, this message translates to:
+  /// **'Cambios de turno'**
+  String get notifRationaleBullet2;
+
+  /// Rationale bullet 3: reviews received
+  ///
+  /// In es, this message translates to:
+  /// **'Valoraciones recibidas'**
+  String get notifRationaleBullet3;
+
+  /// Primary CTA that triggers the system prompt
+  ///
+  /// In es, this message translates to:
+  /// **'Activar notificaciones'**
+  String get notifRationaleCtaEnable;
+
+  /// Secondary CTA that skips the prompt
+  ///
+  /// In es, this message translates to:
+  /// **'Ahora no'**
+  String get notifRationaleCtaLater;
+
+  /// Banner shown when the OS-level notification permission is denied
+  ///
+  /// In es, this message translates to:
+  /// **'Notificaciones bloqueadas por el sistema. Activa los permisos en Ajustes de Android para recibir avisos de Toka.'**
+  String get notifSystemBlockedBanner;
+
+  /// Button that opens the system notification settings screen
+  ///
+  /// In es, this message translates to:
+  /// **'Abrir ajustes'**
+  String get notifSystemBlockedAction;
+
+  /// Section title in Notification Settings (debug only)
+  ///
+  /// In es, this message translates to:
+  /// **'Probar notificaciones'**
+  String get notifTestSectionTitle;
+
+  /// Explanation below the Test notifications section title
+  ///
+  /// In es, this message translates to:
+  /// **'Dispara una muestra de cada tipo para ver cómo se verán.'**
+  String get notifTestSectionHint;
+
+  /// No description provided for @notifTestDeadline.
+  ///
+  /// In es, this message translates to:
+  /// **'Probar «Tarea por vencer»'**
+  String get notifTestDeadline;
+
+  /// No description provided for @notifTestAssignment.
+  ///
+  /// In es, this message translates to:
+  /// **'Probar «Tarea asignada»'**
+  String get notifTestAssignment;
+
+  /// No description provided for @notifTestReminder.
+  ///
+  /// In es, this message translates to:
+  /// **'Probar «Recordatorio previo»'**
+  String get notifTestReminder;
+
+  /// No description provided for @notifTestDailySummary.
+  ///
+  /// In es, this message translates to:
+  /// **'Probar «Resumen diario»'**
+  String get notifTestDailySummary;
+
+  /// No description provided for @notifTestFeedback.
+  ///
+  /// In es, this message translates to:
+  /// **'Probar «Valoración recibida»'**
+  String get notifTestFeedback;
+
+  /// No description provided for @notifTestRotation.
+  ///
+  /// In es, this message translates to:
+  /// **'Probar «Rotación de turno»'**
+  String get notifTestRotation;
+
+  /// SnackBar shown after a test notification is dispatched
+  ///
+  /// In es, this message translates to:
+  /// **'Notificación de prueba enviada'**
+  String get notifTestSent;
+
+  /// AppBar title for the history event detail screen
+  ///
+  /// In es, this message translates to:
+  /// **'Detalle del evento'**
+  String get historyEventDetailTitle;
+
+  /// Fallback label when a member UID cannot be resolved
+  ///
+  /// In es, this message translates to:
+  /// **'miembro desconocido'**
+  String get historyEventUnknownMember;
+
+  /// Empty state when the event has no reviews yet
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no hay valoraciones para este evento'**
+  String get noReviewsOnEvent;
+
+  /// Review author header
+  ///
+  /// In es, this message translates to:
+  /// **'Valoración de {name}'**
+  String reviewByLabel(String name);
+
+  /// Label above the private note content
+  ///
+  /// In es, this message translates to:
+  /// **'Nota privada'**
+  String get reviewPrivateNoteLabel;
+
+  /// Helper text indicating who can read the private note
+  ///
+  /// In es, this message translates to:
+  /// **'Sólo tú y {name} veis esta nota'**
+  String reviewPrivateNoteHint(String name);
+
+  /// Section title on member profile listing recent reviews
+  ///
+  /// In es, this message translates to:
+  /// **'Últimas valoraciones'**
+  String get memberProfileLastReviews;
+
+  /// Relative days counter used in task previews
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =0{hoy} =1{en 1 día} other{en {count} días}}'**
+  String daysUntil(int count);
+
+  /// Active task count label
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =0{sin tareas activas} =1{1 tarea activa} other{{count} tareas activas}}'**
+  String tasksActiveCount(int count);
+
+  /// Members count label
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =0{sin miembros} =1{1 miembro} other{{count} miembros}}'**
+  String membersCount(int count);
+
+  /// Countdown days remaining
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =0{último día} =1{queda 1 día} other{quedan {count} días}}'**
+  String daysLeft(int count);
+
+  /// Reviews count label
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =0{sin valoraciones} =1{1 valoración} other{{count} valoraciones}}'**
+  String reviewsCount(int count);
 }
 
 class _AppLocalizationsDelegate

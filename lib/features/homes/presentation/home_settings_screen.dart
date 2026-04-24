@@ -1,16 +1,12 @@
 // lib/features/homes/presentation/home_settings_screen.dart
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
 import '../../../core/constants/routes.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/loading_widget.dart';
-import '../../members/application/member_actions_provider.dart';
-import '../../members/application/members_provider.dart';
-import '../../members/presentation/widgets/invite_member_sheet.dart';
+import '../../subscription/presentation/widgets/premium_state_banner.dart';
 import '../application/home_settings_view_model.dart';
 import '../domain/homes_repository.dart';
 
@@ -60,21 +56,24 @@ class _HomeSettingsScreenState extends ConsumerState<HomeSettingsScreen> {
       ),
     );
     if (confirmed != true) return;
+    if (!context.mounted) return;
+
+    // BUG-26: navegamos ANTES de esperar al callable. Si esperamos a que
+    // resuelva, el rebuild deja currentHomeProvider == null mientras la
+    // pantalla aún está montada → Scaffold zombie con error genérico
+    // durante 1-2 frames antes del redirect.
+    final messenger = ScaffoldMessenger.of(context);
+    context.go(AppRoutes.home);
     try {
       await vm.leaveHome();
-      if (context.mounted) Navigator.of(context).pop();
     } on CannotLeaveAsOwnerException {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.homes_error_cannot_leave_as_owner)),
-        );
-      }
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.homes_error_cannot_leave_as_owner)),
+      );
     } on PayerLockedException {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.members_error_payer_locked)),
-        );
-      }
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.members_error_payer_locked)),
+      );
     }
   }
 
@@ -202,6 +201,7 @@ class _HomeSettingsScreenState extends ConsumerState<HomeSettingsScreen> {
 
           return ListView(
             children: [
+              const PremiumStateBanner(),
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                 child: data.canEdit
@@ -224,10 +224,12 @@ class _HomeSettingsScreenState extends ConsumerState<HomeSettingsScreen> {
                 key: const Key('home_plan_tile'),
                 title: Text(data.planLabel),
               ),
-              if (data.canManageSubscription)
+              if (data.isPayer)
                 ListTile(
-                  key: const Key('manage_subscription_tile'),
-                  title: Text(l10n.homes_manage_subscription),
+                  key: const Key('payer_info_tile'),
+                  leading: const Icon(Icons.info_outline),
+                  title: Text(l10n.homes_payer_info_body),
+                  subtitle: Text(l10n.homes_payer_info_action),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push(AppRoutes.subscription),
                 ),
@@ -248,12 +250,12 @@ class _HomeSettingsScreenState extends ConsumerState<HomeSettingsScreen> {
               // END DEBUG PREMIUM
               const Divider(),
               ListTile(
-                key: const Key('members_tile'),
-                title: Text(l10n.homes_members),
+                key: const Key('manage_members_tile'),
+                leading: const Icon(Icons.people_outline),
+                title: Text(l10n.homes_manage_members),
                 trailing: const Icon(Icons.chevron_right),
-                onTap: () => context.push(AppRoutes.homeSettingsMembers),
+                onTap: () => context.go(AppRoutes.members),
               ),
-              if (data.canGenerateCode) _InviteCodeTile(homeId: data.homeId),
               const Divider(),
               ListTile(
                 key: const Key('leave_home_tile'),
@@ -276,171 +278,6 @@ class _HomeSettingsScreenState extends ConsumerState<HomeSettingsScreen> {
           );
         },
       ),
-    );
-  }
-}
-
-/// Tile que muestra el código de invitación activo con fecha de expiración,
-/// botón de copiar y botón de regenerar. Si no hay código activo muestra
-/// un botón para generar uno nuevo que abre el InviteMemberSheet.
-class _InviteCodeTile extends ConsumerStatefulWidget {
-  const _InviteCodeTile({required this.homeId});
-
-  final String homeId;
-
-  @override
-  ConsumerState<_InviteCodeTile> createState() => _InviteCodeTileState();
-}
-
-class _InviteCodeTileState extends ConsumerState<_InviteCodeTile> {
-  bool _isRegenerating = false;
-
-  bool _isExpiringSoon(DateTime expiresAt) =>
-      expiresAt.difference(DateTime.now()).inHours < 24;
-
-  Future<void> _regenerateCode() async {
-    setState(() => _isRegenerating = true);
-    try {
-      await ref
-          .read(memberActionsProvider.notifier)
-          .generateInviteCode(widget.homeId);
-    } catch (_) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text(AppLocalizations.of(context).error_generic)),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _isRegenerating = false);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final activeCodeAsync = ref.watch(activeInviteCodeProvider(widget.homeId));
-
-    return activeCodeAsync.when(
-      loading: () => ListTile(
-        key: const Key('invite_code_tile'),
-        title: Text(l10n.homes_invite_code),
-        trailing: const SizedBox(
-          width: 20,
-          height: 20,
-          child: CircularProgressIndicator(strokeWidth: 2),
-        ),
-      ),
-      error: (_, __) => ListTile(
-        key: const Key('invite_code_tile'),
-        title: Text(l10n.homes_invite_code),
-        trailing: TextButton(
-          key: const Key('generate_code_button'),
-          onPressed: () => showModalBottomSheet<void>(
-            context: context,
-            isScrollControlled: true,
-            builder: (_) => InviteMemberSheet(homeId: widget.homeId),
-          ),
-          child: Text(l10n.homes_generate_code),
-        ),
-      ),
-      data: (activeCode) {
-        if (activeCode == null) {
-          return ListTile(
-            key: const Key('invite_code_tile'),
-            title: Text(l10n.homes_invite_code),
-            trailing: TextButton(
-              key: const Key('generate_code_button'),
-              onPressed: () => showModalBottomSheet<void>(
-                context: context,
-                isScrollControlled: true,
-                builder: (_) => InviteMemberSheet(homeId: widget.homeId),
-              ),
-              child: Text(l10n.homes_generate_code),
-            ),
-          );
-        }
-
-        final expiresAt = activeCode.expiresAt;
-        final formattedDate =
-            DateFormat('dd MMM yyyy · HH:mm').format(expiresAt);
-        final expiringSoon = _isExpiringSoon(expiresAt);
-
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(l10n.homes_invite_code,
-                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color:
-                            Theme.of(context).colorScheme.onSurfaceVariant,
-                      )),
-              const SizedBox(height: 4),
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          activeCode.code,
-                          key: const Key('settings_invite_code_text'),
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleLarge
-                              ?.copyWith(letterSpacing: 3),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          l10n.invite_code_expires_at(formattedDate),
-                          key: const Key('settings_invite_code_expiry'),
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall
-                              ?.copyWith(
-                                color: expiringSoon
-                                    ? Theme.of(context).colorScheme.error
-                                    : Theme.of(context)
-                                        .colorScheme
-                                        .onSurfaceVariant,
-                              ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  IconButton(
-                    key: const Key('copy_code_button'),
-                    icon: const Icon(Icons.copy),
-                    tooltip: l10n.invite_sheet_copy_code,
-                    onPressed: () {
-                      Clipboard.setData(
-                          ClipboardData(text: activeCode.code));
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                            content:
-                                Text(l10n.invite_sheet_code_copied)),
-                      );
-                    },
-                  ),
-                  IconButton(
-                    key: const Key('regenerate_code_button'),
-                    icon: _isRegenerating
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.refresh),
-                    tooltip: l10n.invite_code_regenerate,
-                    onPressed: _isRegenerating ? null : _regenerateCode,
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
-      },
     );
   }
 }

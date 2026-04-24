@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/routes.dart';
 import '../application/onboarding_provider.dart';
 import '../application/onboarding_view_model.dart';
+import 'notification_rationale_screen.dart';
 import 'steps/home_choice_step.dart';
 import 'steps/language_step.dart';
 import 'steps/profile_step.dart';
@@ -22,6 +23,7 @@ class OnboardingFlowScreen extends ConsumerStatefulWidget {
 
 class _OnboardingFlowScreenState extends ConsumerState<OnboardingFlowScreen> {
   late final PageController _pageController;
+  bool _navigationDispatched = false;
 
   @override
   void initState() {
@@ -56,9 +58,18 @@ class _OnboardingFlowScreenState extends ConsumerState<OnboardingFlowScreen> {
     final vm = ref.watch(onboardingViewModelProvider);
 
     // Navegar a home en el post-frame para evitar setState durante build.
-    if (vmState.shouldNavigateHome) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) context.go(AppRoutes.home);
+    // Si el onboarding aún no mostró la rationale de notificaciones o el SO
+    // reporta `notDetermined`, la insertamos como último paso antes de home.
+    if (vmState.shouldNavigateHome && !_navigationDispatched) {
+      _navigationDispatched = true;
+      final router = GoRouter.of(context);
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (!mounted) return;
+        final showRationale = await shouldShowNotificationRationale();
+        if (!mounted) return;
+        router.go(
+          showRationale ? AppRoutes.notificationRationale : AppRoutes.home,
+        );
       });
     }
 

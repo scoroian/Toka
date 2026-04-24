@@ -9,6 +9,16 @@ import { getNextEligibleMember } from "./pass_turn_helpers";
 const db = admin.firestore();
 const FieldValue = admin.firestore.FieldValue;
 
+/**
+ * Callable `passTaskTurn` — BUG-06.
+ *
+ * Pasar turno es una acción EXPLÍCITA del usuario: siempre avanza en
+ * `assignmentOrder` usando {@link getNextEligibleMember}. No consulta
+ * `onMissAssign`, que solo rige el cron `processExpiredTasks`
+ * (tarea vencida sin acción → `computeNextAssignee(onMissAssign, ...)`).
+ *
+ * Con 2 miembros + `onMissAssign=sameAssignee`, pasar turno alterna A ↔ B.
+ */
 export const passTaskTurn = onCall(async (request) => {
   if (!request.auth) {
     throw new HttpsError("unauthenticated", "Not authenticated");

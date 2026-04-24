@@ -213,6 +213,12 @@
   "@homes_manage_subscription": { "description": "Manage subscription button" },
   "homes_members": "Membri",
   "@homes_members": { "description": "Members section label" },
+  "homes_manage_members": "Gestionează membri",
+  "@homes_manage_members": { "description": "Manage members tile in home settings (opens MembersScreen)" },
+  "homes_payer_info_body": "Contul tău plătește Premium pentru această casă.",
+  "@homes_payer_info_body": { "description": "Subtle info shown to payer in home settings" },
+  "homes_payer_info_action": "Gestionează în Setări",
+  "@homes_payer_info_action": { "description": "Link to Settings → Manage subscription from payer info tile" },
   "homes_invite_code": "Cod de invitație",
   "@homes_invite_code": { "description": "Invite code section label" },
   "homes_generate_code": "Generează cod",
@@ -611,6 +617,64 @@
   },
   "rescue_banner_renew": "Reînnoiește",
   "@rescue_banner_renew": { "description": "Rescue banner renew button" },
+  "rescue_banner_title": "Premium expiră în {days} zile — reînnoiește pentru a nu pierde funcțiile",
+  "@rescue_banner_title": {
+    "description": "Rescue banner title when >=1 day left",
+    "placeholders": { "days": { "type": "int" } }
+  },
+  "rescue_banner_last_day": "Premium expiră astăzi. Reînnoiește înainte de miezul nopții.",
+  "@rescue_banner_last_day": { "description": "Rescue banner title when <1 day left" },
+  "rescue_banner_hours_left": "Mai sunt {hours} ore",
+  "@rescue_banner_hours_left": {
+    "description": "Countdown in hours when less than a day remains",
+    "placeholders": { "hours": { "type": "int" } }
+  },
+  "rescue_last_billing_error_title": "Ultima încercare de plată",
+  "@rescue_last_billing_error_title": { "description": "Section header for last billing error" },
+  "cancelled_ends_banner_title": "Nu se va reînnoi după {date}. Poți reactiva oricând.",
+  "@cancelled_ends_banner_title": {
+    "description": "Banner for cancelledPendingEnd state",
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "cancelled_ends_banner_cta": "Reactivează reînnoirea",
+  "@cancelled_ends_banner_cta": { "description": "CTA on cancelledPendingEnd banner" },
+  "expired_free_banner_title": "Premium a expirat pe {date}. Reactivează oricând.",
+  "@expired_free_banner_title": {
+    "description": "Banner for expiredFree state",
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "expired_free_banner_cta": "Reactivează Premium",
+  "@expired_free_banner_cta": { "description": "CTA on expiredFree banner" },
+  "restorable_banner_title": "Poți restabili Premium până pe {date}",
+  "@restorable_banner_title": {
+    "description": "Banner for restorable state",
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "restorable_banner_cta": "Restabilește",
+  "@restorable_banner_cta": { "description": "CTA on restorable banner" },
+  "paywall_title_from_expired": "Reactivează Premium",
+  "@paywall_title_from_expired": { "description": "Paywall title when coming from expiredFree" },
+  "paywall_subtitle_from_expired": "Premium a expirat pe {date}. Reactivează oricând.",
+  "@paywall_subtitle_from_expired": {
+    "description": "Paywall subtitle when coming from expiredFree",
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "paywall_title_from_rescue": "Reînnoiește înainte de a pierde funcțiile",
+  "@paywall_title_from_rescue": { "description": "Paywall title when coming from rescue" },
+  "paywall_subtitle_from_rescue": "Mai sunt {days} zile pentru reînnoire.",
+  "@paywall_subtitle_from_rescue": {
+    "description": "Paywall subtitle when coming from rescue",
+    "placeholders": { "days": { "type": "int" } }
+  },
+  "paywall_title_from_restorable": "Restabilește Premium",
+  "@paywall_title_from_restorable": { "description": "Paywall title when coming from restorable" },
+  "paywall_subtitle_from_restorable": "Mai sunt {days} zile din fereastra de restabilire.",
+  "@paywall_subtitle_from_restorable": {
+    "description": "Paywall subtitle when coming from restorable",
+    "placeholders": { "days": { "type": "int" } }
+  },
+  "paywall_cta_reactivate": "Reactivează Premium",
+  "@paywall_cta_reactivate": { "description": "Paywall primary CTA when reactivating" },
   "subscription_management_title": "Abonamentul tău",
   "@subscription_management_title": { "description": "Subscription management screen title" },
   "subscription_status_active": "Premium activ",
@@ -640,6 +704,61 @@
   "@subscription_restore_expired_error": { "description": "Restore window expired error" },
   "subscription_plan_downgrade": "Planifică downgrade",
   "@subscription_plan_downgrade": { "description": "Plan downgrade button" },
+  "subscription_free_benefits_title": "Cu Premium deblochezi",
+  "@subscription_free_benefits_title": { "description": "Free plan benefits section title" },
+  "subscription_counter_members": "{used}/{max} membri",
+  "@subscription_counter_members": {
+    "description": "Usage counter for members",
+    "placeholders": { "used": { "type": "int" }, "max": { "type": "int" } }
+  },
+  "subscription_counter_tasks": "{used}/{max} sarcini automate",
+  "@subscription_counter_tasks": {
+    "description": "Usage counter for automatic tasks",
+    "placeholders": { "used": { "type": "int" }, "max": { "type": "int" } }
+  },
+  "subscription_next_renewal": "Următoarea reînnoire: {date}",
+  "@subscription_next_renewal": {
+    "description": "Next renewal date",
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "subscription_no_auto_renew": "Nu se va reînnoi automat",
+  "@subscription_no_auto_renew": { "description": "Auto-renew disabled notice" },
+  "subscription_premium_until": "Premium până la {date}",
+  "@subscription_premium_until": {
+    "description": "Premium valid until date",
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "subscription_expired_on": "Premium a expirat la {date}",
+  "@subscription_expired_on": {
+    "description": "Premium expired on date",
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "subscription_restorable_until": "Poți restaura Premium până la {date} ({days} zile)",
+  "@subscription_restorable_until": {
+    "description": "Restorable premium with days left",
+    "placeholders": { "date": { "type": "String" }, "days": { "type": "int" } }
+  },
+  "subscription_rescue_warning": "Premium-ul tău expiră în {days} zile — reînnoiește pentru a-l păstra",
+  "@subscription_rescue_warning": {
+    "description": "Rescue warning message",
+    "placeholders": { "days": { "type": "int" } }
+  },
+  "subscription_manage_billing": "Gestionează facturarea",
+  "@subscription_manage_billing": { "description": "Manage billing button" },
+  "subscription_cancel_renewal": "Anulează reînnoirea",
+  "@subscription_cancel_renewal": { "description": "Cancel auto-renewal button" },
+  "subscription_reactivate_renewal": "Reactivează reînnoirea",
+  "@subscription_reactivate_renewal": { "description": "Reactivate auto-renewal button" },
+  "subscription_change_plan": "Schimbă planul",
+  "@subscription_change_plan": { "description": "Change plan button" },
+  "subscription_reactivate_premium": "Reactivează Premium",
+  "@subscription_reactivate_premium": { "description": "Reactivate premium button" },
+  "subscription_payer_label": "Plătitor",
+  "@subscription_payer_label": { "description": "Payer label" },
+  "subscription_payer_you": "tu",
+  "@subscription_payer_you": { "description": "Self payer label" },
+  "subscription_payer_other": "alt membru",
+  "@subscription_payer_other": { "description": "Other payer placeholder" },
   "downgrade_planner_title": "Planifică downgrade",
   "@downgrade_planner_title": { "description": "Downgrade planner screen title" },
   "downgrade_planner_members_section": "Ce membri vor continua?",
@@ -974,5 +1093,87 @@
   "recurrence_one_time": "Punctuală",
   "@recurrence_one_time": { "description": "Chip label for one-time tasks" },
   "recurrence_one_time_help": "Se finalizează o singură dată și dispare din listă.",
-  "@recurrence_one_time_help": { "description": "Helper text below the Puntual chip" }
+  "@recurrence_one_time_help": { "description": "Helper text below the Puntual chip" },
+  "notifRationaleTitle": "Toka te anunță doar ce este important",
+  "@notifRationaleTitle": { "description": "Title shown in the onboarding notification rationale screen" },
+  "notifRationaleBullet1": "Sarcini noi atribuite ție",
+  "@notifRationaleBullet1": { "description": "Rationale bullet 1: new task assigned" },
+  "notifRationaleBullet2": "Schimbări de tură",
+  "@notifRationaleBullet2": { "description": "Rationale bullet 2: turn changes" },
+  "notifRationaleBullet3": "Evaluări primite",
+  "@notifRationaleBullet3": { "description": "Rationale bullet 3: reviews received" },
+  "notifRationaleCtaEnable": "Activează notificările",
+  "@notifRationaleCtaEnable": { "description": "Primary CTA that triggers the system prompt" },
+  "notifRationaleCtaLater": "Nu acum",
+  "@notifRationaleCtaLater": { "description": "Secondary CTA that skips the prompt" },
+  "notifSystemBlockedBanner": "Notificările sunt blocate de sistem. Activează permisiunile în Setările Android pentru a primi alerte Toka.",
+  "@notifSystemBlockedBanner": { "description": "Banner shown when the OS-level notification permission is denied" },
+  "notifSystemBlockedAction": "Deschide setările",
+  "@notifSystemBlockedAction": { "description": "Button that opens the system notification settings screen" },
+
+  "notifTestSectionTitle": "Testează notificările",
+  "@notifTestSectionTitle": { "description": "Section title in Notification Settings (debug only)" },
+  "notifTestSectionHint": "Trimite o mostră din fiecare tip pentru a vedea cum apar.",
+  "@notifTestSectionHint": { "description": "Explanation below the Test notifications section title" },
+  "notifTestDeadline": "Testează «Sarcină pe cale să expire»",
+  "@notifTestDeadline": {},
+  "notifTestAssignment": "Testează «Sarcină atribuită»",
+  "@notifTestAssignment": {},
+  "notifTestReminder": "Testează «Memento»",
+  "@notifTestReminder": {},
+  "notifTestDailySummary": "Testează «Rezumat zilnic»",
+  "@notifTestDailySummary": {},
+  "notifTestFeedback": "Testează «Evaluare primită»",
+  "@notifTestFeedback": {},
+  "notifTestRotation": "Testează «Schimb de rotație»",
+  "@notifTestRotation": {},
+  "notifTestSent": "Notificare de test trimisă",
+  "@notifTestSent": { "description": "SnackBar shown after a test notification is dispatched" },
+
+  "historyEventDetailTitle": "Detaliu eveniment",
+  "@historyEventDetailTitle": { "description": "AppBar title for the history event detail screen" },
+  "historyEventUnknownMember": "membru necunoscut",
+  "@historyEventUnknownMember": { "description": "Fallback label when a member UID cannot be resolved" },
+  "noReviewsOnEvent": "Încă nu există evaluări pentru acest eveniment",
+  "@noReviewsOnEvent": { "description": "Empty state when the event has no reviews yet" },
+  "reviewByLabel": "Evaluare de la {name}",
+  "@reviewByLabel": {
+    "description": "Review author header",
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "reviewPrivateNoteLabel": "Notă privată",
+  "@reviewPrivateNoteLabel": { "description": "Label above the private note content" },
+  "reviewPrivateNoteHint": "Doar tu și {name} vedeți această notă",
+  "@reviewPrivateNoteHint": {
+    "description": "Helper text indicating who can read the private note",
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "memberProfileLastReviews": "Ultimele evaluări",
+  "@memberProfileLastReviews": { "description": "Section title on member profile listing recent reviews" },
+
+  "daysUntil": "{count, plural, =0{azi} =1{în 1 zi} few{în {count} zile} other{în {count} de zile}}",
+  "@daysUntil": {
+    "description": "Relative days counter used in task previews",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "tasksActiveCount": "{count, plural, =0{nicio sarcină activă} =1{1 sarcină activă} few{{count} sarcini active} other{{count} de sarcini active}}",
+  "@tasksActiveCount": {
+    "description": "Active task count label",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "membersCount": "{count, plural, =0{niciun membru} =1{1 membru} few{{count} membri} other{{count} de membri}}",
+  "@membersCount": {
+    "description": "Members count label",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "daysLeft": "{count, plural, =0{ultima zi} =1{1 zi rămasă} few{{count} zile rămase} other{{count} de zile rămase}}",
+  "@daysLeft": {
+    "description": "Countdown days remaining",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "reviewsCount": "{count, plural, =0{nicio evaluare} =1{1 evaluare} few{{count} evaluări} other{{count} de evaluări}}",
+  "@reviewsCount": {
+    "description": "Reviews count label",
+    "placeholders": { "count": { "type": "int" } }
+  }
 }

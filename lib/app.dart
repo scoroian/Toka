@@ -1,4 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -19,16 +23,20 @@ import 'features/auth/presentation/verify_email_screen.dart';
 import 'features/i18n/application/locale_provider.dart';
 import 'features/homes/presentation/home_settings_screen.dart';
 import 'features/homes/presentation/my_homes_screen.dart';
+import 'features/onboarding/presentation/notification_rationale_screen.dart';
 import 'features/onboarding/presentation/onboarding_flow_screen.dart';
 import 'features/members/presentation/members_screen.dart';
 import 'features/members/presentation/vacation_screen.dart';
 import 'features/profile/presentation/own_profile_screen.dart';
 import 'features/profile/presentation/edit_profile_screen.dart';
+import 'features/subscription/presentation/paywall_entry_context.dart';
 import 'features/subscription/presentation/paywall_screen.dart';
 import 'features/subscription/presentation/subscription_management_screen.dart';
 import 'features/subscription/presentation/rescue_screen.dart';
 import 'features/subscription/presentation/downgrade_planner_screen.dart';
 import 'features/notifications/application/notification_prefs_provider.dart';
+import 'features/notifications/application/notification_service.dart';
+import 'features/notifications/application/notification_tap_handler.dart';
 import 'features/notifications/presentation/notification_settings_screen.dart';
 import 'features/settings/presentation/settings_screen.dart';
 import 'l10n/app_localizations.dart';
@@ -36,8 +44,10 @@ import 'features/tasks/presentation/skins/today_screen_v2.dart';
 import 'features/tasks/presentation/skins/all_tasks_screen_v2.dart';
 import 'features/tasks/presentation/skins/task_detail_screen_v2.dart';
 import 'features/tasks/presentation/skins/create_edit_task_screen_v2.dart';
+import 'features/history/presentation/history_event_detail_screen.dart';
 import 'features/history/presentation/skins/history_screen_v2.dart';
 import 'features/members/presentation/skins/member_profile_screen_v2.dart';
+import 'shared/widgets/keyboard_visible_provider.dart';
 import 'shared/widgets/skins/main_shell_v2.dart';
 
 part 'app.g.dart';
@@ -179,6 +189,10 @@ GoRouter appRouter(AppRouterRef ref) {
         path: AppRoutes.onboarding,
         builder: (_, __) => const OnboardingFlowScreen(),
       ),
+      GoRoute(
+        path: AppRoutes.notificationRationale,
+        builder: (_, __) => const NotificationRationaleScreen(),
+      ),
 
       // ── Shell principal con NavigationBar ──────────────────────────
       ShellRoute(
@@ -258,15 +272,6 @@ GoRouter appRouter(AppRouterRef ref) {
       GoRoute(
         path: AppRoutes.homeSettings,
         builder: (_, __) => const HomeSettingsScreen(),
-        routes: [
-          // Ruta de miembros fuera del ShellRoute para evitar conflicto de
-          // GlobalKey cuando se navega desde HomeSettingsScreen (que está
-          // fuera del shell) a /members (que está dentro del shell).
-          GoRoute(
-            path: 'members',
-            builder: (_, __) => const MembersScreen(),
-          ),
-        ],
       ),
       GoRoute(
         path: AppRoutes.vacation,
@@ -291,7 +296,14 @@ GoRouter appRouter(AppRouterRef ref) {
       ),
       GoRoute(
         path: AppRoutes.paywall,
-        builder: (_, __) => const PaywallScreen(),
+        builder: (_, state) {
+          final raw = state.uri.queryParameters['ctx'];
+          final entry = PaywallEntryContext.values.firstWhere(
+            (e) => e.name == raw,
+            orElse: () => PaywallEntryContext.fromFree,
+          );
+          return PaywallScreen(entryContext: entry);
+        },
       ),
       GoRoute(
         path: AppRoutes.rescueScreen,
@@ -300,6 +312,17 @@ GoRouter appRouter(AppRouterRef ref) {
       GoRoute(
         path: AppRoutes.downgradePlanner,
         builder: (_, __) => const DowngradePlannerScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.historyEventDetail,
+        builder: (context, state) {
+          final homeId = state.pathParameters['homeId']!;
+          final eventId = state.pathParameters['eventId']!;
+          return HistoryEventDetailScreen(
+            homeId: homeId,
+            eventId: eventId,
+          );
+        },
       ),
       GoRoute(
         path: AppRoutes.notificationSettings,
@@ -315,30 +338,117 @@ GoRouter appRouter(AppRouterRef ref) {
   );
 }
 
-class TokaApp extends ConsumerWidget {
+class TokaApp extends ConsumerStatefulWidget {
   const TokaApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    ref.watch(fcmTokenInitProvider);
-    final locale     = ref.watch(localeNotifierProvider);
-    final router     = ref.watch(appRouterProvider);
-    final themeMode  = ref.watch(themeModeNotifierProvider);
+  ConsumerState<TokaApp> createState() => _TokaAppState();
+}
 
-    return MaterialApp.router(
-      onGenerateTitle: (context) => AppLocalizations.of(context).appName,
-      locale: locale,
-      supportedLocales: LocaleService.supported,
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      theme:      AppThemeV2.light,
-      darkTheme:  AppThemeV2.dark,
-      themeMode:  themeMode,
-      routerConfig: router,
+class _TokaAppState extends ConsumerState<TokaApp>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    // Primera sincronización al arrancar: si el usuario ya está autenticado y
+    // el permiso del SO cambió mientras la app estaba cerrada, este ping
+    // alinea Firestore antes del primer render.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _syncSystemAuthorized();
+      _initNotificationService();
+    });
+  }
+
+  Future<void> _initNotificationService() async {
+    final service = ref.read(notificationServiceProvider);
+    if (service.isInitialized) return;
+    await service.init(
+      onTap: (payload) {
+        final router = ref.read(appRouterProvider);
+        NotificationTapHandler(router).handle(payload);
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _syncSystemAuthorized();
+    }
+  }
+
+  Future<void> _syncSystemAuthorized() async {
+    // Forzar relectura del provider para que la UI (banner en ajustes) se
+    // actualice cuando el usuario vuelve de los ajustes del sistema.
+    ref.invalidate(systemNotificationsAuthorizedProvider);
+
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+    try {
+      final settings =
+          await FirebaseMessaging.instance.getNotificationSettings();
+      final authorized =
+          settings.authorizationStatus == AuthorizationStatus.authorized ||
+              settings.authorizationStatus == AuthorizationStatus.provisional;
+
+      final userRef =
+          FirebaseFirestore.instance.collection('users').doc(uid);
+      final snap = await userRef.get();
+      final prefs = (snap.data()?['notificationPrefs'] as Map<String, dynamic>?);
+      final current = prefs?['systemAuthorized'] as bool?;
+      if (current == authorized) return;
+
+      await userRef.set(
+        {
+          'notificationPrefs': {'systemAuthorized': authorized},
+        },
+        SetOptions(merge: true),
+      );
+    } catch (_) {
+      // No-critical: reintenta en el próximo resumed.
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    ref.watch(fcmTokenInitProvider);
+    final locale = ref.watch(localeNotifierProvider);
+    final router = ref.watch(appRouterProvider);
+    final themeMode = ref.watch(themeModeNotifierProvider);
+
+    return KeyboardVisibilityBuilder(
+      builder: (context, keyboardVisible) {
+        // Alimentamos el provider desde el builder: al cambiar la visibilidad
+        // del teclado se reconstruye el subtree y esto actualiza el estado
+        // global que consumen AdBanner y adAwareBottomPadding.
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          ref
+              .read(keyboardVisibleProvider.notifier)
+              .setVisible(keyboardVisible);
+        });
+        return MaterialApp.router(
+          onGenerateTitle: (context) => AppLocalizations.of(context).appName,
+          locale: locale,
+          supportedLocales: LocaleService.supported,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          theme: AppThemeV2.light,
+          darkTheme: AppThemeV2.dark,
+          themeMode: themeMode,
+          routerConfig: router,
+        );
+      },
     );
   }
 }

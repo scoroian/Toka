@@ -51,3 +51,10 @@ app.*.map.json
 functions/node_modules/
 functions/lib/
 scripts/service-account.json
+# Cloud Functions env files (contienen UIDs/secretos). Solo .env.example se commitea.
+functions/.env
+functions/.env.*
+!functions/.env.example
+
+# Firebase Admin SDK service-account keys para QA/scripts locales. NUNCA commitear.
+secrets/

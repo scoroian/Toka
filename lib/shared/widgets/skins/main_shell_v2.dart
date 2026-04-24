@@ -8,6 +8,7 @@ import '../../../core/theme/app_colors_v2.dart';
 import '../../../l10n/app_localizations.dart';
 import '../ad_banner.dart';
 import '../ad_banner_config_provider.dart';
+import '../keyboard_visible_provider.dart';
 
 class MainShellV2 extends ConsumerWidget {
   const MainShellV2({super.key, required this.child});
@@ -52,38 +53,47 @@ class MainShellV2 extends ConsumerWidget {
   /// debe aplicar para que su último ítem quede por encima del banner y
   /// la NavBar flotante.
   ///
-  ///   safeBottom + kNavBarHeight + kNavBarBottom + bannerSlotHeight(...)
+  ///   safeBottom + navBarSlot + bannerSlot
+  ///
+  /// Tanto `bannerSlot` como `navBarSlot` se evalúan a 0 cuando el teclado
+  /// del sistema está visible: ambos se ocultan para no tapar el input.
   ///
   /// Debe llamarse desde un `build` o `Consumer.builder`: hace `ref.watch`.
   static double bottomContentPadding(BuildContext ctx, WidgetRef ref) {
     final safeBottom = MediaQuery.of(ctx).padding.bottom;
     final cfg = ref.watch(adBannerConfigProvider);
+    final keyboardVisible = ref.watch(keyboardVisibleProvider);
     final location = GoRouterState.of(ctx).matchedLocation;
-    final visible = cfg.show
+    final bannerVisible = cfg.show
         && cfg.unitId.isNotEmpty
-        && !_suppressBannerFor(location);
+        && !_suppressBannerFor(location)
+        && !keyboardVisible;
+    final navBarSlot = keyboardVisible ? 0.0 : kNavBarHeight + kNavBarBottom;
     return safeBottom
-        + kNavBarHeight
-        + kNavBarBottom
-        + bannerSlotHeight(bannerVisible: visible);
+        + navBarSlot
+        + bannerSlotHeight(bannerVisible: bannerVisible);
   }
 
   /// Padding inferior que un `floatingActionButton` dentro de una pantalla tab
   /// debe aplicar para quedar por encima del banner + NavBar.
   ///
-  ///   kNavBarHeight + kNavBarBottom + bannerSlotHeight(...)
+  ///   navBarSlot + bannerSlot
+  ///
+  /// Con el teclado visible, tanto NavBar como banner se ocultan, por lo que
+  /// este padding se evalúa a 0 y el FAB queda al ras de la safe area.
   ///
   /// `safeBottom` NO se incluye: el Scaffold interno ya lo aporta vía
   /// `MediaQuery.padding.bottom` (el shell reserva ese espacio).
   static double fabBottomPadding(BuildContext ctx, WidgetRef ref) {
     final cfg = ref.watch(adBannerConfigProvider);
+    final keyboardVisible = ref.watch(keyboardVisibleProvider);
     final location = GoRouterState.of(ctx).matchedLocation;
-    final visible = cfg.show
+    final bannerVisible = cfg.show
         && cfg.unitId.isNotEmpty
-        && !_suppressBannerFor(location);
-    return kNavBarHeight
-        + kNavBarBottom
-        + bannerSlotHeight(bannerVisible: visible);
+        && !_suppressBannerFor(location)
+        && !keyboardVisible;
+    final navBarSlot = keyboardVisible ? 0.0 : kNavBarHeight + kNavBarBottom;
+    return navBarSlot + bannerSlotHeight(bannerVisible: bannerVisible);
   }
 
   @override
@@ -93,10 +103,13 @@ class MainShellV2 extends ConsumerWidget {
     final safeBottom = MediaQuery.of(context).padding.bottom;
 
     final adConfig = ref.watch(adBannerConfigProvider);
+    final keyboardVisible = ref.watch(keyboardVisibleProvider);
     final bannerVisible = adConfig.show
         && adConfig.unitId.isNotEmpty
-        && !_suppressBannerFor(location);
+        && !_suppressBannerFor(location)
+        && !keyboardVisible;
     final bannerSlot = bannerSlotHeight(bannerVisible: bannerVisible);
+    final navBarSlot = keyboardVisible ? 0.0 : _kNavBarHeight + _kNavBarBottom;
 
     // El SizedBox transparente registra la altura de la barra + banner en
     // el Scaffold, de modo que MediaQuery.padding.bottom crece para los hijos.
@@ -118,7 +131,7 @@ class MainShellV2 extends ConsumerWidget {
       child: Scaffold(
         extendBody: true,
         bottomNavigationBar: SizedBox(
-          height: _kNavBarHeight + _kNavBarBottom + safeBottom + bannerSlot,
+          height: navBarSlot + safeBottom + bannerSlot,
         ),
         body: Stack(
           children: [
@@ -127,14 +140,15 @@ class MainShellV2 extends ConsumerWidget {
               Positioned(
                 left: 0,
                 right: 0,
-                bottom: _kNavBarHeight + _kNavBarBottom + safeBottom + _kBannerGap,
+                bottom: navBarSlot + safeBottom + _kBannerGap,
                 child: const AdBanner(key: Key('ad_banner')),
               ),
-            Positioned(
-              left: 16, right: 16,
-              bottom: _kNavBarBottom + safeBottom,
-              child: _FloatingNavBar(selectedIndex: tabIndex),
-            ),
+            if (!keyboardVisible)
+              Positioned(
+                left: 16, right: 16,
+                bottom: _kNavBarBottom + safeBottom,
+                child: _FloatingNavBar(selectedIndex: tabIndex),
+              ),
           ],
         ),
       ),

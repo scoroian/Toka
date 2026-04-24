@@ -338,6 +338,16 @@ class AppLocalizationsRo extends AppLocalizations {
   String get homes_members => 'Membri';
 
   @override
+  String get homes_manage_members => 'Gestionează membri';
+
+  @override
+  String get homes_payer_info_body =>
+      'Contul tău plătește Premium pentru această casă.';
+
+  @override
+  String get homes_payer_info_action => 'Gestionează în Setări';
+
+  @override
   String get homes_invite_code => 'Cod de invitație';
 
   @override
@@ -892,6 +902,75 @@ class AppLocalizationsRo extends AppLocalizations {
   String get rescue_banner_renew => 'Reînnoiește';
 
   @override
+  String rescue_banner_title(int days) {
+    return 'Premium expiră în $days zile — reînnoiește pentru a nu pierde funcțiile';
+  }
+
+  @override
+  String get rescue_banner_last_day =>
+      'Premium expiră astăzi. Reînnoiește înainte de miezul nopții.';
+
+  @override
+  String rescue_banner_hours_left(int hours) {
+    return 'Mai sunt $hours ore';
+  }
+
+  @override
+  String get rescue_last_billing_error_title => 'Ultima încercare de plată';
+
+  @override
+  String cancelled_ends_banner_title(String date) {
+    return 'Nu se va reînnoi după $date. Poți reactiva oricând.';
+  }
+
+  @override
+  String get cancelled_ends_banner_cta => 'Reactivează reînnoirea';
+
+  @override
+  String expired_free_banner_title(String date) {
+    return 'Premium a expirat pe $date. Reactivează oricând.';
+  }
+
+  @override
+  String get expired_free_banner_cta => 'Reactivează Premium';
+
+  @override
+  String restorable_banner_title(String date) {
+    return 'Poți restabili Premium până pe $date';
+  }
+
+  @override
+  String get restorable_banner_cta => 'Restabilește';
+
+  @override
+  String get paywall_title_from_expired => 'Reactivează Premium';
+
+  @override
+  String paywall_subtitle_from_expired(String date) {
+    return 'Premium a expirat pe $date. Reactivează oricând.';
+  }
+
+  @override
+  String get paywall_title_from_rescue =>
+      'Reînnoiește înainte de a pierde funcțiile';
+
+  @override
+  String paywall_subtitle_from_rescue(int days) {
+    return 'Mai sunt $days zile pentru reînnoire.';
+  }
+
+  @override
+  String get paywall_title_from_restorable => 'Restabilește Premium';
+
+  @override
+  String paywall_subtitle_from_restorable(int days) {
+    return 'Mai sunt $days zile din fereastra de restabilire.';
+  }
+
+  @override
+  String get paywall_cta_reactivate => 'Reactivează Premium';
+
+  @override
   String get subscription_management_title => 'Abonamentul tău';
 
   @override
@@ -927,6 +1006,71 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get subscription_plan_downgrade => 'Planifică downgrade';
+
+  @override
+  String get subscription_free_benefits_title => 'Cu Premium deblochezi';
+
+  @override
+  String subscription_counter_members(int used, int max) {
+    return '$used/$max membri';
+  }
+
+  @override
+  String subscription_counter_tasks(int used, int max) {
+    return '$used/$max sarcini automate';
+  }
+
+  @override
+  String subscription_next_renewal(String date) {
+    return 'Următoarea reînnoire: $date';
+  }
+
+  @override
+  String get subscription_no_auto_renew => 'Nu se va reînnoi automat';
+
+  @override
+  String subscription_premium_until(String date) {
+    return 'Premium până la $date';
+  }
+
+  @override
+  String subscription_expired_on(String date) {
+    return 'Premium a expirat la $date';
+  }
+
+  @override
+  String subscription_restorable_until(String date, int days) {
+    return 'Poți restaura Premium până la $date ($days zile)';
+  }
+
+  @override
+  String subscription_rescue_warning(int days) {
+    return 'Premium-ul tău expiră în $days zile — reînnoiește pentru a-l păstra';
+  }
+
+  @override
+  String get subscription_manage_billing => 'Gestionează facturarea';
+
+  @override
+  String get subscription_cancel_renewal => 'Anulează reînnoirea';
+
+  @override
+  String get subscription_reactivate_renewal => 'Reactivează reînnoirea';
+
+  @override
+  String get subscription_change_plan => 'Schimbă planul';
+
+  @override
+  String get subscription_reactivate_premium => 'Reactivează Premium';
+
+  @override
+  String get subscription_payer_label => 'Plătitor';
+
+  @override
+  String get subscription_payer_you => 'tu';
+
+  @override
+  String get subscription_payer_other => 'alt membru';
 
   @override
   String get downgrade_planner_title => 'Planifică downgrade';
@@ -1573,4 +1717,148 @@ class AppLocalizationsRo extends AppLocalizations {
   @override
   String get recurrence_one_time_help =>
       'Se finalizează o singură dată și dispare din listă.';
+
+  @override
+  String get notifRationaleTitle => 'Toka te anunță doar ce este important';
+
+  @override
+  String get notifRationaleBullet1 => 'Sarcini noi atribuite ție';
+
+  @override
+  String get notifRationaleBullet2 => 'Schimbări de tură';
+
+  @override
+  String get notifRationaleBullet3 => 'Evaluări primite';
+
+  @override
+  String get notifRationaleCtaEnable => 'Activează notificările';
+
+  @override
+  String get notifRationaleCtaLater => 'Nu acum';
+
+  @override
+  String get notifSystemBlockedBanner =>
+      'Notificările sunt blocate de sistem. Activează permisiunile în Setările Android pentru a primi alerte Toka.';
+
+  @override
+  String get notifSystemBlockedAction => 'Deschide setările';
+
+  @override
+  String get notifTestSectionTitle => 'Testează notificările';
+
+  @override
+  String get notifTestSectionHint =>
+      'Trimite o mostră din fiecare tip pentru a vedea cum apar.';
+
+  @override
+  String get notifTestDeadline => 'Testează «Sarcină pe cale să expire»';
+
+  @override
+  String get notifTestAssignment => 'Testează «Sarcină atribuită»';
+
+  @override
+  String get notifTestReminder => 'Testează «Memento»';
+
+  @override
+  String get notifTestDailySummary => 'Testează «Rezumat zilnic»';
+
+  @override
+  String get notifTestFeedback => 'Testează «Evaluare primită»';
+
+  @override
+  String get notifTestRotation => 'Testează «Schimb de rotație»';
+
+  @override
+  String get notifTestSent => 'Notificare de test trimisă';
+
+  @override
+  String get historyEventDetailTitle => 'Detaliu eveniment';
+
+  @override
+  String get historyEventUnknownMember => 'membru necunoscut';
+
+  @override
+  String get noReviewsOnEvent =>
+      'Încă nu există evaluări pentru acest eveniment';
+
+  @override
+  String reviewByLabel(String name) {
+    return 'Evaluare de la $name';
+  }
+
+  @override
+  String get reviewPrivateNoteLabel => 'Notă privată';
+
+  @override
+  String reviewPrivateNoteHint(String name) {
+    return 'Doar tu și $name vedeți această notă';
+  }
+
+  @override
+  String get memberProfileLastReviews => 'Ultimele evaluări';
+
+  @override
+  String daysUntil(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'în $count de zile',
+      few: 'în $count zile',
+      one: 'în 1 zi',
+      zero: 'azi',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String tasksActiveCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count de sarcini active',
+      few: '$count sarcini active',
+      one: '1 sarcină activă',
+      zero: 'nicio sarcină activă',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String membersCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count de membri',
+      few: '$count membri',
+      one: '1 membru',
+      zero: 'niciun membru',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String daysLeft(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count de zile rămase',
+      few: '$count zile rămase',
+      one: '1 zi rămasă',
+      zero: 'ultima zi',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reviewsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count de evaluări',
+      few: '$count evaluări',
+      one: '1 evaluare',
+      zero: 'nicio evaluare',
+    );
+    return '$_temp0';
+  }
 }

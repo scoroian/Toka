@@ -4,6 +4,10 @@ import * as admin from "firebase-admin";
 import * as logger from "firebase-functions/logger";
 import { buildNewMemberDoc } from "./member_factory";
 import { FREE_LIMITS, FREE_LIMIT_CODES, isPremium } from "../shared/free_limits";
+import {
+  parseDebugPremiumAllowedUids,
+  isDebugPremiumAllowed,
+} from "./debug_premium_allowlist";
 
 const db = admin.firestore();
 const FieldValue = admin.firestore.FieldValue;
@@ -969,16 +973,31 @@ export const transferOwnership = onCall(async (request) => {
   );
 });
 
-// DEBUG PREMIUM — REMOVE BEFORE PRODUCTION
+// @DEBUG_PREMIUM_REMOVE_BEFORE_PRODUCTION_RELEASE
+// ===========================================================================
+// ⚠️  CÓDIGO DE DEBUG — ELIMINAR ANTES DEL RELEASE A PRODUCCIÓN ⚠️
+// ---------------------------------------------------------------------------
+// TODO(release): Cuando exista un proyecto Firebase de producción separado de
+// `toka-dd241`, eliminar ESTA FUNCIÓN COMPLETA (hasta `// END DEBUG PREMIUM`)
+// junto con:
+//   - `functions/.env.<projectId>` con DEBUG_PREMIUM_ALLOWED_UIDS
+//   - `functions/scripts/check-debug-premium.js`
+//   - El botón de debug premium en lib/features/homes/presentation/home_settings_screen.dart
+//   - El método debugSetPremiumStatus en HomesRepositoryImpl y el ViewModel
+// El script `functions/scripts/check-debug-premium.js` detecta este marker y
+// se ejecuta en `npm run deploy:release` para fallar si sigue presente.
 // ---------------------------------------------------------------------------
 // debugSetPremiumStatus
 // Cambia `premiumStatus` de un hogar a uno de 6 valores válidos y propaga el
 // cambio a `homes/{homeId}/views/dashboard.premiumFlags` de forma coherente.
 // Solo el owner puede llamarla. Pensado exclusivamente para QA/desarrollo.
+// Gate: permitido si (FUNCTIONS_EMULATOR==="true") O el uid del caller está
+// en la env var DEBUG_PREMIUM_ALLOWED_UIDS (CSV de UIDs). Si la env var no
+// está definida o está vacía, la función solo funciona en emulador.
 // Input:  { homeId: string, status: "free" | "active" | "cancelledPendingEnd"
 //          | "rescue" | "expiredFree" | "restorable" }
 // Output: { ok: true }
-// ---------------------------------------------------------------------------
+// ===========================================================================
 const DEBUG_VALID_STATUSES = [
   "free",
   "active",
@@ -991,10 +1010,18 @@ const DEBUG_VALID_STATUSES = [
 type DebugPremiumStatus = typeof DEBUG_VALID_STATUSES[number];
 
 export const debugSetPremiumStatus = onCall(async (request) => {
-  if (process.env.FUNCTIONS_EMULATOR !== "true") {
+  const allowedUids = parseDebugPremiumAllowedUids(
+    process.env.DEBUG_PREMIUM_ALLOWED_UIDS
+  );
+  const allowed = isDebugPremiumAllowed(
+    process.env.FUNCTIONS_EMULATOR,
+    request.auth?.uid,
+    allowedUids
+  );
+  if (!allowed) {
     throw new HttpsError(
       "permission-denied",
-      "Debug operations only available in emulator"
+      "Debug operations only available in emulator or for allowed users"
     );
   }
 

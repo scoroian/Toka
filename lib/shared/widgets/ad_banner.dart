@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import 'ad_banner_config_provider.dart';
+import 'keyboard_visible_provider.dart';
 
 // Test unit IDs oficiales de Google. Nunca generan revenue y son seguros
 // de usar en dev. En producción se sobreescriben por el unitId del dashboard.
@@ -122,6 +123,14 @@ class _AdBannerState extends ConsumerState<AdBanner> {
     ref.listen<AdBannerConfig>(adBannerConfigProvider, (prev, next) {
       _syncWithConfig(next);
     });
+
+    // Política AdMob (spec 2026-04-21): ocultamos el banner mientras el
+    // teclado está visible para que no quede pegado al campo enfocado.
+    // Mantenemos el BannerAd cargado y el timer de 60s activo: al cerrar
+    // el teclado el banner reaparece al instante sin malgastar impresión.
+    if (ref.watch(keyboardVisibleProvider)) {
+      return const SizedBox.shrink();
+    }
 
     final config = ref.watch(adBannerConfigProvider);
     // Inicializar el banner en el primer build si procede.

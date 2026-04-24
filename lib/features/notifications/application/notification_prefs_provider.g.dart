@@ -215,6 +215,28 @@ final fcmTokenInitProvider = Provider<void>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef FcmTokenInitRef = ProviderRef<void>;
+String _$systemNotificationsAuthorizedHash() =>
+    r'a2ac1ad3aa809d5d355a4eeccb52ad957f08e473';
+
+/// Estado actual del permiso de notificaciones a nivel de sistema operativo.
+/// Se invalida manualmente al volver al foreground para forzar una relectura.
+///
+/// Copied from [systemNotificationsAuthorized].
+@ProviderFor(systemNotificationsAuthorized)
+final systemNotificationsAuthorizedProvider =
+    AutoDisposeFutureProvider<bool>.internal(
+  systemNotificationsAuthorized,
+  name: r'systemNotificationsAuthorizedProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$systemNotificationsAuthorizedHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef SystemNotificationsAuthorizedRef = AutoDisposeFutureProviderRef<bool>;
 String _$notificationPrefsNotifierHash() =>
     r'16ac310942a5e4d4e590d010a5a19fba917a62f7';
 

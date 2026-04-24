@@ -213,6 +213,12 @@
   "@homes_manage_subscription": { "description": "Manage subscription button" },
   "homes_members": "Members",
   "@homes_members": { "description": "Members section label" },
+  "homes_manage_members": "Manage members",
+  "@homes_manage_members": { "description": "Manage members tile in home settings (opens MembersScreen)" },
+  "homes_payer_info_body": "Your account is paying for this home's Premium.",
+  "@homes_payer_info_body": { "description": "Subtle info shown to payer in home settings" },
+  "homes_payer_info_action": "Manage in Settings",
+  "@homes_payer_info_action": { "description": "Link to Settings → Manage subscription from payer info tile" },
   "homes_invite_code": "Invite code",
   "@homes_invite_code": { "description": "Invite code section label" },
   "homes_generate_code": "Generate code",
@@ -611,6 +617,64 @@
   },
   "rescue_banner_renew": "Renew",
   "@rescue_banner_renew": { "description": "Rescue banner renew button" },
+  "rescue_banner_title": "Your Premium expires in {days} days — renew to keep your features",
+  "@rescue_banner_title": {
+    "description": "Rescue banner title when >=1 day left",
+    "placeholders": { "days": { "type": "int" } }
+  },
+  "rescue_banner_last_day": "Your Premium expires today. Renew before midnight.",
+  "@rescue_banner_last_day": { "description": "Rescue banner title when <1 day left" },
+  "rescue_banner_hours_left": "{hours} hours left",
+  "@rescue_banner_hours_left": {
+    "description": "Countdown in hours when less than a day remains",
+    "placeholders": { "hours": { "type": "int" } }
+  },
+  "rescue_last_billing_error_title": "Last billing attempt",
+  "@rescue_last_billing_error_title": { "description": "Section header for last billing error" },
+  "cancelled_ends_banner_title": "Won't renew after {date}. You can reactivate any time.",
+  "@cancelled_ends_banner_title": {
+    "description": "Banner for cancelledPendingEnd state",
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "cancelled_ends_banner_cta": "Reactivate renewal",
+  "@cancelled_ends_banner_cta": { "description": "CTA on cancelledPendingEnd banner" },
+  "expired_free_banner_title": "Your Premium expired on {date}. Reactivate whenever you want.",
+  "@expired_free_banner_title": {
+    "description": "Banner for expiredFree state",
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "expired_free_banner_cta": "Reactivate Premium",
+  "@expired_free_banner_cta": { "description": "CTA on expiredFree banner" },
+  "restorable_banner_title": "You can restore your Premium until {date}",
+  "@restorable_banner_title": {
+    "description": "Banner for restorable state",
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "restorable_banner_cta": "Restore",
+  "@restorable_banner_cta": { "description": "CTA on restorable banner" },
+  "paywall_title_from_expired": "Reactivate Premium",
+  "@paywall_title_from_expired": { "description": "Paywall title when coming from expiredFree" },
+  "paywall_subtitle_from_expired": "Your Premium expired on {date}. Reactivate whenever you want.",
+  "@paywall_subtitle_from_expired": {
+    "description": "Paywall subtitle when coming from expiredFree",
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "paywall_title_from_rescue": "Renew before losing your features",
+  "@paywall_title_from_rescue": { "description": "Paywall title when coming from rescue" },
+  "paywall_subtitle_from_rescue": "{days} days left to renew.",
+  "@paywall_subtitle_from_rescue": {
+    "description": "Paywall subtitle when coming from rescue",
+    "placeholders": { "days": { "type": "int" } }
+  },
+  "paywall_title_from_restorable": "Restore your Premium",
+  "@paywall_title_from_restorable": { "description": "Paywall title when coming from restorable" },
+  "paywall_subtitle_from_restorable": "{days} days left in the restoration window.",
+  "@paywall_subtitle_from_restorable": {
+    "description": "Paywall subtitle when coming from restorable",
+    "placeholders": { "days": { "type": "int" } }
+  },
+  "paywall_cta_reactivate": "Reactivate Premium",
+  "@paywall_cta_reactivate": { "description": "Paywall primary CTA when reactivating" },
   "subscription_management_title": "Your subscription",
   "@subscription_management_title": { "description": "Subscription management screen title" },
   "subscription_status_active": "Premium active",
@@ -640,6 +704,61 @@
   "@subscription_restore_expired_error": { "description": "Restore window expired error" },
   "subscription_plan_downgrade": "Plan downgrade",
   "@subscription_plan_downgrade": { "description": "Plan downgrade button" },
+  "subscription_free_benefits_title": "Unlock with Premium",
+  "@subscription_free_benefits_title": { "description": "Free plan benefits section title" },
+  "subscription_counter_members": "{used}/{max} members",
+  "@subscription_counter_members": {
+    "description": "Usage counter for members",
+    "placeholders": { "used": { "type": "int" }, "max": { "type": "int" } }
+  },
+  "subscription_counter_tasks": "{used}/{max} automatic tasks",
+  "@subscription_counter_tasks": {
+    "description": "Usage counter for automatic tasks",
+    "placeholders": { "used": { "type": "int" }, "max": { "type": "int" } }
+  },
+  "subscription_next_renewal": "Next renewal: {date}",
+  "@subscription_next_renewal": {
+    "description": "Next renewal date",
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "subscription_no_auto_renew": "Will not renew automatically",
+  "@subscription_no_auto_renew": { "description": "Auto-renew disabled notice" },
+  "subscription_premium_until": "Premium until {date}",
+  "@subscription_premium_until": {
+    "description": "Premium valid until date",
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "subscription_expired_on": "Premium expired on {date}",
+  "@subscription_expired_on": {
+    "description": "Premium expired on date",
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "subscription_restorable_until": "You can restore Premium until {date} ({days} days left)",
+  "@subscription_restorable_until": {
+    "description": "Restorable premium with days left",
+    "placeholders": { "date": { "type": "String" }, "days": { "type": "int" } }
+  },
+  "subscription_rescue_warning": "Your Premium expires in {days} days — renew to keep your features",
+  "@subscription_rescue_warning": {
+    "description": "Rescue warning message",
+    "placeholders": { "days": { "type": "int" } }
+  },
+  "subscription_manage_billing": "Manage billing",
+  "@subscription_manage_billing": { "description": "Manage billing button" },
+  "subscription_cancel_renewal": "Cancel renewal",
+  "@subscription_cancel_renewal": { "description": "Cancel auto-renewal button" },
+  "subscription_reactivate_renewal": "Reactivate renewal",
+  "@subscription_reactivate_renewal": { "description": "Reactivate auto-renewal button" },
+  "subscription_change_plan": "Change plan",
+  "@subscription_change_plan": { "description": "Change plan button" },
+  "subscription_reactivate_premium": "Reactivate Premium",
+  "@subscription_reactivate_premium": { "description": "Reactivate premium button" },
+  "subscription_payer_label": "Payer",
+  "@subscription_payer_label": { "description": "Payer label" },
+  "subscription_payer_you": "you",
+  "@subscription_payer_you": { "description": "Self payer label" },
+  "subscription_payer_other": "another member",
+  "@subscription_payer_other": { "description": "Other payer placeholder" },
   "downgrade_planner_title": "Plan downgrade",
   "@downgrade_planner_title": { "description": "Downgrade planner screen title" },
   "downgrade_planner_members_section": "Which members will continue?",
@@ -974,5 +1093,87 @@
   "recurrence_one_time": "One-time",
   "@recurrence_one_time": { "description": "Chip label for one-time tasks" },
   "recurrence_one_time_help": "Completed only once and disappears from the list.",
-  "@recurrence_one_time_help": { "description": "Helper text below the Puntual chip" }
+  "@recurrence_one_time_help": { "description": "Helper text below the Puntual chip" },
+  "notifRationaleTitle": "Toka will only ping you about what matters",
+  "@notifRationaleTitle": { "description": "Title shown in the onboarding notification rationale screen" },
+  "notifRationaleBullet1": "New tasks assigned to you",
+  "@notifRationaleBullet1": { "description": "Rationale bullet 1: new task assigned" },
+  "notifRationaleBullet2": "Turn changes",
+  "@notifRationaleBullet2": { "description": "Rationale bullet 2: turn changes" },
+  "notifRationaleBullet3": "Reviews you receive",
+  "@notifRationaleBullet3": { "description": "Rationale bullet 3: reviews received" },
+  "notifRationaleCtaEnable": "Enable notifications",
+  "@notifRationaleCtaEnable": { "description": "Primary CTA that triggers the system prompt" },
+  "notifRationaleCtaLater": "Not now",
+  "@notifRationaleCtaLater": { "description": "Secondary CTA that skips the prompt" },
+  "notifSystemBlockedBanner": "Notifications are blocked by the system. Enable permissions in Android settings to receive Toka alerts.",
+  "@notifSystemBlockedBanner": { "description": "Banner shown when the OS-level notification permission is denied" },
+  "notifSystemBlockedAction": "Open settings",
+  "@notifSystemBlockedAction": { "description": "Button that opens the system notification settings screen" },
+
+  "notifTestSectionTitle": "Test notifications",
+  "@notifTestSectionTitle": { "description": "Section title in Notification Settings (debug only)" },
+  "notifTestSectionHint": "Send a sample of each type to preview how they look.",
+  "@notifTestSectionHint": { "description": "Explanation below the Test notifications section title" },
+  "notifTestDeadline": "Test \"Task due soon\"",
+  "@notifTestDeadline": {},
+  "notifTestAssignment": "Test \"Task assigned\"",
+  "@notifTestAssignment": {},
+  "notifTestReminder": "Test \"Reminder\"",
+  "@notifTestReminder": {},
+  "notifTestDailySummary": "Test \"Daily summary\"",
+  "@notifTestDailySummary": {},
+  "notifTestFeedback": "Test \"Feedback received\"",
+  "@notifTestFeedback": {},
+  "notifTestRotation": "Test \"Rotation change\"",
+  "@notifTestRotation": {},
+  "notifTestSent": "Test notification sent",
+  "@notifTestSent": { "description": "SnackBar shown after a test notification is dispatched" },
+
+  "historyEventDetailTitle": "Event detail",
+  "@historyEventDetailTitle": { "description": "AppBar title for the history event detail screen" },
+  "historyEventUnknownMember": "unknown member",
+  "@historyEventUnknownMember": { "description": "Fallback label when a member UID cannot be resolved" },
+  "noReviewsOnEvent": "No reviews yet for this event",
+  "@noReviewsOnEvent": { "description": "Empty state when the event has no reviews yet" },
+  "reviewByLabel": "Review by {name}",
+  "@reviewByLabel": {
+    "description": "Review author header",
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "reviewPrivateNoteLabel": "Private note",
+  "@reviewPrivateNoteLabel": { "description": "Label above the private note content" },
+  "reviewPrivateNoteHint": "Only you and {name} can see this note",
+  "@reviewPrivateNoteHint": {
+    "description": "Helper text indicating who can read the private note",
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "memberProfileLastReviews": "Latest reviews",
+  "@memberProfileLastReviews": { "description": "Section title on member profile listing recent reviews" },
+
+  "daysUntil": "{count, plural, =0{today} =1{in 1 day} other{in {count} days}}",
+  "@daysUntil": {
+    "description": "Relative days counter used in task previews",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "tasksActiveCount": "{count, plural, =0{no active tasks} =1{1 active task} other{{count} active tasks}}",
+  "@tasksActiveCount": {
+    "description": "Active task count label",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "membersCount": "{count, plural, =0{no members} =1{1 member} other{{count} members}}",
+  "@membersCount": {
+    "description": "Members count label",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "daysLeft": "{count, plural, =0{last day} =1{1 day left} other{{count} days left}}",
+  "@daysLeft": {
+    "description": "Countdown days remaining",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "reviewsCount": "{count, plural, =0{no reviews} =1{1 review} other{{count} reviews}}",
+  "@reviewsCount": {
+    "description": "Reviews count label",
+    "placeholders": { "count": { "type": "int" } }
+  }
 }

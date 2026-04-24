@@ -13,6 +13,12 @@ class FShadows {
   static const List<BoxShadow> glowCyan = [
     BoxShadow(color: Color(0x5938BDF8), blurRadius: 40, offset: Offset(0, 20)),
   ];
+
+  /// Versión suavizada para fondos claros — sobre blanco un glow 35% satura.
+  static const List<BoxShadow> glowCyanLight = [
+    BoxShadow(color: Color(0x3338BDF8), blurRadius: 28, offset: Offset(0, 10)),
+  ];
+
   static const List<BoxShadow> glowGold = [
     BoxShadow(color: Color(0x80F5B544), blurRadius: 30, offset: Offset(0, 10)),
   ];

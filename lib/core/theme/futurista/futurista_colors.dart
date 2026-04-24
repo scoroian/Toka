@@ -23,7 +23,13 @@ abstract class FuturistaColors {
   static const error           = Color(0xFFFB7185);
 
   // Light alternativo (más frío que el v2)
-  static const bgLight         = Color(0xFFF6F7FB);
-  static const surfaceLight    = Color(0xFFFFFFFF);
-  static const textPrimLight   = Color(0xFF0B1220);
+  static const bgLight           = Color(0xFFF6F7FB);
+  static const surfaceLight      = Color(0xFFFFFFFF);
+  static const surfaceVariantLight = Color(0xFFEEF2F7); // usada para inputs
+  static const textPrimLight     = Color(0xFF0B1220);
+  static const textSecondaryLight = Color(0xA30B1220); // 64%
+  static const textTertiaryLight = Color(0x6B0B1220); // 42%
+  static const textFaintLight    = Color(0x380B1220); // 22%
+  static const lineLight         = Color(0x14000000); //  8% negro
+  static const lineStrongLight   = Color(0x29000000); // 16% negro
 }

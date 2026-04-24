@@ -3369,6 +3369,42 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'{count, plural, =0{sin valoraciones} =1{1 valoración} other{{count} valoraciones}}'**
   String reviewsCount(int count);
+
+  /// Header of the appearance section in settings
+  ///
+  /// In es, this message translates to:
+  /// **'Aspecto'**
+  String get settingsAppearanceTitle;
+
+  /// Short description of the appearance section in settings
+  ///
+  /// In es, this message translates to:
+  /// **'Elige cómo se ve Toka'**
+  String get settingsAppearanceSubtitle;
+
+  /// Name of the classic (v2) skin
+  ///
+  /// In es, this message translates to:
+  /// **'Clásico'**
+  String get skinClassicLabel;
+
+  /// Short description of the classic (v2) skin
+  ///
+  /// In es, this message translates to:
+  /// **'Cálido, luminoso, familiar'**
+  String get skinClassicDescription;
+
+  /// Name of the futurist skin
+  ///
+  /// In es, this message translates to:
+  /// **'Futurista'**
+  String get skinFuturistaLabel;
+
+  /// Short description of the futurist skin
+  ///
+  /// In es, this message translates to:
+  /// **'Oscuro, espacial, minimalista'**
+  String get skinFuturistaDescription;
 }
 
 class _AppLocalizationsDelegate

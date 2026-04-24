@@ -1175,5 +1175,17 @@
   "@reviewsCount": {
     "description": "Reviews count label",
     "placeholders": { "count": { "type": "int" } }
-  }
+  },
+  "settingsAppearanceTitle": "Aspect",
+  "@settingsAppearanceTitle": { "description": "Header of the appearance section in settings" },
+  "settingsAppearanceSubtitle": "Alege cum arată Toka",
+  "@settingsAppearanceSubtitle": { "description": "Short description of the appearance section in settings" },
+  "skinClassicLabel": "Clasic",
+  "@skinClassicLabel": { "description": "Name of the classic (v2) skin" },
+  "skinClassicDescription": "Cald, luminos, familiar",
+  "@skinClassicDescription": { "description": "Short description of the classic (v2) skin" },
+  "skinFuturistaLabel": "Futurist",
+  "@skinFuturistaLabel": { "description": "Name of the futurist skin" },
+  "skinFuturistaDescription": "Întunecat, cosmic, minimalist",
+  "@skinFuturistaDescription": { "description": "Short description of the futurist skin" }
 }

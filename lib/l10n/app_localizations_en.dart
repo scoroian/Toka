@@ -1842,4 +1842,22 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get settingsAppearanceTitle => 'Appearance';
+
+  @override
+  String get settingsAppearanceSubtitle => 'Choose how Toka looks';
+
+  @override
+  String get skinClassicLabel => 'Classic';
+
+  @override
+  String get skinClassicDescription => 'Warm, bright, familiar';
+
+  @override
+  String get skinFuturistaLabel => 'Futurist';
+
+  @override
+  String get skinFuturistaDescription => 'Dark, cosmic, minimalist';
 }

@@ -197,13 +197,6 @@ class SettingsScreen extends ConsumerWidget {
 
           // ── Apariencia ───────────────────────────────────────────────
           _SectionHeader(key: const Key('settings_section_appearance'), title: l10n.appearance),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
-            child: Text(
-              l10n.settingsAppearanceSubtitle,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-          ),
           const AppearancePicker(key: Key('settings_appearance_picker')),
           const _ThemeModeSelector(key: Key('settings_theme_mode')),
           const Divider(),

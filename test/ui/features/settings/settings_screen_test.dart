@@ -123,6 +123,11 @@ void main() {
   testWidgets('SettingsScreen renderiza sección Suscripción', (tester) async {
     await tester.pumpWidget(_wrap());
     await tester.pumpAndSettle();
+    await tester.dragUntilVisible(
+      find.byKey(const Key('settings_section_subscription')),
+      find.byType(ListView),
+      const Offset(0, -200),
+    );
     expect(find.byKey(const Key('settings_section_subscription')), findsOneWidget);
   });
 
@@ -135,6 +140,11 @@ void main() {
       ),
     ));
     await tester.pumpAndSettle();
+    await tester.dragUntilVisible(
+      find.byKey(const Key('subscription_status_label')),
+      find.byType(ListView),
+      const Offset(0, -200),
+    );
     expect(find.byKey(const Key('subscription_status_label')), findsOneWidget);
     expect(find.text('Plan Premium'), findsOneWidget);
   });
@@ -142,6 +152,11 @@ void main() {
   testWidgets('SettingsScreen muestra "Plan gratuito" cuando no hay Premium', (tester) async {
     await tester.pumpWidget(_wrap());
     await tester.pumpAndSettle();
+    await tester.dragUntilVisible(
+      find.byKey(const Key('subscription_status_label')),
+      find.byType(ListView),
+      const Offset(0, -200),
+    );
     expect(find.byKey(const Key('subscription_status_label')), findsOneWidget);
     expect(find.text('Plan gratuito'), findsOneWidget);
   });

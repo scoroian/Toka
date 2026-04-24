@@ -43,15 +43,15 @@ import 'features/notifications/application/notification_tap_handler.dart';
 import 'features/notifications/presentation/notification_settings_screen.dart';
 import 'features/settings/presentation/settings_screen.dart';
 import 'l10n/app_localizations.dart';
-import 'features/tasks/presentation/skins/today_screen_v2.dart';
-import 'features/tasks/presentation/skins/all_tasks_screen_v2.dart';
+import 'features/tasks/presentation/skins/all_tasks_screen.dart';
+import 'features/tasks/presentation/skins/today_screen.dart';
 import 'features/tasks/presentation/skins/task_detail_screen_v2.dart';
 import 'features/tasks/presentation/skins/create_edit_task_screen_v2.dart';
 import 'features/history/presentation/history_event_detail_screen.dart';
 import 'features/history/presentation/skins/history_screen_v2.dart';
 import 'features/members/presentation/skins/member_profile_screen_v2.dart';
 import 'shared/widgets/keyboard_visible_provider.dart';
-import 'shared/widgets/skins/main_shell_v2.dart';
+import 'shared/widgets/skins/main_shell_root.dart';
 
 part 'app.g.dart';
 
@@ -197,13 +197,13 @@ GoRouter appRouter(AppRouterRef ref) {
         builder: (_, __) => const NotificationRationaleScreen(),
       ),
 
-      // ── Shell principal con NavigationBar ──────────────────────────
+      // ── Shell principal (v2 NavigationBar / futurista TockaTabBar) ──
       ShellRoute(
-        builder: (context, state, child) => MainShellV2(child: child),
+        builder: (context, state, child) => MainShellRoot(child: child),
         routes: [
           GoRoute(
             path: AppRoutes.home,
-            builder: (_, __) => const TodayScreenV2(),
+            builder: (_, __) => const TodayScreen(),
           ),
           GoRoute(
             path: AppRoutes.history,
@@ -227,7 +227,7 @@ GoRouter appRouter(AppRouterRef ref) {
           ),
           GoRoute(
             path: AppRoutes.tasks,
-            builder: (_, __) => const AllTasksScreenV2(),
+            builder: (_, __) => const AllTasksScreen(),
             routes: [
               // 'new' debe ir ANTES de ':id' para que /tasks/new no sea
               // capturado por el parámetro :id (Bug #32).

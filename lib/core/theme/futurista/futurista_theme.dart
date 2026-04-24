@@ -71,11 +71,11 @@ abstract class FuturistaTheme {
     return base.copyWith(
       colorScheme: const ColorScheme(
         brightness: Brightness.light,
-        primary: FuturistaColors.primary,
-        onPrimary: FuturistaColors.onPrimary,
+        primary: FuturistaColors.primaryLight,
+        onPrimary: FuturistaColors.surfaceLight,
         secondary: FuturistaColors.primaryAlt,
-        onSecondary: FuturistaColors.onPrimary,
-        error: FuturistaColors.error,
+        onSecondary: FuturistaColors.surfaceLight,
+        error: FuturistaColors.errorLight,
         onError: FuturistaColors.surfaceLight,
         surface: FuturistaColors.surfaceLight,
         onSurface: FuturistaColors.textPrimLight,
@@ -101,9 +101,9 @@ abstract class FuturistaTheme {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: FuturistaColors.primary,
-          foregroundColor: FuturistaColors.onPrimary,
-          shadowColor: const Color(0x3338BDF8),
+          backgroundColor: FuturistaColors.primaryLight,
+          foregroundColor: FuturistaColors.surfaceLight,
+          shadowColor: const Color(0x330284C7),
           elevation: 4,
           textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -123,7 +123,7 @@ abstract class FuturistaTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: FuturistaColors.primary, width: 1.5),
+          borderSide: const BorderSide(color: FuturistaColors.primaryLight, width: 1.5),
         ),
       ),
     );

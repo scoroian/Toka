@@ -53,5 +53,21 @@ void main() {
       expect(FuturistaColors.surfaceLight, isNot(FuturistaColors.bg1));
       expect(FuturistaColors.textPrimLight, isNot(FuturistaColors.textPrimary));
     });
+
+    testWidgets('dark primary is electric cyan', (tester) async {
+      final t = await capturedTheme(tester, FuturistaTheme.dark);
+      expect(t.colorScheme.primary, FuturistaColors.primary);
+    });
+
+    testWidgets('light primary is darker cyan for contrast on light bg',
+        (tester) async {
+      final t = await capturedTheme(tester, FuturistaTheme.light);
+      expect(t.colorScheme.primary, FuturistaColors.primaryLight);
+    });
+
+    testWidgets('secondary violet is identical in both modes', (tester) async {
+      final dark = await capturedTheme(tester, FuturistaTheme.dark);
+      expect(dark.colorScheme.secondary, FuturistaColors.primaryAlt);
+    });
   });
 }

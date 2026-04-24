@@ -15,8 +15,9 @@ class FShadows {
   ];
 
   /// Versión suavizada para fondos claros — sobre blanco un glow 35% satura.
+  /// Cyan más oscuro (#0284C7) en light mode alineado con el canvas.
   static const List<BoxShadow> glowCyanLight = [
-    BoxShadow(color: Color(0x3338BDF8), blurRadius: 28, offset: Offset(0, 10)),
+    BoxShadow(color: Color(0x330284C7), blurRadius: 28, offset: Offset(0, 10)),
   ];
 
   static const List<BoxShadow> glowGold = [

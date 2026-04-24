@@ -32,4 +32,13 @@ abstract class FuturistaColors {
   static const textFaintLight    = Color(0x380B1220); // 22%
   static const lineLight         = Color(0x14000000); //  8% negro
   static const lineStrongLight   = Color(0x29000000); // 16% negro
+
+  // Accents light (tomados de tokens.jsx del canvas).
+  // El cyan dark #38BDF8 satura en fondos claros; el canvas usa un cyan más
+  // oscuro para mantener contraste AA sin perder identidad.
+  static const primaryLight   = Color(0xFF0284C7);
+  static const successLight   = Color(0xFF059669);
+  static const warningLight   = Color(0xFFB45309);
+  static const errorLight     = Color(0xFFE11D48);
+  static const premiumLight   = Color(0xFFB45309);
 }

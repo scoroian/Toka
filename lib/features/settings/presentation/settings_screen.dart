@@ -16,6 +16,7 @@ import '../../members/domain/member.dart';
 import '../../homes/domain/home_membership.dart';
 import '../application/settings_view_model.dart';
 import '../../../core/theme/theme_mode_provider.dart';
+import 'widgets/appearance_picker.dart';
 
 /// Caso B/D — transfiere ownership y luego abandona el hogar.
 Future<void> _transferAndLeave(
@@ -196,6 +197,14 @@ class SettingsScreen extends ConsumerWidget {
 
           // ── Apariencia ───────────────────────────────────────────────
           _SectionHeader(key: const Key('settings_section_appearance'), title: l10n.appearance),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+            child: Text(
+              l10n.settingsAppearanceSubtitle,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ),
+          const AppearancePicker(key: Key('settings_appearance_picker')),
           const _ThemeModeSelector(key: Key('settings_theme_mode')),
           const Divider(),
 

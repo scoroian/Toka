@@ -10,7 +10,10 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'core/constants/routes.dart';
 import 'core/services/locale_service.dart';
+import 'core/theme/app_skin.dart';
 import 'core/theme/app_theme_v2.dart';
+import 'core/theme/futurista/futurista_theme.dart';
+import 'core/theme/skin_provider.dart';
 import 'core/theme/theme_mode_provider.dart';
 import 'features/auth/application/auth_provider.dart';
 import 'features/auth/application/auth_state.dart';
@@ -422,6 +425,11 @@ class _TokaAppState extends ConsumerState<TokaApp>
     final locale = ref.watch(localeNotifierProvider);
     final router = ref.watch(appRouterProvider);
     final themeMode = ref.watch(themeModeNotifierProvider);
+    final skin = ref.watch(skinModeProvider);
+    final (lightTheme, darkTheme) = switch (skin) {
+      AppSkin.v2        => (AppThemeV2.light,   AppThemeV2.dark),
+      AppSkin.futurista => (FuturistaTheme.light, FuturistaTheme.dark),
+    };
 
     return KeyboardVisibilityBuilder(
       builder: (context, keyboardVisible) {
@@ -443,8 +451,8 @@ class _TokaAppState extends ConsumerState<TokaApp>
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
-          theme: AppThemeV2.light,
-          darkTheme: AppThemeV2.dark,
+          theme: lightTheme,
+          darkTheme: darkTheme,
           themeMode: themeMode,
           routerConfig: router,
         );

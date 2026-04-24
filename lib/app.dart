@@ -28,9 +28,10 @@ import 'features/homes/presentation/home_settings_screen.dart';
 import 'features/homes/presentation/my_homes_screen.dart';
 import 'features/onboarding/presentation/notification_rationale_screen.dart';
 import 'features/onboarding/presentation/onboarding_flow_screen.dart';
-import 'features/members/presentation/skins/members_screen_v2.dart';
+import 'features/members/presentation/skins/member_profile_screen.dart';
+import 'features/members/presentation/skins/members_screen.dart';
 import 'features/members/presentation/vacation_screen.dart';
-import 'features/profile/presentation/skins/own_profile_screen_v2.dart';
+import 'features/profile/presentation/skins/own_profile_screen.dart';
 import 'features/profile/presentation/edit_profile_screen.dart';
 import 'features/subscription/presentation/paywall_entry_context.dart';
 import 'features/subscription/presentation/paywall_screen.dart';
@@ -45,11 +46,10 @@ import 'features/settings/presentation/settings_screen.dart';
 import 'l10n/app_localizations.dart';
 import 'features/tasks/presentation/skins/all_tasks_screen.dart';
 import 'features/tasks/presentation/skins/today_screen.dart';
-import 'features/tasks/presentation/skins/task_detail_screen_v2.dart';
-import 'features/tasks/presentation/skins/create_edit_task_screen_v2.dart';
+import 'features/tasks/presentation/skins/task_detail_screen.dart';
+import 'features/tasks/presentation/skins/create_edit_task_screen.dart';
 import 'features/history/presentation/history_event_detail_screen.dart';
-import 'features/history/presentation/skins/history_screen_v2.dart';
-import 'features/members/presentation/skins/member_profile_screen_v2.dart';
+import 'features/history/presentation/skins/history_screen.dart';
 import 'shared/widgets/keyboard_visible_provider.dart';
 import 'shared/widgets/skins/main_shell_root.dart';
 
@@ -207,11 +207,11 @@ GoRouter appRouter(AppRouterRef ref) {
           ),
           GoRoute(
             path: AppRoutes.history,
-            builder: (_, __) => const HistoryScreenV2(),
+            builder: (_, __) => const HistoryScreen(),
           ),
           GoRoute(
             path: AppRoutes.members,
-            builder: (_, __) => const MembersScreenV2(),
+            builder: (_, __) => const MembersScreen(),
             routes: [
               GoRoute(
                 path: ':uid',
@@ -219,7 +219,7 @@ GoRouter appRouter(AppRouterRef ref) {
                   final uid = state.pathParameters['uid']!;
                   final extra = state.extra as Map<String, dynamic>?;
                   final homeId = extra?['homeId'] as String? ?? '';
-                  return MemberProfileScreenV2(
+                  return MemberProfileScreen(
                       homeId: homeId, memberUid: uid);
                 },
               ),
@@ -236,20 +236,20 @@ GoRouter appRouter(AppRouterRef ref) {
               // recargas que Google AdMob podría penalizar.
               GoRoute(
                 path: 'new',
-                builder: (_, __) => const CreateEditTaskScreenV2(),
+                builder: (_, __) => const CreateEditTaskScreen(),
               ),
               GoRoute(
                 path: ':id',
                 builder: (context, state) {
                   final id = state.pathParameters['id']!;
-                  return TaskDetailScreenV2(taskId: id);
+                  return TaskDetailScreen(taskId: id);
                 },
                 routes: [
                   GoRoute(
                     path: 'edit',
                     builder: (context, state) {
                       final id = state.pathParameters['id']!;
-                      return CreateEditTaskScreenV2(editTaskId: id);
+                      return CreateEditTaskScreen(editTaskId: id);
                     },
                   ),
                 ],
@@ -287,7 +287,7 @@ GoRouter appRouter(AppRouterRef ref) {
       ),
       GoRoute(
         path: AppRoutes.profile,
-        builder: (_, __) => const OwnProfileScreenV2(),
+        builder: (_, __) => const OwnProfileScreen(),
       ),
       GoRoute(
         path: AppRoutes.editProfile,

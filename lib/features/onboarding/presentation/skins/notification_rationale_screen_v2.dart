@@ -1,4 +1,4 @@
-// lib/features/onboarding/presentation/notification_rationale_screen.dart
+// lib/features/onboarding/presentation/skins/notification_rationale_screen_v2.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -7,10 +7,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../core/constants/routes.dart';
-import '../../../l10n/app_localizations.dart';
-import '../../notifications/application/fcm_token_service.dart';
-import '../../notifications/application/notification_prefs_provider.dart';
+import '../../../../core/constants/routes.dart';
+import '../../../../l10n/app_localizations.dart';
+import '../../../notifications/application/fcm_token_service.dart';
+import '../../../notifications/application/notification_prefs_provider.dart';
 
 /// Key used in SharedPreferences to avoid showing the rationale screen twice
 /// within the same installation.
@@ -59,16 +59,16 @@ Future<void> _persistSystemAuthorized(bool authorized) async {
   }
 }
 
-class NotificationRationaleScreen extends ConsumerStatefulWidget {
-  const NotificationRationaleScreen({super.key});
+class NotificationRationaleScreenV2 extends ConsumerStatefulWidget {
+  const NotificationRationaleScreenV2({super.key});
 
   @override
-  ConsumerState<NotificationRationaleScreen> createState() =>
-      _NotificationRationaleScreenState();
+  ConsumerState<NotificationRationaleScreenV2> createState() =>
+      _NotificationRationaleScreenV2State();
 }
 
-class _NotificationRationaleScreenState
-    extends ConsumerState<NotificationRationaleScreen> {
+class _NotificationRationaleScreenV2State
+    extends ConsumerState<NotificationRationaleScreenV2> {
   bool _busy = false;
 
   FcmTokenService _service() => FcmTokenService(

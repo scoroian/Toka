@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../../../l10n/app_localizations.dart';
-import '../widgets/home_join_form.dart';
+import '../../../../../l10n/app_localizations.dart';
+import '../../widgets/home_join_form.dart';
 
 enum _HomeChoice { none, create, join }
 
-class HomeChoiceStep extends StatefulWidget {
-  const HomeChoiceStep({
+class HomeChoiceStepV2 extends StatefulWidget {
+  const HomeChoiceStepV2({
     super.key,
     required this.isLoading,
     required this.error,
@@ -23,10 +23,10 @@ class HomeChoiceStep extends StatefulWidget {
   final VoidCallback onPrev;
 
   @override
-  State<HomeChoiceStep> createState() => _HomeChoiceStepState();
+  State<HomeChoiceStepV2> createState() => _HomeChoiceStepV2State();
 }
 
-class _HomeChoiceStepState extends State<HomeChoiceStep> {
+class _HomeChoiceStepV2State extends State<HomeChoiceStepV2> {
   _HomeChoice _choice = _HomeChoice.none;
   final _formKey = GlobalKey<FormState>();
   final _nameCtrl = TextEditingController();

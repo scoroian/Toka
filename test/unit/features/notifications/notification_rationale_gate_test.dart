@@ -3,7 +3,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:toka/features/onboarding/presentation/notification_rationale_screen.dart';
+import 'package:toka/features/onboarding/presentation/skins/notification_rationale_screen_v2.dart';
 
 class _MockMessaging extends Mock implements FirebaseMessaging {}
 

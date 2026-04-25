@@ -3,16 +3,16 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/utils/toka_dates.dart';
-import '../../../l10n/app_localizations.dart';
-import '../../auth/application/auth_provider.dart';
-import '../../members/application/members_provider.dart';
-import '../../members/domain/member.dart';
-import '../application/history_event_detail_provider.dart';
-import '../domain/task_event.dart';
+import '../../../../core/utils/toka_dates.dart';
+import '../../../../l10n/app_localizations.dart';
+import '../../../auth/application/auth_provider.dart';
+import '../../../members/application/members_provider.dart';
+import '../../../members/domain/member.dart';
+import '../../application/history_event_detail_provider.dart';
+import '../../domain/task_event.dart';
 
-class HistoryEventDetailScreen extends ConsumerWidget {
-  const HistoryEventDetailScreen({
+class HistoryEventDetailScreenV2 extends ConsumerWidget {
+  const HistoryEventDetailScreenV2({
     super.key,
     required this.homeId,
     required this.eventId,

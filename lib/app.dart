@@ -26,29 +26,29 @@ import 'features/auth/presentation/verify_email_screen.dart';
 import 'features/i18n/application/locale_provider.dart';
 import 'features/homes/presentation/skins/home_settings_screen.dart';
 import 'features/homes/presentation/skins/my_homes_screen.dart';
-import 'features/onboarding/presentation/notification_rationale_screen.dart';
+import 'features/onboarding/presentation/skins/notification_rationale_screen_v2.dart';
 import 'features/onboarding/presentation/onboarding_flow_screen.dart';
 import 'features/members/presentation/skins/member_profile_screen.dart';
 import 'features/members/presentation/skins/members_screen.dart';
-import 'features/members/presentation/vacation_screen.dart';
+import 'features/members/presentation/skins/vacation_screen_v2.dart';
 import 'features/profile/presentation/skins/own_profile_screen.dart';
 import 'features/profile/presentation/skins/edit_profile_screen.dart';
 import 'features/subscription/presentation/paywall_entry_context.dart';
 import 'features/subscription/presentation/skins/paywall_screen.dart';
 import 'features/subscription/presentation/skins/subscription_management_screen.dart';
 import 'features/subscription/presentation/skins/rescue_screen.dart';
-import 'features/subscription/presentation/downgrade_planner_screen.dart';
+import 'features/subscription/presentation/skins/downgrade_planner_screen_v2.dart';
 import 'features/notifications/application/notification_prefs_provider.dart';
 import 'features/notifications/application/notification_service.dart';
 import 'features/notifications/application/notification_tap_handler.dart';
-import 'features/notifications/presentation/notification_settings_screen.dart';
+import 'features/notifications/presentation/skins/notification_settings_screen_v2.dart';
 import 'features/settings/presentation/settings_screen.dart';
 import 'l10n/app_localizations.dart';
 import 'features/tasks/presentation/skins/all_tasks_screen.dart';
 import 'features/tasks/presentation/skins/today_screen.dart';
 import 'features/tasks/presentation/skins/task_detail_screen.dart';
 import 'features/tasks/presentation/skins/create_edit_task_screen.dart';
-import 'features/history/presentation/history_event_detail_screen.dart';
+import 'features/history/presentation/skins/history_event_detail_screen_v2.dart';
 import 'features/history/presentation/skins/history_screen.dart';
 import 'shared/widgets/keyboard_visible_provider.dart';
 import 'shared/widgets/skins/main_shell_root.dart';
@@ -194,7 +194,7 @@ GoRouter appRouter(AppRouterRef ref) {
       ),
       GoRoute(
         path: AppRoutes.notificationRationale,
-        builder: (_, __) => const NotificationRationaleScreen(),
+        builder: (_, __) => const NotificationRationaleScreenV2(),
       ),
 
       // ── Shell principal (v2 NavigationBar / futurista TockaTabBar) ──
@@ -282,7 +282,7 @@ GoRouter appRouter(AppRouterRef ref) {
           final extra = state.extra as Map<String, dynamic>?;
           final homeId = extra?['homeId'] as String? ?? '';
           final uid = extra?['uid'] as String? ?? '';
-          return VacationScreen(homeId: homeId, uid: uid);
+          return VacationScreenV2(homeId: homeId, uid: uid);
         },
       ),
       GoRoute(
@@ -314,14 +314,14 @@ GoRouter appRouter(AppRouterRef ref) {
       ),
       GoRoute(
         path: AppRoutes.downgradePlanner,
-        builder: (_, __) => const DowngradePlannerScreen(),
+        builder: (_, __) => const DowngradePlannerScreenV2(),
       ),
       GoRoute(
         path: AppRoutes.historyEventDetail,
         builder: (context, state) {
           final homeId = state.pathParameters['homeId']!;
           final eventId = state.pathParameters['eventId']!;
-          return HistoryEventDetailScreen(
+          return HistoryEventDetailScreenV2(
             homeId: homeId,
             eventId: eventId,
           );
@@ -331,7 +331,7 @@ GoRouter appRouter(AppRouterRef ref) {
         path: AppRoutes.notificationSettings,
         builder: (context, state) {
           final extra = state.extra as Map<String, dynamic>?;
-          return NotificationSettingsScreen(
+          return NotificationSettingsScreenV2(
             homeId: extra?['homeId'] as String? ?? '',
             uid: extra?['uid'] as String? ?? '',
           );

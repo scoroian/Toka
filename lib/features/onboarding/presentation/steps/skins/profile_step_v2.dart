@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../../../../l10n/app_localizations.dart';
+import '../../../../../l10n/app_localizations.dart';
 
-class ProfileStep extends StatefulWidget {
-  const ProfileStep({
+class ProfileStepV2 extends StatefulWidget {
+  const ProfileStepV2({
     super.key,
     required this.nickname,
     required this.phoneNumber,
@@ -37,10 +37,10 @@ class ProfileStep extends StatefulWidget {
   final VoidCallback onPrev;
 
   @override
-  State<ProfileStep> createState() => _ProfileStepState();
+  State<ProfileStepV2> createState() => _ProfileStepV2State();
 }
 
-class _ProfileStepState extends State<ProfileStep> {
+class _ProfileStepV2State extends State<ProfileStepV2> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _nicknameCtrl;
   late final TextEditingController _phoneCtrl;

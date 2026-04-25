@@ -11,7 +11,7 @@ import 'package:toka/features/auth/application/auth_state.dart';
 import 'package:toka/features/auth/domain/auth_user.dart';
 import 'package:toka/features/history/application/history_event_detail_provider.dart';
 import 'package:toka/features/history/domain/task_event.dart';
-import 'package:toka/features/history/presentation/history_event_detail_screen.dart';
+import 'package:toka/features/history/presentation/skins/history_event_detail_screen_v2.dart';
 import 'package:toka/features/homes/domain/home_membership.dart';
 import 'package:toka/features/members/application/members_provider.dart';
 import 'package:toka/features/members/domain/member.dart';
@@ -98,10 +98,10 @@ List<Override> _overrides({required String viewerUid}) => [
     ];
 
 void main() {
-  group('HistoryEventDetailScreen — visibilidad de nota', () {
+  group('HistoryEventDetailScreenV2 — visibilidad de nota', () {
     testWidgets('reviewer ve la nota', (tester) async {
       await tester.pumpWidget(_wrap(
-        const HistoryEventDetailScreen(homeId: 'home1', eventId: 'e1'),
+        const HistoryEventDetailScreenV2(homeId: 'home1', eventId: 'e1'),
         _overrides(viewerUid: 'uid_reviewer'),
       ));
       await tester.pumpAndSettle();
@@ -113,7 +113,7 @@ void main() {
 
     testWidgets('performer ve la nota', (tester) async {
       await tester.pumpWidget(_wrap(
-        const HistoryEventDetailScreen(homeId: 'home1', eventId: 'e1'),
+        const HistoryEventDetailScreenV2(homeId: 'home1', eventId: 'e1'),
         _overrides(viewerUid: 'uid_performer'),
       ));
       await tester.pumpAndSettle();
@@ -125,7 +125,7 @@ void main() {
     testWidgets('tercero NO ve la nota pero sí estrellas + score',
         (tester) async {
       await tester.pumpWidget(_wrap(
-        const HistoryEventDetailScreen(homeId: 'home1', eventId: 'e1'),
+        const HistoryEventDetailScreenV2(homeId: 'home1', eventId: 'e1'),
         _overrides(viewerUid: 'uid_third'),
       ));
       await tester.pumpAndSettle();
@@ -137,7 +137,7 @@ void main() {
 
     testWidgets('evento sin reviews muestra mensaje vacío', (tester) async {
       await tester.pumpWidget(_wrap(
-        const HistoryEventDetailScreen(homeId: 'home1', eventId: 'e1'),
+        const HistoryEventDetailScreenV2(homeId: 'home1', eventId: 'e1'),
         [
           authProvider.overrideWith(
               () => _FakeAuth(AuthState.authenticated(_user('uid_third')))),

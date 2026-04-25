@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:toka/features/members/application/vacation_provider.dart';
-import 'package:toka/features/members/presentation/vacation_screen.dart';
+import 'package:toka/features/members/presentation/skins/vacation_screen_v2.dart';
 import 'package:toka/l10n/app_localizations.dart';
 
 Widget _wrap() => ProviderScope(
@@ -13,12 +13,12 @@ Widget _wrap() => ProviderScope(
       child: MaterialApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: const VacationScreen(homeId: 'h1', uid: 'u1'),
+        home: const VacationScreenV2(homeId: 'h1', uid: 'u1'),
       ),
     );
 
 void main() {
-  testWidgets('VacationScreen muestra toggle de vacaciones', (tester) async {
+  testWidgets('VacationScreenV2 muestra toggle de vacaciones', (tester) async {
     await tester.pumpWidget(_wrap());
     await tester.pumpAndSettle();
     expect(find.byType(SwitchListTile), findsOneWidget);

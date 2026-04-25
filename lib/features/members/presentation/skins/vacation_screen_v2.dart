@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/utils/toka_dates.dart';
-import '../../../l10n/app_localizations.dart';
-import '../application/vacation_view_model.dart';
+import '../../../../core/utils/toka_dates.dart';
+import '../../../../l10n/app_localizations.dart';
+import '../../application/vacation_view_model.dart';
 
-class VacationScreen extends ConsumerStatefulWidget {
-  const VacationScreen({super.key, required this.homeId, required this.uid});
+class VacationScreenV2 extends ConsumerStatefulWidget {
+  const VacationScreenV2({super.key, required this.homeId, required this.uid});
 
   final String homeId;
   final String uid;
 
   @override
-  ConsumerState<VacationScreen> createState() => _VacationScreenState();
+  ConsumerState<VacationScreenV2> createState() => _VacationScreenV2State();
 }
 
-class _VacationScreenState extends ConsumerState<VacationScreen> {
+class _VacationScreenV2State extends ConsumerState<VacationScreenV2> {
   final _reasonController = TextEditingController();
 
   @override

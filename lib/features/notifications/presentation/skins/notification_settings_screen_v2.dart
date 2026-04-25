@@ -4,13 +4,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../l10n/app_localizations.dart';
-import '../application/notification_service.dart';
-import '../application/notification_settings_view_model.dart';
-import '../domain/notification_preferences.dart';
+import '../../../../l10n/app_localizations.dart';
+import '../../application/notification_service.dart';
+import '../../application/notification_settings_view_model.dart';
+import '../../domain/notification_preferences.dart';
 
-class NotificationSettingsScreen extends ConsumerWidget {
-  const NotificationSettingsScreen({
+class NotificationSettingsScreenV2 extends ConsumerWidget {
+  const NotificationSettingsScreenV2({
     super.key,
     required this.homeId,
     required this.uid,

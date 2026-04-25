@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:toka/features/notifications/application/notification_prefs_provider.dart';
 import 'package:toka/features/notifications/application/notification_settings_view_model.dart';
 import 'package:toka/features/notifications/domain/notification_preferences.dart';
-import 'package:toka/features/notifications/presentation/notification_settings_screen.dart';
+import 'package:toka/features/notifications/presentation/skins/notification_settings_screen_v2.dart';
 import 'package:toka/l10n/app_localizations.dart';
 
 const _prefs = NotificationPreferences(homeId: 'h1', uid: 'u1');
@@ -26,7 +26,7 @@ Widget _wrap({bool isPremium = false, bool systemAuthorized = true}) {
     child: MaterialApp(
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: const NotificationSettingsScreen(homeId: 'h1', uid: 'u1'),
+      home: const NotificationSettingsScreenV2(homeId: 'h1', uid: 'u1'),
     ),
   );
 }

@@ -3,16 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../l10n/app_localizations.dart';
-import '../../homes/application/current_home_provider.dart';
-import '../../homes/application/dashboard_provider.dart';
-import '../../members/application/members_provider.dart';
-import '../../members/domain/member.dart';
-import '../../homes/domain/home_membership.dart';
-import '../application/downgrade_planner_view_model.dart';
+import '../../../../l10n/app_localizations.dart';
+import '../../../homes/application/current_home_provider.dart';
+import '../../../homes/application/dashboard_provider.dart';
+import '../../../members/application/members_provider.dart';
+import '../../../members/domain/member.dart';
+import '../../../homes/domain/home_membership.dart';
+import '../../application/downgrade_planner_view_model.dart';
 
-class DowngradePlannerScreen extends ConsumerWidget {
-  const DowngradePlannerScreen({super.key});
+class DowngradePlannerScreenV2 extends ConsumerWidget {
+  const DowngradePlannerScreenV2({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

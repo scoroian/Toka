@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../features/i18n/application/language_provider.dart';
-import '../../../../l10n/app_localizations.dart';
+import '../../../../../features/i18n/application/language_provider.dart';
+import '../../../../../l10n/app_localizations.dart';
 
-class LanguageStep extends ConsumerWidget {
-  const LanguageStep({
+class LanguageStepV2 extends ConsumerWidget {
+  const LanguageStepV2({
     super.key,
     required this.selectedLocale,
     required this.onLocaleSelected,

@@ -14,7 +14,7 @@ import 'package:toka/features/members/domain/member.dart';
 import 'package:toka/features/subscription/application/downgrade_planner_view_model.dart';
 import 'package:toka/features/subscription/application/paywall_provider.dart';
 import 'package:toka/features/subscription/domain/purchase_result.dart';
-import 'package:toka/features/subscription/presentation/downgrade_planner_screen.dart';
+import 'package:toka/features/subscription/presentation/skins/downgrade_planner_screen_v2.dart';
 import 'package:toka/features/tasks/domain/home_dashboard.dart';
 import 'package:toka/l10n/app_localizations.dart';
 
@@ -170,7 +170,7 @@ void main() {
   ];
 
   testWidgets(
-      'DowngradePlannerScreen: owner siempre marcado y no desseleccionable',
+      'DowngradePlannerScreenV2: owner siempre marcado y no desseleccionable',
       (tester) async {
     final allUids = {'owner', 'm1', 'm2', 'm3', 'm4'};
     final mock = _MockDowngradeVM();
@@ -180,7 +180,7 @@ void main() {
     when(() => mock.savedSuccessfully).thenReturn(false);
     when(() => mock.savePlan()).thenAnswer((_) async {});
 
-    await tester.pumpWidget(_wrap(const DowngradePlannerScreen(), overrides: [
+    await tester.pumpWidget(_wrap(const DowngradePlannerScreenV2(), overrides: [
       ...dataOverrides,
       downgradePlannerViewModelProvider.overrideWithValue(mock),
     ]));
@@ -192,7 +192,7 @@ void main() {
     expect(ownerCheckbox.onChanged, isNull);
   });
 
-  testWidgets('DowngradePlannerScreen: botón Guardar plan está presente',
+  testWidgets('DowngradePlannerScreenV2: botón Guardar plan está presente',
       (tester) async {
     final mock = _MockDowngradeVM();
     when(() => mock.selectedMemberIds).thenReturn(<String>{});
@@ -201,7 +201,7 @@ void main() {
     when(() => mock.savedSuccessfully).thenReturn(false);
     when(() => mock.savePlan()).thenAnswer((_) async {});
 
-    await tester.pumpWidget(_wrap(const DowngradePlannerScreen(), overrides: [
+    await tester.pumpWidget(_wrap(const DowngradePlannerScreenV2(), overrides: [
       ...dataOverrides,
       downgradePlannerViewModelProvider.overrideWithValue(mock),
     ]));
@@ -210,7 +210,7 @@ void main() {
     expect(find.byKey(const Key('btn_save_plan')), findsOneWidget);
   });
 
-  testWidgets('DowngradePlannerScreen: muestra 5 miembros en la lista',
+  testWidgets('DowngradePlannerScreenV2: muestra 5 miembros en la lista',
       (tester) async {
     final mock = _MockDowngradeVM();
     when(() => mock.selectedMemberIds).thenReturn(<String>{});
@@ -219,7 +219,7 @@ void main() {
     when(() => mock.savedSuccessfully).thenReturn(false);
     when(() => mock.savePlan()).thenAnswer((_) async {});
 
-    await tester.pumpWidget(_wrap(const DowngradePlannerScreen(), overrides: [
+    await tester.pumpWidget(_wrap(const DowngradePlannerScreenV2(), overrides: [
       ...dataOverrides,
       downgradePlannerViewModelProvider.overrideWithValue(mock),
     ]));
@@ -231,11 +231,11 @@ void main() {
   });
 
   testWidgets(
-      'DowngradePlannerScreen: no permite seleccionar más de 3 miembros',
+      'DowngradePlannerScreenV2: no permite seleccionar más de 3 miembros',
       (tester) async {
     // Use real VM + data overrides for interaction test
     await tester.pumpWidget(
-        _wrap(const DowngradePlannerScreen(), overrides: dataOverrides));
+        _wrap(const DowngradePlannerScreenV2(), overrides: dataOverrides));
     // Pump explicitly to allow the VM microtask initialization
     await tester.pump();
     await tester.pump();

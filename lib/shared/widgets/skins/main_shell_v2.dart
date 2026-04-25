@@ -9,6 +9,7 @@ import '../../../l10n/app_localizations.dart';
 import '../ad_banner.dart';
 import '../ad_banner_config_provider.dart';
 import '../keyboard_visible_provider.dart';
+import 'shell_metrics.dart';
 
 class MainShellV2 extends ConsumerWidget {
   const MainShellV2({super.key, required this.child});
@@ -27,11 +28,10 @@ class MainShellV2 extends ConsumerWidget {
     return location.startsWith(AppRoutes.settings);
   }
 
-  // Altura total que la barra flotante ocupa desde el borde inferior de la pantalla.
-  // Usada tanto para el placeholder transparente (MediaQuery) como para el Positioned.
-  // Públicas para que los inner Scaffolds puedan calcular el padding del FAB.
-  static const double kNavBarHeight  = 56;
-  static const double kNavBarBottom  = 12;
+  // Constantes públicas reexportadas desde ShellMetrics. Ningún consumidor
+  // externo necesita migrar — siguen funcionando con el mismo nombre y valor.
+  static const double kNavBarHeight  = MainShellV2Metrics.kNavBarHeight;
+  static const double kNavBarBottom  = MainShellV2Metrics.kNavBarBottom;
   // Compatibilidad interna
   static const double _kNavBarHeight = kNavBarHeight;
   static const double _kNavBarBottom = kNavBarBottom;

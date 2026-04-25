@@ -6,10 +6,11 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/routes.dart';
 import '../application/onboarding_provider.dart';
 import '../application/onboarding_view_model.dart';
-import 'skins/notification_rationale_screen_v2.dart';
-import 'steps/skins/home_choice_step_v2.dart';
-import 'steps/skins/language_step_v2.dart';
-import 'steps/skins/profile_step_v2.dart';
+import 'skins/notification_rationale_screen_v2.dart'
+    show shouldShowNotificationRationale;
+import 'steps/skins/home_choice_step.dart';
+import 'steps/skins/language_step.dart';
+import 'steps/skins/profile_step.dart';
 import 'steps/skins/welcome_step.dart';
 import 'widgets/onboarding_progress_bar.dart';
 
@@ -104,7 +105,7 @@ class _OnboardingFlowScreenState extends ConsumerState<OnboardingFlowScreen> {
                 WelcomeStep(onStart: vm.nextStep),
 
                 // Step 1: Language
-                LanguageStepV2(
+                LanguageStep(
                   selectedLocale: vm.selectedLocale,
                   onLocaleSelected: vm.setLocale,
                   onNext: vm.nextStep,
@@ -112,7 +113,7 @@ class _OnboardingFlowScreenState extends ConsumerState<OnboardingFlowScreen> {
                 ),
 
                 // Step 2: Profile
-                ProfileStepV2(
+                ProfileStep(
                   nickname: vm.nickname,
                   phoneNumber: vm.phoneNumber,
                   phoneVisible: vm.phoneVisible,
@@ -128,7 +129,7 @@ class _OnboardingFlowScreenState extends ConsumerState<OnboardingFlowScreen> {
                 ),
 
                 // Step 3: Home choice
-                HomeChoiceStepV2(
+                HomeChoiceStep(
                   isLoading: vm.isLoading,
                   error: vm.error,
                   onCreateHome: (name, emoji) => vm.createHome(name, emoji),

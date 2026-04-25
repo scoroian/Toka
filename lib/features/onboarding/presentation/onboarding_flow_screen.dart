@@ -10,7 +10,7 @@ import 'notification_rationale_screen.dart';
 import 'steps/home_choice_step.dart';
 import 'steps/language_step.dart';
 import 'steps/profile_step.dart';
-import 'steps/welcome_step.dart';
+import 'steps/skins/welcome_step.dart';
 import 'widgets/onboarding_progress_bar.dart';
 
 class OnboardingFlowScreen extends ConsumerStatefulWidget {

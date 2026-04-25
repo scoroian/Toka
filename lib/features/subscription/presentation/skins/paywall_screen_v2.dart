@@ -2,19 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../l10n/app_localizations.dart';
-import '../../homes/application/current_home_provider.dart';
-import '../../homes/domain/home.dart';
-import '../application/days_left.dart';
-import '../application/paywall_view_model.dart';
-import 'paywall_entry_context.dart';
-import 'widgets/plan_comparison_card.dart';
+import '../../../../l10n/app_localizations.dart';
+import '../../../homes/application/current_home_provider.dart';
+import '../../../homes/domain/home.dart';
+import '../../application/days_left.dart';
+import '../../application/paywall_view_model.dart';
+import '../paywall_entry_context.dart';
+import '../widgets/plan_comparison_card.dart';
 
 const _kMonthlyId = 'toka_premium_monthly';
 const _kAnnualId = 'toka_premium_annual';
 
-class PaywallScreen extends ConsumerWidget {
-  const PaywallScreen({
+class PaywallScreenV2 extends ConsumerWidget {
+  const PaywallScreenV2({
     super.key,
     this.entryContext = PaywallEntryContext.fromFree,
   });

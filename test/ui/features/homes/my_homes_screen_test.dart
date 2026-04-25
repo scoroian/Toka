@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:toka/features/homes/application/my_homes_view_model.dart';
 import 'package:toka/features/homes/domain/home_membership.dart';
-import 'package:toka/features/homes/presentation/my_homes_screen.dart';
+import 'package:toka/features/homes/presentation/skins/my_homes_screen_v2.dart';
 import 'package:toka/l10n/app_localizations.dart';
 import 'package:toka/shared/widgets/loading_widget.dart';
 
@@ -58,7 +58,7 @@ Widget _wrap(MyHomesViewModel vm) => ProviderScope(
           GlobalCupertinoLocalizations.delegate,
         ],
         supportedLocales: [Locale('es')],
-        home: MyHomesScreen(),
+        home: MyHomesScreenV2(),
       ),
     );
 

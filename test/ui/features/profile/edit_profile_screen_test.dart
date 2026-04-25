@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:toka/features/auth/application/auth_provider.dart';
 import 'package:toka/features/auth/application/auth_state.dart';
 import 'package:toka/features/profile/application/edit_profile_view_model.dart';
-import 'package:toka/features/profile/presentation/edit_profile_screen.dart';
+import 'package:toka/features/profile/presentation/skins/edit_profile_screen_v2.dart';
 import 'package:toka/l10n/app_localizations.dart';
 
 // ---------------------------------------------------------------------------
@@ -88,7 +88,7 @@ Widget _wrap(EditProfileViewModel vm) => ProviderScope(
           GlobalCupertinoLocalizations.delegate,
         ],
         supportedLocales: [Locale('es')],
-        home: EditProfileScreen(),
+        home: EditProfileScreenV2(),
       ),
     );
 

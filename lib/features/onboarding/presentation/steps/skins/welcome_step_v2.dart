@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../../../../l10n/app_localizations.dart';
+import '../../../../../l10n/app_localizations.dart';
 
-class WelcomeStep extends StatelessWidget {
-  const WelcomeStep({super.key, required this.onStart});
+class WelcomeStepV2 extends StatelessWidget {
+  const WelcomeStepV2({super.key, required this.onStart});
 
   final VoidCallback onStart;
 

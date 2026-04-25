@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/constants/routes.dart';
-import '../../../l10n/app_localizations.dart';
-import '../application/rescue_view_model.dart';
-import 'widgets/plan_comparison_card.dart';
+import '../../../../core/constants/routes.dart';
+import '../../../../l10n/app_localizations.dart';
+import '../../application/rescue_view_model.dart';
+import '../widgets/plan_comparison_card.dart';
 
-class RescueScreen extends ConsumerWidget {
-  const RescueScreen({super.key});
+class RescueScreenV2 extends ConsumerWidget {
+  const RescueScreenV2({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

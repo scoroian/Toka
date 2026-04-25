@@ -5,18 +5,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../../../l10n/app_localizations.dart';
-import '../../../shared/widgets/loading_widget.dart';
-import '../application/edit_profile_view_model.dart';
+import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/widgets/loading_widget.dart';
+import '../../application/edit_profile_view_model.dart';
 
-class EditProfileScreen extends ConsumerStatefulWidget {
-  const EditProfileScreen({super.key});
+class EditProfileScreenV2 extends ConsumerStatefulWidget {
+  const EditProfileScreenV2({super.key});
 
   @override
-  ConsumerState<EditProfileScreen> createState() => _EditProfileScreenState();
+  ConsumerState<EditProfileScreenV2> createState() => _EditProfileScreenV2State();
 }
 
-class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
+class _EditProfileScreenV2State extends ConsumerState<EditProfileScreenV2> {
   final _nicknameController = TextEditingController();
   final _bioController = TextEditingController();
   final _phoneController = TextEditingController();

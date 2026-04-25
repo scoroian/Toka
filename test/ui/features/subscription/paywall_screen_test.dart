@@ -8,7 +8,7 @@ import 'package:toka/features/homes/domain/home.dart';
 import 'package:toka/features/homes/domain/home_limits.dart';
 import 'package:toka/features/subscription/application/paywall_provider.dart';
 import 'package:toka/features/subscription/domain/purchase_result.dart';
-import 'package:toka/features/subscription/presentation/paywall_screen.dart';
+import 'package:toka/features/subscription/presentation/skins/paywall_screen_v2.dart';
 import 'package:toka/l10n/app_localizations.dart';
 
 final _freeHome = Home(
@@ -66,7 +66,7 @@ void main() {
 
   testWidgets('PaywallScreen muestra CTA anual y mensual', (tester) async {
     await tester.pumpWidget(
-        _wrap(const PaywallScreen(), overrides: baseOverrides));
+        _wrap(const PaywallScreenV2(), overrides: baseOverrides));
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('btn_cta_annual')), findsOneWidget);
@@ -76,7 +76,7 @@ void main() {
 
   testWidgets('PaywallScreen muestra PlanComparisonCard', (tester) async {
     await tester.pumpWidget(
-        _wrap(const PaywallScreen(), overrides: baseOverrides));
+        _wrap(const PaywallScreenV2(), overrides: baseOverrides));
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('plan_comparison_card')), findsOneWidget);
@@ -84,7 +84,7 @@ void main() {
 
   testWidgets('golden: PaywallScreen', (tester) async {
     await tester.pumpWidget(
-        _wrap(const PaywallScreen(), overrides: baseOverrides));
+        _wrap(const PaywallScreenV2(), overrides: baseOverrides));
     await tester.pumpAndSettle();
 
     await expectLater(

@@ -3,22 +3,22 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../core/constants/routes.dart';
-import '../../../l10n/app_localizations.dart';
-import '../../../shared/widgets/ad_aware_bottom_padding.dart';
-import '../../auth/application/auth_provider.dart';
-import '../../homes/domain/home.dart';
-import '../application/paywall_provider.dart';
-import '../application/subscription_management_view_model.dart';
-import '../domain/subscription_dashboard.dart';
-import 'widgets/plan_summary_card.dart';
+import '../../../../core/constants/routes.dart';
+import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/widgets/ad_aware_bottom_padding.dart';
+import '../../../auth/application/auth_provider.dart';
+import '../../../homes/domain/home.dart';
+import '../../application/paywall_provider.dart';
+import '../../application/subscription_management_view_model.dart';
+import '../../domain/subscription_dashboard.dart';
+import '../widgets/plan_summary_card.dart';
 
 /// Pantalla *Ajustes → Gestionar suscripción*. Reemplaza la versión anterior
 /// que leía un snapshot puntual: ahora consume el stream
 /// `subscriptionDashboardProvider` para que el refresh sea automático tras
 /// cualquier cambio de estado premium (BUG-12).
-class SubscriptionManagementScreen extends ConsumerWidget {
-  const SubscriptionManagementScreen({super.key});
+class SubscriptionManagementScreenV2 extends ConsumerWidget {
+  const SubscriptionManagementScreenV2({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

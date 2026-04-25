@@ -12,7 +12,7 @@ import 'package:toka/features/subscription/application/subscription_provider.dar
 import 'package:toka/features/subscription/domain/purchase_result.dart';
 import 'package:toka/features/subscription/domain/subscription_repository.dart';
 import 'package:toka/features/subscription/domain/subscription_state.dart';
-import 'package:toka/features/subscription/presentation/rescue_screen.dart';
+import 'package:toka/features/subscription/presentation/skins/rescue_screen_v2.dart';
 import 'package:toka/l10n/app_localizations.dart';
 
 class _MockSubscriptionRepository extends Mock
@@ -102,14 +102,14 @@ void main() {
 
   testWidgets('RescueScreen: se renderiza correctamente (Scaffold)',
       (tester) async {
-    await tester.pumpWidget(_wrap(const RescueScreen(), overrides: baseOverrides));
+    await tester.pumpWidget(_wrap(const RescueScreenV2(), overrides: baseOverrides));
     await tester.pumpAndSettle();
 
     expect(find.byType(Scaffold), findsOneWidget);
   });
 
   testWidgets('RescueScreen: muestra botón de renovación anual', (tester) async {
-    await tester.pumpWidget(_wrap(const RescueScreen(), overrides: baseOverrides));
+    await tester.pumpWidget(_wrap(const RescueScreenV2(), overrides: baseOverrides));
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('btn_renew_annual')), findsOneWidget);
@@ -117,14 +117,14 @@ void main() {
 
   testWidgets('RescueScreen: muestra botón de renovación mensual',
       (tester) async {
-    await tester.pumpWidget(_wrap(const RescueScreen(), overrides: baseOverrides));
+    await tester.pumpWidget(_wrap(const RescueScreenV2(), overrides: baseOverrides));
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('btn_renew_monthly')), findsOneWidget);
   });
 
   testWidgets('RescueScreen: muestra botón de plan downgrade', (tester) async {
-    await tester.pumpWidget(_wrap(const RescueScreen(), overrides: baseOverrides));
+    await tester.pumpWidget(_wrap(const RescueScreenV2(), overrides: baseOverrides));
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('btn_plan_downgrade')), findsOneWidget);

@@ -1,15 +1,15 @@
-// lib/features/homes/presentation/my_homes_screen.dart
+// lib/features/homes/presentation/skins/my_homes_screen_v2.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../l10n/app_localizations.dart';
-import '../../../shared/widgets/loading_widget.dart';
-import '../application/my_homes_view_model.dart';
-import '../domain/home_membership.dart';
+import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/widgets/loading_widget.dart';
+import '../../application/my_homes_view_model.dart';
+import '../../domain/home_membership.dart';
 
-class MyHomesScreen extends ConsumerWidget {
-  const MyHomesScreen({super.key});
+class MyHomesScreenV2 extends ConsumerWidget {
+  const MyHomesScreenV2({super.key});
 
   String _roleLabel(MemberRole role, AppLocalizations l10n) {
     switch (role) {

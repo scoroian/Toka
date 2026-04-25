@@ -8,7 +8,7 @@ import 'package:toka/features/subscription/application/paywall_provider.dart';
 import 'package:toka/features/subscription/application/subscription_dashboard_provider.dart';
 import 'package:toka/features/subscription/domain/purchase_result.dart';
 import 'package:toka/features/subscription/domain/subscription_dashboard.dart';
-import 'package:toka/features/subscription/presentation/subscription_management_screen.dart';
+import 'package:toka/features/subscription/presentation/skins/subscription_management_screen_v2.dart';
 import 'package:toka/features/tasks/domain/home_dashboard.dart';
 import 'package:toka/l10n/app_localizations.dart';
 
@@ -73,7 +73,7 @@ void main() {
   testWidgets('SubscriptionManagementScreen: estado active muestra card y sin spinner',
       (tester) async {
     await tester.pumpWidget(_wrap(
-      const SubscriptionManagementScreen(),
+      const SubscriptionManagementScreenV2(),
       overrides: _overridesFor(_makeDashboard(HomePremiumStatus.active)),
     ));
     await tester.pumpAndSettle();
@@ -86,7 +86,7 @@ void main() {
   testWidgets('SubscriptionManagementScreen: estado free muestra btn_go_premium',
       (tester) async {
     await tester.pumpWidget(_wrap(
-      const SubscriptionManagementScreen(),
+      const SubscriptionManagementScreenV2(),
       overrides: _overridesFor(_makeDashboard(HomePremiumStatus.free)),
     ));
     await tester.pumpAndSettle();
@@ -99,7 +99,7 @@ void main() {
       'SubscriptionManagementScreen: estado restorable muestra btn_restore_premium',
       (tester) async {
     await tester.pumpWidget(_wrap(
-      const SubscriptionManagementScreen(),
+      const SubscriptionManagementScreenV2(),
       overrides: _overridesFor(_makeDashboard(HomePremiumStatus.restorable)),
     ));
     await tester.pumpAndSettle();
@@ -112,7 +112,7 @@ void main() {
       'SubscriptionManagementScreen: estado cancelledPendingEnd muestra btn_reactivate_renewal',
       (tester) async {
     await tester.pumpWidget(_wrap(
-      const SubscriptionManagementScreen(),
+      const SubscriptionManagementScreenV2(),
       overrides:
           _overridesFor(_makeDashboard(HomePremiumStatus.cancelledPendingEnd)),
     ));
@@ -125,7 +125,7 @@ void main() {
   testWidgets('SubscriptionManagementScreen: estado rescue muestra btn_renew',
       (tester) async {
     await tester.pumpWidget(_wrap(
-      const SubscriptionManagementScreen(),
+      const SubscriptionManagementScreenV2(),
       overrides: _overridesFor(_makeDashboard(HomePremiumStatus.rescue)),
     ));
     await tester.pumpAndSettle();
@@ -139,7 +139,7 @@ void main() {
       'SubscriptionManagementScreen: estado expiredFree muestra btn_reactivate_premium',
       (tester) async {
     await tester.pumpWidget(_wrap(
-      const SubscriptionManagementScreen(),
+      const SubscriptionManagementScreenV2(),
       overrides: _overridesFor(_makeDashboard(HomePremiumStatus.expiredFree)),
     ));
     await tester.pumpAndSettle();

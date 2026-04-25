@@ -1,23 +1,23 @@
-// lib/features/homes/presentation/home_settings_screen.dart
+// lib/features/homes/presentation/skins/home_settings_screen_v2.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/constants/routes.dart';
-import '../../../l10n/app_localizations.dart';
-import '../../../shared/widgets/loading_widget.dart';
-import '../../subscription/presentation/widgets/premium_state_banner.dart';
-import '../application/home_settings_view_model.dart';
-import '../domain/homes_repository.dart';
+import '../../../../core/constants/routes.dart';
+import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/widgets/loading_widget.dart';
+import '../../../subscription/presentation/widgets/premium_state_banner.dart';
+import '../../application/home_settings_view_model.dart';
+import '../../domain/homes_repository.dart';
 
-class HomeSettingsScreen extends ConsumerStatefulWidget {
-  const HomeSettingsScreen({super.key});
+class HomeSettingsScreenV2 extends ConsumerStatefulWidget {
+  const HomeSettingsScreenV2({super.key});
 
   @override
-  ConsumerState<HomeSettingsScreen> createState() => _HomeSettingsScreenState();
+  ConsumerState<HomeSettingsScreenV2> createState() => _HomeSettingsScreenV2State();
 }
 
-class _HomeSettingsScreenState extends ConsumerState<HomeSettingsScreen> {
+class _HomeSettingsScreenV2State extends ConsumerState<HomeSettingsScreenV2> {
   late TextEditingController _nameController;
   bool _nameInitialized = false;
 

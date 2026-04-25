@@ -20,7 +20,7 @@ import 'package:toka/features/homes/domain/home.dart';
 import 'package:toka/features/homes/domain/home_limits.dart';
 import 'package:toka/features/homes/domain/home_membership.dart';
 import 'package:toka/features/homes/domain/homes_repository.dart';
-import 'package:toka/features/homes/presentation/home_settings_screen.dart';
+import 'package:toka/features/homes/presentation/skins/home_settings_screen_v2.dart';
 import 'package:toka/l10n/app_localizations.dart';
 
 class _MockHomesRepository extends Mock implements HomesRepository {}
@@ -84,7 +84,7 @@ GoRouter _buildRouter() {
     routes: [
       GoRoute(
         path: AppRoutes.homeSettings,
-        builder: (_, __) => const HomeSettingsScreen(),
+        builder: (_, __) => const HomeSettingsScreenV2(),
       ),
       GoRoute(
         path: AppRoutes.home,
@@ -140,7 +140,7 @@ void main() {
       await tester.pumpWidget(_wrap(repo));
       await tester.pumpAndSettle();
 
-      expect(find.byType(HomeSettingsScreen), findsOneWidget);
+      expect(find.byType(HomeSettingsScreenV2), findsOneWidget);
 
       await tester.tap(find.byKey(const Key('leave_home_tile')));
       await tester.pumpAndSettle();
@@ -152,7 +152,7 @@ void main() {
       // El callable sigue pendiente, pero la pantalla ya debió migrar al
       // destino seguro: el fake_home_destination, NO el HomeSettingsScreen.
       expect(find.byKey(const Key('fake_home_destination')), findsOneWidget);
-      expect(find.byType(HomeSettingsScreen), findsNothing);
+      expect(find.byType(HomeSettingsScreenV2), findsNothing);
 
       // El callable se invocó.
       verify(() => repo.leaveHome('h1', uid: 'uid1')).called(1);

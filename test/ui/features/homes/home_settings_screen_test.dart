@@ -12,7 +12,7 @@ import 'package:toka/features/homes/domain/home.dart';
 import 'package:toka/features/homes/domain/home_limits.dart';
 import 'package:toka/features/homes/domain/home_membership.dart';
 import 'package:toka/features/homes/domain/homes_repository.dart';
-import 'package:toka/features/homes/presentation/home_settings_screen.dart';
+import 'package:toka/features/homes/presentation/skins/home_settings_screen_v2.dart';
 import 'package:toka/l10n/app_localizations.dart';
 
 // ---------------------------------------------------------------------------
@@ -111,7 +111,7 @@ Widget _wrap({
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: [Locale('es')],
-      home: HomeSettingsScreen(),
+      home: HomeSettingsScreenV2(),
     ),
   );
 }
@@ -158,7 +158,7 @@ void main() {
     await tester.pumpAndSettle();
 
     await expectLater(
-      find.byType(HomeSettingsScreen),
+      find.byType(HomeSettingsScreenV2),
       matchesGoldenFile('goldens/home_settings_owner.png'),
     );
   });

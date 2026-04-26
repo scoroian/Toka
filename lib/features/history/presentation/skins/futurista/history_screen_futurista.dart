@@ -165,6 +165,10 @@ class _HistoryScreenFuturistaState
     );
   }
 
+  /// Intencionalmente duplicado entre v2 y futurista: la skin futurista usa
+  /// `TockaBtn` y la v2 usa `ElevatedButton` (Material). La spec 2F
+  /// (§3 "decisiones tomadas") decide NO deduplicar este sheet por la
+  /// divergencia visual establecida en el commit `4f90fef`.
   void _showUpgradeSheet(BuildContext ctx) {
     final l10n = AppLocalizations.of(ctx);
     showModalBottomSheet<void>(

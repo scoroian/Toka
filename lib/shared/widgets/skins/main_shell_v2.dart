@@ -23,11 +23,6 @@ class MainShellV2 extends ConsumerWidget {
     return 0;
   }
 
-  // Rutas del shell donde NO mostramos el banner (legales/formales).
-  static bool _suppressBannerFor(String location) {
-    return location.startsWith(AppRoutes.settings);
-  }
-
   // Constantes públicas reexportadas desde ShellMetrics. Ningún consumidor
   // externo necesita migrar — siguen funcionando con el mismo nombre y valor.
   static const double kNavBarHeight  = MainShellV2Metrics.kNavBarHeight;
@@ -64,9 +59,10 @@ class MainShellV2 extends ConsumerWidget {
     final cfg = ref.watch(adBannerConfigProvider);
     final keyboardVisible = ref.watch(keyboardVisibleProvider);
     final location = GoRouterState.of(ctx).matchedLocation;
+    final metrics = ref.watch(shellMetricsProvider);
     final bannerVisible = cfg.show
         && cfg.unitId.isNotEmpty
-        && !_suppressBannerFor(location)
+        && !metrics.suppressBannerFor(location)
         && !keyboardVisible;
     final navBarSlot = keyboardVisible ? 0.0 : kNavBarHeight + kNavBarBottom;
     return safeBottom
@@ -88,9 +84,10 @@ class MainShellV2 extends ConsumerWidget {
     final cfg = ref.watch(adBannerConfigProvider);
     final keyboardVisible = ref.watch(keyboardVisibleProvider);
     final location = GoRouterState.of(ctx).matchedLocation;
+    final metrics = ref.watch(shellMetricsProvider);
     final bannerVisible = cfg.show
         && cfg.unitId.isNotEmpty
-        && !_suppressBannerFor(location)
+        && !metrics.suppressBannerFor(location)
         && !keyboardVisible;
     final navBarSlot = keyboardVisible ? 0.0 : kNavBarHeight + kNavBarBottom;
     return navBarSlot + bannerSlotHeight(bannerVisible: bannerVisible);
@@ -104,9 +101,10 @@ class MainShellV2 extends ConsumerWidget {
 
     final adConfig = ref.watch(adBannerConfigProvider);
     final keyboardVisible = ref.watch(keyboardVisibleProvider);
+    final metrics = ref.watch(shellMetricsProvider);
     final bannerVisible = adConfig.show
         && adConfig.unitId.isNotEmpty
-        && !_suppressBannerFor(location)
+        && !metrics.suppressBannerFor(location)
         && !keyboardVisible;
     final bannerSlot = bannerSlotHeight(bannerVisible: bannerVisible);
     final navBarSlot = keyboardVisible ? 0.0 : _kNavBarHeight + _kNavBarBottom;

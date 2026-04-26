@@ -51,6 +51,13 @@ double adAwareBottomPadding(
   return banner + navBar + safeArea + extra;
 }
 
+/// Devuelve la ruta actual desde [GoRouterState], o cadena vacía si el
+/// widget que invoca [adAwareBottomPadding] no está dentro de un
+/// [GoRouter] (común en tests con `MaterialApp(home: ...)` simple o en
+/// goldens aislados). El fallback `''` es deliberado: provoca que
+/// `suppressBannerFor` devuelva `false`, es decir el cálculo es
+/// conservador (asume que el banner SÍ se mostraría) y reserva
+/// espacio extra. Nunca devuelve menos padding del necesario.
 String _safeLocation(BuildContext context) {
   try {
     return GoRouterState.of(context).matchedLocation;

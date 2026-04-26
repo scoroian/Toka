@@ -1,10 +1,14 @@
 // lib/features/history/presentation/skins/futurista/history_screen_futurista.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../../core/constants/routes.dart';
 import '../../../../../core/theme/futurista/futurista_colors.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../../../shared/widgets/ad_aware_bottom_padding.dart';
+import '../../../../../shared/widgets/bottom_sheet_padding.dart';
+import '../../../../../shared/widgets/futurista/premium_banner_futurista.dart';
 import '../../../../../shared/widgets/futurista/tocka_avatar.dart';
 import '../../../../../shared/widgets/futurista/tocka_chip.dart';
 import '../../../../../shared/widgets/futurista/tocka_pill.dart';
@@ -15,6 +19,7 @@ import '../../../../members/application/members_provider.dart';
 import '../../../../members/domain/member.dart';
 import '../../../domain/task_event.dart';
 import '../../../application/history_view_model.dart';
+import '../../widgets/rate_event_sheet.dart';
 
 /// Pantalla "Historial" en skin futurista. Consume el mismo
 /// `historyViewModelProvider` que v2 y mantiene el filtrado por tipo de
@@ -123,6 +128,8 @@ class _HistoryScreenFuturistaState
                     );
                   }
                   final groups = _groupByDay(items);
+                  final showPremiumBanner = !vm.isPremium;
+                  final extras = showPremiumBanner ? 1 : 0;
                   return ListView.builder(
                     key: const Key('history_list_futurista'),
                     controller: _scroll,
@@ -131,18 +138,88 @@ class _HistoryScreenFuturistaState
                       right: 16,
                       top: 4,
                       bottom:
-                          adAwareBottomPadding(context, ref, extra: 80),
+                          adAwareBottomPadding(context, ref, extra: 16),
                     ),
-                    itemCount: groups.length,
+                    itemCount: groups.length + extras,
                     itemBuilder: (ctx, i) {
+                      if (i >= groups.length) {
+                        return const PremiumBannerFuturista();
+                      }
                       final g = groups[i];
                       return _DayGroup(
                         label: g.label,
                         items: g.items,
+                        isPremium: vm.isPremium,
+                        onRate: (item) => _showRateSheet(ctx, vm, item),
+                        onUpgradeFromRate: () => _showUpgradeSheet(ctx),
                       );
                     },
                   );
                 },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showRateSheet(
+    BuildContext ctx,
+    HistoryViewModel vm,
+    TaskEventItem item,
+  ) {
+    showModalBottomSheet<void>(
+      context: ctx,
+      isScrollControlled: true,
+      builder: (_) => RateEventSheet(
+        onSubmit: (rating, note) =>
+            vm.rateEvent(item.raw.id, rating, note: note),
+      ),
+    );
+  }
+
+  void _showUpgradeSheet(BuildContext ctx) {
+    final l10n = AppLocalizations.of(ctx);
+    showModalBottomSheet<void>(
+      context: ctx,
+      isScrollControlled: true,
+      builder: (sheetCtx) => Padding(
+        padding: EdgeInsets.fromLTRB(
+          24,
+          24,
+          24,
+          24 + bottomSheetSafeBottom(sheetCtx, ref, hasNavBar: true),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(children: [
+              const Icon(Icons.star, color: Colors.amber),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  l10n.free_reviews_upgrade_title,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ]),
+            const SizedBox(height: 12),
+            Text(l10n.free_reviews_upgrade_body),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                key: const Key('btn_upgrade_from_rate_fut'),
+                onPressed: () {
+                  Navigator.of(sheetCtx).pop();
+                  ctx.push(AppRoutes.paywall);
+                },
+                child: Text(l10n.free_go_premium_cta),
               ),
             ),
           ],
@@ -282,10 +359,19 @@ class _FilterChipsRow extends StatelessWidget {
 }
 
 class _DayGroup extends StatelessWidget {
-  const _DayGroup({required this.label, required this.items});
+  const _DayGroup({
+    required this.label,
+    required this.items,
+    required this.isPremium,
+    required this.onRate,
+    required this.onUpgradeFromRate,
+  });
 
   final String label;
   final List<TaskEventItem> items;
+  final bool isPremium;
+  final void Function(TaskEventItem) onRate;
+  final VoidCallback onUpgradeFromRate;
 
   @override
   Widget build(BuildContext context) {
@@ -309,7 +395,12 @@ class _DayGroup extends StatelessWidget {
         Column(
           children: [
             for (final it in items) ...[
-              _EventRow(item: it),
+              _EventRow(
+                item: it,
+                isPremium: isPremium,
+                onRate: () => onRate(it),
+                onUpgradeFromRate: onUpgradeFromRate,
+              ),
               const SizedBox(height: 8),
             ],
           ],
@@ -319,13 +410,21 @@ class _DayGroup extends StatelessWidget {
   }
 }
 
-class _EventRow extends StatelessWidget {
-  const _EventRow({required this.item});
+class _EventRow extends ConsumerWidget {
+  const _EventRow({
+    required this.item,
+    required this.isPremium,
+    required this.onRate,
+    required this.onUpgradeFromRate,
+  });
 
   final TaskEventItem item;
+  final bool isPremium;
+  final VoidCallback onRate;
+  final VoidCallback onUpgradeFromRate;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final l10n = AppLocalizations.of(context);
@@ -355,7 +454,9 @@ class _EventRow extends StatelessWidget {
     final description = _descriptionFor(item, l10n);
     final timeLabel = _timeLabel(_eventDate(item.raw).toLocal());
 
-    return Container(
+    final trailing = _buildTrailing();
+
+    final body = Container(
       key: Key('history_row_fut_${item.raw.id}'),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
@@ -413,9 +514,63 @@ class _EventRow extends StatelessWidget {
               ],
             ),
           ),
+          if (trailing != null) ...[
+            const SizedBox(width: 8),
+            trailing,
+          ],
         ],
       ),
     );
+
+    final isDetailable = item.raw is CompletedEvent || item.raw is PassedEvent;
+    final homeId = ref.read(currentHomeProvider).valueOrNull?.id;
+    if (isDetailable && homeId != null) {
+      return Material(
+        color: Colors.transparent,
+        child: InkWell(
+          key: Key('history_tile_tap_${item.raw.id}'),
+          borderRadius: BorderRadius.circular(12),
+          onTap: () => context.push(
+            AppRoutes.historyEventDetail
+                .replaceFirst(':homeId', homeId)
+                .replaceFirst(':eventId', item.raw.id),
+          ),
+          child: body,
+        ),
+      );
+    }
+    return body;
+  }
+
+  Widget? _buildTrailing() {
+    if (isPremium) {
+      if (item.isRated) {
+        return const Icon(Icons.star, color: Colors.amber, size: 18);
+      }
+      if (item.canRate) {
+        return IconButton(
+          key: Key('rate_button_fut_${item.raw.id}'),
+          icon: const Icon(Icons.star_border),
+          iconSize: 18,
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+          onPressed: onRate,
+        );
+      }
+      return null;
+    }
+    final isRateable = item.raw is CompletedEvent && !item.isOwnEvent;
+    if (isRateable) {
+      return IconButton(
+        key: Key('rate_upgrade_fut_${item.raw.id}'),
+        icon: Icon(Icons.star_border, color: Colors.grey.shade500),
+        iconSize: 18,
+        padding: EdgeInsets.zero,
+        constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+        onPressed: onUpgradeFromRate,
+      );
+    }
+    return null;
   }
 
   Color _avatarColor(TaskEventItem it) {

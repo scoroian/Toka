@@ -17,6 +17,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../../l10n/app_localizations.dart';
+import '../../../../../shared/widgets/ad_aware_bottom_padding.dart';
 import '../../../../../shared/widgets/futurista/tocka_btn.dart';
 import '../../../../homes/application/current_home_provider.dart';
 import '../../../../homes/domain/home.dart';
@@ -74,7 +75,9 @@ class PaywallScreenFuturista extends ConsumerWidget {
         child: vm.isLoading
             ? const Center(child: CircularProgressIndicator())
             : SingleChildScrollView(
-                padding: const EdgeInsets.only(bottom: 32),
+                padding: EdgeInsets.only(
+                  bottom: adAwareBottomPadding(context, ref, extra: 16),
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [

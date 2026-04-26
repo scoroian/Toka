@@ -17,6 +17,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../../l10n/app_localizations.dart';
+import '../../../../../shared/widgets/ad_aware_bottom_padding.dart';
 import '../../../../../shared/widgets/futurista/task_glyph.dart';
 import '../../../../../shared/widgets/futurista/tocka_btn.dart';
 import '../../../../../shared/widgets/futurista/tocka_pill.dart';
@@ -211,7 +212,12 @@ class _CreateEditTaskScreenFuturistaState
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+          padding: EdgeInsets.fromLTRB(
+            16,
+            8,
+            16,
+            adAwareBottomPadding(context, ref, extra: 16),
+          ),
           children: [
             _HeaderRow(
               title: vm.isEditing

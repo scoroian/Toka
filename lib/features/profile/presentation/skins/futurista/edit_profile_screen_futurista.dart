@@ -18,6 +18,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../../../l10n/app_localizations.dart';
+import '../../../../../shared/widgets/ad_aware_bottom_padding.dart';
 import '../../../../../shared/widgets/futurista/tocka_avatar.dart';
 import '../../../../../shared/widgets/futurista/tocka_btn.dart';
 import '../../../../../shared/widgets/futurista/tocka_chip.dart';
@@ -164,7 +165,12 @@ class _EditProfileScreenFuturistaState
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(0, 4, 0, 32),
+          padding: EdgeInsets.fromLTRB(
+            0,
+            4,
+            0,
+            adAwareBottomPadding(context, ref, extra: 16),
+          ),
           children: [
             // ── Header ────────────────────────────────────────────────────
             Padding(

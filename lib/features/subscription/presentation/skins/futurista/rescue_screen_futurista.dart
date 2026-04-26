@@ -26,6 +26,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../../core/constants/routes.dart';
 import '../../../../../l10n/app_localizations.dart';
+import '../../../../../shared/widgets/ad_aware_bottom_padding.dart';
 import '../../../../../shared/widgets/futurista/tocka_btn.dart';
 import '../../../../../shared/widgets/futurista/tocka_pill.dart';
 import '../../../application/rescue_view_model.dart';
@@ -52,7 +53,9 @@ class RescueScreenFuturista extends ConsumerWidget {
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.only(bottom: 32),
+          padding: EdgeInsets.only(
+            bottom: adAwareBottomPadding(context, ref, extra: 16),
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [

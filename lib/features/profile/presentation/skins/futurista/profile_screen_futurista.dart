@@ -23,6 +23,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../../core/constants/routes.dart';
 import '../../../../../l10n/app_localizations.dart';
+import '../../../../../shared/widgets/ad_aware_bottom_padding.dart';
 import '../../../../../shared/widgets/futurista/radar_chart.dart';
 import '../../../../../shared/widgets/futurista/tocka_avatar.dart';
 import '../../../../../shared/widgets/futurista/tocka_btn.dart';
@@ -130,6 +131,7 @@ class ProfileScreenFuturista extends ConsumerWidget {
           memberUidForReviews: viewerUid,
           viewerUid: viewerUid,
           l10n: l10n,
+          bottomPadding: adAwareBottomPadding(context, ref, extra: 16),
         );
       },
     );
@@ -195,6 +197,7 @@ class ProfileScreenFuturista extends ConsumerWidget {
           memberUidForReviews: m.uid,
           viewerUid: viewerUid,
           l10n: l10n,
+          bottomPadding: adAwareBottomPadding(context, ref, extra: 16),
         );
       },
     );
@@ -355,6 +358,7 @@ class _ProfileBody extends StatelessWidget {
     required this.memberUidForReviews,
     required this.viewerUid,
     required this.l10n,
+    required this.bottomPadding,
   });
 
   final TextStyle mono;
@@ -372,6 +376,11 @@ class _ProfileBody extends StatelessWidget {
   final String memberUidForReviews;
   final String viewerUid;
   final AppLocalizations l10n;
+  /// Bottom padding calculado por el padre con `adAwareBottomPadding`. Se
+  /// inyecta como parámetro porque `_ProfileBody` es `StatelessWidget` sin
+  /// acceso a `WidgetRef` — convertirlo a `ConsumerWidget` solo por esto sería
+  /// excesivo.
+  final double bottomPadding;
 
   @override
   Widget build(BuildContext context) {
@@ -379,7 +388,7 @@ class _ProfileBody extends StatelessWidget {
     final cs = theme.colorScheme;
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(0, 10, 0, 32),
+      padding: EdgeInsets.fromLTRB(0, 10, 0, bottomPadding),
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),

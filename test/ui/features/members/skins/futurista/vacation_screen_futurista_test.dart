@@ -10,7 +10,6 @@ import 'package:toka/features/members/presentation/skins/futurista/vacation_scre
 import 'package:toka/features/members/presentation/skins/vacation_screen.dart';
 import 'package:toka/features/members/presentation/skins/vacation_screen_v2.dart';
 import 'package:toka/l10n/app_localizations.dart';
-import 'package:toka/shared/widgets/ad_banner_config_provider.dart';
 
 Widget _harness(ProviderContainer c) => UncontrolledProviderScope(
       container: c,
@@ -30,15 +29,6 @@ Widget _harness(ProviderContainer c) => UncontrolledProviderScope(
 ProviderContainer _container() => ProviderContainer(overrides: [
       memberVacationProvider(homeId: 'h1', uid: 'u1')
           .overrideWith((_) => Stream.value(null)),
-      // VacationScreenFuturista usa adAwareBottomPadding → adBannerConfigProvider
-      // → dashboardProvider → currentHomeProvider → authProvider, cuyo
-      // `Auth.build()` arma un `Timer(15s)` para el fallback de login. Sin este
-      // override, ese timer queda colgando al cierre del test ("Timer is still
-      // pending"). Override conservador (show: false, unitId: '') corta la
-      // cadena al primer eslabón y mantiene el helper coherente con producción.
-      adBannerConfigProvider.overrideWith(
-        (ref) => const AdBannerConfig(show: false, unitId: ''),
-      ),
     ]);
 
 void main() {

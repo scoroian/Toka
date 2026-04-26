@@ -17,7 +17,8 @@ class TaskActionability {
   /// - Tareas vencidas (due < now) son siempre actionable.
   /// - hourly: due cae en la hora actual.
   /// - daily: due cae hoy.
-  /// - weekly: due cae en la semana ISO actual (lunes-domingo).
+  /// - weekly: due cae en la semana actual lunes-domingo, calculada con
+  ///   `DateTime.weekday` (NO cumple ISO 8601 estricto en fronteras de año).
   /// - monthly: due cae en el mes actual.
   /// - yearly: due cae en el año actual.
   /// - oneTime / desconocido: equivalente a daily.

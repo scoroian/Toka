@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../core/theme/futurista/futurista_colors.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../../../shared/widgets/ad_aware_bottom_padding.dart';
-import '../../../../../shared/widgets/futurista/ad_banner_futurista.dart';
 import '../../../../../shared/widgets/futurista/block_header.dart';
 import '../../../../../shared/widgets/futurista/task_card_futurista.dart';
 import '../../../../../shared/widgets/futurista/task_glyph.dart';
@@ -31,10 +30,11 @@ import '../../widgets/today_empty_state.dart';
 ///
 /// 1. `TockaTopBar` con nombre de hogar y avatars de miembros.
 /// 2. Hero "Te toca ahora" cuando hay tarea asignada al usuario actual.
-/// 3. `AdBannerFuturista` (maqueta visual, respeta el config provider).
-/// 4. Bloques por recurrencia (HORA, DÍA, SEMANA, MES, AÑO) con
+/// 3. Bloques por recurrencia (HORA, DÍA, SEMANA, MES, AÑO) con
 ///    `BlockHeader` + `TaskCardFuturista`.
-/// 5. Bloque `HECHAS · HOY` con las tareas completadas del día.
+/// 4. Bloque `HECHAS · HOY` con las tareas completadas del día.
+/// El banner publicitario lo pinta el shell (`MainShellFuturista`), no esta
+/// pantalla — paridad con `TodayScreenV2`.
 class TodayScreenFuturista extends ConsumerWidget {
   const TodayScreenFuturista({super.key});
 
@@ -131,12 +131,6 @@ class TodayScreenFuturista extends ConsumerWidget {
                       ),
                     ),
                   ),
-                const SliverToBoxAdapter(
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
-                    child: AdBannerFuturista(),
-                  ),
-                ),
                 // Bloques por recurrencia (excluyendo hero, evitando duplicar).
                 for (final recType in data.recurrenceOrder)
                   if ((data.grouped[recType]?.todos ?? const <TaskPreview>[])
@@ -165,8 +159,7 @@ class TodayScreenFuturista extends ConsumerWidget {
                   ),
                 SliverToBoxAdapter(
                   child: SizedBox(
-                    height:
-                        adAwareBottomPadding(context, ref, extra: 96),
+                    height: adAwareBottomPadding(context, ref, extra: 16),
                   ),
                 ),
               ],

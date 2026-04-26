@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:toka/core/theme/app_skin.dart';
 import 'package:toka/core/theme/skin_provider.dart';
 import 'package:toka/l10n/app_localizations.dart';
+import 'package:toka/shared/widgets/ad_banner_config_provider.dart';
 import 'package:toka/shared/widgets/skins/main_shell_futurista.dart';
 import 'package:toka/shared/widgets/skins/main_shell_root.dart';
 
@@ -65,6 +66,13 @@ void main() {
     final c = ProviderContainer(
       overrides: [
         skinModeProvider.overrideWith(_FakeSkinMode.new),
+        // El nuevo MainShellFuturista (Task 2e) watchea adBannerConfigProvider
+        // para decidir si pintar el AdBanner real. En este harness no hay
+        // Firebase ni currentHomeProvider, así que devolvemos un config OFF
+        // estable y evitamos timers pendientes / streams Firestore reales.
+        adBannerConfigProvider.overrideWith(
+          (ref) => const AdBannerConfig(show: false, unitId: ''),
+        ),
       ],
     );
     addTearDown(c.dispose);

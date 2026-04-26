@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../../core/constants/routes.dart';
 import '../../../../../l10n/app_localizations.dart';
+import '../../../../../shared/widgets/ad_aware_bottom_padding.dart';
 import '../../../../../shared/widgets/futurista/task_glyph.dart';
 import '../../../../../shared/widgets/futurista/tocka_avatar.dart';
 import '../../../../../shared/widgets/futurista/tocka_btn.dart';
@@ -139,7 +140,12 @@ class AllTasksScreenFuturista extends ConsumerWidget {
                   }
                   return ListView.separated(
                     key: const Key('tasks_list'),
-                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 120),
+                    padding: EdgeInsets.only(
+                      left: 16,
+                      right: 16,
+                      top: 4,
+                      bottom: adAwareBottomPadding(context, ref, extra: 16),
+                    ),
                     itemCount: tasks.length,
                     separatorBuilder: (_, __) => const SizedBox(height: 8),
                     itemBuilder: (_, i) {

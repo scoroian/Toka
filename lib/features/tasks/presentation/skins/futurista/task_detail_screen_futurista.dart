@@ -17,6 +17,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../../core/constants/routes.dart';
 import '../../../../../core/utils/toka_dates.dart';
 import '../../../../../l10n/app_localizations.dart';
+import '../../../../../shared/widgets/ad_aware_bottom_padding.dart';
 import '../../../../../shared/widgets/futurista/task_glyph.dart';
 import '../../../../../shared/widgets/futurista/tocka_avatar.dart';
 import '../../../../../shared/widgets/futurista/tocka_btn.dart';
@@ -85,7 +86,12 @@ class _Content extends ConsumerWidget {
     final task = data.task;
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+      padding: EdgeInsets.fromLTRB(
+        16,
+        12,
+        16,
+        adAwareBottomPadding(context, ref, extra: 16),
+      ),
       children: [
         _HeaderRow(
           canManage: data.canManage,

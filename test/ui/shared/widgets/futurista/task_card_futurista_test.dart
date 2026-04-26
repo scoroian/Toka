@@ -19,44 +19,76 @@ void main() {
     expect(find.text('· vence 11:30'), findsOneWidget);
   });
 
-  testWidgets('mine & !done shows check button and fires onComplete',
+  testWidgets('mine + actionable shows [Hecho][Pasar] row, fires onComplete and onPass',
       (tester) async {
     var completed = false;
+    var passed = false;
     await tester.pumpWidget(harness(TaskCardFuturista(
       title: 't',
       assignee: 'A',
       assigneeColor: const Color(0xFF38BDF8),
       mine: true,
+      actionable: true,
       onComplete: () => completed = true,
+      onPass: () => passed = true,
     )));
-    final checkBtn = find.byIcon(Icons.check);
-    expect(checkBtn, findsOneWidget);
-    await tester.tap(checkBtn);
+    final doneBtn = find.byKey(const Key('task_card_done_btn'));
+    final passBtn = find.byKey(const Key('task_card_pass_btn'));
+    expect(doneBtn, findsOneWidget);
+    expect(passBtn, findsOneWidget);
+    await tester.tap(doneBtn);
     expect(completed, true);
+    await tester.tap(passBtn);
+    expect(passed, true);
   });
 
-  testWidgets('done hides right slot and adds strikethrough', (tester) async {
+  testWidgets('mine + NOT actionable: tap done fires onActionableHint, not onComplete',
+      (tester) async {
+    var completed = false;
+    var hinted = false;
+    await tester.pumpWidget(harness(TaskCardFuturista(
+      title: 't',
+      assignee: 'A',
+      assigneeColor: const Color(0xFF38BDF8),
+      mine: true,
+      actionable: false,
+      onComplete: () => completed = true,
+      onActionableHint: () => hinted = true,
+    )));
+    expect(find.byIcon(Icons.lock_clock), findsOneWidget);
+    await tester.tap(find.byKey(const Key('task_card_done_btn')));
+    expect(completed, false);
+    expect(hinted, true);
+  });
+
+  testWidgets('mine + done hides buttons row and applies strikethrough',
+      (tester) async {
     await tester.pumpWidget(harness(const TaskCardFuturista(
       title: 't',
       assignee: 'A',
       assigneeColor: Color(0xFF38BDF8),
+      mine: true,
       done: true,
     )));
-    expect(find.byIcon(Icons.lock_outline), findsNothing);
+    expect(find.byKey(const Key('task_card_done_btn')), findsNothing);
+    expect(find.byKey(const Key('task_card_pass_btn')), findsNothing);
     final titleText = tester.widget<Text>(find.text('t'));
     expect(titleText.style?.decoration, TextDecoration.lineThrough);
   });
 
-  testWidgets('!mine & !done shows lock icon', (tester) async {
+  testWidgets('!mine shows lock icon in right slot, no buttons row',
+      (tester) async {
     await tester.pumpWidget(harness(const TaskCardFuturista(
       title: 't',
       assignee: 'A',
       assigneeColor: Color(0xFF38BDF8),
     )));
     expect(find.byIcon(Icons.lock_outline), findsOneWidget);
+    expect(find.byKey(const Key('task_card_done_btn')), findsNothing);
+    expect(find.byKey(const Key('task_card_pass_btn')), findsNothing);
   });
 
-  testWidgets('onTap fires when card tapped', (tester) async {
+  testWidgets('onTap fires when card body tapped', (tester) async {
     var tapped = false;
     await tester.pumpWidget(harness(TaskCardFuturista(
       title: 't',

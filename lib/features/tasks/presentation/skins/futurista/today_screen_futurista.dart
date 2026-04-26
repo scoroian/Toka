@@ -1,8 +1,11 @@
 // lib/features/tasks/presentation/skins/futurista/today_screen_futurista.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../../core/constants/routes.dart';
 import '../../../../../core/theme/futurista/futurista_colors.dart';
+import '../../../../../core/utils/toka_dates.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../../../shared/widgets/ad_aware_bottom_padding.dart';
 import '../../../../../shared/widgets/futurista/block_header.dart';
@@ -220,6 +223,8 @@ class TodayScreenFuturista extends ConsumerWidget {
             final t = todos[i];
             final isMine = t.currentAssigneeUid != null &&
                 t.currentAssigneeUid == currentUid;
+            final l10n = AppLocalizations.of(ctx);
+            final actionable = _isActionable(t);
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: TaskCardFuturista(
@@ -229,11 +234,17 @@ class TodayScreenFuturista extends ConsumerWidget {
                 assigneeColor: _colorFromUid(t.currentAssigneeUid),
                 when: _whenLabel(ctx, t),
                 glyph: _glyphForRecurrence(recType),
-                mine: isMine && !t.isOverdue ? true : isMine,
+                mine: isMine,
                 overdue: t.isOverdue,
                 urgent: t.isOverdue,
-                onTap: onPass == null ? null : () => onPass(t),
+                actionable: actionable,
+                doneLabel: l10n.today_btn_done,
+                onTap: () => ctx.push(
+                  AppRoutes.taskDetail.replaceAll(':id', t.taskId),
+                ),
                 onComplete: onDone == null ? null : () => onDone(t),
+                onPass: onPass == null ? null : () => onPass(t),
+                onActionableHint: () => _snackNotYet(ctx, l10n, t),
               ),
             );
           },
@@ -324,6 +335,71 @@ class TodayScreenFuturista extends ConsumerWidget {
     final hh = due.hour.toString().padLeft(2, '0');
     final mm = due.minute.toString().padLeft(2, '0');
     return '$hh:$mm';
+  }
+
+  /// Determina si la tarea puede completarse ahora según su tipo de
+  /// recurrencia. Lógica idéntica a `_TodayTaskCardTodoV2State._isActionable`
+  /// para mantener paridad con la skin v2.
+  bool _isActionable(TaskPreview t, {DateTime? now}) {
+    final n = now ?? DateTime.now();
+    final due = t.nextDueAt;
+    if (due.isBefore(n)) return true;
+    switch (t.recurrenceType) {
+      case 'hourly':
+        final hourEnd = DateTime(n.year, n.month, n.day, n.hour + 1);
+        return due.isBefore(hourEnd);
+      case 'daily':
+        final dayEnd = DateTime(n.year, n.month, n.day + 1);
+        return due.isBefore(dayEnd);
+      case 'weekly':
+        final daysFromMonday = n.weekday - 1;
+        final weekStart = DateTime(n.year, n.month, n.day - daysFromMonday);
+        final weekEnd = weekStart.add(const Duration(days: 7));
+        return due.isBefore(weekEnd);
+      case 'monthly':
+        final monthEnd = DateTime(n.year, n.month + 1, 1);
+        return due.isBefore(monthEnd);
+      case 'yearly':
+        final yearEnd = DateTime(n.year + 1, 1, 1);
+        return due.isBefore(yearEnd);
+      default:
+        final dayEnd = DateTime(n.year, n.month, n.day + 1);
+        return due.isBefore(dayEnd);
+    }
+  }
+
+  /// Formato del mensaje "aún no es momento — vence el {date}" según el tipo
+  /// de recurrencia. Mismas reglas que `_TodayTaskCardTodoV2State._formatDueForMessage`.
+  String _formatDueForMessage(BuildContext context, TaskPreview t) {
+    final locale = Localizations.localeOf(context);
+    final due = t.nextDueAt.toLocal();
+    switch (t.recurrenceType) {
+      case 'hourly':
+        return TokaDates.timeShort(due, locale);
+      case 'daily':
+        return '${TokaDates.dateMediumWithWeekday(due, locale)} · '
+            '${TokaDates.timeShort(due, locale)}';
+      case 'weekly':
+        return TokaDates.dateMediumWithWeekday(due, locale);
+      case 'monthly':
+        return TokaDates.dateLongDayMonth(due, locale);
+      case 'yearly':
+        return TokaDates.monthYearLong(due, locale);
+      default:
+        return '${TokaDates.dateMediumWithWeekday(due, locale)} · '
+            '${TokaDates.timeShort(due, locale)}';
+    }
+  }
+
+  void _snackNotYet(BuildContext ctx, AppLocalizations l10n, TaskPreview t) {
+    final dateStr = _formatDueForMessage(ctx, t);
+    ScaffoldMessenger.of(ctx)
+      ..clearSnackBars()
+      ..showSnackBar(SnackBar(
+        content: Text(l10n.today_hecho_not_yet(dateStr)),
+        duration: const Duration(seconds: 3),
+        behavior: SnackBarBehavior.floating,
+      ));
   }
 }
 

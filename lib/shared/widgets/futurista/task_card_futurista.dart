@@ -2,9 +2,21 @@ import 'package:flutter/material.dart';
 
 import 'task_glyph.dart';
 import 'tocka_avatar.dart';
+import 'tocka_btn.dart';
 
-/// Tarjeta de tarea futurista. Estados: mine (glow + check btn), done (tachado),
-/// urgent (warning color), overdue (danger en when).
+/// Tarjeta de tarea futurista. Estados: mine (glow + fila inferior con
+/// [Hecho][Pasar]), done (tachado), urgent (warning color), overdue (danger).
+///
+/// Cuando `mine && !done`, debajo del row principal aparece una fila con dos
+/// botones: `TockaBtn glow lg fullWidth icon=check` (Hecho) + `TockaBtn ghost
+/// lg icon=swap_horiz` (Pasar). El botón Hecho aplica gating: si `actionable`
+/// es false, se renderiza con icono `lock_clock` y al pulsarlo invoca
+/// `onActionableHint` en vez de `onComplete`. La card NO conoce
+/// `task.nextDueAt` ni `recurrenceType`, así que el cálculo de `actionable`
+/// y el formato del SnackBar viven en el consumidor.
+///
+/// `onTap` representa "tap general en la card" (para navegar al detalle).
+/// Es independiente de `onComplete`/`onPass`.
 class TaskCardFuturista extends StatelessWidget {
   const TaskCardFuturista({
     super.key,
@@ -18,8 +30,12 @@ class TaskCardFuturista extends StatelessWidget {
     this.overdue = false,
     this.mine = false,
     this.compact = false,
+    this.actionable = true,
     this.onTap,
     this.onComplete,
+    this.onPass,
+    this.onActionableHint,
+    this.doneLabel = 'Hecho',
   });
 
   final String title;
@@ -32,8 +48,12 @@ class TaskCardFuturista extends StatelessWidget {
   final bool overdue;
   final bool mine;
   final bool compact;
+  final bool actionable;
   final VoidCallback? onTap;
   final VoidCallback? onComplete;
+  final VoidCallback? onPass;
+  final VoidCallback? onActionableHint;
+  final String doneLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +62,7 @@ class TaskCardFuturista extends StatelessWidget {
 
     Color glyphColor;
     if (urgent) {
-      glyphColor = const Color(0xFFF5B544); // warning
+      glyphColor = const Color(0xFFF5B544);
     } else if (mine) {
       glyphColor = cs.primary;
     } else {
@@ -70,6 +90,8 @@ class TaskCardFuturista extends StatelessWidget {
           ]
         : null;
 
+    final showButtonsRow = mine && !done;
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -83,13 +105,25 @@ class TaskCardFuturista extends StatelessWidget {
             border: Border.all(color: borderColor, width: 1),
             boxShadow: shadow,
           ),
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              _leftSlot(context, glyphColor),
-              const SizedBox(width: 12),
-              Expanded(child: _center(context)),
-              const SizedBox(width: 8),
-              _rightSlot(context, cs),
+              Row(
+                children: [
+                  _leftSlot(context, glyphColor),
+                  const SizedBox(width: 12),
+                  Expanded(child: _center(context)),
+                  if (!showButtonsRow) ...[
+                    const SizedBox(width: 8),
+                    _rightSlotForNonOwn(context, cs),
+                  ],
+                ],
+              ),
+              if (showButtonsRow) ...[
+                const SizedBox(height: 12),
+                _buttonsRow(context, cs),
+              ],
             ],
           ),
         ),
@@ -178,37 +212,8 @@ class TaskCardFuturista extends StatelessWidget {
     );
   }
 
-  Widget _rightSlot(BuildContext context, ColorScheme cs) {
+  Widget _rightSlotForNonOwn(BuildContext context, ColorScheme cs) {
     if (done) return const SizedBox.shrink();
-    if (mine) {
-      return Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onComplete,
-          borderRadius: BorderRadius.circular(10),
-          child: Container(
-            width: 38,
-            height: 38,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [cs.primary, cs.primary.withValues(alpha: 0.87)],
-              ),
-              borderRadius: BorderRadius.circular(10),
-              boxShadow: [
-                BoxShadow(
-                  color: cs.primary.withValues(alpha: 0.35),
-                  blurRadius: 18,
-                  offset: const Offset(0, 6),
-                ),
-              ],
-            ),
-            child: Icon(Icons.check, color: cs.onPrimary, size: 20),
-          ),
-        ),
-      );
-    }
     return Container(
       width: 38,
       height: 38,
@@ -221,6 +226,33 @@ class TaskCardFuturista extends StatelessWidget {
         size: 14,
         color: cs.onSurface.withValues(alpha: 0.22),
       ),
+    );
+  }
+
+  Widget _buttonsRow(BuildContext context, ColorScheme cs) {
+    final isLocked = !actionable;
+    return Row(
+      children: [
+        Expanded(
+          child: TockaBtn(
+            key: const Key('task_card_done_btn'),
+            variant: isLocked ? TockaBtnVariant.ghost : TockaBtnVariant.glow,
+            size: TockaBtnSize.lg,
+            fullWidth: true,
+            icon: Icon(isLocked ? Icons.lock_clock : Icons.check),
+            onPressed: isLocked ? onActionableHint : onComplete,
+            child: Text(doneLabel),
+          ),
+        ),
+        const SizedBox(width: 8),
+        TockaBtn(
+          key: const Key('task_card_pass_btn'),
+          variant: TockaBtnVariant.ghost,
+          size: TockaBtnSize.lg,
+          onPressed: onPass,
+          child: const Icon(Icons.swap_horiz),
+        ),
+      ],
     );
   }
 }

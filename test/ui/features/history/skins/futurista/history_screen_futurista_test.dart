@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:toka/core/theme/app_skin.dart';
 import 'package:toka/core/theme/skin_provider.dart';
@@ -15,6 +16,7 @@ import 'package:toka/features/history/presentation/skins/history_screen.dart';
 import 'package:toka/features/history/presentation/skins/history_screen_v2.dart';
 import 'package:toka/features/homes/application/current_home_provider.dart';
 import 'package:toka/features/homes/domain/home.dart';
+import 'package:toka/features/homes/domain/home_limits.dart';
 import 'package:toka/l10n/app_localizations.dart';
 
 TaskEventItem _completedItem({
@@ -50,6 +52,25 @@ class _FakeAuth extends Auth {
 class _FakeCurrentHome extends CurrentHome {
   @override
   Future<Home?> build() async => null;
+}
+
+class _FakeCurrentHomeWithId extends CurrentHome {
+  @override
+  Future<Home?> build() async => Home(
+        id: 'h1',
+        name: 'Casa',
+        ownerUid: 'owner',
+        currentPayerUid: null,
+        lastPayerUid: null,
+        premiumStatus: HomePremiumStatus.free,
+        premiumPlan: null,
+        premiumEndsAt: null,
+        restoreUntil: null,
+        autoRenewEnabled: false,
+        limits: const HomeLimits(maxMembers: 5),
+        createdAt: DateTime(2026, 1, 1),
+        updatedAt: DateTime(2026, 1, 1),
+      );
 }
 
 class _FakeHistoryViewModel implements HistoryViewModel {
@@ -101,6 +122,42 @@ Widget _harness({required ProviderContainer container}) =>
         home: HistoryScreen(),
       ),
     );
+
+Widget _routerHarness({
+  required ProviderContainer container,
+  required void Function() onDetailVisited,
+}) {
+  final router = GoRouter(
+    initialLocation: '/',
+    routes: [
+      GoRoute(
+        path: '/',
+        builder: (_, __) => const HistoryScreen(),
+      ),
+      GoRoute(
+        path: '/history/:homeId/:eventId',
+        builder: (_, __) {
+          onDetailVisited();
+          return const Scaffold(body: Text('detail-screen'));
+        },
+      ),
+    ],
+  );
+  return UncontrolledProviderScope(
+    container: container,
+    child: MaterialApp.router(
+      routerConfig: router,
+      locale: const Locale('es'),
+      supportedLocales: const [Locale('es'), Locale('en'), Locale('ro')],
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+    ),
+  );
+}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -208,5 +265,36 @@ void main() {
       await tester.pump(const Duration(milliseconds: 80));
     }
     expect(find.byKey(const Key('rate_button_fut_e1')), findsOneWidget);
+  });
+
+  testWidgets(
+      'futurista: tap en CompletedEvent navega a historyEventDetail',
+      (tester) async {
+    SharedPreferences.setMockInitialValues(
+        {SkinMode.persistKey: AppSkin.futurista.persistKey});
+    var navigated = false;
+    final c = ProviderContainer(overrides: [
+      historyViewModelProvider.overrideWith(
+        (ref) => _FakeHistoryViewModel(
+          itemsList: [_completedItem(id: 'e-tap')],
+          premium: true,
+        ),
+      ),
+      authProvider.overrideWith(_FakeAuth.new),
+      currentHomeProvider.overrideWith(_FakeCurrentHomeWithId.new),
+    ]);
+    addTearDown(c.dispose);
+    await tester.pumpWidget(_routerHarness(
+      container: c,
+      onDetailVisited: () => navigated = true,
+    ));
+    for (var i = 0; i < 5; i++) {
+      await tester.pump(const Duration(milliseconds: 80));
+    }
+    await tester.tap(find.byKey(const Key('history_tile_tap_e-tap')));
+    for (var i = 0; i < 5; i++) {
+      await tester.pump(const Duration(milliseconds: 80));
+    }
+    expect(navigated, true);
   });
 }

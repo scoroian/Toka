@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/routes.dart';
@@ -9,11 +8,11 @@ import 'tocka_btn.dart';
 /// Banner intercalado para usuarios free en history futurista.
 /// Reusa los strings `history_premium_banner_*` de v2 con un look acorde
 /// al lenguaje futurista (surfaceContainerHighest + border primary muted).
-class PremiumBannerFuturista extends ConsumerWidget {
+class PremiumBannerFuturista extends StatelessWidget {
   const PremiumBannerFuturista({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final l10n = AppLocalizations.of(context);

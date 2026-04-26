@@ -10,6 +10,7 @@ import '../../../../../shared/widgets/ad_aware_bottom_padding.dart';
 import '../../../../../shared/widgets/bottom_sheet_padding.dart';
 import '../../../../../shared/widgets/futurista/premium_banner_futurista.dart';
 import '../../../../../shared/widgets/futurista/tocka_avatar.dart';
+import '../../../../../shared/widgets/futurista/tocka_btn.dart';
 import '../../../../../shared/widgets/futurista/tocka_chip.dart';
 import '../../../../../shared/widgets/futurista/tocka_pill.dart';
 import '../../../../../shared/widgets/futurista/tocka_top_bar.dart';
@@ -211,16 +212,16 @@ class _HistoryScreenFuturistaState
             const SizedBox(height: 12),
             Text(l10n.free_reviews_upgrade_body),
             const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                key: const Key('btn_upgrade_from_rate_fut'),
-                onPressed: () {
-                  Navigator.of(sheetCtx).pop();
-                  ctx.push(AppRoutes.paywall);
-                },
-                child: Text(l10n.free_go_premium_cta),
-              ),
+            TockaBtn(
+              key: const Key('btn_upgrade_from_rate_fut'),
+              variant: TockaBtnVariant.primary,
+              size: TockaBtnSize.md,
+              fullWidth: true,
+              onPressed: () {
+                Navigator.of(sheetCtx).pop();
+                ctx.push(AppRoutes.paywall);
+              },
+              child: Text(l10n.free_go_premium_cta),
             ),
           ],
         ),

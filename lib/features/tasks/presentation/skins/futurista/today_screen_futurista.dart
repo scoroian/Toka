@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../../core/constants/routes.dart';
 import '../../../../../core/theme/futurista/futurista_colors.dart';
-import '../../../../../core/utils/toka_dates.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../../../shared/widgets/ad_aware_bottom_padding.dart';
 import '../../../../../shared/widgets/futurista/block_header.dart';
@@ -22,6 +21,7 @@ import '../../../../members/domain/member.dart';
 import '../../../application/today_view_model.dart';
 import '../../../domain/home_dashboard.dart';
 import '../../../domain/recurrence_order.dart';
+import '../../../domain/task_actionability.dart';
 import '../../widgets/complete_task_dialog.dart';
 import '../../widgets/pass_turn_dialog.dart';
 import '../../widgets/today_empty_state.dart';
@@ -224,7 +224,7 @@ class TodayScreenFuturista extends ConsumerWidget {
             final isMine = t.currentAssigneeUid != null &&
                 t.currentAssigneeUid == currentUid;
             final l10n = AppLocalizations.of(ctx);
-            final actionable = _isActionable(t);
+            final actionable = TaskActionability.isActionable(t);
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: TaskCardFuturista(
@@ -337,62 +337,11 @@ class TodayScreenFuturista extends ConsumerWidget {
     return '$hh:$mm';
   }
 
-  /// Determina si la tarea puede completarse ahora según su tipo de
-  /// recurrencia. Lógica idéntica a `_TodayTaskCardTodoV2State._isActionable`
-  /// para mantener paridad con la skin v2.
-  bool _isActionable(TaskPreview t, {DateTime? now}) {
-    final n = now ?? DateTime.now();
-    final due = t.nextDueAt;
-    if (due.isBefore(n)) return true;
-    switch (t.recurrenceType) {
-      case 'hourly':
-        final hourEnd = DateTime(n.year, n.month, n.day, n.hour + 1);
-        return due.isBefore(hourEnd);
-      case 'daily':
-        final dayEnd = DateTime(n.year, n.month, n.day + 1);
-        return due.isBefore(dayEnd);
-      case 'weekly':
-        final daysFromMonday = n.weekday - 1;
-        final weekStart = DateTime(n.year, n.month, n.day - daysFromMonday);
-        final weekEnd = weekStart.add(const Duration(days: 7));
-        return due.isBefore(weekEnd);
-      case 'monthly':
-        final monthEnd = DateTime(n.year, n.month + 1, 1);
-        return due.isBefore(monthEnd);
-      case 'yearly':
-        final yearEnd = DateTime(n.year + 1, 1, 1);
-        return due.isBefore(yearEnd);
-      default:
-        final dayEnd = DateTime(n.year, n.month, n.day + 1);
-        return due.isBefore(dayEnd);
-    }
-  }
-
-  /// Formato del mensaje "aún no es momento — vence el {date}" según el tipo
-  /// de recurrencia. Mismas reglas que `_TodayTaskCardTodoV2State._formatDueForMessage`.
-  String _formatDueForMessage(BuildContext context, TaskPreview t) {
-    final locale = Localizations.localeOf(context);
-    final due = t.nextDueAt.toLocal();
-    switch (t.recurrenceType) {
-      case 'hourly':
-        return TokaDates.timeShort(due, locale);
-      case 'daily':
-        return '${TokaDates.dateMediumWithWeekday(due, locale)} · '
-            '${TokaDates.timeShort(due, locale)}';
-      case 'weekly':
-        return TokaDates.dateMediumWithWeekday(due, locale);
-      case 'monthly':
-        return TokaDates.dateLongDayMonth(due, locale);
-      case 'yearly':
-        return TokaDates.monthYearLong(due, locale);
-      default:
-        return '${TokaDates.dateMediumWithWeekday(due, locale)} · '
-            '${TokaDates.timeShort(due, locale)}';
-    }
-  }
-
   void _snackNotYet(BuildContext ctx, AppLocalizations l10n, TaskPreview t) {
-    final dateStr = _formatDueForMessage(ctx, t);
+    final dateStr = TaskActionability.formatDueForMessage(
+      t,
+      Localizations.localeOf(ctx),
+    );
     ScaffoldMessenger.of(ctx)
       ..clearSnackBars()
       ..showSnackBar(SnackBar(

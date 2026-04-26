@@ -16,7 +16,7 @@ import '../../../../shared/widgets/premium_upgrade_banner.dart';
 import '../widgets/history_empty_state.dart';
 import '../widgets/history_event_tile.dart';
 import '../widgets/history_filter_bar.dart';
-import '../widgets/rate_event_sheet.dart';
+import '../widgets/show_rate_sheet.dart';
 import '../../domain/task_event.dart';
 
 class HistoryScreenV2 extends ConsumerStatefulWidget {
@@ -134,7 +134,7 @@ class _HistoryScreenV2State extends ConsumerState<HistoryScreenV2> {
           key: Key('rate_button_${item.raw.id}'),
           icon: const Icon(Icons.star_border),
           tooltip: l10n.history_rate_button,
-          onPressed: () => _showRateSheet(item, vm),
+          onPressed: () => showRateSheet(context, vm, item),
         );
       }
     } else {
@@ -171,15 +171,6 @@ class _HistoryScreenV2State extends ConsumerState<HistoryScreenV2> {
             .replaceFirst(':eventId', item.raw.id),
       ),
       child: tile,
-    );
-  }
-
-  void _showRateSheet(TaskEventItem item, HistoryViewModel vm) {
-    showModalBottomSheet<void>(
-      context: context, isScrollControlled: true,
-      builder: (_) => RateEventSheet(
-        onSubmit: (rating, note) => vm.rateEvent(item.raw.id, rating, note: note),
-      ),
     );
   }
 

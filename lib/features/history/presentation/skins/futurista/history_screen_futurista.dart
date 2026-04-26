@@ -20,7 +20,7 @@ import '../../../../members/application/members_provider.dart';
 import '../../../../members/domain/member.dart';
 import '../../../domain/task_event.dart';
 import '../../../application/history_view_model.dart';
-import '../../widgets/rate_event_sheet.dart';
+import '../../widgets/show_rate_sheet.dart';
 
 /// Pantalla "Historial" en skin futurista. Consume el mismo
 /// `historyViewModelProvider` que v2 y mantiene el filtrado por tipo de
@@ -151,7 +151,7 @@ class _HistoryScreenFuturistaState
                         label: g.label,
                         items: g.items,
                         isPremium: vm.isPremium,
-                        onRate: (item) => _showRateSheet(ctx, vm, item),
+                        onRate: (item) => showRateSheet(ctx, vm, item),
                         onUpgradeFromRate: () => _showUpgradeSheet(ctx),
                       );
                     },
@@ -161,21 +161,6 @@ class _HistoryScreenFuturistaState
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  void _showRateSheet(
-    BuildContext ctx,
-    HistoryViewModel vm,
-    TaskEventItem item,
-  ) {
-    showModalBottomSheet<void>(
-      context: ctx,
-      isScrollControlled: true,
-      builder: (_) => RateEventSheet(
-        onSubmit: (rating, note) =>
-            vm.rateEvent(item.raw.id, rating, note: note),
       ),
     );
   }

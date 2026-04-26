@@ -9,6 +9,7 @@ import '../../../../../core/theme/app_colors_v2.dart';
 import '../../../../../core/utils/toka_dates.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../domain/home_dashboard.dart';
+import '../../../domain/task_actionability.dart';
 import '../../../presentation/utils/task_visual_utils.dart';
 import '../../../../profile/application/profile_provider.dart';
 
@@ -56,65 +57,6 @@ class _TodayTaskCardTodoV2State extends ConsumerState<TodayTaskCardTodoV2>
     super.dispose();
   }
 
-  /// Determina si la tarea puede completarse ahora según su tipo de recurrencia.
-  /// - hourly: vence en la hora actual
-  /// - daily: vence hoy
-  /// - weekly: vence esta semana
-  /// - monthly: vence este mes
-  /// - yearly: vence este año
-  bool _isActionable() {
-    final now = widget.now ?? DateTime.now();
-    final due = widget.task.nextDueAt;
-
-    // Tareas vencidas siempre son accionables
-    if (due.isBefore(now)) return true;
-
-    switch (widget.task.recurrenceType) {
-      case 'hourly':
-        final hourEnd = DateTime(now.year, now.month, now.day, now.hour + 1);
-        return due.isBefore(hourEnd);
-      case 'daily':
-        final dayEnd = DateTime(now.year, now.month, now.day + 1);
-        return due.isBefore(dayEnd);
-      case 'weekly':
-        final daysFromMonday = now.weekday - 1;
-        final weekStart = DateTime(now.year, now.month, now.day - daysFromMonday);
-        final weekEnd = weekStart.add(const Duration(days: 7));
-        return due.isBefore(weekEnd);
-      case 'monthly':
-        final monthEnd = DateTime(now.year, now.month + 1, 1);
-        return due.isBefore(monthEnd);
-      case 'yearly':
-        final yearEnd = DateTime(now.year + 1, 1, 1);
-        return due.isBefore(yearEnd);
-      default:
-        final dayEnd = DateTime(now.year, now.month, now.day + 1);
-        return due.isBefore(dayEnd);
-    }
-  }
-
-  /// Formatea la fecha de vencimiento para el mensaje informativo según el tipo de recurrencia.
-  String _formatDueForMessage(BuildContext context) {
-    final locale = Localizations.localeOf(context);
-    final due = widget.task.nextDueAt.toLocal();
-    switch (widget.task.recurrenceType) {
-      case 'hourly':
-        return TokaDates.timeShort(due, locale);
-      case 'daily':
-        return '${TokaDates.dateMediumWithWeekday(due, locale)} · '
-            '${TokaDates.timeShort(due, locale)}';
-      case 'weekly':
-        return TokaDates.dateMediumWithWeekday(due, locale);
-      case 'monthly':
-        return TokaDates.dateLongDayMonth(due, locale);
-      case 'yearly':
-        return TokaDates.monthYearLong(due, locale);
-      default:
-        return '${TokaDates.dateMediumWithWeekday(due, locale)} · '
-            '${TokaDates.timeShort(due, locale)}';
-    }
-  }
-
   Future<void> _handleDone() async {
     if (_animating) return;
     setState(() => _animating = true);
@@ -126,7 +68,10 @@ class _TodayTaskCardTodoV2State extends ConsumerState<TodayTaskCardTodoV2>
   }
 
   void _handleDoneNotReady(BuildContext context, AppLocalizations l10n) {
-    final dateStr = _formatDueForMessage(context);
+    final dateStr = TaskActionability.formatDueForMessage(
+      widget.task,
+      Localizations.localeOf(context),
+    );
     ScaffoldMessenger.of(context)
       ..clearSnackBars()
       ..showSnackBar(SnackBar(
@@ -161,7 +106,10 @@ class _TodayTaskCardTodoV2State extends ConsumerState<TodayTaskCardTodoV2>
     final isDark    = Theme.of(context).brightness == Brightness.dark;
     final isOwn     = widget.task.currentAssigneeUid == widget.currentUid;
     final isOverdue = widget.task.isOverdue;
-    final actionable = _isActionable();
+    final actionable = TaskActionability.isActionable(
+      widget.task,
+      now: widget.now,
+    );
 
     // resolve name/photo
     String? name  = widget.task.currentAssigneeName;

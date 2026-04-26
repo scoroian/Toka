@@ -23,6 +23,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../../core/constants/routes.dart';
 import '../../../../../core/theme/futurista/futurista_colors.dart';
 import '../../../../../l10n/app_localizations.dart';
+import '../../../../../shared/widgets/ad_aware_bottom_padding.dart';
 import '../../../application/my_homes_view_model.dart';
 import '../../../domain/home_membership.dart';
 
@@ -75,7 +76,12 @@ class MyHomesScreenFuturista extends ConsumerWidget {
                   }
                   return ListView.separated(
                     key: const Key('my_homes_list'),
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                    padding: EdgeInsets.fromLTRB(
+                      16,
+                      8,
+                      16,
+                      adAwareBottomPadding(context, ref, extra: 16),
+                    ),
                     itemCount: memberships.length + 1,
                     separatorBuilder: (_, __) => const SizedBox(height: 10),
                     itemBuilder: (context, index) {

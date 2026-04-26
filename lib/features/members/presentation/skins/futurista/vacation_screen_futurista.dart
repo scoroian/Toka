@@ -10,6 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/utils/toka_dates.dart';
 import '../../../../../l10n/app_localizations.dart';
+import '../../../../../shared/widgets/ad_aware_bottom_padding.dart';
 import '../../../../../shared/widgets/futurista/tocka_btn.dart';
 import '../../../application/vacation_view_model.dart';
 
@@ -144,7 +145,12 @@ class _VacationScreenFuturistaState
     return Scaffold(
       appBar: AppBar(title: Text(l10n.vacation_title)),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
+        padding: EdgeInsets.fromLTRB(
+          24,
+          24,
+          24,
+          adAwareBottomPadding(context, ref, extra: 16),
+        ),
         children: [
           Center(
             child: Container(

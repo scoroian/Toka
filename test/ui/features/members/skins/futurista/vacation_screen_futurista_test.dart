@@ -10,6 +10,7 @@ import 'package:toka/features/members/presentation/skins/futurista/vacation_scre
 import 'package:toka/features/members/presentation/skins/vacation_screen.dart';
 import 'package:toka/features/members/presentation/skins/vacation_screen_v2.dart';
 import 'package:toka/l10n/app_localizations.dart';
+import 'package:toka/shared/widgets/ad_banner_config_provider.dart';
 
 Widget _harness(ProviderContainer c) => UncontrolledProviderScope(
       container: c,
@@ -29,6 +30,12 @@ Widget _harness(ProviderContainer c) => UncontrolledProviderScope(
 ProviderContainer _container() => ProviderContainer(overrides: [
       memberVacationProvider(homeId: 'h1', uid: 'u1')
           .overrideWith((_) => Stream.value(null)),
+      // VacationScreenFuturista usa adAwareBottomPadding → adBannerConfigProvider,
+      // que de otro modo se suscribiría al `dashboardProvider` (StreamProvider sin
+      // mock) y dejaría un Timer pendiente al cierre del test.
+      adBannerConfigProvider.overrideWith(
+        (ref) => const AdBannerConfig(show: false, unitId: ''),
+      ),
     ]);
 
 void main() {

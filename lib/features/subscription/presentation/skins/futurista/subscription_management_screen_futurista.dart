@@ -40,6 +40,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../../../core/constants/routes.dart';
 import '../../../../../core/theme/futurista/futurista_colors.dart';
 import '../../../../../l10n/app_localizations.dart';
+import '../../../../../shared/widgets/ad_aware_bottom_padding.dart';
 import '../../../../auth/application/auth_provider.dart';
 import '../../../../homes/domain/home.dart';
 import '../../../application/paywall_provider.dart';
@@ -89,7 +90,12 @@ class SubscriptionManagementScreenFuturista extends ConsumerWidget {
             ),
           ),
           data: (data) => ListView(
-            padding: const EdgeInsets.fromLTRB(0, 12, 0, 24),
+            padding: EdgeInsets.fromLTRB(
+              0,
+              12,
+              0,
+              adAwareBottomPadding(context, ref, extra: 16),
+            ),
             children: [
               const _Header(title: 'Gestión de suscripción'),
               const SizedBox(height: 14),

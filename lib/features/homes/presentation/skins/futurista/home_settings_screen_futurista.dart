@@ -27,6 +27,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../../core/theme/futurista/futurista_colors.dart';
 import '../../../../../l10n/app_localizations.dart';
+import '../../../../../shared/widgets/ad_aware_bottom_padding.dart';
 import '../../../application/home_settings_view_model.dart';
 import '../../../domain/homes_repository.dart';
 
@@ -157,7 +158,12 @@ class _HomeSettingsScreenFuturistaState
           data: (data) {
             if (data == null) return Center(child: Text(l10n.error_generic));
             return ListView(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+              padding: EdgeInsets.fromLTRB(
+                16,
+                12,
+                16,
+                adAwareBottomPadding(context, ref, extra: 16),
+              ),
               children: [
                 _Header(title: l10n.homes_settings_title),
                 const SizedBox(height: 14),

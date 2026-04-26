@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../l10n/app_localizations.dart';
+import '../../../../../shared/widgets/ad_aware_bottom_padding.dart';
 import '../../../../../shared/widgets/futurista/tocka_btn.dart';
 import '../../../application/notification_service.dart';
 import '../../../application/notification_settings_view_model.dart';
@@ -99,7 +100,12 @@ class _SettingsBodyFuturista extends ConsumerWidget {
     }
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      padding: EdgeInsets.fromLTRB(
+        16,
+        16,
+        16,
+        adAwareBottomPadding(context, ref, extra: 16),
+      ),
       children: [
         if (!systemOn) ...[
           Container(

@@ -10,6 +10,7 @@ import '../ad_banner.dart';
 import '../ad_banner_config_provider.dart';
 import '../keyboard_visible_provider.dart';
 import 'shell_metrics.dart';
+import 'shell_presence_marker.dart';
 
 class MainShellV2 extends ConsumerWidget {
   const MainShellV2({super.key, required this.child});
@@ -133,7 +134,7 @@ class MainShellV2 extends ConsumerWidget {
         ),
         body: Stack(
           children: [
-            child,
+            ShellPresenceMarker(child: child),
             if (bannerVisible)
               Positioned(
                 left: 0,

@@ -19,6 +19,7 @@ import 'package:toka/shared/widgets/ad_banner.dart';
 import 'package:toka/shared/widgets/ad_banner_config_provider.dart';
 import 'package:toka/shared/widgets/keyboard_visible_provider.dart';
 import 'package:toka/shared/widgets/skins/main_shell_v2.dart';
+import 'package:toka/shared/widgets/skins/shell_presence_marker.dart';
 
 class _MockTodayViewModel extends Mock implements TodayViewModel {}
 
@@ -78,7 +79,10 @@ Widget _wrap(ProviderContainer container) {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: [Locale('es')],
-      home: TodayScreenV2(),
+      // En producción TodayScreenV2 siempre vive bajo MainShellV2 / Futurista;
+      // el shell aporta `ShellPresenceMarker`. Aquí lo simulamos para que
+      // adAwareBottomPadding NO caiga en el early-return out-of-shell.
+      home: ShellPresenceMarker(child: TodayScreenV2()),
     ),
   );
 }

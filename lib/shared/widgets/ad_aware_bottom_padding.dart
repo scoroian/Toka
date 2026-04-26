@@ -6,14 +6,17 @@ import 'ad_banner.dart';
 import 'ad_banner_config_provider.dart';
 import 'keyboard_visible_provider.dart';
 import 'skins/shell_metrics.dart';
+import 'skins/shell_presence_marker.dart';
 
 /// Padding inferior total que cualquier `ScrollView` de contenido
 /// debe aplicar para que su último ítem quede visible por encima
 /// del banner publicitario, la NavigationBar flotante y la safe area.
 ///
 /// Devuelve:
-///
-///   banner + navBar + safeArea + extra
+///   - `safeArea + extra` si el widget está FUERA del shell (push routes
+///     como /paywall, /profile, /vacation: no renderizan NavBar ni AdBanner).
+///   - `banner + navBar + safeArea + extra` si está bajo un `MainShellV2` o
+///     `MainShellFuturista` (detectado vía `ShellPresenceMarker`).
 ///
 /// Tanto `banner` como `navBar` se evalúan a 0 cuando el teclado del
 /// sistema está visible: la spec oculta ambos mientras el usuario escribe
@@ -30,6 +33,18 @@ double adAwareBottomPadding(
   WidgetRef ref, {
   double extra = 0,
 }) {
+  final safeArea = MediaQuery.paddingOf(context).bottom;
+
+  // Pantallas fuera del shell (push routes como /paywall, /profile,
+  // /vacation, etc.) no renderizan NavBar ni AdBanner. Solo necesitan
+  // safeArea + extra. Esto evita ~64-140px de espacio muerto al fondo.
+  // Bonus: al no leer adBannerConfigProvider/shellMetricsProvider/etc.
+  // se evita disparar la cadena que mantiene vivo el Timer 15s de
+  // authProvider en tests sin mock completo.
+  if (!ShellPresenceMarker.of(context)) {
+    return safeArea + extra;
+  }
+
   final metrics = ref.watch(shellMetricsProvider);
   final config = ref.watch(adBannerConfigProvider);
   final keyboardVisible = ref.watch(keyboardVisibleProvider);
@@ -46,7 +61,6 @@ double adAwareBottomPadding(
   final navBar = keyboardVisible
       ? 0.0
       : metrics.navBarHeight + metrics.navBarBottom;
-  final safeArea = MediaQuery.paddingOf(context).bottom;
 
   return banner + navBar + safeArea + extra;
 }

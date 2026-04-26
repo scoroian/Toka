@@ -9,6 +9,7 @@ import '../ad_banner_config_provider.dart';
 import '../futurista/tocka_tab_bar.dart';
 import '../keyboard_visible_provider.dart';
 import 'shell_metrics.dart';
+import 'shell_presence_marker.dart';
 
 /// Shell futurista con TockaTabBar floating + AdBanner flotante al pie y
 /// PopScope que redirige a Hoy desde otras tabs (paridad con MainShellV2).
@@ -83,7 +84,7 @@ class MainShellFuturista extends ConsumerWidget {
         ),
         body: Stack(
           children: [
-            child,
+            ShellPresenceMarker(child: child),
             if (bannerVisible)
               Positioned(
                 left: 0,

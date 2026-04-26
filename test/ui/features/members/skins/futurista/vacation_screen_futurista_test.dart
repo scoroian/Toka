@@ -30,9 +30,12 @@ Widget _harness(ProviderContainer c) => UncontrolledProviderScope(
 ProviderContainer _container() => ProviderContainer(overrides: [
       memberVacationProvider(homeId: 'h1', uid: 'u1')
           .overrideWith((_) => Stream.value(null)),
-      // VacationScreenFuturista usa adAwareBottomPadding → adBannerConfigProvider,
-      // que de otro modo se suscribiría al `dashboardProvider` (StreamProvider sin
-      // mock) y dejaría un Timer pendiente al cierre del test.
+      // VacationScreenFuturista usa adAwareBottomPadding → adBannerConfigProvider
+      // → dashboardProvider → currentHomeProvider → authProvider, cuyo
+      // `Auth.build()` arma un `Timer(15s)` para el fallback de login. Sin este
+      // override, ese timer queda colgando al cierre del test ("Timer is still
+      // pending"). Override conservador (show: false, unitId: '') corta la
+      // cadena al primer eslabón y mantiene el helper coherente con producción.
       adBannerConfigProvider.overrideWith(
         (ref) => const AdBannerConfig(show: false, unitId: ''),
       ),

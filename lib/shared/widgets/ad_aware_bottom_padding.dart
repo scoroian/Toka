@@ -67,11 +67,12 @@ double adAwareBottomPadding(
 
 /// Devuelve la ruta actual desde [GoRouterState], o cadena vacía si el
 /// widget que invoca [adAwareBottomPadding] no está dentro de un
-/// [GoRouter] (común en tests con `MaterialApp(home: ...)` simple o en
-/// goldens aislados). El fallback `''` es deliberado: provoca que
-/// `suppressBannerFor` devuelva `false`, es decir el cálculo es
-/// conservador (asume que el banner SÍ se mostraría) y reserva
-/// espacio extra. Nunca devuelve menos padding del necesario.
+/// [GoRouter]. Tras el early-return de [ShellPresenceMarker], este path
+/// solo se ejecuta dentro del shell — donde GoRouter siempre existe en
+/// producción — así que el fallback queda como defensivo para tests o
+/// goldens que monten un shell sin router. El fallback `''` provoca que
+/// `suppressBannerFor` devuelva `false` (cálculo conservador: asume
+/// banner visible y reserva espacio extra).
 String _safeLocation(BuildContext context) {
   try {
     return GoRouterState.of(context).matchedLocation;

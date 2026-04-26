@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
 import 'task_glyph.dart';
 import 'tocka_avatar.dart';
 import 'tocka_btn.dart';
@@ -35,7 +36,7 @@ class TaskCardFuturista extends StatelessWidget {
     this.onComplete,
     this.onPass,
     this.onActionableHint,
-    this.doneLabel = 'Hecho',
+    this.doneLabel,
   });
 
   final String title;
@@ -53,7 +54,7 @@ class TaskCardFuturista extends StatelessWidget {
   final VoidCallback? onComplete;
   final VoidCallback? onPass;
   final VoidCallback? onActionableHint;
-  final String doneLabel;
+  final String? doneLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -231,6 +232,7 @@ class TaskCardFuturista extends StatelessWidget {
 
   Widget _buttonsRow(BuildContext context, ColorScheme cs) {
     final isLocked = !actionable;
+    final label = doneLabel ?? AppLocalizations.of(context).today_btn_done;
     return Row(
       children: [
         Expanded(
@@ -241,7 +243,7 @@ class TaskCardFuturista extends StatelessWidget {
             fullWidth: true,
             icon: Icon(isLocked ? Icons.lock_clock : Icons.check),
             onPressed: isLocked ? onActionableHint : onComplete,
-            child: Text(doneLabel),
+            child: Text(label),
           ),
         ),
         const SizedBox(width: 8),

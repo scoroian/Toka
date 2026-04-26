@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:toka/l10n/app_localizations.dart';
 import 'package:toka/shared/widgets/futurista/task_card_futurista.dart';
 import 'package:toka/shared/widgets/futurista/task_glyph.dart';
 
-Widget harness(Widget child) => MaterialApp(home: Scaffold(body: child));
+Widget harness(Widget child) => MaterialApp(
+      locale: const Locale('es'),
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      home: Scaffold(body: child),
+    );
 
 void main() {
   testWidgets('renders title and assignee', (tester) async {
@@ -98,5 +104,20 @@ void main() {
     )));
     await tester.tap(find.byType(TaskCardFuturista));
     expect(tapped, true);
+  });
+
+  testWidgets('mine + NOT actionable: pass button still fires onPass',
+      (tester) async {
+    var passed = false;
+    await tester.pumpWidget(harness(TaskCardFuturista(
+      title: 't',
+      assignee: 'A',
+      assigneeColor: const Color(0xFF38BDF8),
+      mine: true,
+      actionable: false,
+      onPass: () => passed = true,
+    )));
+    await tester.tap(find.byKey(const Key('task_card_pass_btn')));
+    expect(passed, true);
   });
 }

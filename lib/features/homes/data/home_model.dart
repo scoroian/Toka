@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../../../core/constants/free_limits.dart';
 import '../domain/home.dart';
 import '../domain/home_limits.dart';
 import '../domain/home_membership.dart';
@@ -7,24 +8,23 @@ import '../domain/home_membership.dart';
 class HomeModel {
   static Home fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data()!;
+    final premiumStatusRaw = data['premiumStatus'] as String? ?? 'free';
+    final premiumStatus = normalizePremiumStatus(premiumStatusRaw);
+
     return Home(
       id: doc.id,
       name: data['name'] as String,
       ownerUid: data['ownerUid'] as String,
       currentPayerUid: data['currentPayerUid'] as String?,
       lastPayerUid: data['lastPayerUid'] as String?,
-      premiumStatus: HomePremiumStatus.fromString(
-          data['premiumStatus'] as String? ?? 'free'),
+      premiumStatus: HomePremiumStatus.fromString(premiumStatus),
       premiumPlan: data['premiumPlan'] as String?,
       premiumEndsAt: (data['premiumEndsAt'] as Timestamp?)?.toDate(),
       restoreUntil: (data['restoreUntil'] as Timestamp?)?.toDate(),
       autoRenewEnabled: data['autoRenewEnabled'] as bool? ?? false,
       limits: HomeLimits(
         maxMembers: (data['limits']?['maxMembers'] as int?) ?? 5,
-        isPremium: (() {
-          final s = data['premiumStatus'] as String? ?? 'free';
-          return s == 'active' || s == 'cancelledPendingEnd' || s == 'rescue';
-        })(),
+        isPremium: isHomePremium(premiumStatus),
       ),
       createdAt: (data['createdAt'] as Timestamp).toDate(),
       updatedAt: (data['updatedAt'] as Timestamp).toDate(),

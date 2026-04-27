@@ -107,8 +107,17 @@ class HomesRepositoryImpl implements HomesRepository {
     final userDoc = await _firestore.collection('users').doc(uid).get();
     if (!userDoc.exists) return 0;
     final data = userDoc.data()!;
-    final baseSlots = (data['baseSlots'] as int?) ?? 2;
-    final lifetimeUnlocked = (data['lifetimeUnlocked'] as int?) ?? 0;
+
+    // Campos canónicos: baseHomeSlots/lifetimeUnlockedHomeSlots/homeSlotCap.
+    // Fallback legacy: baseSlots/lifetimeUnlocked durante migración.
+    final baseSlots =
+        (data['baseHomeSlots'] as int?) ?? (data['baseSlots'] as int?) ?? 2;
+    final lifetimeUnlocked =
+        (data['lifetimeUnlockedHomeSlots'] as int?) ??
+            (data['lifetimeUnlocked'] as int?) ??
+            0;
+    final totalSlots =
+        (data['homeSlotCap'] as int?) ?? baseSlots + lifetimeUnlocked;
 
     final membershipsSnap = await _firestore
         .collection('users')
@@ -118,7 +127,7 @@ class HomesRepositoryImpl implements HomesRepository {
         .get();
     final currentCount = membershipsSnap.docs.length;
 
-    return baseSlots + lifetimeUnlocked - currentCount;
+    return totalSlots - currentCount;
   }
 
   @override

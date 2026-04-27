@@ -14,21 +14,31 @@ export const FREE_LIMITS = {
  * Conjunto de `premiumStatus` que se consideran "con Premium vigente":
  * el hogar disfruta de todas las capacidades Premium.
  *
- * - `active`              : suscripción al día.
- * - `cancelledPendingEnd` : cancelada pero aún dentro del periodo pagado.
- * - `rescue`              : ventana de rescate de 3 días antes del downgrade.
- *
- * Los estados `free`, `expiredFree` y `restorable` devuelven `false`.
+ * Valor canónico persistido: `cancelledPendingEnd`.
+ * La variante legacy `cancelled_pending_end` se acepta temporalmente durante
+ * la migración para no dejar hogares pagados como Free.
  */
 const PREMIUM_ACTIVE_STATUSES = new Set<string>([
   "active",
   "cancelledPendingEnd",
+  "cancelled_pending_end",
   "rescue",
 ]);
 
 export function isPremium(status: string | null | undefined): boolean {
   if (!status) return false;
   return PREMIUM_ACTIVE_STATUSES.has(status);
+}
+
+export function normalizePremiumStatus(status: string | null | undefined): string {
+  switch (status) {
+    case "cancelled_pending_end":
+      return "cancelledPendingEnd";
+    case "expired_free":
+      return "expiredFree";
+    default:
+      return status ?? "free";
+  }
 }
 
 // Códigos de error devueltos en HttpsError("failed-precondition", code)

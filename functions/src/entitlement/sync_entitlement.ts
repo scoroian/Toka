@@ -6,12 +6,27 @@ import { FieldValue, Timestamp } from "firebase-admin/firestore";
 import { unlockSlotIfEligibleTx } from "./slot_ledger";
 import { parseReceiptData } from "./sync_entitlement_helpers";
 import { DEFAULT_BANNER_UNIT_ID } from "../shared/ad_constants";
+import { isPremium, normalizePremiumStatus } from "../shared/free_limits";
 
 const db = () => admin.firestore();
+
+function allowUnverifiedReceiptParsing(): boolean {
+  // Este flujo solo sirve para emulador/QA mientras no está integrada la
+  // validación server-to-server Apple/Google. En producción debe estar a false.
+  return process.env.FUNCTIONS_EMULATOR === "true" ||
+    process.env.TOKA_ALLOW_UNVERIFIED_RECEIPTS === "true";
+}
 
 export const syncEntitlement = onCall(async (request) => {
   if (!request.auth) {
     throw new HttpsError("unauthenticated", "Not authenticated");
+  }
+
+  if (!allowUnverifiedReceiptParsing()) {
+    throw new HttpsError(
+      "failed-precondition",
+      "store-receipt-validation-not-enabled",
+    );
   }
 
   const uid = request.auth.uid;
@@ -31,19 +46,22 @@ export const syncEntitlement = onCall(async (request) => {
 
   const firestore = db();
 
-  // Validar que el usuario es miembro del hogar
+  // Validar que el usuario es miembro activo del hogar
   const memberRef = firestore
     .collection("homes")
     .doc(homeId)
     .collection("members")
     .doc(uid);
   const memberSnap = await memberRef.get();
-  if (!memberSnap.exists) {
-    throw new HttpsError("permission-denied", "User is not a member of this home");
+  if (!memberSnap.exists || memberSnap.data()?.["status"] !== "active") {
+    throw new HttpsError("permission-denied", "User is not an active member of this home");
   }
 
-  // Parsear el recibo (en producción: llamar a Apple/Google para validar server-side)
-  const { status, plan, endsAt, autoRenewEnabled } = parseReceiptData(receiptData);
+  // QA/emulador: parsear recibo simulado. Producción real debe sustituir esto
+  // por validación server-to-server Apple/Google antes de habilitar la función.
+  const parsed = parseReceiptData(receiptData);
+  const status = normalizePremiumStatus(parsed.status);
+  const { plan, endsAt, autoRenewEnabled } = parsed;
 
   // Actualizar el hogar
   const homeRef = firestore.collection("homes").doc(homeId);
@@ -113,7 +131,7 @@ async function updatePremiumFlagsInDashboard(
   homeId: string,
   premiumStatus: string,
 ): Promise<void> {
-  const isPremium = ["active", "cancelled_pending_end", "rescue"].includes(premiumStatus);
+  const homeIsPremium = isPremium(premiumStatus);
   const dashRef = firestore
     .collection("homes")
     .doc(homeId)
@@ -122,15 +140,15 @@ async function updatePremiumFlagsInDashboard(
   await dashRef.set(
     {
       premiumFlags: {
-        isPremium,
-        showAds: !isPremium,
-        canUseSmartDistribution: isPremium,
-        canUseVacations: isPremium,
-        canUseReviews: isPremium,
+        isPremium: homeIsPremium,
+        showAds: !homeIsPremium,
+        canUseSmartDistribution: homeIsPremium,
+        canUseVacations: homeIsPremium,
+        canUseReviews: homeIsPremium,
       },
       adFlags: {
-        showBanner: !isPremium,
-        bannerUnit: isPremium ? "" : DEFAULT_BANNER_UNIT_ID,
+        showBanner: !homeIsPremium,
+        bannerUnit: homeIsPremium ? "" : DEFAULT_BANNER_UNIT_ID,
       },
       updatedAt: FieldValue.serverTimestamp(),
     },

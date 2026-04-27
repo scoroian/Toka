@@ -11,11 +11,26 @@ class FreeLimits {
 
 /// Estados de `premiumStatus` en los que un hogar todavía tiene
 /// capacidades Premium (billing activo, cancelado en espera o rescue).
+///
+/// Valor canónico persistido: `cancelledPendingEnd`. La variante legacy
+/// `cancelled_pending_end` se acepta temporalmente durante la migración.
 const Set<String> kPremiumActiveStatuses = {
   'active',
   'cancelledPendingEnd',
+  'cancelled_pending_end',
   'rescue',
 };
 
 bool isHomePremium(String? premiumStatus) =>
     premiumStatus != null && kPremiumActiveStatuses.contains(premiumStatus);
+
+String normalizePremiumStatus(String? premiumStatus) {
+  switch (premiumStatus) {
+    case 'cancelled_pending_end':
+      return 'cancelledPendingEnd';
+    case 'expired_free':
+      return 'expiredFree';
+    default:
+      return premiumStatus ?? 'free';
+  }
+}

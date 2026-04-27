@@ -73,7 +73,8 @@ export const passTaskTurn = onCall(async (request) => {
     const memberRef = db.collection("homes").doc(homeId).collection("members").doc(uid);
     const memberSnap = await tx.get(memberRef);
     const member = memberSnap.data() ?? {};
-    const completed: number = (member["completedCount"] as number) ?? 0;
+    const legacyCompleted = (member["tasksCompleted"] as number | undefined) ?? 0;
+    const completed: number = (member["completedCount"] as number | undefined) ?? legacyCompleted;
     const passed: number = (member["passedCount"] as number) ?? 0;
     const complianceBefore = completed / Math.max(completed + passed, 1);
     const complianceAfter = completed / Math.max(completed + passed + 1, 1);
@@ -92,6 +93,8 @@ export const passTaskTurn = onCall(async (request) => {
       toUid,
       reason: reason ?? null,
       noCandidate,
+      complianceBefore,
+      complianceAfter,
       createdAt: FieldValue.serverTimestamp(),
       penaltyApplied: true,
     });
@@ -104,6 +107,8 @@ export const passTaskTurn = onCall(async (request) => {
 
     // 7. Actualizar contadores del miembro que pasa
     tx.update(memberRef, {
+      completedCount: completed,
+      tasksCompleted: FieldValue.delete(),
       passedCount: FieldValue.increment(1),
       complianceRate: complianceAfter,
       lastActiveAt: FieldValue.serverTimestamp(),

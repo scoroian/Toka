@@ -21,10 +21,11 @@ export function buildNewMemberDoc(p: NewMemberParams): Record<string, unknown> {
     role: p.role,
     status: "active",
     joinedAt: FieldValue.serverTimestamp(),
-    tasksCompleted: 0,
+    completedCount: 0,
+    completions60d: 0,
     passedCount: 0,
     complianceRate: 0.0,
     currentStreak: 0,
-    averageScore: 0.0,
+    avgReviewScore: null,
   };
 }

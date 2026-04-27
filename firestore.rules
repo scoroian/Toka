@@ -65,6 +65,66 @@ service cloud.firestore {
         );
     }
 
+    // ─── Task write hardening ─────────────────────────────────────────────────
+
+    function taskCreateKeysAllowed() {
+      return request.resource.data.keys().hasOnly([
+        'homeId',
+        'title',
+        'description',
+        'visualKind',
+        'visualValue',
+        'status',
+        'recurrenceType',
+        'recurrenceRule',
+        'assignmentMode',
+        'assignmentOrder',
+        'currentAssigneeUid',
+        'nextDueAt',
+        'difficultyWeight',
+        'completedCount90d',
+        'createdByUid',
+        'createdAt',
+        'updatedAt',
+        'onMissAssign'
+      ]);
+    }
+
+    function taskCreateValuesAllowed(homeId) {
+      return request.resource.data.homeId == homeId
+        && request.resource.data.status == 'active'
+        && request.resource.data.createdByUid == request.auth.uid
+        && request.resource.data.completedCount90d == 0
+        && request.resource.data.title is string
+        && request.resource.data.assignmentOrder is list
+        && request.resource.data.difficultyWeight is number;
+    }
+
+    function taskUpdateFieldsAllowed() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+        'title',
+        'description',
+        'visualKind',
+        'visualValue',
+        'recurrenceType',
+        'recurrenceRule',
+        'assignmentMode',
+        'assignmentOrder',
+        'currentAssigneeUid',
+        'nextDueAt',
+        'difficultyWeight',
+        'updatedAt',
+        'onMissAssign',
+        'status',
+        'frozenUids'
+      ]);
+    }
+
+    function taskUpdateValuesAllowed() {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(['status'])
+        || request.resource.data.status in ['active', 'frozen', 'deleted'];
+    }
+
     // ─── Idiomas (pública) ──────────────────────────────────────────────────────
 
     match /languages/{code} {
@@ -143,8 +203,15 @@ service cloud.firestore {
         // El "recurrenceRule.kind/type" en el payload decide si cuenta como
         // recurrente automática o como puntual.
         allow create: if isAdminOrOwner(homeId) && isActiveMember(homeId)
+                         && taskCreateKeysAllowed()
+                         && taskCreateValuesAllowed(homeId)
                          && (isHomePremium(homeId) || freeCanCreateTask(homeId));
-        allow update: if isAdminOrOwner(homeId) && isActiveMember(homeId);
+        // Update cliente: solo configuración editable por admin/owner. Campos
+        // derivados/auditoría (completedCount90d, createdByUid, createdAt,
+        // homeId) quedan reservados a Cloud Functions/Admin SDK.
+        allow update: if isAdminOrOwner(homeId) && isActiveMember(homeId)
+                         && taskUpdateFieldsAllowed()
+                         && taskUpdateValuesAllowed();
         allow delete: if false; // Soft delete via update
       }
 

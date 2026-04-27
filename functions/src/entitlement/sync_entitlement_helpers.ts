@@ -1,6 +1,19 @@
 // functions/src/entitlement/sync_entitlement_helpers.ts
 import { HttpsError } from "firebase-functions/v2/https";
 
+const ALLOWED_STATUSES = new Set([
+  "active",
+  "cancelledPendingEnd",
+  "cancelled_pending_end",
+  "expiredFree",
+  "expired_free",
+  "restorable",
+  "rescue",
+  "free",
+]);
+
+const ALLOWED_PLANS = new Set(["monthly", "annual"]);
+
 export function parseReceiptData(receiptData: string): {
   status: string;
   plan: string;
@@ -14,9 +27,20 @@ export function parseReceiptData(receiptData: string): {
       endsAt?: string;
       autoRenewEnabled?: boolean;
     };
+
+    const status = parsed.status ?? "active";
+    const plan = parsed.plan ?? "monthly";
+
+    if (!ALLOWED_STATUSES.has(status)) {
+      throw new HttpsError("invalid-argument", "Invalid entitlement status");
+    }
+    if (!ALLOWED_PLANS.has(plan)) {
+      throw new HttpsError("invalid-argument", "Invalid entitlement plan");
+    }
+
     return {
-      status: parsed.status ?? "active",
-      plan: parsed.plan ?? "monthly",
+      status,
+      plan,
       endsAt: (() => {
         if (!parsed.endsAt) return null;
         const d = new Date(parsed.endsAt);
@@ -25,7 +49,8 @@ export function parseReceiptData(receiptData: string): {
       })(),
       autoRenewEnabled: parsed.autoRenewEnabled ?? true,
     };
-  } catch {
+  } catch (e) {
+    if (e instanceof HttpsError) throw e;
     throw new HttpsError("invalid-argument", "Invalid receipt data format");
   }
 }

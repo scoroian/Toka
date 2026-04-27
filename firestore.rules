@@ -33,14 +33,22 @@ service cloud.firestore {
     }
 
     // ─── Premium / límites Free ────────────────────────────────────────────────
-    // Los límites del plan Free se centralizan en functions/src/shared/free_limits.ts
-    // y en lib/core/constants/free_limits.dart. Las reglas de aquí DEBEN mantener
-    // los mismos números como defensa en profundidad (el cliente y el backend ya
-    // gatean en primera línea).
+    // Valores persistidos canónicos: active, cancelledPendingEnd, rescue.
+    // También se aceptan variantes legacy snake_case durante la migración.
+
+    function isPremiumStatus(status) {
+      return status in [
+        'active',
+        'cancelledPendingEnd',
+        'cancelled_pending_end',
+        'rescue'
+      ];
+    }
 
     function isHomePremium(homeId) {
-      return get(/databases/$(database)/documents/homes/$(homeId)).data.premiumStatus
-        in ['active', 'cancelledPendingEnd', 'rescue'];
+      return isPremiumStatus(
+        get(/databases/$(database)/documents/homes/$(homeId)).data.premiumStatus
+      );
     }
 
     function dashboardPlanCounters(homeId) {
@@ -52,6 +60,7 @@ service cloud.firestore {
       return dashboardPlanCounters(homeId).activeTasks < 4
         && (
           request.resource.data.recurrenceRule.kind == 'oneTime'
+          || request.resource.data.recurrenceRule.type == 'oneTime'
           || dashboardPlanCounters(homeId).automaticRecurringTasks < 3
         );
     }
@@ -66,13 +75,26 @@ service cloud.firestore {
     // ─── Usuarios ──────────────────────────────────────────────────────────────
 
     match /users/{uid} {
-      // Cualquier usuario autenticado puede leer perfiles ajenos (nickname,
-      // photoUrl, bio) para mostrarlos en listas de miembros e historial.
-      // Los campos sensibles (phone, billing) se controlan a nivel de app.
-      allow read: if isAuth();
-      allow create: if isUser(uid);
+      // Documento privado: puede contener teléfono, preferencias, billing,
+      // contadores de plazas y otros datos sensibles. Los perfiles visibles se
+      // sirven desde homes/{homeId}/members/{uid} y dashboard denormalizado.
+      allow read: if isUser(uid);
+      allow create: if isUser(uid)
+        && !request.resource.data.keys().hasAny([
+          'baseHomeSlots',
+          'lifetimeUnlockedHomeSlots',
+          'homeSlotCap',
+          'baseSlots',
+          'lifetimeUnlocked'
+        ]);
       allow update: if isUser(uid) && !request.resource.data.diff(resource.data).affectedKeys()
-                       .hasAny(['baseHomeSlots', 'lifetimeUnlockedHomeSlots', 'homeSlotCap']);
+                       .hasAny([
+                         'baseHomeSlots',
+                         'lifetimeUnlockedHomeSlots',
+                         'homeSlotCap',
+                         'baseSlots',
+                         'lifetimeUnlocked'
+                       ]);
       allow delete: if false; // Solo via Function
 
       match /memberships/{homeId} {
@@ -118,7 +140,7 @@ service cloud.firestore {
       match /tasks/{taskId} {
         allow read: if isMemberOfHome(homeId);
         // Create: admin/owner activo Y (Premium O por debajo del límite Free).
-        // El "recurrenceRule.kind" en el payload decide si cuenta como
+        // El "recurrenceRule.kind/type" en el payload decide si cuenta como
         // recurrente automática o como puntual.
         allow create: if isAdminOrOwner(homeId) && isActiveMember(homeId)
                          && (isHomePremium(homeId) || freeCanCreateTask(homeId));
@@ -164,6 +186,11 @@ service cloud.firestore {
       match /subscriptions/{chargeId} {
         allow read: if isMemberOfHome(homeId) && getMembership(homeId).billingState in ['currentPayer', 'formerPayer'];
         allow write: if false;
+
+        match /charges/{nestedChargeId} {
+          allow read: if isMemberOfHome(homeId) && getMembership(homeId).billingState in ['currentPayer', 'formerPayer'];
+          allow write: if false;
+        }
       }
 
       // Invitaciones

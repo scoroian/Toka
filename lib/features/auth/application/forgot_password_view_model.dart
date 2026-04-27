@@ -1,5 +1,10 @@
 // lib/features/auth/application/forgot_password_view_model.dart
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+//
+// Los warnings de `unused_element_parameter` son falsos positivos: los
+// campos del factory `_State` se usan vía `copyWith()`, que el analyzer
+// no rastrea. `library_private_types_in_public_api` es deliberado — la
+// API pública es la clase abstracta `ForgotPasswordViewModel`.
+// ignore_for_file: unused_element_parameter, library_private_types_in_public_api
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 

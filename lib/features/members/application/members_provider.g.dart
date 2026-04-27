@@ -309,5 +309,168 @@ class _ActiveInviteCodeProviderElement extends AutoDisposeStreamProviderElement<
   @override
   String get homeId => (origin as ActiveInviteCodeProvider).homeId;
 }
+
+String _$pendingInvitationsHash() =>
+    r'7117fb9b517a580ccefefcc0029daf24ab55bc44';
+
+/// Lista reactiva de invitaciones pendientes (no usadas y no expiradas)
+/// del hogar. Usado en el sheet de "Invitaciones pendientes" del
+/// `home_settings_screen`. Read protegido a admin/owner por reglas
+/// Firestore.
+///
+/// Copied from [pendingInvitations].
+@ProviderFor(pendingInvitations)
+const pendingInvitationsProvider = PendingInvitationsFamily();
+
+/// Lista reactiva de invitaciones pendientes (no usadas y no expiradas)
+/// del hogar. Usado en el sheet de "Invitaciones pendientes" del
+/// `home_settings_screen`. Read protegido a admin/owner por reglas
+/// Firestore.
+///
+/// Copied from [pendingInvitations].
+class PendingInvitationsFamily extends Family<AsyncValue<List<Invitation>>> {
+  /// Lista reactiva de invitaciones pendientes (no usadas y no expiradas)
+  /// del hogar. Usado en el sheet de "Invitaciones pendientes" del
+  /// `home_settings_screen`. Read protegido a admin/owner por reglas
+  /// Firestore.
+  ///
+  /// Copied from [pendingInvitations].
+  const PendingInvitationsFamily();
+
+  /// Lista reactiva de invitaciones pendientes (no usadas y no expiradas)
+  /// del hogar. Usado en el sheet de "Invitaciones pendientes" del
+  /// `home_settings_screen`. Read protegido a admin/owner por reglas
+  /// Firestore.
+  ///
+  /// Copied from [pendingInvitations].
+  PendingInvitationsProvider call(
+    String homeId,
+  ) {
+    return PendingInvitationsProvider(
+      homeId,
+    );
+  }
+
+  @override
+  PendingInvitationsProvider getProviderOverride(
+    covariant PendingInvitationsProvider provider,
+  ) {
+    return call(
+      provider.homeId,
+    );
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'pendingInvitationsProvider';
+}
+
+/// Lista reactiva de invitaciones pendientes (no usadas y no expiradas)
+/// del hogar. Usado en el sheet de "Invitaciones pendientes" del
+/// `home_settings_screen`. Read protegido a admin/owner por reglas
+/// Firestore.
+///
+/// Copied from [pendingInvitations].
+class PendingInvitationsProvider
+    extends AutoDisposeStreamProvider<List<Invitation>> {
+  /// Lista reactiva de invitaciones pendientes (no usadas y no expiradas)
+  /// del hogar. Usado en el sheet de "Invitaciones pendientes" del
+  /// `home_settings_screen`. Read protegido a admin/owner por reglas
+  /// Firestore.
+  ///
+  /// Copied from [pendingInvitations].
+  PendingInvitationsProvider(
+    String homeId,
+  ) : this._internal(
+          (ref) => pendingInvitations(
+            ref as PendingInvitationsRef,
+            homeId,
+          ),
+          from: pendingInvitationsProvider,
+          name: r'pendingInvitationsProvider',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$pendingInvitationsHash,
+          dependencies: PendingInvitationsFamily._dependencies,
+          allTransitiveDependencies:
+              PendingInvitationsFamily._allTransitiveDependencies,
+          homeId: homeId,
+        );
+
+  PendingInvitationsProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.homeId,
+  }) : super.internal();
+
+  final String homeId;
+
+  @override
+  Override overrideWith(
+    Stream<List<Invitation>> Function(PendingInvitationsRef provider) create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: PendingInvitationsProvider._internal(
+        (ref) => create(ref as PendingInvitationsRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        homeId: homeId,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeStreamProviderElement<List<Invitation>> createElement() {
+    return _PendingInvitationsProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is PendingInvitationsProvider && other.homeId == homeId;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, homeId.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin PendingInvitationsRef on AutoDisposeStreamProviderRef<List<Invitation>> {
+  /// The parameter `homeId` of this provider.
+  String get homeId;
+}
+
+class _PendingInvitationsProviderElement
+    extends AutoDisposeStreamProviderElement<List<Invitation>>
+    with PendingInvitationsRef {
+  _PendingInvitationsProviderElement(super.provider);
+
+  @override
+  String get homeId => (origin as PendingInvitationsProvider).homeId;
+}
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

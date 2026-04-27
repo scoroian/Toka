@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../../l10n/app_localizations.dart';
 import '../../../../../../shared/widgets/futurista/tocka_btn.dart';
 
-/// Pantalla Welcome de la skin futurista. Layout según
+/// Pantalla Welcome de la skin futurista. Layout adaptado del canvas
 /// `skin_futurista/screens-meta.jsx` (función `OnboardingScreen`).
 ///
-/// Mantiene la misma signatura que [WelcomeStepV2] para compartir VM.
+/// Importante: el canvas original incluía CTAs de auth (Google/Apple/Email) y
+/// de crear/unirse a hogar; aquí los omitimos porque el onboarding va
+/// POST-login y crear/unirse es el último paso del propio onboarding
+/// (`HomeChoiceStep`). Este step es informativo y avanza al siguiente paso
+/// con un único CTA, en paridad funcional con [WelcomeStepV2].
 class WelcomeStepFuturista extends StatelessWidget {
   const WelcomeStepFuturista({super.key, required this.onStart});
 
@@ -15,6 +20,7 @@ class WelcomeStepFuturista extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
+    final l10n = AppLocalizations.of(context);
     final isIos = theme.platform == TargetPlatform.iOS;
     final topPad = isIos ? 52.0 : 14.0;
     final bottomPad = isIos ? 40.0 : 30.0;
@@ -182,74 +188,14 @@ class WelcomeStepFuturista extends StatelessWidget {
                     ),
                   ),
                   const Spacer(),
-                  // Botones primarios.
+                  // CTA único: avanzar al siguiente paso del onboarding.
                   TockaBtn(
+                    key: const Key('start_button'),
                     variant: TockaBtnVariant.glow,
                     size: TockaBtnSize.lg,
                     fullWidth: true,
-                    icon: const Icon(Icons.add, size: 16),
                     onPressed: onStart,
-                    child: const Text('Crear un hogar'),
-                  ),
-                  const SizedBox(height: 10),
-                  TockaBtn(
-                    variant: TockaBtnVariant.soft,
-                    size: TockaBtnSize.lg,
-                    fullWidth: true,
-                    icon: const Icon(Icons.arrow_forward, size: 14),
-                    onPressed: onStart,
-                    child: const Text('Unirme con un código'),
-                  ),
-                  const SizedBox(height: 6),
-                  // Social row.
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TockaBtn(
-                          variant: TockaBtnVariant.ghost,
-                          size: TockaBtnSize.md,
-                          fullWidth: true,
-                          onPressed: onStart,
-                          child: const Text('Google'),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: TockaBtn(
-                          variant: TockaBtnVariant.ghost,
-                          size: TockaBtnSize.md,
-                          fullWidth: true,
-                          onPressed: onStart,
-                          child: const Text('Apple'),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: TockaBtn(
-                          variant: TockaBtnVariant.ghost,
-                          size: TockaBtnSize.md,
-                          fullWidth: true,
-                          onPressed: onStart,
-                          child: const Text('Email'),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 14),
-                  Center(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: Text(
-                        'Al continuar aceptas Términos y Privacidad',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontFamily: 'JetBrainsMono',
-                          fontSize: 10.5,
-                          letterSpacing: 0.4,
-                          color: cs.onSurfaceVariant,
-                        ),
-                      ),
-                    ),
+                    child: Text(l10n.onboarding_start),
                   ),
                 ],
               ),

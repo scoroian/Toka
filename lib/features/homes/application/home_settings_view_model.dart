@@ -17,6 +17,7 @@ class HomeSettingsViewData {
   const HomeSettingsViewData({
     required this.homeId,
     required this.homeName,
+    required this.photoUrl,
     required this.planLabel,
     required this.canEdit,
     required this.isPayer,
@@ -30,6 +31,7 @@ class HomeSettingsViewData {
 
   final String homeId;
   final String homeName;
+  final String? photoUrl;
   final String planLabel;
   final bool canEdit;
   final bool isPayer;
@@ -46,6 +48,12 @@ abstract class HomeSettingsViewModel {
   String? get error;
   bool get isLoading;
   Future<void> updateHomeName(String name);
+  /// Sube `localPath` a Storage como avatar del hogar y refleja la URL
+  /// en `homes/{homeId}.photoUrl`. El stream del hogar lo propagará al
+  /// resto de pantallas via `currentHomeProvider`.
+  Future<void> updateHomePhoto(String localPath);
+  /// Elimina el avatar (Storage + Firestore).
+  Future<void> removeHomePhoto();
   Future<void> leaveHome();
   Future<void> closeHome();
   void clearError();
@@ -77,6 +85,20 @@ class _HomeSettingsViewModelImpl implements HomeSettingsViewModel {
     await ref
         .read(homesRepositoryProvider)
         .updateHomeName(homeId, name.trim());
+  }
+
+  @override
+  Future<void> updateHomePhoto(String localPath) async {
+    final homeId = viewData.valueOrNull?.homeId;
+    if (homeId == null) return;
+    await ref.read(homesRepositoryProvider).updateHomePhoto(homeId, localPath);
+  }
+
+  @override
+  Future<void> removeHomePhoto() async {
+    final homeId = viewData.valueOrNull?.homeId;
+    if (homeId == null) return;
+    await ref.read(homesRepositoryProvider).removeHomePhoto(homeId);
   }
 
   @override
@@ -152,6 +174,7 @@ HomeSettingsViewModel homeSettingsViewModel(
     return HomeSettingsViewData(
       homeId: home.id,
       homeName: home.name,
+      photoUrl: home.photoUrl,
       planLabel: _planLabel(home, l10n),
       canEdit: canEdit,
       isPayer: isCurrentPayer,

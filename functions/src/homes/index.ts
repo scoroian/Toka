@@ -773,6 +773,18 @@ export const promoteToAdmin = onCall(async (request) => {
     // (que leen de users/{uid}/memberships/{homeId}) vean el rol correcto.
     tx.update(targetRef, { role: "admin" });
     tx.update(targetMembershipRef, { role: "admin" });
+
+    // Mantener `dashboard.planCounters.totalAdmins` sincronizado para que
+    // el banner free-limit del cliente reaccione sin recalcular. El
+    // dashboard se inicializa en createHome con totalAdmins=1 (owner) y
+    // hasta ahora no se actualizaba en promote/demote (bug detectado en
+    // el análisis multi-agente).
+    const dashRef = homeRef.collection("views").doc("dashboard");
+    tx.set(
+      dashRef,
+      { planCounters: { totalAdmins: FieldValue.increment(1) } },
+      { merge: true },
+    );
   });
 
   logger.info(`promoteToAdmin: uid=${targetUid} in home=${homeId} by owner=${uid}`);
@@ -815,6 +827,14 @@ export const demoteFromAdmin = onCall(async (request) => {
     // Actualizar rol en ambos documentos (ver promoteToAdmin para contexto).
     tx.update(targetRef, { role: "member" });
     tx.update(targetMembershipRef, { role: "member" });
+
+    // Mantener counter sincronizado (ver promoteToAdmin).
+    const dashRef = homeRef.collection("views").doc("dashboard");
+    tx.set(
+      dashRef,
+      { planCounters: { totalAdmins: FieldValue.increment(-1) } },
+      { merge: true },
+    );
   });
 
   logger.info(`demoteFromAdmin: uid=${targetUid} in home=${homeId} by owner=${uid}`);

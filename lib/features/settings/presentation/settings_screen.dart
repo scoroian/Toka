@@ -151,18 +151,22 @@ class SettingsScreen extends ConsumerWidget {
                 ),
               );
               if (confirmed != true || !context.mounted) return;
+              // Capturamos el router y messenger antes de cualquier await
+              // para no usar `context` después y evitar el lint
+              // `use_build_context_synchronously`. Si el widget se desmonta
+              // durante los awaits, el GoRouter sigue siendo válido y
+              // navegamos sin tocar el BuildContext desmontado.
+              final router = GoRouter.of(context);
+              final messenger = ScaffoldMessenger.of(context);
               try {
                 await FirebaseAuth.instance.currentUser?.delete();
-                if (context.mounted) {
-                  await ref.read(authProvider.notifier).signOut();
-                  context.go(AppRoutes.login);
-                }
+                await ref.read(authProvider.notifier).signOut();
+                router.go(AppRoutes.login);
               } on FirebaseAuthException catch (e) {
-                if (!context.mounted) return;
                 final msg = e.code == 'requires-recent-login'
                     ? l10n.settings_delete_requires_reauth
                     : l10n.error_generic;
-                ScaffoldMessenger.of(context).showSnackBar(
+                messenger.showSnackBar(
                   SnackBar(content: Text(msg)),
                 );
               }
@@ -459,29 +463,31 @@ class _TransferOwnershipDialogState extends State<_TransferOwnershipDialog> {
             const SizedBox(height: 12),
             ConstrainedBox(
               constraints: const BoxConstraints(maxHeight: 300),
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: widget.members.length,
-                itemBuilder: (_, i) {
-                  final m = widget.members[i];
-                  return RadioListTile<String>(
-                    key: Key('transfer_member_${m.uid}'),
-                    value: m.uid,
-                    groupValue: _selectedUid,
-                    onChanged: (v) => setState(() => _selectedUid = v),
-                    title: Text(m.nickname),
-                    secondary: CircleAvatar(
-                      backgroundImage: m.photoUrl != null
-                          ? NetworkImage(m.photoUrl!)
-                          : null,
-                      child: m.photoUrl == null
-                          ? Text(m.nickname.isNotEmpty
-                              ? m.nickname[0].toUpperCase()
-                              : '?')
-                          : null,
-                    ),
-                  );
-                },
+              child: RadioGroup<String>(
+                groupValue: _selectedUid,
+                onChanged: (v) => setState(() => _selectedUid = v),
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: widget.members.length,
+                  itemBuilder: (_, i) {
+                    final m = widget.members[i];
+                    return RadioListTile<String>(
+                      key: Key('transfer_member_${m.uid}'),
+                      value: m.uid,
+                      title: Text(m.nickname),
+                      secondary: CircleAvatar(
+                        backgroundImage: m.photoUrl != null
+                            ? NetworkImage(m.photoUrl!)
+                            : null,
+                        child: m.photoUrl == null
+                            ? Text(m.nickname.isNotEmpty
+                                ? m.nickname[0].toUpperCase()
+                                : '?')
+                            : null,
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
           ],
@@ -533,29 +539,31 @@ class _FrozenTransferDialogState extends State<_FrozenTransferDialog> {
             const SizedBox(height: 12),
             ConstrainedBox(
               constraints: const BoxConstraints(maxHeight: 300),
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: widget.members.length,
-                itemBuilder: (_, i) {
-                  final m = widget.members[i];
-                  return RadioListTile<String>(
-                    key: Key('frozen_member_${m.uid}'),
-                    value: m.uid,
-                    groupValue: _selectedUid,
-                    onChanged: (v) => setState(() => _selectedUid = v),
-                    title: Text(m.nickname),
-                    secondary: CircleAvatar(
-                      backgroundImage: m.photoUrl != null
-                          ? NetworkImage(m.photoUrl!)
-                          : null,
-                      child: m.photoUrl == null
-                          ? Text(m.nickname.isNotEmpty
-                              ? m.nickname[0].toUpperCase()
-                              : '?')
-                          : null,
-                    ),
-                  );
-                },
+              child: RadioGroup<String>(
+                groupValue: _selectedUid,
+                onChanged: (v) => setState(() => _selectedUid = v),
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: widget.members.length,
+                  itemBuilder: (_, i) {
+                    final m = widget.members[i];
+                    return RadioListTile<String>(
+                      key: Key('frozen_member_${m.uid}'),
+                      value: m.uid,
+                      title: Text(m.nickname),
+                      secondary: CircleAvatar(
+                        backgroundImage: m.photoUrl != null
+                            ? NetworkImage(m.photoUrl!)
+                            : null,
+                        child: m.photoUrl == null
+                            ? Text(m.nickname.isNotEmpty
+                                ? m.nickname[0].toUpperCase()
+                                : '?')
+                            : null,
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
           ],

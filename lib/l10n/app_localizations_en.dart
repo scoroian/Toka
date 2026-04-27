@@ -337,6 +337,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homes_manage_members => 'Manage members';
 
   @override
+  String get homes_transfer_ownership => 'Transfer ownership';
+
+  @override
+  String get homes_cancel_renewal => 'Cancel renewal';
+
+  @override
+  String get homes_freeze_member => 'Freeze member';
+
+  @override
+  String get homes_coming_soon => 'Coming soon';
+
+  @override
   String get homes_payer_info_body =>
       'Your account is paying for this home\'s Premium.';
 
@@ -602,6 +614,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get members_section_active => 'Active';
+
+  @override
+  String get members_balance_title => 'Household balance';
+
+  @override
+  String get members_balance_well_distributed => 'Well distributed';
+
+  @override
+  String members_balance_unbalanced(String topName) {
+    return 'Unbalanced · $topName';
+  }
 
   @override
   String get members_section_frozen => 'Frozen';
@@ -1860,4 +1883,428 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get skinFuturistaDescription => 'Dark, cosmic, minimalist';
+
+  @override
+  String get homes_role_frozen => 'Frozen';
+
+  @override
+  String get today_hero_label => 'YOUR TURN';
+
+  @override
+  String get task_detail_next_turn => 'NEXT TURN';
+
+  @override
+  String get task_detail_rotation => 'ROTATION';
+
+  @override
+  String get task_due_at_label => 'Due at';
+
+  @override
+  String get task_due_at_min_short => 'MIN';
+
+  @override
+  String get common_more_options => 'More options';
+
+  @override
+  String get rotation_now => 'NOW';
+
+  @override
+  String get rotation_next => 'NEXT';
+
+  @override
+  String get tasks_filter_all => 'All';
+
+  @override
+  String get tasks_filter_mine => 'Mine';
+
+  @override
+  String get tasks_filter_due_soon => 'Due soon';
+
+  @override
+  String get tasks_filter_weekly_chip => 'Weekly';
+
+  @override
+  String get tasks_filter_monthly_chip => 'Monthly';
+
+  @override
+  String get recurrence_label_hourly => 'Hour';
+
+  @override
+  String get recurrence_label_daily => 'Day';
+
+  @override
+  String get recurrence_label_weekly => 'Week';
+
+  @override
+  String get recurrence_label_monthly => 'Month';
+
+  @override
+  String get recurrence_label_yearly => 'Year';
+
+  @override
+  String recurrence_pill_hourly(int n) {
+    return 'Every ${n}h';
+  }
+
+  @override
+  String get recurrence_pill_daily => 'Every day';
+
+  @override
+  String recurrence_pill_daily_n(int n) {
+    return 'Every $n days';
+  }
+
+  @override
+  String get recurrence_pill_weekly => 'Weekly';
+
+  @override
+  String get recurrence_pill_monthly => 'Monthly';
+
+  @override
+  String get recurrence_pill_yearly => 'Yearly';
+
+  @override
+  String get recurrence_pill_one_time => 'Once';
+
+  @override
+  String get weekday_mon_short => 'M';
+
+  @override
+  String get weekday_tue_short => 'T';
+
+  @override
+  String get weekday_wed_short => 'W';
+
+  @override
+  String get weekday_thu_short => 'T';
+
+  @override
+  String get weekday_fri_short => 'F';
+
+  @override
+  String get weekday_sat_short => 'S';
+
+  @override
+  String get weekday_sun_short => 'S';
+
+  @override
+  String get tasks_section_label_title => 'TITLE';
+
+  @override
+  String get tasks_section_label_visual => 'VISUAL';
+
+  @override
+  String get tasks_section_label_recurrence => 'RECURRENCE';
+
+  @override
+  String get tasks_section_label_description => 'DESCRIPTION';
+
+  @override
+  String get tasks_section_label_assigned => 'ASSIGNED';
+
+  @override
+  String get tasks_section_label_assignment => 'DISTRIBUTION';
+
+  @override
+  String get assignment_rotation => 'Rotation';
+
+  @override
+  String get assignment_smart => 'Smart';
+
+  @override
+  String get member_stat_completed_short => 'completed';
+
+  @override
+  String get member_stat_passed_short => 'passed';
+
+  @override
+  String get task_card_done_by => 'Done by';
+
+  @override
+  String get task_card_assigned_to => 'Assigned to';
+
+  @override
+  String get profile_stat_tasks_label => 'TASKS';
+
+  @override
+  String get profile_stat_streak_label => 'STREAK';
+
+  @override
+  String get profile_stat_average_label => 'AVERAGE';
+
+  @override
+  String get home_settings_section_general => 'GENERAL';
+
+  @override
+  String get home_settings_section_members => 'MEMBERS & ROLES';
+
+  @override
+  String get home_settings_section_subscription => 'SUBSCRIPTION';
+
+  @override
+  String get home_settings_section_danger => 'DANGER ZONE';
+
+  @override
+  String get home_settings_section_debug => 'DEBUG';
+
+  @override
+  String get home_settings_avatar => 'Home avatar';
+
+  @override
+  String get home_settings_timezone => 'Time zone';
+
+  @override
+  String get home_settings_pending_invites => 'Pending invites';
+
+  @override
+  String get home_settings_admins => 'Admins';
+
+  @override
+  String get home_settings_plan_current => 'Current plan';
+
+  @override
+  String get home_settings_renewal => 'Renewal';
+
+  @override
+  String get home_settings_code_short => 'CODE';
+
+  @override
+  String get vacation_subtitle_futurista =>
+      'While you\'re on vacation, tasks won\'t be assigned to you.';
+
+  @override
+  String get vacation_reason_label_short => 'REASON';
+
+  @override
+  String get rescue_hero_title_futurista =>
+      'Decide what stays\nactive in Free.';
+
+  @override
+  String get rescue_subtitle_prefix =>
+      'If you don\'t reactivate, your home will downgrade to Free on ';
+
+  @override
+  String get rescue_subtitle_suffix =>
+      '. The rest will be frozen for 30 days · restorable.';
+
+  @override
+  String get common_back_to_home => 'Back to home';
+
+  @override
+  String get plan_per_month_home => 'per month · home';
+
+  @override
+  String get plan_per_year_breakdown => 'per year · €2.50/mo';
+
+  @override
+  String get plan_label_monthly_short => 'MONTHLY';
+
+  @override
+  String get plan_label_annual_short => 'ANNUAL';
+
+  @override
+  String get plan_annual_discount_badge => '-37%';
+
+  @override
+  String get subscription_status_pill_active => 'Active';
+
+  @override
+  String get subscription_status_pill_cancelled => 'Cancelled';
+
+  @override
+  String get subscription_status_pill_rescue => 'In rescue';
+
+  @override
+  String get subscription_status_pill_expired => 'Expired';
+
+  @override
+  String get subscription_status_pill_restorable => 'Restorable';
+
+  @override
+  String subscription_renewal_detail(String date) {
+    return 'Renewal: $date';
+  }
+
+  @override
+  String subscription_expired_detail(String date) {
+    return 'Expired: $date';
+  }
+
+  @override
+  String subscription_restore_detail(String date) {
+    return 'Restore before: $date';
+  }
+
+  @override
+  String subscription_expires_in_days(int days) {
+    return 'Expires in $days days';
+  }
+
+  @override
+  String subscription_expires_on_detail(String date) {
+    return 'Expires: $date';
+  }
+
+  @override
+  String get phone_visibility_none => 'Nobody';
+
+  @override
+  String get phone_visibility_home => 'Home';
+
+  @override
+  String get phone_visibility_all => 'Everyone';
+
+  @override
+  String get profile_global_compliance_label => 'Global compliance';
+
+  @override
+  String get notif_deadline_title => 'Task about to expire';
+
+  @override
+  String notif_deadline_body(String taskTitle, int minutes) {
+    return '$taskTitle · due in $minutes min';
+  }
+
+  @override
+  String notif_assignment_title(String assigner) {
+    return '$assigner assigned you a task';
+  }
+
+  @override
+  String notif_assignment_body(String taskTitle, String dueAt) {
+    return '$taskTitle · $dueAt';
+  }
+
+  @override
+  String notif_reminder_title(int minutes, String taskTitle) {
+    return 'In $minutes min: $taskTitle';
+  }
+
+  @override
+  String notif_reminder_body(String dueAt) {
+    return 'Due at $dueAt';
+  }
+
+  @override
+  String notif_daily_summary_title(int total, int mine) {
+    return 'Today: $total tasks · you have $mine';
+  }
+
+  @override
+  String get notif_daily_summary_body => 'Tap to see the list';
+
+  @override
+  String notif_feedback_title(String taskTitle) {
+    return 'Review: $taskTitle';
+  }
+
+  @override
+  String notif_feedback_msg_body(String stars) {
+    return '$stars · They left you a private note';
+  }
+
+  @override
+  String get notif_rotation_title => 'This week\'s rotations';
+
+  @override
+  String notif_rotation_summary(String homeName, int count) {
+    return '$homeName · $count tasks';
+  }
+
+  @override
+  String get homes_transfer_no_candidates =>
+      'No active members to transfer to.';
+
+  @override
+  String get homes_transfer_confirm_title => 'Transfer ownership?';
+
+  @override
+  String homes_transfer_confirm_body(String name) {
+    return '$name will become the new owner and you will become an administrator.';
+  }
+
+  @override
+  String homes_transfer_success(String name) {
+    return '$name is now the home owner.';
+  }
+
+  @override
+  String get homes_transfer_error_payer_locked =>
+      'You cannot transfer ownership while you are paying for the home\'s Premium. Cancel renewal or transfer at the end of the period.';
+
+  @override
+  String homes_admins_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count administrators',
+      one: '1 administrator',
+      zero: 'No administrators',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get homes_admins_sheet_title => 'Administrators';
+
+  @override
+  String get homes_admins_sheet_body =>
+      'Promote or demote members. Admins can manage tasks and members but cannot transfer ownership.';
+
+  @override
+  String get homes_admins_promote => 'Promote';
+
+  @override
+  String get homes_admins_demote => 'Demote';
+
+  @override
+  String get homes_admins_promote_blocked_free =>
+      'Only Premium can have multiple administrators.';
+
+  @override
+  String homes_invitations_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pending',
+      one: '1 pending',
+      zero: 'None',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get homes_invitations_sheet_title => 'Pending invitations';
+
+  @override
+  String get homes_invitations_empty => 'No active invitations.';
+
+  @override
+  String homes_invitations_expires_in(String label) {
+    return 'Expires in $label';
+  }
+
+  @override
+  String get homes_invitations_revoke => 'Revoke';
+
+  @override
+  String get homes_invitations_revoked => 'Invitation revoked.';
+
+  @override
+  String get homes_avatar_sheet_title => 'Home avatar';
+
+  @override
+  String get homes_avatar_pick_gallery => 'Pick from gallery';
+
+  @override
+  String get homes_avatar_pick_camera => 'Take photo';
+
+  @override
+  String get homes_avatar_remove => 'Remove photo';
+
+  @override
+  String get homes_avatar_uploading => 'Uploading photo…';
+
+  @override
+  String get homes_avatar_updated => 'Home photo updated.';
 }

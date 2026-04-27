@@ -81,48 +81,58 @@ class SubscriptionManagementScreenFuturista extends ConsumerWidget {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
-        child: vm.dashboard.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (_, __) => Center(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Text(l10n.error_generic),
+        child: Column(
+          children: [
+            // Header fijo arriba: el botón back queda anclado.
+            Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: _Header(title: l10n.subscription_management_title),
             ),
-          ),
-          data: (data) => ListView(
-            padding: EdgeInsets.fromLTRB(
-              0,
-              12,
-              0,
-              adAwareBottomPadding(context, ref, extra: 16),
-            ),
-            children: [
-              const _Header(title: 'Gestión de suscripción'),
-              const SizedBox(height: 14),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: _PlanHeroCard(data: data),
-              ),
-              const SizedBox(height: 12),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: _PayerCard(
-                  data: data,
-                  currentUserUid: currentUid,
-                  l10n: l10n,
+            Expanded(
+              child: vm.dashboard.when(
+                loading: () =>
+                    const Center(child: CircularProgressIndicator()),
+                error: (_, __) => Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Text(l10n.error_generic),
+                  ),
+                ),
+                data: (data) => ListView(
+                  padding: EdgeInsets.fromLTRB(
+                    0,
+                    14,
+                    0,
+                    adAwareBottomPadding(context, ref, extra: 16),
+                  ),
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: _PlanHeroCard(data: data),
+                    ),
+                    const SizedBox(height: 12),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: _PayerCard(
+                        data: data,
+                        currentUserUid: currentUid,
+                        l10n: l10n,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: _ActionsCard(
+                        data: data,
+                        vm: vm,
+                        l10n: l10n,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 16),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: _ActionsCard(
-                  data: data,
-                  vm: vm,
-                  l10n: l10n,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -208,7 +218,7 @@ class _PlanHeroCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    final info = _PlanHeroInfo.from(data);
+    final info = _PlanHeroInfo.from(data, AppLocalizations.of(context));
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -274,37 +284,43 @@ class _PlanHeroInfo {
   final Widget statusPill;
   final String? detail;
 
-  factory _PlanHeroInfo.from(SubscriptionDashboard data) {
+  factory _PlanHeroInfo.from(
+    SubscriptionDashboard data,
+    AppLocalizations l10n,
+  ) {
+    // 'Tocka Premium' / 'Tocka Free' son nombres de marca y NO se localizan.
+    // Sí se localizan los sufijos de plan (Mensual/Anual) y todos los
+    // detalles del pill (renovación, vencimiento, etc.).
     String planSuffix() {
-      if (data.plan == 'annual') return ' · Anual';
-      if (data.plan == 'monthly') return ' · Mensual';
+      if (data.plan == 'annual') return ' · ${l10n.subscription_annual}';
+      if (data.plan == 'monthly') return ' · ${l10n.subscription_monthly}';
       return '';
     }
 
     String? renewalDetail() {
       final endsAt = data.endsAt;
       if (endsAt == null) return null;
-      return 'Renovación: ${_formatDate(endsAt)}';
+      return l10n.subscription_renewal_detail(_formatDate(endsAt));
     }
 
     String? expiredDetail() {
       final endsAt = data.endsAt;
       if (endsAt == null) return null;
-      return 'Expiró: ${_formatDate(endsAt)}';
+      return l10n.subscription_expired_detail(_formatDate(endsAt));
     }
 
     String? restoreDetail() {
       final until = data.restoreUntil;
       if (until == null) return null;
-      return 'Restaurar antes de: ${_formatDate(until)}';
+      return l10n.subscription_restore_detail(_formatDate(until));
     }
 
     switch (data.status) {
       case HomePremiumStatus.active:
         return _PlanHeroInfo(
           title: 'Tocka Premium${planSuffix()}',
-          statusPill: const _StatusPill(
-            label: 'Activa',
+          statusPill: _StatusPill(
+            label: l10n.subscription_status_pill_active,
             color: FuturistaColors.success,
           ),
           detail: renewalDetail(),
@@ -312,30 +328,30 @@ class _PlanHeroInfo {
       case HomePremiumStatus.cancelledPendingEnd:
         return _PlanHeroInfo(
           title: 'Tocka Premium${planSuffix()}',
-          statusPill: const _StatusPill(
-            label: 'Cancelado',
+          statusPill: _StatusPill(
+            label: l10n.subscription_status_pill_cancelled,
             color: FuturistaColors.warning,
           ),
           detail: data.endsAt != null
-              ? 'Vence: ${_formatDate(data.endsAt!)}'
+              ? l10n.subscription_expires_on_detail(_formatDate(data.endsAt!))
               : null,
         );
       case HomePremiumStatus.rescue:
         return _PlanHeroInfo(
           title: 'Tocka Premium${planSuffix()}',
-          statusPill: const _StatusPill(
-            label: 'En rescate',
+          statusPill: _StatusPill(
+            label: l10n.subscription_status_pill_rescue,
             color: FuturistaColors.warning,
           ),
           detail: data.endsAt != null
-              ? 'Vence en ${data.daysLeft} días'
+              ? l10n.subscription_expires_in_days(data.daysLeft)
               : null,
         );
       case HomePremiumStatus.expiredFree:
         return _PlanHeroInfo(
           title: 'Tocka Free',
-          statusPill: const _StatusPill(
-            label: 'Expirado',
+          statusPill: _StatusPill(
+            label: l10n.subscription_status_pill_expired,
             color: FuturistaColors.error,
           ),
           detail: expiredDetail(),
@@ -343,18 +359,18 @@ class _PlanHeroInfo {
       case HomePremiumStatus.restorable:
         return _PlanHeroInfo(
           title: 'Tocka Free',
-          statusPill: const _StatusPill(
-            label: 'Restaurable',
+          statusPill: _StatusPill(
+            label: l10n.subscription_status_pill_restorable,
             color: FuturistaColors.primary,
           ),
           detail: restoreDetail(),
         );
       case HomePremiumStatus.free:
       case HomePremiumStatus.purged:
-        return const _PlanHeroInfo(
+        return _PlanHeroInfo(
           title: 'Tocka Free',
           statusPill: _StatusPill(
-            label: 'Plan gratuito',
+            label: l10n.homes_plan_free,
             color: null,
           ),
           detail: null,

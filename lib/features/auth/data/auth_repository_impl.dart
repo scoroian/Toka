@@ -190,8 +190,20 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<void> signOut() async {
-    await _googleSignIn.signOut();
-    await _auth.signOut();
+    // Paralelizamos para no encadenar latencias: si el usuario no se logueó
+    // con Google, `_googleSignIn.signOut()` igualmente intenta limpiar y puede
+    // tardar varios segundos (Google Play Services). El `try/catch` evita que
+    // un fallo del lado Google bloquee la salida real (FirebaseAuth).
+    Future<void> googleSafe() async {
+      try {
+        await _googleSignIn.signOut();
+      } catch (_) {
+        // Silenciamos: si Google falla, FirebaseAuth.signOut() es lo único
+        // necesario para volver a la pantalla de login.
+      }
+    }
+
+    await Future.wait<void>([googleSafe(), _auth.signOut()]);
   }
 
   AuthFailure _map(FirebaseAuthException e) => switch (e.code) {

@@ -215,6 +215,14 @@
   "@homes_members": { "description": "Members section label" },
   "homes_manage_members": "Gestionar miembros",
   "@homes_manage_members": { "description": "Manage members tile in home settings (opens MembersScreen)" },
+  "homes_transfer_ownership": "Transferir propiedad",
+  "@homes_transfer_ownership": { "description": "Transfer ownership tile in home settings (owner only)" },
+  "homes_cancel_renewal": "Cancelar renovación",
+  "@homes_cancel_renewal": { "description": "Cancel auto-renewal tile in home settings (premium only)" },
+  "homes_freeze_member": "Congelar miembro",
+  "@homes_freeze_member": { "description": "Freeze member tile in home settings (owner only)" },
+  "homes_coming_soon": "Próximamente",
+  "@homes_coming_soon": { "description": "Snackbar when tapping a feature not yet implemented" },
   "homes_payer_info_body": "Tu cuenta está pagando el Premium de este hogar.",
   "@homes_payer_info_body": { "description": "Subtle info shown to payer in home settings" },
   "homes_payer_info_action": "Gestionar en Ajustes",
@@ -408,6 +416,15 @@
   "@members_invite_fab": { "description": "FAB label on members screen" },
   "members_section_active": "Activos",
   "@members_section_active": { "description": "Active members section" },
+  "members_balance_title": "Equilibrio del hogar",
+  "@members_balance_title": { "description": "Title of the household balance card" },
+  "members_balance_well_distributed": "Bien repartido",
+  "@members_balance_well_distributed": { "description": "Message when household chores are evenly distributed" },
+  "members_balance_unbalanced": "Desequilibrado · {topName}",
+  "@members_balance_unbalanced": {
+    "description": "Message when one member has done many more tasks than the rest",
+    "placeholders": { "topName": { "type": "String" } }
+  },
   "members_section_frozen": "Congelados",
   "@members_section_frozen": { "description": "Frozen members section" },
   "members_pending_tasks": "{count} tareas pendientes",
@@ -1187,5 +1204,343 @@
   "skinFuturistaLabel": "Futurista",
   "@skinFuturistaLabel": { "description": "Name of the futurist skin" },
   "skinFuturistaDescription": "Oscuro, espacial, minimalista",
-  "@skinFuturistaDescription": { "description": "Short description of the futurist skin" }
+  "@skinFuturistaDescription": { "description": "Short description of the futurist skin" },
+
+  "homes_role_frozen": "Congelado",
+  "@homes_role_frozen": { "description": "Frozen member role label" },
+
+  "today_hero_label": "TE TOCA",
+  "@today_hero_label": { "description": "Hero pill on Today screen when a task is assigned to the current user" },
+  "task_detail_next_turn": "PRÓXIMO TURNO",
+  "@task_detail_next_turn": { "description": "Header of the next-turn card in task detail" },
+  "task_detail_rotation": "ROTACIÓN",
+  "@task_detail_rotation": { "description": "Header of the rotation card in task detail" },
+  "task_due_at_label": "Vence a las",
+  "@task_due_at_label": { "description": "Label preceding the time at which a task is due" },
+  "task_due_at_min_short": "MIN",
+  "@task_due_at_min_short": { "description": "Short label for minutes in the next-turn countdown" },
+  "common_more_options": "Más opciones",
+  "@common_more_options": { "description": "Generic 'more options' button label" },
+  "rotation_now": "AHORA",
+  "@rotation_now": { "description": "Label for the current member in a rotation strip" },
+  "rotation_next": "SIG.",
+  "@rotation_next": { "description": "Short label (3-4 chars) for the next member in a rotation strip" },
+
+  "tasks_filter_all": "Todas",
+  "@tasks_filter_all": { "description": "Filter chip: all tasks" },
+  "tasks_filter_mine": "Mías",
+  "@tasks_filter_mine": { "description": "Filter chip: tasks assigned to me" },
+  "tasks_filter_due_soon": "Por vencer",
+  "@tasks_filter_due_soon": { "description": "Filter chip: tasks due in the next 48h" },
+  "tasks_filter_weekly_chip": "Semanales",
+  "@tasks_filter_weekly_chip": { "description": "Filter chip: weekly recurring tasks" },
+  "tasks_filter_monthly_chip": "Mensuales",
+  "@tasks_filter_monthly_chip": { "description": "Filter chip: monthly recurring tasks" },
+
+  "recurrence_label_hourly": "Hora",
+  "@recurrence_label_hourly": { "description": "Short recurrence label: hourly" },
+  "recurrence_label_daily": "Día",
+  "@recurrence_label_daily": { "description": "Short recurrence label: daily" },
+  "recurrence_label_weekly": "Semana",
+  "@recurrence_label_weekly": { "description": "Short recurrence label: weekly" },
+  "recurrence_label_monthly": "Mes",
+  "@recurrence_label_monthly": { "description": "Short recurrence label: monthly" },
+  "recurrence_label_yearly": "Año",
+  "@recurrence_label_yearly": { "description": "Short recurrence label: yearly" },
+
+  "recurrence_pill_hourly": "Cada {n}h",
+  "@recurrence_pill_hourly": {
+    "description": "Pill label for hourly recurrence (e.g. 'Cada 2h')",
+    "placeholders": { "n": { "type": "int" } }
+  },
+  "recurrence_pill_daily": "Cada día",
+  "@recurrence_pill_daily": { "description": "Pill label for daily recurrence (every day)" },
+  "recurrence_pill_daily_n": "Cada {n} días",
+  "@recurrence_pill_daily_n": {
+    "description": "Pill label for daily recurrence with interval > 1",
+    "placeholders": { "n": { "type": "int" } }
+  },
+  "recurrence_pill_weekly": "Semanal",
+  "@recurrence_pill_weekly": { "description": "Pill label for weekly recurrence" },
+  "recurrence_pill_monthly": "Mensual",
+  "@recurrence_pill_monthly": { "description": "Pill label for monthly recurrence" },
+  "recurrence_pill_yearly": "Anual",
+  "@recurrence_pill_yearly": { "description": "Pill label for yearly recurrence" },
+  "recurrence_pill_one_time": "Una vez",
+  "@recurrence_pill_one_time": { "description": "Pill label for one-time recurrence (singular)" },
+
+  "weekday_mon_short": "L",
+  "@weekday_mon_short": { "description": "1-char short label for Monday in weekday picker" },
+  "weekday_tue_short": "M",
+  "@weekday_tue_short": { "description": "1-char short label for Tuesday" },
+  "weekday_wed_short": "X",
+  "@weekday_wed_short": { "description": "1-char short label for Wednesday (X in Spanish, W in English)" },
+  "weekday_thu_short": "J",
+  "@weekday_thu_short": { "description": "1-char short label for Thursday" },
+  "weekday_fri_short": "V",
+  "@weekday_fri_short": { "description": "1-char short label for Friday" },
+  "weekday_sat_short": "S",
+  "@weekday_sat_short": { "description": "1-char short label for Saturday" },
+  "weekday_sun_short": "D",
+  "@weekday_sun_short": { "description": "1-char short label for Sunday" },
+
+  "tasks_section_label_title": "TÍTULO",
+  "@tasks_section_label_title": { "description": "Mono-uppercase header for title field on task form" },
+  "tasks_section_label_visual": "VISUAL",
+  "@tasks_section_label_visual": { "description": "Mono-uppercase header for visual picker on task form" },
+  "tasks_section_label_recurrence": "RECURRENCIA",
+  "@tasks_section_label_recurrence": { "description": "Mono-uppercase header for recurrence card on task form" },
+  "tasks_section_label_description": "DESCRIPCIÓN",
+  "@tasks_section_label_description": { "description": "Mono-uppercase header for description field on task form" },
+  "tasks_section_label_assigned": "ASIGNADOS",
+  "@tasks_section_label_assigned": { "description": "Mono-uppercase header for assignees list on task form" },
+  "tasks_section_label_assignment": "REPARTO",
+  "@tasks_section_label_assignment": { "description": "Mono-uppercase header for assignment mode card on task form" },
+
+  "assignment_rotation": "Rotación",
+  "@assignment_rotation": { "description": "Assignment mode: round-robin rotation" },
+  "assignment_smart": "Inteligente",
+  "@assignment_smart": { "description": "Assignment mode: smart distribution (Premium)" },
+
+  "member_stat_completed_short": "hechas",
+  "@member_stat_completed_short": { "description": "Compact stat suffix for tasks completed by a member" },
+  "member_stat_passed_short": "pases",
+  "@member_stat_passed_short": { "description": "Compact stat suffix for turn-passes by a member" },
+
+  "task_card_done_by": "Hecho por",
+  "@task_card_done_by": { "description": "Prefix shown on completed task cards before the actor name" },
+  "task_card_assigned_to": "Toca a",
+  "@task_card_assigned_to": { "description": "Prefix shown on pending task cards before the assignee name" },
+
+  "profile_stat_tasks_label": "TAREAS",
+  "@profile_stat_tasks_label": { "description": "Mono header for total tasks stat on profile" },
+  "profile_stat_streak_label": "RACHA",
+  "@profile_stat_streak_label": { "description": "Mono header for current streak stat on profile" },
+  "profile_stat_average_label": "MEDIA",
+  "@profile_stat_average_label": { "description": "Mono header for average compliance stat on profile" },
+
+  "home_settings_section_general": "GENERAL",
+  "@home_settings_section_general": { "description": "Section header in home settings (general info)" },
+  "home_settings_section_members": "MIEMBROS Y ROLES",
+  "@home_settings_section_members": { "description": "Section header in home settings (members and roles)" },
+  "home_settings_section_subscription": "SUSCRIPCIÓN",
+  "@home_settings_section_subscription": { "description": "Section header in home settings (subscription)" },
+  "home_settings_section_danger": "ZONA DE PELIGRO",
+  "@home_settings_section_danger": { "description": "Section header in home settings (destructive actions)" },
+  "home_settings_section_debug": "DEBUG",
+  "@home_settings_section_debug": { "description": "Section header in home settings (debug-only, hidden in prod)" },
+  "home_settings_avatar": "Avatar del hogar",
+  "@home_settings_avatar": { "description": "Row label: home avatar (placeholder, not implemented)" },
+  "home_settings_timezone": "Zona horaria",
+  "@home_settings_timezone": { "description": "Row label: home timezone (placeholder, not implemented)" },
+  "home_settings_pending_invites": "Invitaciones pendientes",
+  "@home_settings_pending_invites": { "description": "Row label: pending invitations counter" },
+  "home_settings_admins": "Administradores",
+  "@home_settings_admins": { "description": "Row label: admin members counter" },
+  "home_settings_plan_current": "Plan actual",
+  "@home_settings_plan_current": { "description": "Row label: current premium plan" },
+  "home_settings_renewal": "Renovación",
+  "@home_settings_renewal": { "description": "Row label: subscription renewal date" },
+  "home_settings_code_short": "CODE",
+  "@home_settings_code_short": { "description": "Short prefix shown before the home id snippet" },
+
+  "vacation_subtitle_futurista": "Mientras estés en vacaciones, las tareas no te tocarán a ti.",
+  "@vacation_subtitle_futurista": { "description": "Hero subtitle on the futurist vacation screen" },
+  "vacation_reason_label_short": "MOTIVO",
+  "@vacation_reason_label_short": { "description": "Mono uppercase label preceding the vacation reason input" },
+
+  "rescue_hero_title_futurista": "Decide qué sigue\nactivo en Free.",
+  "@rescue_hero_title_futurista": { "description": "Hero title on the futurist rescue screen (allows newline)" },
+  "rescue_subtitle_prefix": "Si no reactivas, tu hogar bajará a Free el ",
+  "@rescue_subtitle_prefix": { "description": "First part of rescue subtitle, before the date" },
+  "rescue_subtitle_suffix": ". El resto quedará congelado 30 días · restaurable.",
+  "@rescue_subtitle_suffix": { "description": "Second part of rescue subtitle, after the date" },
+  "common_back_to_home": "Volver al hogar",
+  "@common_back_to_home": { "description": "Back-to-home navigation label" },
+
+  "plan_per_month_home": "al mes · hogar",
+  "@plan_per_month_home": { "description": "Subtext of the monthly plan card on paywall (price unit)" },
+  "plan_per_year_breakdown": "al año · 2,50€/mes",
+  "@plan_per_year_breakdown": { "description": "Subtext of the annual plan card on paywall (price + monthly equivalent)" },
+  "plan_label_monthly_short": "MENSUAL",
+  "@plan_label_monthly_short": { "description": "Mono uppercase label of the monthly plan card" },
+  "plan_label_annual_short": "ANUAL",
+  "@plan_label_annual_short": { "description": "Mono uppercase label of the annual plan card" },
+  "plan_annual_discount_badge": "-37%",
+  "@plan_annual_discount_badge": { "description": "Discount badge shown on the annual plan card" },
+
+  "subscription_status_pill_active": "Activa",
+  "@subscription_status_pill_active": { "description": "Status pill: Premium active" },
+  "subscription_status_pill_cancelled": "Cancelado",
+  "@subscription_status_pill_cancelled": { "description": "Status pill: cancelled, still active until end" },
+  "subscription_status_pill_rescue": "En rescate",
+  "@subscription_status_pill_rescue": { "description": "Status pill: rescue window (3 days before downgrade)" },
+  "subscription_status_pill_expired": "Expirado",
+  "@subscription_status_pill_expired": { "description": "Status pill: Premium expired" },
+  "subscription_status_pill_restorable": "Restaurable",
+  "@subscription_status_pill_restorable": { "description": "Status pill: 30-day restore window after downgrade" },
+  "subscription_renewal_detail": "Renovación: {date}",
+  "@subscription_renewal_detail": {
+    "description": "Detail line: next auto-renewal date",
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "subscription_expired_detail": "Expiró: {date}",
+  "@subscription_expired_detail": {
+    "description": "Detail line: premium expired on date",
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "subscription_restore_detail": "Restaurar antes de: {date}",
+  "@subscription_restore_detail": {
+    "description": "Detail line: restore deadline",
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "subscription_expires_in_days": "Vence en {days} días",
+  "@subscription_expires_in_days": {
+    "description": "Detail line: rescue window countdown",
+    "placeholders": { "days": { "type": "int" } }
+  },
+  "subscription_expires_on_detail": "Vence: {date}",
+  "@subscription_expires_on_detail": {
+    "description": "Detail line: cancelled subscription end date",
+    "placeholders": { "date": { "type": "String" } }
+  },
+
+  "phone_visibility_none": "Nadie",
+  "@phone_visibility_none": { "description": "Phone visibility chip: nobody can see the phone number" },
+  "phone_visibility_home": "Hogar",
+  "@phone_visibility_home": { "description": "Phone visibility chip: only home members can see the phone number" },
+  "phone_visibility_all": "Todos",
+  "@phone_visibility_all": { "description": "Phone visibility chip: everyone (default)" },
+
+  "profile_global_compliance_label": "Cumplimiento global",
+  "@profile_global_compliance_label": { "description": "Stats row label on profile screens — global compliance across all homes" },
+
+  "notif_deadline_title": "Tarea por vencer",
+  "@notif_deadline_title": { "description": "Push notification title — task is about to expire" },
+  "notif_deadline_body": "{taskTitle} · vence en {minutes} min",
+  "@notif_deadline_body": {
+    "description": "Push notification body — task expiring",
+    "placeholders": {
+      "taskTitle": { "type": "String" },
+      "minutes": { "type": "int" }
+    }
+  },
+  "notif_assignment_title": "{assigner} te asignó una tarea",
+  "@notif_assignment_title": {
+    "description": "Push notification title — someone assigned you a task",
+    "placeholders": { "assigner": { "type": "String" } }
+  },
+  "notif_assignment_body": "{taskTitle} · {dueAt}",
+  "@notif_assignment_body": {
+    "description": "Push notification body — assignment with due date",
+    "placeholders": {
+      "taskTitle": { "type": "String" },
+      "dueAt": { "type": "String" }
+    }
+  },
+  "notif_reminder_title": "En {minutes} min: {taskTitle}",
+  "@notif_reminder_title": {
+    "description": "Push notification title — reminder N min before due",
+    "placeholders": {
+      "minutes": { "type": "int" },
+      "taskTitle": { "type": "String" }
+    }
+  },
+  "notif_reminder_body": "Vence a las {dueAt}",
+  "@notif_reminder_body": {
+    "description": "Push notification body — reminder with due time",
+    "placeholders": { "dueAt": { "type": "String" } }
+  },
+  "notif_daily_summary_title": "Hoy: {total} tareas · tú tienes {mine}",
+  "@notif_daily_summary_title": {
+    "description": "Push notification title — daily summary",
+    "placeholders": {
+      "total": { "type": "int" },
+      "mine": { "type": "int" }
+    }
+  },
+  "notif_daily_summary_body": "Pulsa para ver la lista",
+  "@notif_daily_summary_body": { "description": "Push notification body — daily summary" },
+  "notif_feedback_title": "Valoración: {taskTitle}",
+  "@notif_feedback_title": {
+    "description": "Push notification title — review received",
+    "placeholders": { "taskTitle": { "type": "String" } }
+  },
+  "notif_feedback_msg_body": "{stars} · Te ha dejado una nota privada",
+  "@notif_feedback_msg_body": {
+    "description": "Push notification message body — review with stars and private note",
+    "placeholders": { "stars": { "type": "String" } }
+  },
+  "notif_rotation_title": "Rotaciones de esta semana",
+  "@notif_rotation_title": { "description": "Push notification title — weekly rotation summary" },
+  "notif_rotation_summary": "{homeName} · {count} tareas",
+  "@notif_rotation_summary": {
+    "description": "Inbox-style summary line — rotation count for home",
+    "placeholders": {
+      "homeName": { "type": "String" },
+      "count": { "type": "int" }
+    }
+  },
+
+  "homes_transfer_no_candidates": "No hay miembros activos a los que transferir.",
+  "@homes_transfer_no_candidates": { "description": "Empty state in transfer ownership sheet when no eligible candidates" },
+  "homes_transfer_confirm_title": "¿Transferir propiedad?",
+  "@homes_transfer_confirm_title": { "description": "Confirm dialog title before transferring ownership" },
+  "homes_transfer_confirm_body": "{name} pasará a ser el nuevo propietario y tú quedarás como administrador.",
+  "@homes_transfer_confirm_body": {
+    "description": "Confirm dialog body, named after the new owner",
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "homes_transfer_success": "{name} es ahora el propietario del hogar.",
+  "@homes_transfer_success": {
+    "description": "Snackbar after successful transfer",
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "homes_transfer_error_payer_locked": "No puedes transferir la propiedad mientras pagues el Premium del hogar. Cancela la renovación o transfiere al final del periodo.",
+  "@homes_transfer_error_payer_locked": { "description": "Error when payer tries to transfer ownership during active Premium" },
+  "homes_admins_count": "{count, plural, =0{Sin administradores} =1{1 administrador} other{{count} administradores}}",
+  "@homes_admins_count": {
+    "description": "Pluralized admin count shown as the value of the admins row",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "homes_admins_sheet_title": "Administradores",
+  "@homes_admins_sheet_title": { "description": "Sheet title for managing admin roles" },
+  "homes_admins_sheet_body": "Promociona o degrada miembros. Los admins pueden gestionar tareas y miembros pero no transferir la propiedad.",
+  "@homes_admins_sheet_body": { "description": "Sheet body explaining admin management" },
+  "homes_admins_promote": "Promover",
+  "@homes_admins_promote": { "description": "Action: promote member to admin" },
+  "homes_admins_demote": "Degradar",
+  "@homes_admins_demote": { "description": "Action: demote admin to member" },
+  "homes_admins_promote_blocked_free": "Sólo Premium puede tener varios administradores.",
+  "@homes_admins_promote_blocked_free": { "description": "Tooltip / snack when free-plan tries to promote" },
+  "homes_invitations_count": "{count, plural, =0{Ninguna} =1{1 pendiente} other{{count} pendientes}}",
+  "@homes_invitations_count": {
+    "description": "Pluralized pending invitation count shown as the value of the invitations row",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "homes_invitations_sheet_title": "Invitaciones pendientes",
+  "@homes_invitations_sheet_title": { "description": "Sheet title for managing pending invitations" },
+  "homes_invitations_empty": "No hay invitaciones activas.",
+  "@homes_invitations_empty": { "description": "Empty state in pending invitations sheet" },
+  "homes_invitations_expires_in": "Caduca en {label}",
+  "@homes_invitations_expires_in": {
+    "description": "Subtitle line — when this invitation expires (relative)",
+    "placeholders": { "label": { "type": "String" } }
+  },
+  "homes_invitations_revoke": "Revocar",
+  "@homes_invitations_revoke": { "description": "Action: revoke / invalidate an invitation code" },
+  "homes_invitations_revoked": "Invitación revocada.",
+  "@homes_invitations_revoked": { "description": "Snackbar after successful revoke" },
+  "homes_avatar_sheet_title": "Avatar del hogar",
+  "@homes_avatar_sheet_title": { "description": "Sheet title for editing the home avatar" },
+  "homes_avatar_pick_gallery": "Elegir de galería",
+  "@homes_avatar_pick_gallery": { "description": "Action: pick from photo gallery" },
+  "homes_avatar_pick_camera": "Hacer foto",
+  "@homes_avatar_pick_camera": { "description": "Action: take photo with camera" },
+  "homes_avatar_remove": "Quitar foto",
+  "@homes_avatar_remove": { "description": "Action: remove existing home photo" },
+  "homes_avatar_uploading": "Subiendo foto…",
+  "@homes_avatar_uploading": { "description": "Snackbar / progress while uploading" },
+  "homes_avatar_updated": "Foto del hogar actualizada.",
+  "@homes_avatar_updated": { "description": "Snackbar after successful update" }
 }

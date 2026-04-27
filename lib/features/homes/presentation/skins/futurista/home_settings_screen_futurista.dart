@@ -25,11 +25,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../../core/constants/routes.dart';
 import '../../../../../core/theme/futurista/futurista_colors.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../../../shared/widgets/ad_aware_bottom_padding.dart';
+import '../../../../members/application/members_provider.dart';
+import '../../../../members/domain/member.dart';
 import '../../../application/home_settings_view_model.dart';
+import '../../../domain/home_membership.dart';
 import '../../../domain/homes_repository.dart';
+import '../../widgets/admins_sheet.dart';
+import '../../widgets/home_avatar_sheet.dart';
+import '../../widgets/pending_invitations_sheet.dart';
+import '../../widgets/transfer_ownership_sheet.dart';
 
 const String _kMono = 'JetBrainsMono';
 
@@ -116,6 +124,80 @@ class _HomeSettingsScreenFuturistaState
     }
   }
 
+  // DEBUG PREMIUM — REMOVE BEFORE PRODUCTION RELEASE
+  Future<void> _showDebugPremiumSheet(
+    BuildContext context,
+    HomeSettingsViewModel vm,
+    String currentStatus,
+  ) async {
+    const statuses = <String>[
+      'free',
+      'active',
+      'cancelledPendingEnd',
+      'rescue',
+      'expiredFree',
+      'restorable',
+    ];
+    final selected = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      builder: (ctx) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16),
+                  child: Text(
+                    '🧪 Debug: cambiar estado premium',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                RadioGroup<String>(
+                  groupValue: currentStatus,
+                  onChanged: (v) => Navigator.of(ctx).pop(v),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: statuses
+                        .map((s) => RadioListTile<String>(
+                              key: Key('debug_premium_option_$s'),
+                              value: s,
+                              title: Text(s),
+                            ))
+                        .toList(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+    if (selected == null || selected == currentStatus) return;
+    try {
+      await vm.debugSetPremiumStatus(selected);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Estado premium: $selected')),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
+    }
+  }
+  // END DEBUG PREMIUM
+
   Future<void> _confirmClose(
     BuildContext context,
     AppLocalizations l10n,
@@ -152,30 +234,44 @@ class _HomeSettingsScreenFuturistaState
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
-        child: vm.viewData.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (_, __) => Center(child: Text(l10n.error_generic)),
-          data: (data) {
-            if (data == null) return Center(child: Text(l10n.error_generic));
-            return ListView(
-              padding: EdgeInsets.fromLTRB(
-                16,
-                12,
-                16,
-                adAwareBottomPadding(context, ref, extra: 16),
-              ),
-              children: [
-                _Header(title: l10n.homes_settings_title),
-                const SizedBox(height: 14),
+        child: Column(
+          children: [
+            // Header fijo arriba: el chevron back queda anclado mientras
+            // el contenido scrollea.
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+              child: _Header(title: l10n.homes_settings_title),
+            ),
+            Expanded(
+              child: vm.viewData.when(
+                loading: () =>
+                    const Center(child: CircularProgressIndicator()),
+                error: (_, __) => Center(child: Text(l10n.error_generic)),
+                data: (data) {
+                  if (data == null) {
+                    return Center(child: Text(l10n.error_generic));
+                  }
+                  return ListView(
+                    padding: EdgeInsets.fromLTRB(
+                      16,
+                      14,
+                      16,
+                      adAwareBottomPadding(context, ref, extra: 16),
+                    ),
+                    children: [
                 _Hero(
                   homeName: data.homeName,
                   homeIdShort: _shortenId(data.homeId),
+                  photoUrl: data.photoUrl,
                   isPremium: !data.planLabel
                       .toLowerCase()
                       .contains(l10n.homes_plan_free.toLowerCase()),
                   planLabel: data.planLabel,
+                  onTapAvatar: data.canEdit
+                      ? () => showHomeAvatarSheet(context)
+                      : null,
                 ),
-                const _SectionHeader(title: 'GENERAL'),
+                _SectionHeader(title: l10n.home_settings_section_general),
                 _SectionCard(
                   rows: [
                     _SettingsRow(
@@ -187,92 +283,178 @@ class _HomeSettingsScreenFuturistaState
                           ? () => _editName(context, l10n, vm, data.homeName)
                           : null,
                     ),
-                    const _SettingsRow(
-                      label: 'Avatar del hogar',
-                      value: '—',
+                    // Avatar y zona horaria — no implementados aún en el VM.
+                    // Mostrados en informativo (no tappables) para que el
+                    // usuario sepa que existirán pero no parezcan rotos.
+                    _SettingsRow(
+                      key: const Key('home_avatar_tile'),
+                      label: l10n.home_settings_avatar,
+                      value: data.photoUrl != null ? '✓' : '—',
                       iconLeft: Icons.image_outlined,
-                      tone: _RowTone.neutral,
-                      onTap: null,
+                      tone: _RowTone.accent,
+                      onTap: data.canEdit
+                          ? () => showHomeAvatarSheet(context)
+                          : null,
                     ),
-                    const _SettingsRow(
-                      label: 'Zona horaria',
-                      value: '—',
+                    _SettingsRow(
+                      label: l10n.home_settings_timezone,
+                      value: l10n.homes_coming_soon,
                       iconLeft: Icons.public,
                       tone: _RowTone.neutral,
                       onTap: null,
                     ),
                   ],
                 ),
-                const _SectionHeader(title: 'MIEMBROS Y ROLES'),
+                _SectionHeader(title: l10n.home_settings_section_members),
                 _SectionCard(
                   rows: [
-                    const _SettingsRow(
-                      label: 'Invitaciones pendientes',
-                      value: '—',
-                      iconLeft: Icons.mail_outline,
-                      tone: _RowTone.neutral,
-                      onTap: null,
-                    ),
-                    const _SettingsRow(
-                      label: 'Administradores',
-                      value: '—',
-                      iconLeft: Icons.shield_outlined,
-                      tone: _RowTone.neutral,
-                      onTap: null,
-                    ),
+                    // Tile principal de miembros — paridad con v2 (manage_members_tile).
                     _SettingsRow(
-                      label: 'Transferir propiedad',
+                      key: const Key('manage_members_tile'),
+                      label: l10n.homes_manage_members,
                       value: null,
-                      iconLeft: Icons.swap_horiz,
-                      tone: _RowTone.neutral,
-                      onTap: data.isOwner ? () {} : null,
+                      iconLeft: Icons.people_outline,
+                      tone: _RowTone.accent,
+                      onTap: () => context.push(AppRoutes.members),
                     ),
+                    // Filas informativas: no tappeables, sin chevron (ver _SettingsRow).
+                    // Invitaciones pendientes: contador reactivo + sheet.
+                    Consumer(builder: (ctx, ref, _) {
+                      final invs = ref
+                              .watch(pendingInvitationsProvider(data.homeId))
+                              .valueOrNull ??
+                          const [];
+                      return _SettingsRow(
+                        key: const Key('pending_invitations_tile'),
+                        label: l10n.home_settings_pending_invites,
+                        value: l10n.homes_invitations_count(invs.length),
+                        iconLeft: Icons.mail_outline,
+                        tone: _RowTone.neutral,
+                        onTap: data.isOwner
+                            ? () => showPendingInvitationsSheet(
+                                  ctx,
+                                  homeId: data.homeId,
+                                )
+                            : null,
+                      );
+                    }),
+                    // Administradores: contador real derivado de
+                    // homeMembersProvider (owner cuenta como admin), tap
+                    // abre sheet de gestión solo para owners.
+                    Consumer(builder: (ctx, ref, _) {
+                      final members = ref
+                              .watch(homeMembersProvider(data.homeId))
+                              .valueOrNull ??
+                          const <Member>[];
+                      final adminCount = members
+                          .where((m) =>
+                              m.role == MemberRole.owner ||
+                              m.role == MemberRole.admin)
+                          .length;
+                      return _SettingsRow(
+                        key: const Key('admins_tile'),
+                        label: l10n.home_settings_admins,
+                        value: l10n.homes_admins_count(adminCount),
+                        iconLeft: Icons.shield_outlined,
+                        tone: _RowTone.neutral,
+                        onTap: data.isOwner
+                            ? () => showAdminsSheet(ctx, homeId: data.homeId)
+                            : null,
+                      );
+                    }),
+                    if (data.isOwner)
+                      _SettingsRow(
+                        key: const Key('transfer_ownership_tile'),
+                        label: l10n.homes_transfer_ownership,
+                        value: null,
+                        iconLeft: Icons.swap_horiz,
+                        tone: _RowTone.neutral,
+                        onTap: () => showTransferOwnershipSheet(
+                          context,
+                          homeId: data.homeId,
+                        ),
+                      ),
                   ],
                 ),
-                const _SectionHeader(title: 'SUSCRIPCIÓN'),
+                _SectionHeader(title: l10n.home_settings_section_subscription),
                 _SectionCard(
                   rows: [
                     _SettingsRow(
-                      label: 'Plan actual',
+                      label: l10n.home_settings_plan_current,
                       value: data.planLabel,
                       iconLeft: Icons.workspace_premium,
                       tone: _RowTone.accent,
                       onTap: null,
                     ),
                     _SettingsRow(
-                      label: 'Pagador',
+                      label: l10n.subscription_payer_label,
                       value: data.isPayer ? l10n.homes_role_owner : '—',
                       iconLeft: Icons.person_outline,
                       tone: _RowTone.neutral,
                       onTap: null,
                     ),
-                    const _SettingsRow(
-                      label: 'Renovación',
-                      value: '—',
-                      iconLeft: Icons.calendar_today,
-                      tone: _RowTone.neutral,
-                      onTap: null,
-                    ),
-                    _SettingsRow(
-                      label: 'Cancelar renovación',
-                      value: null,
-                      iconLeft: Icons.cancel_outlined,
-                      tone: _RowTone.danger,
-                      onTap: () {},
-                    ),
+                    // Tile "Gestionar suscripción": entry-point al detalle
+                    // de la suscripción donde el pagador puede cancelar
+                    // renovación, ver historial y reactivar (paridad con v2).
+                    if (data.isPayer)
+                      _SettingsRow(
+                        key: const Key('manage_subscription_tile'),
+                        label: l10n.homes_manage_subscription,
+                        value: null,
+                        iconLeft: Icons.tune,
+                        tone: _RowTone.accent,
+                        onTap: () => context.push(AppRoutes.subscription),
+                      ),
+                    if (data.isPayer)
+                      _SettingsRow(
+                        key: const Key('cancel_renewal_tile'),
+                        label: l10n.homes_cancel_renewal,
+                        value: null,
+                        iconLeft: Icons.cancel_outlined,
+                        tone: _RowTone.danger,
+                        onTap: () => context.push(AppRoutes.subscription),
+                      ),
                   ],
                 ),
-                const _SectionHeader(title: 'ZONA DE PELIGRO'),
+                // DEBUG PREMIUM — REMOVE BEFORE PRODUCTION
+                if (data.showDebugPremiumToggle) ...[
+                  _SectionHeader(title: l10n.home_settings_section_debug),
+                  _SectionCard(
+                    rows: [
+                      _SettingsRow(
+                        key: const Key('debug_premium_toggle_tile'),
+                        // Etiqueta visible al equipo dev — el emoji es
+                        // intencional para distinguir tiles de debug. NO
+                        // se internacionaliza porque desaparecerá antes de
+                        // producción (ver script `check-debug-premium.js`).
+                        label: '🧪 Estado premium',
+                        value: data.premiumStatusCode,
+                        iconLeft: Icons.science,
+                        tone: _RowTone.accent,
+                        onTap: () => _showDebugPremiumSheet(
+                          context,
+                          vm,
+                          data.premiumStatusCode,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+                // END DEBUG PREMIUM
+                _SectionHeader(title: l10n.home_settings_section_danger),
                 _SectionCard(
                   rows: [
+                    if (data.isOwner)
+                      _SettingsRow(
+                        key: const Key('freeze_member_tile'),
+                        label: l10n.homes_freeze_member,
+                        value: null,
+                        iconLeft: Icons.ac_unit,
+                        tone: _RowTone.danger,
+                        onTap: () => context.push(AppRoutes.members),
+                      ),
                     _SettingsRow(
-                      label: 'Congelar miembro',
-                      value: null,
-                      iconLeft: Icons.ac_unit,
-                      tone: _RowTone.danger,
-                      onTap: data.isOwner ? () {} : null,
-                    ),
-                    _SettingsRow(
+                      key: const Key('leave_home_tile'),
                       label: l10n.homes_leave_home,
                       value: null,
                       iconLeft: Icons.logout,
@@ -281,6 +463,7 @@ class _HomeSettingsScreenFuturistaState
                     ),
                     if (data.isOwner)
                       _SettingsRow(
+                        key: const Key('close_home_tile'),
                         label: l10n.homes_close_home,
                         value: null,
                         iconLeft: Icons.delete_outline,
@@ -289,9 +472,12 @@ class _HomeSettingsScreenFuturistaState
                       ),
                   ],
                 ),
-              ],
-            );
-          },
+                    ],
+                  );
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -370,14 +556,18 @@ class _Hero extends StatelessWidget {
   const _Hero({
     required this.homeName,
     required this.homeIdShort,
+    required this.photoUrl,
     required this.isPremium,
     required this.planLabel,
+    required this.onTapAvatar,
   });
 
   final String homeName;
   final String homeIdShort;
+  final String? photoUrl;
   final bool isPremium;
   final String planLabel;
+  final VoidCallback? onTapAvatar;
 
   @override
   Widget build(BuildContext context) {
@@ -385,6 +575,47 @@ class _Hero extends StatelessWidget {
     final cs = theme.colorScheme;
     final initial =
         homeName.trim().isEmpty ? '?' : homeName.trim()[0].toUpperCase();
+
+    Widget avatarBox = Container(
+      width: 56,
+      height: 56,
+      decoration: BoxDecoration(
+        gradient: photoUrl == null
+            ? LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [cs.primary, cs.secondary],
+              )
+            : null,
+        image: photoUrl != null
+            ? DecorationImage(
+                image: NetworkImage(photoUrl!),
+                fit: BoxFit.cover,
+              )
+            : null,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      alignment: Alignment.center,
+      child: photoUrl == null
+          ? Text(
+              initial,
+              style: const TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
+                letterSpacing: -0.4,
+              ),
+            )
+          : null,
+    );
+    if (onTapAvatar != null) {
+      avatarBox = InkWell(
+        key: const Key('home_avatar_hero'),
+        onTap: onTapAvatar,
+        borderRadius: BorderRadius.circular(14),
+        child: avatarBox,
+      );
+    }
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -403,28 +634,7 @@ class _Hero extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [cs.primary, cs.secondary],
-              ),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            alignment: Alignment.center,
-            child: Text(
-              initial,
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w800,
-                color: Colors.white,
-                letterSpacing: -0.4,
-              ),
-            ),
-          ),
+          avatarBox,
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -443,7 +653,7 @@ class _Hero extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'CODE · $homeIdShort',
+                  '${AppLocalizations.of(context).home_settings_code_short} · $homeIdShort',
                   style: TextStyle(
                     fontFamily: _kMono,
                     fontSize: 11,
@@ -591,6 +801,7 @@ enum _RowTone { neutral, accent, danger }
 
 class _SettingsRow extends StatelessWidget {
   const _SettingsRow({
+    super.key,
     required this.label,
     required this.value,
     required this.iconLeft,
@@ -632,64 +843,71 @@ class _SettingsRow extends StatelessWidget {
         break;
     }
 
+    final isInteractive = onTap != null;
     final labelColor = tone == _RowTone.danger ? danger : cs.onSurface;
+    // Filas sin onTap son meramente informativas. No pintamos el chevron
+    // ni el ripple del InkWell — así el usuario distingue de un vistazo
+    // qué se puede tocar y qué es solo lectura.
+    final body = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+      child: Row(
+        children: [
+          Container(
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              color: slotBg,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: slotBorder),
+            ),
+            alignment: Alignment.center,
+            child: Icon(iconLeft, size: 13, color: slotIcon),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: labelColor,
+              ),
+            ),
+          ),
+          if (value != null) ...[
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                value!,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.end,
+                style: TextStyle(
+                  fontFamily: _kMono,
+                  fontSize: 12.5,
+                  color: cs.onSurfaceVariant,
+                ),
+              ),
+            ),
+          ],
+          if (isInteractive) ...[
+            const SizedBox(width: 6),
+            Icon(
+              Icons.chevron_right,
+              size: 13,
+              color: cs.onSurfaceVariant,
+            ),
+          ],
+        ],
+      ),
+    );
 
+    if (!isInteractive) {
+      return Opacity(opacity: 0.72, child: body);
+    }
     return Material(
       color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-          child: Row(
-            children: [
-              Container(
-                width: 28,
-                height: 28,
-                decoration: BoxDecoration(
-                  color: slotBg,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: slotBorder),
-                ),
-                alignment: Alignment.center,
-                child: Icon(iconLeft, size: 13, color: slotIcon),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: labelColor,
-                  ),
-                ),
-              ),
-              if (value != null) ...[
-                const SizedBox(width: 8),
-                Flexible(
-                  child: Text(
-                    value!,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.end,
-                    style: TextStyle(
-                      fontFamily: _kMono,
-                      fontSize: 12.5,
-                      color: cs.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-              ],
-              const SizedBox(width: 6),
-              Icon(
-                Icons.chevron_right,
-                size: 13,
-                color: cs.onSurfaceVariant,
-              ),
-            ],
-          ),
-        ),
-      ),
+      child: InkWell(onTap: onTap, child: body),
     );
   }
 }

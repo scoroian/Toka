@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../l10n/app_localizations.dart';
 import 'task_glyph.dart';
+import 'task_visual_futurista.dart';
 import 'tocka_avatar.dart';
 import 'tocka_btn.dart';
 
@@ -27,6 +28,8 @@ class TaskCardFuturista extends StatelessWidget {
     this.when,
     this.done = false,
     this.glyph = TaskGlyphKind.ring,
+    this.visualKind = '',
+    this.visualValue = '',
     this.urgent = false,
     this.overdue = false,
     this.mine = false,
@@ -44,7 +47,13 @@ class TaskCardFuturista extends StatelessWidget {
   final Color assigneeColor;
   final String? when;
   final bool done;
+  // Glyph derivado de la recurrencia. Solo se usa como FALLBACK cuando el
+  // usuario no eligió un visual propio (visualKind/visualValue vacíos).
   final TaskGlyphKind glyph;
+  // Visual elegido por el usuario en el form (paridad con v2): 'icon' con
+  // codePoint Material, o 'emoji' con string. Si está vacío, se usa `glyph`.
+  final String visualKind;
+  final String visualValue;
   final bool urgent;
   final bool overdue;
   final bool mine;
@@ -140,20 +149,17 @@ class TaskCardFuturista extends StatelessWidget {
         child: Icon(Icons.check, color: Color(0xFF34D399), size: 20),
       );
     }
-    return Container(
-      width: 44,
-      height: 44,
-      decoration: BoxDecoration(
-        color: glyphColor.withValues(alpha: 0.07),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: glyphColor.withValues(alpha: 0.19),
-          width: 1,
-        ),
-      ),
-      child: Center(
-        child: TaskGlyph(kind: glyph, color: glyphColor, size: 22),
-      ),
+    // TaskVisualFuturista pinta su propio slot (border + bg) y respeta el
+    // visualKind del usuario; si está vacío, cae al glyph derivado de
+    // recurrencia. Mantiene 100% la estética anterior cuando no hay visual.
+    return TaskVisualFuturista(
+      visualKind: visualKind,
+      visualValue: visualValue,
+      color: glyphColor,
+      size: 22,
+      slotSize: 44,
+      slotRadius: 12,
+      fallbackGlyph: glyph,
     );
   }
 
@@ -180,7 +186,9 @@ class TaskCardFuturista extends StatelessWidget {
         Row(
           children: [
             Text(
-              done ? 'Hecho por ' : 'Toca a ',
+              done
+                  ? '${AppLocalizations.of(context).task_card_done_by} '
+                  : '${AppLocalizations.of(context).task_card_assigned_to} ',
               style: TextStyle(fontSize: 11.5, color: cs.onSurfaceVariant),
             ),
             TockaAvatar(name: assignee, color: assigneeColor, size: 16),

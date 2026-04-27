@@ -186,7 +186,7 @@ class _VacationScreenFuturistaState
           ),
           const SizedBox(height: 20),
           Text(
-            'Modo vacaciones',
+            l10n.vacation_title,
             textAlign: TextAlign.center,
             style: theme.textTheme.headlineMedium?.copyWith(
                   fontSize: 24,
@@ -201,7 +201,7 @@ class _VacationScreenFuturistaState
           ),
           const SizedBox(height: 8),
           Text(
-            'Mientras estés en vacaciones, las tareas no te tocarán a ti.',
+            l10n.vacation_subtitle_futurista,
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 14,
@@ -258,7 +258,7 @@ class _VacationScreenFuturistaState
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        'MOTIVO',
+                        l10n.vacation_reason_label_short,
                         style: monoLabel.copyWith(color: muted),
                       ),
                       const SizedBox(height: 6),

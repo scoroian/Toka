@@ -20,7 +20,9 @@ part 'onboarding_provider.g.dart';
 const _kStep = 'onboarding_step';
 const _kLocale = 'onboarding_locale';
 const _kNickname = 'onboarding_nickname';
-const _kCompleted = 'onboarding_completed';
+// Scoped por uid: si dos cuentas distintas se loguean en el mismo dispositivo,
+// la segunda no debe heredar el flag de onboarding completado de la primera.
+String _completedKey(String uid) => 'onboarding_completed_$uid';
 
 @Riverpod(keepAlive: true)
 OnboardingRepository onboardingRepository(Ref ref) {
@@ -35,14 +37,17 @@ OnboardingRepository onboardingRepository(Ref ref) {
 /// the flag survives app reinstalls and works across devices (Bug #onboarding-reinstall).
 @Riverpod(keepAlive: true)
 Future<bool> onboardingCompleted(Ref ref) async {
-  // Fast path: SharedPreferences (works within the same install)
-  final prefs = await SharedPreferences.getInstance();
-  if (prefs.getBool(_kCompleted) ?? false) return true;
-
-  // Fallback: Firestore (survives reinstalls and works across devices)
+  // Sin uid no hay nada que comprobar: el redirect del router decide por
+  // authState antes de llegar aquí, así que en la práctica esta rama no se
+  // alcanza con el usuario logueado.
   final uid = FirebaseAuth.instance.currentUser?.uid;
   if (uid == null) return false;
 
+  // Fast path: SharedPreferences scoped por uid (works within the same install)
+  final prefs = await SharedPreferences.getInstance();
+  if (prefs.getBool(_completedKey(uid)) ?? false) return true;
+
+  // Fallback: Firestore (survives reinstalls and works across devices)
   final doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
   if (!doc.exists) return false;
 
@@ -51,7 +56,7 @@ Future<bool> onboardingCompleted(Ref ref) async {
   // Check explicit flag (written since this version)
   final flagSet = (data['onboardingCompleted'] as bool?) ?? false;
   if (flagSet) {
-    await prefs.setBool(_kCompleted, true);
+    await prefs.setBool(_completedKey(uid), true);
     return true;
   }
 
@@ -59,7 +64,7 @@ Future<bool> onboardingCompleted(Ref ref) async {
   // a non-empty nickname means they went through the profile step.
   final nickname = (data['nickname'] as String?)?.trim() ?? '';
   if (nickname.isNotEmpty) {
-    await prefs.setBool(_kCompleted, true);
+    await prefs.setBool(_completedKey(uid), true);
     return true;
   }
 
@@ -85,10 +90,18 @@ class OnboardingNotifier extends _$OnboardingNotifier {
     );
   }
 
-  /// Returns true if onboarding was already completed.
+  /// Returns true if onboarding was already completed for the current user.
   static Future<bool> isCompleted() async {
+    String? uid;
+    try {
+      uid = FirebaseAuth.instance.currentUser?.uid;
+    } catch (_) {
+      // En tests sin Firebase inicializado, FirebaseAuth.instance puede lanzar.
+      return false;
+    }
+    if (uid == null) return false;
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(_kCompleted) ?? false;
+    return prefs.getBool(_completedKey(uid)) ?? false;
   }
 
   void nextStep() {
@@ -247,11 +260,11 @@ class OnboardingNotifier extends _$OnboardingNotifier {
   }
 
   Future<void> _markCompleted() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_kCompleted, true);
-    // Also persist in Firestore so the flag survives reinstalls and device changes
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid != null) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_completedKey(uid), true);
+      // Also persist in Firestore so the flag survives reinstalls and device changes
       try {
         await FirebaseFirestore.instance
             .collection('users')

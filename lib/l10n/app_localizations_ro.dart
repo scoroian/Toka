@@ -341,6 +341,18 @@ class AppLocalizationsRo extends AppLocalizations {
   String get homes_manage_members => 'Gestionează membri';
 
   @override
+  String get homes_transfer_ownership => 'Transferă proprietatea';
+
+  @override
+  String get homes_cancel_renewal => 'Anulează reînnoirea';
+
+  @override
+  String get homes_freeze_member => 'Îngheață membru';
+
+  @override
+  String get homes_coming_soon => 'În curând';
+
+  @override
   String get homes_payer_info_body =>
       'Contul tău plătește Premium pentru această casă.';
 
@@ -609,6 +621,17 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get members_section_active => 'Activi';
+
+  @override
+  String get members_balance_title => 'Echilibrul casei';
+
+  @override
+  String get members_balance_well_distributed => 'Bine repartizat';
+
+  @override
+  String members_balance_unbalanced(String topName) {
+    return 'Dezechilibrat · $topName';
+  }
 
   @override
   String get members_section_frozen => 'Înghețați';
@@ -1879,4 +1902,427 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get skinFuturistaDescription => 'Întunecat, cosmic, minimalist';
+
+  @override
+  String get homes_role_frozen => 'Înghețat';
+
+  @override
+  String get today_hero_label => 'E RÂNDUL TĂU';
+
+  @override
+  String get task_detail_next_turn => 'URMĂTORUL TUR';
+
+  @override
+  String get task_detail_rotation => 'ROTAȚIE';
+
+  @override
+  String get task_due_at_label => 'Scadent la';
+
+  @override
+  String get task_due_at_min_short => 'MIN';
+
+  @override
+  String get common_more_options => 'Mai multe opțiuni';
+
+  @override
+  String get rotation_now => 'ACUM';
+
+  @override
+  String get rotation_next => 'URM.';
+
+  @override
+  String get tasks_filter_all => 'Toate';
+
+  @override
+  String get tasks_filter_mine => 'Ale mele';
+
+  @override
+  String get tasks_filter_due_soon => 'În curând';
+
+  @override
+  String get tasks_filter_weekly_chip => 'Săptămânale';
+
+  @override
+  String get tasks_filter_monthly_chip => 'Lunare';
+
+  @override
+  String get recurrence_label_hourly => 'Oră';
+
+  @override
+  String get recurrence_label_daily => 'Zi';
+
+  @override
+  String get recurrence_label_weekly => 'Săptămână';
+
+  @override
+  String get recurrence_label_monthly => 'Lună';
+
+  @override
+  String get recurrence_label_yearly => 'An';
+
+  @override
+  String recurrence_pill_hourly(int n) {
+    return 'La fiecare ${n}h';
+  }
+
+  @override
+  String get recurrence_pill_daily => 'Zilnic';
+
+  @override
+  String recurrence_pill_daily_n(int n) {
+    return 'La fiecare $n zile';
+  }
+
+  @override
+  String get recurrence_pill_weekly => 'Săptămânal';
+
+  @override
+  String get recurrence_pill_monthly => 'Lunar';
+
+  @override
+  String get recurrence_pill_yearly => 'Anual';
+
+  @override
+  String get recurrence_pill_one_time => 'O singură dată';
+
+  @override
+  String get weekday_mon_short => 'L';
+
+  @override
+  String get weekday_tue_short => 'M';
+
+  @override
+  String get weekday_wed_short => 'M';
+
+  @override
+  String get weekday_thu_short => 'J';
+
+  @override
+  String get weekday_fri_short => 'V';
+
+  @override
+  String get weekday_sat_short => 'S';
+
+  @override
+  String get weekday_sun_short => 'D';
+
+  @override
+  String get tasks_section_label_title => 'TITLU';
+
+  @override
+  String get tasks_section_label_visual => 'VIZUAL';
+
+  @override
+  String get tasks_section_label_recurrence => 'RECURENȚĂ';
+
+  @override
+  String get tasks_section_label_description => 'DESCRIERE';
+
+  @override
+  String get tasks_section_label_assigned => 'ALOCATE';
+
+  @override
+  String get tasks_section_label_assignment => 'DISTRIBUȚIE';
+
+  @override
+  String get assignment_rotation => 'Rotație';
+
+  @override
+  String get assignment_smart => 'Inteligent';
+
+  @override
+  String get member_stat_completed_short => 'făcute';
+
+  @override
+  String get member_stat_passed_short => 'transferate';
+
+  @override
+  String get task_card_done_by => 'Făcută de';
+
+  @override
+  String get task_card_assigned_to => 'Alocată lui';
+
+  @override
+  String get profile_stat_tasks_label => 'SARCINI';
+
+  @override
+  String get profile_stat_streak_label => 'SERIE';
+
+  @override
+  String get profile_stat_average_label => 'MEDIE';
+
+  @override
+  String get home_settings_section_general => 'GENERAL';
+
+  @override
+  String get home_settings_section_members => 'MEMBRI ȘI ROLURI';
+
+  @override
+  String get home_settings_section_subscription => 'ABONAMENT';
+
+  @override
+  String get home_settings_section_danger => 'ZONĂ DE PERICOL';
+
+  @override
+  String get home_settings_section_debug => 'DEBUG';
+
+  @override
+  String get home_settings_avatar => 'Avatarul casei';
+
+  @override
+  String get home_settings_timezone => 'Fus orar';
+
+  @override
+  String get home_settings_pending_invites => 'Invitații în așteptare';
+
+  @override
+  String get home_settings_admins => 'Administratori';
+
+  @override
+  String get home_settings_plan_current => 'Plan actual';
+
+  @override
+  String get home_settings_renewal => 'Reînnoire';
+
+  @override
+  String get home_settings_code_short => 'COD';
+
+  @override
+  String get vacation_subtitle_futurista =>
+      'Cât timp ești în vacanță, sarcinile nu îți vor fi alocate.';
+
+  @override
+  String get vacation_reason_label_short => 'MOTIV';
+
+  @override
+  String get rescue_hero_title_futurista => 'Decide ce rămâne\nactiv în Free.';
+
+  @override
+  String get rescue_subtitle_prefix =>
+      'Dacă nu reactivezi, casa ta va trece la Free pe ';
+
+  @override
+  String get rescue_subtitle_suffix =>
+      '. Restul va fi înghețat 30 zile · restaurabil.';
+
+  @override
+  String get common_back_to_home => 'Înapoi la casă';
+
+  @override
+  String get plan_per_month_home => 'pe lună · casă';
+
+  @override
+  String get plan_per_year_breakdown => 'pe an · 2,50€/lună';
+
+  @override
+  String get plan_label_monthly_short => 'LUNAR';
+
+  @override
+  String get plan_label_annual_short => 'ANUAL';
+
+  @override
+  String get plan_annual_discount_badge => '-37%';
+
+  @override
+  String get subscription_status_pill_active => 'Activ';
+
+  @override
+  String get subscription_status_pill_cancelled => 'Anulat';
+
+  @override
+  String get subscription_status_pill_rescue => 'În salvare';
+
+  @override
+  String get subscription_status_pill_expired => 'Expirat';
+
+  @override
+  String get subscription_status_pill_restorable => 'Restaurabil';
+
+  @override
+  String subscription_renewal_detail(String date) {
+    return 'Reînnoire: $date';
+  }
+
+  @override
+  String subscription_expired_detail(String date) {
+    return 'Expirat: $date';
+  }
+
+  @override
+  String subscription_restore_detail(String date) {
+    return 'Restaurează înainte de: $date';
+  }
+
+  @override
+  String subscription_expires_in_days(int days) {
+    return 'Expiră în $days zile';
+  }
+
+  @override
+  String subscription_expires_on_detail(String date) {
+    return 'Expiră: $date';
+  }
+
+  @override
+  String get phone_visibility_none => 'Nimeni';
+
+  @override
+  String get phone_visibility_home => 'Casă';
+
+  @override
+  String get phone_visibility_all => 'Toți';
+
+  @override
+  String get profile_global_compliance_label => 'Conformitate globală';
+
+  @override
+  String get notif_deadline_title => 'Sarcină pe punctul de a expira';
+
+  @override
+  String notif_deadline_body(String taskTitle, int minutes) {
+    return '$taskTitle · expiră în $minutes min';
+  }
+
+  @override
+  String notif_assignment_title(String assigner) {
+    return '$assigner ți-a alocat o sarcină';
+  }
+
+  @override
+  String notif_assignment_body(String taskTitle, String dueAt) {
+    return '$taskTitle · $dueAt';
+  }
+
+  @override
+  String notif_reminder_title(int minutes, String taskTitle) {
+    return 'În $minutes min: $taskTitle';
+  }
+
+  @override
+  String notif_reminder_body(String dueAt) {
+    return 'Scadent la $dueAt';
+  }
+
+  @override
+  String notif_daily_summary_title(int total, int mine) {
+    return 'Astăzi: $total sarcini · tu ai $mine';
+  }
+
+  @override
+  String get notif_daily_summary_body => 'Apasă pentru a vedea lista';
+
+  @override
+  String notif_feedback_title(String taskTitle) {
+    return 'Evaluare: $taskTitle';
+  }
+
+  @override
+  String notif_feedback_msg_body(String stars) {
+    return '$stars · Ți-a lăsat o notă privată';
+  }
+
+  @override
+  String get notif_rotation_title => 'Rotațiile săptămânii';
+
+  @override
+  String notif_rotation_summary(String homeName, int count) {
+    return '$homeName · $count sarcini';
+  }
+
+  @override
+  String get homes_transfer_no_candidates =>
+      'Nu există membri activi cărora să le transferi.';
+
+  @override
+  String get homes_transfer_confirm_title => 'Transferi proprietatea?';
+
+  @override
+  String homes_transfer_confirm_body(String name) {
+    return '$name va deveni noul proprietar și tu vei rămâne administrator.';
+  }
+
+  @override
+  String homes_transfer_success(String name) {
+    return '$name este acum proprietarul casei.';
+  }
+
+  @override
+  String get homes_transfer_error_payer_locked =>
+      'Nu poți transfera proprietatea cât plătești Premium-ul casei. Anulează reînnoirea sau transferă la sfârșitul perioadei.';
+
+  @override
+  String homes_admins_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count administratori',
+      one: '1 administrator',
+      zero: 'Fără administratori',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get homes_admins_sheet_title => 'Administratori';
+
+  @override
+  String get homes_admins_sheet_body =>
+      'Promovează sau retrogradează membri. Adminii pot gestiona sarcini și membri dar nu pot transfera proprietatea.';
+
+  @override
+  String get homes_admins_promote => 'Promovează';
+
+  @override
+  String get homes_admins_demote => 'Retrogradează';
+
+  @override
+  String get homes_admins_promote_blocked_free =>
+      'Doar Premium poate avea mai mulți administratori.';
+
+  @override
+  String homes_invitations_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count în așteptare',
+      one: '1 în așteptare',
+      zero: 'Niciuna',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get homes_invitations_sheet_title => 'Invitații în așteptare';
+
+  @override
+  String get homes_invitations_empty => 'Nu există invitații active.';
+
+  @override
+  String homes_invitations_expires_in(String label) {
+    return 'Expiră în $label';
+  }
+
+  @override
+  String get homes_invitations_revoke => 'Revocă';
+
+  @override
+  String get homes_invitations_revoked => 'Invitație revocată.';
+
+  @override
+  String get homes_avatar_sheet_title => 'Avatarul casei';
+
+  @override
+  String get homes_avatar_pick_gallery => 'Alege din galerie';
+
+  @override
+  String get homes_avatar_pick_camera => 'Fă o poză';
+
+  @override
+  String get homes_avatar_remove => 'Elimină foto';
+
+  @override
+  String get homes_avatar_uploading => 'Se încarcă poza…';
+
+  @override
+  String get homes_avatar_updated => 'Poza casei actualizată.';
 }

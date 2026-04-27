@@ -227,11 +227,15 @@ class PaywallScreenFuturista extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 10),
+                    // Paridad con v2: TextButton 'btn_terms' que enlaza a los
+                    // términos legales y usa la clave i18n `paywall_terms`
+                    // (en vez de un texto hardcodeado en español).
                     Center(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: TextButton(
+                        key: const Key('btn_terms'),
+                        onPressed: () {/* open URL in future */},
                         child: Text(
-                          'Cancela cuando quieras · Cada cobro suma 1 plaza',
+                          l10n.paywall_terms,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 11,
@@ -381,7 +385,7 @@ class _PlanMonthly extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'MENSUAL',
+            AppLocalizations.of(context).plan_label_monthly_short,
             style: TextStyle(
               fontFamily: 'JetBrainsMono',
               fontSize: 11,
@@ -401,7 +405,7 @@ class _PlanMonthly extends StatelessWidget {
             ),
           ),
           Text(
-            'al mes · hogar',
+            AppLocalizations.of(context).plan_per_month_home,
             style: TextStyle(fontSize: 11, color: cs.onSurfaceVariant),
           ),
         ],
@@ -450,9 +454,9 @@ class _PlanAnnual extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'ANUAL',
-                style: TextStyle(
+              Text(
+                AppLocalizations.of(context).plan_label_annual_short,
+                style: const TextStyle(
                   fontFamily: 'JetBrainsMono',
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
@@ -471,7 +475,7 @@ class _PlanAnnual extends StatelessWidget {
                 ),
               ),
               Text(
-                'al año · 2,50€/mes',
+                AppLocalizations.of(context).plan_per_year_breakdown,
                 style: TextStyle(fontSize: 11, color: cs.onSurfaceVariant),
               ),
             ],
@@ -486,9 +490,9 @@ class _PlanAnnual extends StatelessWidget {
               color: _gold,
               borderRadius: BorderRadius.circular(6),
             ),
-            child: const Text(
-              '-37%',
-              style: TextStyle(
+            child: Text(
+              AppLocalizations.of(context).plan_annual_discount_badge,
+              style: const TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.w800,
                 color: _goldOn,
@@ -521,8 +525,8 @@ _PaywallHeaderData _headerFor(
     case PaywallEntryContext.fromFree:
       return _PaywallHeaderData(
         title: l10n.paywall_title,
-        subtitle: 'Un pago, todo el hogar\nbeneficia. Para siempre.',
-        ctaPrimary: 'Activar Premium → 29,99€/año',
+        subtitle: l10n.paywall_subtitle,
+        ctaPrimary: l10n.paywall_cta_annual,
       );
     case PaywallEntryContext.fromExpired:
       final expiredDate = _formatDate(home?.premiumEndsAt) ?? '';

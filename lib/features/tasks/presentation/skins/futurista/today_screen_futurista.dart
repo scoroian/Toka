@@ -16,8 +16,10 @@ import '../../../../../shared/widgets/futurista/tocka_pill.dart';
 import '../../../../../shared/widgets/futurista/tocka_top_bar.dart';
 import '../../../../homes/application/current_home_provider.dart';
 import '../../../../homes/domain/home.dart';
+import '../../../../homes/presentation/home_selector_widget.dart';
 import '../../../../members/application/members_provider.dart';
 import '../../../../members/domain/member.dart';
+import '../../../../subscription/presentation/widgets/premium_state_banner.dart';
 import '../../../application/today_view_model.dart';
 import '../../../domain/home_dashboard.dart';
 import '../../../domain/recurrence_order.dart';
@@ -102,6 +104,16 @@ class TodayScreenFuturista extends ConsumerWidget {
             retryLabel: l10n.retry,
           ),
           data: (data) {
+            // Sin home y sin homes en la cuenta → CTA crear/unirse
+            // (paridad con TodayScreenV2._NoHomeEmptyState).
+            if (data == null && vm.homes.isEmpty) {
+              return Column(
+                children: [
+                  _TopBarFromState(ref: ref),
+                  Expanded(child: _NoHomeEmptyStateFuturista(widgetRef: ref)),
+                ],
+              );
+            }
             if (data == null) {
               return Column(
                 children: [
@@ -113,10 +125,29 @@ class TodayScreenFuturista extends ConsumerWidget {
 
             final currentUid = data.currentUid;
             final heroTask = _pickHeroTask(data, currentUid);
+            final hasAnyTodos = data.recurrenceOrder.any(
+              (rec) =>
+                  (data.grouped[rec]?.todos ?? const <TaskPreview>[])
+                      .isNotEmpty,
+            );
+            final hasAnyDones = _allDones(data).isNotEmpty;
+
+            // Hogar con 0 tareas (recién creado o vacío): el TopBar se queda
+            // pero por debajo metemos el empty state estándar para que el
+            // usuario vea contenido y entienda que no hay nada pendiente.
+            if (heroTask == null && !hasAnyTodos && !hasAnyDones) {
+              return Column(
+                children: [
+                  _TopBarFromState(ref: ref),
+                  const Expanded(child: TodayEmptyState()),
+                ],
+              );
+            }
 
             return CustomScrollView(
               slivers: [
                 SliverToBoxAdapter(child: _TopBarFromState(ref: ref)),
+                const SliverToBoxAdapter(child: PremiumStateBanner()),
                 if (heroTask != null)
                   SliverToBoxAdapter(
                     child: Padding(
@@ -233,6 +264,10 @@ class TodayScreenFuturista extends ConsumerWidget {
                 assignee: t.currentAssigneeName ?? '—',
                 assigneeColor: _colorFromUid(t.currentAssigneeUid),
                 when: _whenLabel(ctx, t),
+                // Visual del usuario (icono Material o emoji); si vacío,
+                // glyph derivado de recurrencia como fallback.
+                visualKind: t.visualKind,
+                visualValue: t.visualValue,
                 glyph: _glyphForRecurrence(recType),
                 mine: isMine,
                 overdue: t.isOverdue,
@@ -281,6 +316,8 @@ class TodayScreenFuturista extends ConsumerWidget {
                 title: d.title,
                 assignee: d.completedByName,
                 assigneeColor: _colorFromUid(d.completedByUid),
+                visualKind: d.visualKind,
+                visualValue: d.visualValue,
                 glyph: _glyphForRecurrence(d.recurrenceType),
                 done: true,
               ),
@@ -379,7 +416,11 @@ class _TopBarFromState extends ConsumerWidget {
           .toList();
     }
 
-    return TockaTopBar(homeName: homeName, members: members);
+    return TockaTopBar(
+      homeName: homeName,
+      members: members,
+      onHomeTap: () => showHomeSelectorSheet(context, ref),
+    );
   }
 
   static Color _colorFor(String uid) {
@@ -435,7 +476,7 @@ class _HeroTurn extends StatelessWidget {
               TockaPill(
                 color: cs.primary,
                 glow: true,
-                child: const Text('TE TOCA'),
+                child: Text(AppLocalizations.of(context).today_hero_label),
               ),
               const Spacer(),
               TockaAvatar(
@@ -528,6 +569,68 @@ class _FuturistaError extends StatelessWidget {
               variant: TockaBtnVariant.primary,
               onPressed: onRetry,
               child: Text(retryLabel),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Empty state cuando el usuario no tiene ningún hogar todavía. Refleja el
+/// `_NoHomeEmptyState` de TodayScreenV2 pero con TockaBtn para mantener la
+/// estética futurista. Reutiliza los sheets `showCreateHomeSheet` /
+/// `showJoinHomeSheet` del selector de hogares.
+class _NoHomeEmptyStateFuturista extends StatelessWidget {
+  const _NoHomeEmptyStateFuturista({required this.widgetRef});
+
+  final WidgetRef widgetRef;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.home_outlined,
+                size: 64, color: cs.onSurfaceVariant),
+            const SizedBox(height: 16),
+            Text(
+              l10n.today_no_home_title,
+              style: theme.textTheme.titleLarge,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              l10n.today_no_home_body,
+              style: theme.textTheme.bodyMedium
+                  ?.copyWith(color: cs.onSurfaceVariant),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 32),
+            TockaBtn(
+              key: const Key('no_home_create_button'),
+              variant: TockaBtnVariant.glow,
+              size: TockaBtnSize.lg,
+              fullWidth: true,
+              icon: const Icon(Icons.add),
+              onPressed: () => showCreateHomeSheet(context, widgetRef, 0),
+              child: Text(l10n.onboarding_create_home_button),
+            ),
+            const SizedBox(height: 10),
+            TockaBtn(
+              key: const Key('no_home_join_button'),
+              variant: TockaBtnVariant.soft,
+              size: TockaBtnSize.lg,
+              fullWidth: true,
+              icon: const Icon(Icons.group_add_outlined),
+              onPressed: () => showJoinHomeSheet(context, widgetRef, 0),
+              child: Text(l10n.onboarding_join_home),
             ),
           ],
         ),

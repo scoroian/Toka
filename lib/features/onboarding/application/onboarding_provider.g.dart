@@ -25,7 +25,7 @@ final onboardingRepositoryProvider = Provider<OnboardingRepository>.internal(
 // ignore: unused_element
 typedef OnboardingRepositoryRef = ProviderRef<OnboardingRepository>;
 String _$onboardingCompletedHash() =>
-    r'1cabb9a13cec4b3216ed26cee355300f7e1a60ae';
+    r'c40992cce54a40c65e60008da83d35730c0aede6';
 
 /// True if the user has already completed the onboarding flow.
 /// Checks SharedPreferences first (fast path), then Firestore as fallback so
@@ -47,7 +47,7 @@ final onboardingCompletedProvider = FutureProvider<bool>.internal(
 // ignore: unused_element
 typedef OnboardingCompletedRef = FutureProviderRef<bool>;
 String _$onboardingNotifierHash() =>
-    r'8d1fde9468e7d63b254500790564c1d38e90576e';
+    r'9fe5ed90cf5410265dd5208dc5b103472e7247e0';
 
 /// See also [OnboardingNotifier].
 @ProviderFor(OnboardingNotifier)

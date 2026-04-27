@@ -172,8 +172,14 @@ class _InviteMemberSheetState extends ConsumerState<InviteMemberSheet> {
                     ),
                   ],
                   const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  // Wrap (no Row) para que cuando los labels traducidos sean
+                  // largos en una skin con tipografía ancha (futurista usa
+                  // Inter), los botones bajen a la siguiente línea en vez de
+                  // provocar un right-overflowed pill rojo.
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    spacing: 8,
+                    runSpacing: 4,
                     children: [
                       TextButton.icon(
                         key: const Key('btn_copy_code'),
@@ -189,7 +195,6 @@ class _InviteMemberSheetState extends ConsumerState<InviteMemberSheet> {
                         icon: const Icon(Icons.copy),
                         label: Text(l10n.invite_sheet_copy_code),
                       ),
-                      const SizedBox(width: 8),
                       TextButton.icon(
                         key: const Key('btn_regenerate_code'),
                         onPressed: _isLoadingCode ? null : _generateCode,

@@ -69,14 +69,36 @@ class Paywall extends _$Paywall {
     }
   }
 
+  /// Construye el payload que viaja al backend (`syncEntitlement`).
+  ///
+  /// El cliente NO debe enviar campos del estado Premium (`status`, `endsAt`,
+  /// `plan`) calculados localmente: hacerlo permite a un atacante autenticado
+  /// llamar a la callable con un payload arbitrario y obtener Premium sin
+  /// pago. La fuente de verdad sobre el plan, fechas y autoRenew es el
+  /// backend, que valida `purchaseToken` contra Google Play / App Store.
+  ///
+  /// Aquí solo enviamos lo que la store sabe firmar:
+  /// - `productId`: id del producto IAP, para que el servidor derive `plan`.
+  /// - `purchaseToken`: `serverVerificationData` — el token firmado que el
+  ///   servidor usa para llamar a Google Play Developer API (Android) o
+  ///   App Store Server API (iOS).
+  /// - `transactionId`: id local de la transacción (puede ser nulo en iOS
+  ///   restored), útil como pista de idempotencia.
+  /// - `source`: la store que firmó el recibo.
   String _buildReceiptData(PurchaseDetails purchase) {
-    final endsAt = DateTime.now().add(
-      purchase.productID.contains('annual')
-          ? const Duration(days: 365)
-          : const Duration(days: 31),
-    );
-    final plan = purchase.productID.contains('annual') ? 'annual' : 'monthly';
-    return '{"status":"active","plan":"$plan","endsAt":"${endsAt.toIso8601String()}","autoRenewEnabled":true}';
+    final productId = purchase.productID;
+    final purchaseToken = purchase.verificationData.serverVerificationData;
+    final transactionId = purchase.purchaseID ?? '';
+    final source = purchase.verificationData.source;
+    // JSON conservador: si en el futuro añadimos campos firmados se
+    // extiende sin romper el backend (Object.entries en TS los ignora si
+    // no los espera).
+    return '{'
+        '"productId":"$productId",'
+        '"purchaseToken":"$purchaseToken",'
+        '"transactionId":"$transactionId",'
+        '"source":"$source"'
+        '}';
   }
 
   Future<void> startPurchase({

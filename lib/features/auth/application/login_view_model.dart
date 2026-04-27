@@ -1,5 +1,11 @@
 // lib/features/auth/application/login_view_model.dart
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+//
+// `unused_element_parameter`: los parámetros del factory `_LoginState` se
+// usan a través de `copyWith()`, no del constructor directo. El analyzer
+// no detecta ese uso indirecto y marca cada campo como "never given".
+// `library_private_types_in_public_api`: el patrón VM ↔ State privado es
+// deliberado — la API pública es la clase abstracta `LoginViewModel`.
+// ignore_for_file: unused_element_parameter, library_private_types_in_public_api
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 

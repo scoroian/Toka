@@ -4,12 +4,16 @@ import * as logger from "firebase-functions/logger";
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { FieldValue, Timestamp } from "firebase-admin/firestore";
 import { unlockSlotIfEligibleTx } from "./slot_ledger";
-import { parseReceiptData } from "./sync_entitlement_helpers";
+import { parseReceiptData, validateReceipt } from "./sync_entitlement_helpers";
 import { DEFAULT_BANNER_UNIT_ID } from "../shared/ad_constants";
 
 const db = () => admin.firestore();
 
-export const syncEntitlement = onCall(async (request) => {
+// `appCheck: true` exige que la petición venga de un cliente con attestation
+// válida (DeviceCheck en iOS, Play Integrity en Android). Combinado con la
+// validación server-side de `purchaseToken` contra Google/Apple cierra el
+// vector de "cliente forja recibo y obtiene Premium gratis".
+export const syncEntitlement = onCall({ enforceAppCheck: true }, async (request) => {
   if (!request.auth) {
     throw new HttpsError("unauthenticated", "Not authenticated");
   }
@@ -28,6 +32,9 @@ export const syncEntitlement = onCall(async (request) => {
       "homeId, receiptData, platform and chargeId are required",
     );
   }
+  if (platform !== "ios" && platform !== "android") {
+    throw new HttpsError("invalid-argument", "platform must be ios or android");
+  }
 
   const firestore = db();
 
@@ -42,8 +49,15 @@ export const syncEntitlement = onCall(async (request) => {
     throw new HttpsError("permission-denied", "User is not a member of this home");
   }
 
-  // Parsear el recibo (en producción: llamar a Apple/Google para validar server-side)
-  const { status, plan, endsAt, autoRenewEnabled } = parseReceiptData(receiptData);
+  // Parsear el recibo: el cliente solo envía datos firmables por la store
+  // (productId, purchaseToken, transactionId), no el estado Premium.
+  const rawReceipt = parseReceiptData(receiptData);
+  // Validar contra la store (Google Play / App Store). En modo strict
+  // hace verificación server-side real y rechaza si la suscripción no
+  // está activa o el token está corrupto. En dev infiere por productId
+  // con warnings — App Check sigue siendo el gate primario.
+  const { status, plan, endsAt, autoRenewEnabled, storeVerified } =
+    await validateReceipt(rawReceipt, platform);
 
   // Actualizar el hogar
   const homeRef = firestore.collection("homes").doc(homeId);
@@ -86,6 +100,12 @@ export const syncEntitlement = onCall(async (request) => {
       platform,
       status,
       validForUnlock,
+      productId: rawReceipt.productId,
+      transactionId: rawReceipt.transactionId,
+      // Marca explícita de si el recibo fue verificado contra la store.
+      // Útil para auditar producción y detectar slots desbloqueados sin
+      // verificación real.
+      storeVerified,
       createdAt: FieldValue.serverTimestamp(),
     });
 

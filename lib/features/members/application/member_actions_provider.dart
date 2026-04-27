@@ -55,4 +55,12 @@ class MemberActions extends _$MemberActions {
             .read(membersRepositoryProvider)
             .transferOwnership(homeId, newOwnerUid));
   }
+
+  Future<void> revokeInvitation(String homeId, String invitationId) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(
+        () => ref
+            .read(membersRepositoryProvider)
+            .revokeInvitation(homeId, invitationId));
+  }
 }

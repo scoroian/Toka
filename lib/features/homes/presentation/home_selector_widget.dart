@@ -6,7 +6,7 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../../../core/constants/routes.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../../shared/widgets/skins/main_shell_v2.dart';
+import '../../../shared/widgets/bottom_sheet_padding.dart';
 import '../../auth/application/auth_provider.dart';
 import '../application/current_home_provider.dart';
 import '../application/home_slot_provider.dart';
@@ -116,8 +116,14 @@ class _HomeSelectorSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef widgetRef) {
     final l10n = AppLocalizations.of(context);
+    // Padding inferior que respeta NavBar+banner+safeArea de la skin
+    // activa. Sin esto, el tile "Añadir hogar" puede quedar tapado por
+    // la NavBar flotante o el banner publicitario.
+    final bottomPadding =
+        bottomSheetSafeBottom(context, widgetRef, hasNavBar: true);
 
-    return SafeArea(
+    return Padding(
+      padding: EdgeInsets.only(bottom: bottomPadding),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -252,6 +258,49 @@ class _HomeSelectorSheet extends ConsumerWidget {
 // ---------------------------------------------------------------------------
 // Funciones públicas para abrir el sheet desde cualquier pantalla
 // ---------------------------------------------------------------------------
+
+/// Abre el sheet de selección de hogar (lista + acción "Añadir hogar").
+///
+/// Paridad funcional para skins que no pueden usar `HomeSelectorWidget`
+/// directamente (por ejemplo, el `TockaTopBar` futurista, que sólo expone un
+/// callback `onHomeTap`). Reutiliza `_HomeSelectorSheet` con la lista
+/// ordenada y el handler de switchHome ya implementados.
+void showHomeSelectorSheet(BuildContext context, WidgetRef ref) {
+  final l10n = AppLocalizations.of(context);
+  final currentHome = ref.read(currentHomeProvider).valueOrNull;
+  final currentHomeId = currentHome?.id ?? '';
+  final auth = ref.read(authProvider);
+  final uid = auth.whenOrNull(authenticated: (u) => u.uid);
+  final memberships = uid != null
+      ? (ref.read(userMembershipsProvider(uid)).valueOrNull ?? const [])
+      : const <HomeMembership>[];
+  final sorted = sortMembershipsForSelector(
+    memberships,
+    currentHomeId: currentHomeId,
+  );
+  String roleLabel(MemberRole role) {
+    switch (role) {
+      case MemberRole.owner:
+        return l10n.homes_role_owner;
+      case MemberRole.admin:
+        return l10n.homes_role_admin;
+      case MemberRole.member:
+      case MemberRole.frozen:
+        return l10n.homes_role_member;
+    }
+  }
+
+  showModalBottomSheet<void>(
+    context: context,
+    builder: (ctx) => _HomeSelectorSheet(
+      sorted: sorted,
+      currentHomeId: currentHomeId,
+      roleLabel: roleLabel,
+      uid: uid,
+      ref: ref,
+    ),
+  );
+}
 
 /// Muestra el sheet de "Crear hogar", con verificación de slots previa.
 void showCreateHomeSheet(BuildContext context, WidgetRef ref, int currentCount) {
@@ -444,9 +493,10 @@ class _AddHomeSheetState extends ConsumerState<_AddHomeSheet> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
 
-    final mq = MediaQuery.of(context);
-    const navBarExtra = MainShellV2.kNavBarHeight + MainShellV2.kNavBarBottom;
-    final bottomPadding = mq.viewInsets.bottom + mq.viewPadding.bottom + navBarExtra;
+    // bottomSheetSafeBottom respeta NavBar+banner+safeArea de la skin
+    // activa via shellMetricsProvider + adBannerConfigProvider.
+    final bottomPadding =
+        bottomSheetSafeBottom(context, ref, hasNavBar: true);
     return SingleChildScrollView(
       padding: EdgeInsets.only(
         left: 16,

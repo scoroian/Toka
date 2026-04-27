@@ -29,7 +29,11 @@ mixin _$Home {
   HomeLimits get limits => throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
   DateTime get updatedAt => throw _privateConstructorUsedError;
-  String? get lastBillingError => throw _privateConstructorUsedError;
+  String? get lastBillingError =>
+      throw _privateConstructorUsedError; // URL de la foto del hogar en Cloud Storage. null cuando el hogar
+// todavía usa la inicial. Se actualiza desde el sheet de "Avatar
+// del hogar" en `home_settings_screen` (ambas skins).
+  String? get photoUrl => throw _privateConstructorUsedError;
 
   /// Create a copy of Home
   /// with the given fields replaced by the non-null parameter values.
@@ -56,7 +60,8 @@ abstract class $HomeCopyWith<$Res> {
       HomeLimits limits,
       DateTime createdAt,
       DateTime updatedAt,
-      String? lastBillingError});
+      String? lastBillingError,
+      String? photoUrl});
 
   $HomeLimitsCopyWith<$Res> get limits;
 }
@@ -90,6 +95,7 @@ class _$HomeCopyWithImpl<$Res, $Val extends Home>
     Object? createdAt = null,
     Object? updatedAt = null,
     Object? lastBillingError = freezed,
+    Object? photoUrl = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -148,6 +154,10 @@ class _$HomeCopyWithImpl<$Res, $Val extends Home>
           ? _value.lastBillingError
           : lastBillingError // ignore: cast_nullable_to_non_nullable
               as String?,
+      photoUrl: freezed == photoUrl
+          ? _value.photoUrl
+          : photoUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 
@@ -183,7 +193,8 @@ abstract class _$$HomeImplCopyWith<$Res> implements $HomeCopyWith<$Res> {
       HomeLimits limits,
       DateTime createdAt,
       DateTime updatedAt,
-      String? lastBillingError});
+      String? lastBillingError,
+      String? photoUrl});
 
   @override
   $HomeLimitsCopyWith<$Res> get limits;
@@ -215,6 +226,7 @@ class __$$HomeImplCopyWithImpl<$Res>
     Object? createdAt = null,
     Object? updatedAt = null,
     Object? lastBillingError = freezed,
+    Object? photoUrl = freezed,
   }) {
     return _then(_$HomeImpl(
       id: null == id
@@ -273,6 +285,10 @@ class __$$HomeImplCopyWithImpl<$Res>
           ? _value.lastBillingError
           : lastBillingError // ignore: cast_nullable_to_non_nullable
               as String?,
+      photoUrl: freezed == photoUrl
+          ? _value.photoUrl
+          : photoUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -294,7 +310,8 @@ class _$HomeImpl implements _Home {
       required this.limits,
       required this.createdAt,
       required this.updatedAt,
-      this.lastBillingError});
+      this.lastBillingError,
+      this.photoUrl});
 
   @override
   final String id;
@@ -324,10 +341,15 @@ class _$HomeImpl implements _Home {
   final DateTime updatedAt;
   @override
   final String? lastBillingError;
+// URL de la foto del hogar en Cloud Storage. null cuando el hogar
+// todavía usa la inicial. Se actualiza desde el sheet de "Avatar
+// del hogar" en `home_settings_screen` (ambas skins).
+  @override
+  final String? photoUrl;
 
   @override
   String toString() {
-    return 'Home(id: $id, name: $name, ownerUid: $ownerUid, currentPayerUid: $currentPayerUid, lastPayerUid: $lastPayerUid, premiumStatus: $premiumStatus, premiumPlan: $premiumPlan, premiumEndsAt: $premiumEndsAt, restoreUntil: $restoreUntil, autoRenewEnabled: $autoRenewEnabled, limits: $limits, createdAt: $createdAt, updatedAt: $updatedAt, lastBillingError: $lastBillingError)';
+    return 'Home(id: $id, name: $name, ownerUid: $ownerUid, currentPayerUid: $currentPayerUid, lastPayerUid: $lastPayerUid, premiumStatus: $premiumStatus, premiumPlan: $premiumPlan, premiumEndsAt: $premiumEndsAt, restoreUntil: $restoreUntil, autoRenewEnabled: $autoRenewEnabled, limits: $limits, createdAt: $createdAt, updatedAt: $updatedAt, lastBillingError: $lastBillingError, photoUrl: $photoUrl)';
   }
 
   @override
@@ -359,7 +381,9 @@ class _$HomeImpl implements _Home {
             (identical(other.updatedAt, updatedAt) ||
                 other.updatedAt == updatedAt) &&
             (identical(other.lastBillingError, lastBillingError) ||
-                other.lastBillingError == lastBillingError));
+                other.lastBillingError == lastBillingError) &&
+            (identical(other.photoUrl, photoUrl) ||
+                other.photoUrl == photoUrl));
   }
 
   @override
@@ -378,7 +402,8 @@ class _$HomeImpl implements _Home {
       limits,
       createdAt,
       updatedAt,
-      lastBillingError);
+      lastBillingError,
+      photoUrl);
 
   /// Create a copy of Home
   /// with the given fields replaced by the non-null parameter values.
@@ -404,7 +429,8 @@ abstract class _Home implements Home {
       required final HomeLimits limits,
       required final DateTime createdAt,
       required final DateTime updatedAt,
-      final String? lastBillingError}) = _$HomeImpl;
+      final String? lastBillingError,
+      final String? photoUrl}) = _$HomeImpl;
 
   @override
   String get id;
@@ -433,7 +459,12 @@ abstract class _Home implements Home {
   @override
   DateTime get updatedAt;
   @override
-  String? get lastBillingError;
+  String?
+      get lastBillingError; // URL de la foto del hogar en Cloud Storage. null cuando el hogar
+// todavía usa la inicial. Se actualiza desde el sheet de "Avatar
+// del hogar" en `home_settings_screen` (ambas skins).
+  @override
+  String? get photoUrl;
 
   /// Create a copy of Home
   /// with the given fields replaced by the non-null parameter values.

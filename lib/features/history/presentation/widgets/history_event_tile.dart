@@ -143,27 +143,25 @@ class _CompletedTile extends StatelessWidget {
         : event.taskTitleSnapshot;
 
     Widget? effectiveTrailing = trailingOverride;
-    if (effectiveTrailing == null) {
-      effectiveTrailing = _canReview
-          ? TextButton(
-              key: const Key('btn_review'),
-              onPressed: () => showDialog(
-                context: context,
-                builder: (_) => ReviewDialog(
-                  homeId: homeId!,
-                  taskEventId: event.id,
-                  taskTitle: event.taskTitleSnapshot,
-                  performerName: actorName,
-                  isPremium: isPremium,
-                  currentUid: currentUid!,
-                  performerUid: event.performerUid,
-                  onSubmitted: () {},
-                ),
+    effectiveTrailing ??= _canReview
+        ? TextButton(
+            key: const Key('btn_review'),
+            onPressed: () => showDialog(
+              context: context,
+              builder: (_) => ReviewDialog(
+                homeId: homeId!,
+                taskEventId: event.id,
+                taskTitle: event.taskTitleSnapshot,
+                performerName: actorName,
+                isPremium: isPremium,
+                currentUid: currentUid!,
+                performerUid: event.performerUid,
+                onSubmitted: () {},
               ),
-              child: Text(l10n.review_dialog_title),
-            )
-          : const Icon(Icons.check_circle_outline, color: Colors.green);
-    }
+            ),
+            child: Text(l10n.review_dialog_title),
+          )
+        : const Icon(Icons.check_circle_outline, color: Colors.green);
     return ListTile(
       key: Key('history_tile_${event.id}'),
       leading: _Avatar(photoUrl: actorPhotoUrl, name: actorName),

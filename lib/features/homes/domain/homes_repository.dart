@@ -37,6 +37,16 @@ abstract interface class HomesRepository {
   /// Actualiza el campo `name` del hogar en `homes/{homeId}`.
   Future<void> updateHomeName(String homeId, String name);
 
+  /// Sube la imagen local a `homes/{homeId}/avatar.jpg` y actualiza
+  /// `homes/{homeId}.photoUrl` con la download URL pública. Ya hay regla
+  /// `storage.rules` que permite escribir a cualquier autenticado y
+  /// `firestore.rules` restringe el update del doc a admin/owner.
+  Future<void> updateHomePhoto(String homeId, String localPath);
+
+  /// Borra el avatar (Storage + campo Firestore). Falla silenciosa si
+  /// el blob no existía.
+  Future<void> removeHomePhoto(String homeId);
+
   // DEBUG PREMIUM — REMOVE BEFORE PRODUCTION
   /// Cambia el estado premium del hogar a [status] invocando la Cloud
   /// Function `debugSetPremiumStatus`. Solo el owner puede usarlo.

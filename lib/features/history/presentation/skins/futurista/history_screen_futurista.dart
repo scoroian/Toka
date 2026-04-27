@@ -16,6 +16,7 @@ import '../../../../../shared/widgets/futurista/tocka_pill.dart';
 import '../../../../../shared/widgets/futurista/tocka_top_bar.dart';
 import '../../../../homes/application/current_home_provider.dart';
 import '../../../../homes/domain/home.dart';
+import '../../../../homes/presentation/home_selector_widget.dart';
 import '../../../../members/application/members_provider.dart';
 import '../../../../members/domain/member.dart';
 import '../../../domain/task_event.dart';
@@ -130,7 +131,10 @@ class _HistoryScreenFuturistaState
                   }
                   final groups = _groupByDay(items);
                   final showPremiumBanner = !vm.isPremium;
-                  final extras = showPremiumBanner ? 1 : 0;
+                  final showLoadMore = vm.hasMore;
+                  // Slots extra: [loadMore?, premiumBanner?] al final.
+                  final extras =
+                      (showLoadMore ? 1 : 0) + (showPremiumBanner ? 1 : 0);
                   return ListView.builder(
                     key: const Key('history_list_futurista'),
                     controller: _scroll,
@@ -143,17 +147,33 @@ class _HistoryScreenFuturistaState
                     ),
                     itemCount: groups.length + extras,
                     itemBuilder: (ctx, i) {
-                      if (i >= groups.length) {
-                        return const PremiumBannerFuturista();
+                      if (i < groups.length) {
+                        final g = groups[i];
+                        return _DayGroup(
+                          label: g.label,
+                          items: g.items,
+                          isPremium: vm.isPremium,
+                          onRate: (item) => showRateSheet(ctx, vm, item),
+                          onUpgradeFromRate: () => _showUpgradeSheet(ctx),
+                        );
                       }
-                      final g = groups[i];
-                      return _DayGroup(
-                        label: g.label,
-                        items: g.items,
-                        isPremium: vm.isPremium,
-                        onRate: (item) => showRateSheet(ctx, vm, item),
-                        onUpgradeFromRate: () => _showUpgradeSheet(ctx),
-                      );
+                      final idxAfter = i - groups.length;
+                      if (showLoadMore && idxAfter == 0) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          child: Center(
+                            child: TockaBtn(
+                              key: const Key('btn_load_more'),
+                              variant: TockaBtnVariant.ghost,
+                              size: TockaBtnSize.md,
+                              onPressed: vm.loadMore,
+                              child: Text(l10n.history_load_more),
+                            ),
+                          ),
+                        );
+                      }
+                      // Último slot: premium banner.
+                      return const PremiumBannerFuturista();
                     },
                   );
                 },
@@ -291,7 +311,11 @@ class _TopBarFromState extends ConsumerWidget {
           .map((m) => (name: m.nickname, color: _colorFor(m.uid)))
           .toList();
     }
-    return TockaTopBar(homeName: homeName, members: members);
+    return TockaTopBar(
+      homeName: homeName,
+      members: members,
+      onHomeTap: () => showHomeSelectorSheet(context, ref),
+    );
   }
 
   static Color _colorFor(String uid) {

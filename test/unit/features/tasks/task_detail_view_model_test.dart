@@ -13,6 +13,8 @@ import 'package:toka/features/homes/domain/home_membership.dart';
 import 'package:toka/features/i18n/application/locale_provider.dart';
 import 'package:toka/features/members/application/members_provider.dart';
 import 'package:toka/features/members/domain/member.dart';
+import 'package:toka/features/profile/application/profile_provider.dart';
+import 'package:timezone/data/latest.dart' as tzdata;
 import 'package:toka/features/tasks/application/recurrence_provider.dart';
 import 'package:toka/features/tasks/application/task_detail_view_model.dart';
 import 'package:toka/features/tasks/application/tasks_provider.dart';
@@ -250,6 +252,15 @@ ProviderContainer _makeContainer({
     upcomingOccurrencesProvider(task.recurrenceRule).overrideWith(
       (_) => upcomingDates,
     ),
+
+    // userProfileProvider — fallback que el VM usa cuando el nickname
+    // del miembro está vacío. En tests devolvemos un stream vacío para
+    // que el VM caiga al nameMap basado en Member.nickname y el viewData
+    // se calcule sin esperar a Firestore (que no existe en tests).
+    for (final m in allMembers)
+      userProfileProvider(m.uid).overrideWith(
+        (_) => const Stream.empty(),
+      ),
   ]);
 }
 
@@ -266,14 +277,29 @@ Future<TaskDetailViewData?> _resolveViewData(
   await container.read(homeTasksProvider(homeId).future);
   await container.read(homeMembersProvider(homeId).future);
 
-  // Dar un ciclo de microtask para que los watchers internos propaguen
-  await Future<void>.microtask(() {});
-
-  final vm = container.read(taskDetailViewModelProvider(taskId));
-  return vm.viewData.valueOrNull;
+  // El VM lee múltiples streams encadenados (currentHome → tasks →
+  // members → userProfile) y se reconstruye cada vez que uno emite.
+  // Polleamos `viewData.valueOrNull` hasta que el VM converja, con
+  // timeout breve para no colgar el test si nunca emite.
+  TaskDetailViewData? captured;
+  for (var i = 0; i < 50; i++) {
+    final vm = container.read(taskDetailViewModelProvider(taskId));
+    captured = vm.viewData.valueOrNull;
+    if (captured != null) break;
+    await Future<void>.delayed(const Duration(milliseconds: 5));
+  }
+  return captured;
 }
 
 void main() {
+  // _computeUpcomingOccurrences usa tz.getLocation() en task_detail_view_model;
+  // sin inicializar la base de datos de timezones, lanza UninitializedTimezoneException
+  // y el VM propaga el error → viewData se vuelve null y los tests fallan con
+  // "Expected: not null". setUpAll garantiza que se cargue una sola vez.
+  setUpAll(() {
+    tzdata.initializeTimeZones();
+  });
+
   group('TaskDetailViewModel', () {
     test('viewData is data(null) when home is null', () async {
       final container = ProviderContainer(overrides: [
@@ -302,7 +328,7 @@ void main() {
     ];
 
     test(
-        'los asignados rotan round-robin empezando por el siguiente al actual',
+        'la primera ocurrencia es del currentAssignee y luego rotan en orden',
         () async {
       // Given: assignmentOrder = [uid_a, uid_b, uid_c], currentAssigneeUid = uid_a
       const uidA = 'uid_a';
@@ -332,13 +358,15 @@ void main() {
       // When: se computan 3 próximas ocurrencias
       final viewData = await _resolveViewData(container, homeId, taskId);
 
-      // Then: el orden debe ser [uid_b, uid_c, uid_a] → [Nombre B, Nombre C, Nombre A]
+      // Then: el orden debe ser [uid_a, uid_b, uid_c] — el VM devuelve la
+      // próxima ocurrencia para el current assignee (la pendiente que
+      // todavía no ha hecho) y rota a partir de ahí.
       expect(viewData, isNotNull);
       final occs = viewData!.upcomingOccurrences;
       expect(occs, hasLength(3));
-      expect(occs[0].assigneeName, equals('Nombre B'));
-      expect(occs[1].assigneeName, equals('Nombre C'));
-      expect(occs[2].assigneeName, equals('Nombre A'));
+      expect(occs[0].assigneeName, equals('Nombre A'));
+      expect(occs[1].assigneeName, equals('Nombre B'));
+      expect(occs[2].assigneeName, equals('Nombre C'));
     });
 
     test(

@@ -30,12 +30,18 @@
       "Bash(npm run:*)",
       "Bash(grep -v \"test\\\\\\\\\")",
       "Read(//c/Users/sebas/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.7/skills/**)",
-      "Bash(dart format:*)"
+      "Bash(dart format:*)",
+      "WebFetch(domain:)",
+      "WebSearch"
     ],
     "additionalDirectories": [
       "c:\\Users\\sebas\\OneDrive\\Escritorio\\Proyectos\\Toka\\docs\\superpowers"
     ]
   },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "android-debug-bridge-mcp"
+  ],
   "enabledPlugins": {
     "feature-dev@claude-plugins-official": true,
     "frontend-design@claude-plugins-official": true,

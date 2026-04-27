@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../l10n/app_localizations.dart';
 import '../../domain/user_profile.dart';
 
 class StatsSection extends StatelessWidget {
@@ -16,17 +17,18 @@ class StatsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final compliancePct = (globalCompliance * 100).toStringAsFixed(1);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _StatRow(
             key: const Key('stat_total_completed'),
-            label: 'Tareas completadas',
+            label: l10n.member_profile_tasks_completed,
             value: totalCompleted.toString()),
         _StatRow(
             key: const Key('stat_global_compliance'),
-            label: 'Cumplimiento global',
+            label: l10n.profile_global_compliance_label,
             value: '$compliancePct%'),
       ],
     );

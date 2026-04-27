@@ -110,6 +110,14 @@ class MembersScreenV2 extends ConsumerWidget {
                           onCta: () => context.push(AppRoutes.paywall),
                         ),
                       ),
+                    if (data.activeMembers.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                        child: _BalanceCardV2(
+                          activeMembers: data.activeMembers,
+                          l10n: l10n,
+                        ),
+                      ),
                     if (data.activeMembers.isNotEmpty) ...[
                       Padding(
                         padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
@@ -152,3 +160,106 @@ class MembersScreenV2 extends ConsumerWidget {
   }
 }
 
+/// Tarjeta "Equilibrio del hogar" (paridad con `_BalanceHero` futurista).
+///
+/// Muestra el promedio de `complianceRate` de miembros activos como un
+/// porcentaje con barra. Si la diferencia entre el miembro con más tareas
+/// hechas y el resto es relevante (≥2), se indica nominal — útil para
+/// detectar reparto desigual.
+class _BalanceCardV2 extends StatelessWidget {
+  const _BalanceCardV2({required this.activeMembers, required this.l10n});
+
+  final List<Member> activeMembers;
+  final AppLocalizations l10n;
+
+  double get _balance {
+    if (activeMembers.isEmpty) return 0;
+    final sum = activeMembers.fold<double>(
+      0,
+      (acc, m) => acc + m.complianceRate.clamp(0, 1),
+    );
+    return (sum / activeMembers.length).clamp(0.0, 1.0);
+  }
+
+  String _topDelta() {
+    if (activeMembers.length < 2) return l10n.members_section_active;
+    final sorted = [...activeMembers]
+      ..sort((a, b) => b.tasksCompleted.compareTo(a.tasksCompleted));
+    final top = sorted.first;
+    final rest = sorted.sublist(1);
+    final avgRest =
+        rest.fold<int>(0, (a, m) => a + m.tasksCompleted) / rest.length;
+    final diff = (top.tasksCompleted - avgRest).round();
+    if (diff <= 1) return l10n.members_section_active;
+    return '${top.nickname} +$diff';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final value = _balance;
+    final percent = (value * 100).round();
+    final isBalanced = percent >= 75;
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: cs.outlineVariant),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                isBalanced ? Icons.balance : Icons.scale_outlined,
+                size: 20,
+                color: isBalanced ? cs.primary : cs.tertiary,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  l10n.members_balance_title,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              Text(
+                '$percent%',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: isBalanced ? cs.primary : cs.tertiary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: LinearProgressIndicator(
+              value: value,
+              minHeight: 8,
+              backgroundColor: cs.surface,
+              valueColor: AlwaysStoppedAnimation(
+                isBalanced ? cs.primary : cs.tertiary,
+              ),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            isBalanced
+                ? l10n.members_balance_well_distributed
+                : l10n.members_balance_unbalanced(_topDelta()),
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: cs.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

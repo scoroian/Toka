@@ -302,6 +302,7 @@ class _SettingsBodyFuturista extends ConsumerWidget {
         icon: Icons.timer_outlined,
         key: const Key('notif_test_deadline'),
         run: () => service.showDeadline(
+          l10n: l10n,
           homeId: homeId,
           homeName: homeNameSample,
           taskId: 'demo_task_1',
@@ -314,6 +315,7 @@ class _SettingsBodyFuturista extends ConsumerWidget {
         icon: Icons.person_add_alt,
         key: const Key('notif_test_assignment'),
         run: () => service.showAssignment(
+          l10n: l10n,
           homeId: homeId,
           homeName: homeNameSample,
           taskId: 'demo_task_2',
@@ -327,6 +329,7 @@ class _SettingsBodyFuturista extends ConsumerWidget {
         icon: Icons.access_alarm,
         key: const Key('notif_test_reminder'),
         run: () => service.showReminder(
+          l10n: l10n,
           homeId: homeId,
           homeName: homeNameSample,
           taskId: 'demo_task_3',
@@ -340,6 +343,7 @@ class _SettingsBodyFuturista extends ConsumerWidget {
         icon: Icons.today_outlined,
         key: const Key('notif_test_daily_summary'),
         run: () => service.showDailySummary(
+          l10n: l10n,
           homeId: homeId,
           homeName: homeNameSample,
           totalToday: 4,
@@ -351,6 +355,7 @@ class _SettingsBodyFuturista extends ConsumerWidget {
         icon: Icons.star_outline,
         key: const Key('notif_test_feedback'),
         run: () => service.showFeedback(
+          l10n: l10n,
           homeId: homeId,
           homeName: homeNameSample,
           feedbackId: 'demo_feedback_1',
@@ -364,6 +369,7 @@ class _SettingsBodyFuturista extends ConsumerWidget {
         icon: Icons.autorenew,
         key: const Key('notif_test_rotation'),
         run: () => service.showRotation(
+          l10n: l10n,
           homeId: homeId,
           homeName: homeNameSample,
           rotationLines: const [

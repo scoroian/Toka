@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 import '../../../core/errors/exceptions.dart';
 import '../domain/home.dart';
@@ -131,6 +134,43 @@ class HomesRepositoryImpl implements HomesRepository {
   @override
   Future<void> updateHomeName(String homeId, String name) async {
     await _firestore.collection('homes').doc(homeId).update({'name': name});
+  }
+
+  @override
+  Future<void> updateHomePhoto(String homeId, String localPath) async {
+    // 1. Subir el archivo a `homes/{homeId}/avatar.jpg`. La regla de
+    //    Storage acepta a cualquier autenticado con tamaño<5MB y tipo
+    //    image/*. El control fino (admin/owner) lo aplica firestore.rules
+    //    al actualizar `homes/{homeId}.photoUrl`.
+    final ref = FirebaseStorage.instance.ref('homes/$homeId/avatar.jpg');
+    await ref.putFile(File(localPath));
+    final url = await ref.getDownloadURL();
+
+    // 2. Persistir la URL en el documento del hogar para que todos los
+    //    miembros la vean en su `currentHomeProvider` sin necesidad de
+    //    consultar Storage.
+    await _firestore
+        .collection('homes')
+        .doc(homeId)
+        .update({'photoUrl': url, 'updatedAt': FieldValue.serverTimestamp()});
+  }
+
+  @override
+  Future<void> removeHomePhoto(String homeId) async {
+    // Borrado del blob: si el archivo no existe lanza un object-not-found
+    // que tratamos como éxito (el usuario quería que desapareciera y ya no
+    // está). Otros errores se propagan.
+    try {
+      await FirebaseStorage.instance
+          .ref('homes/$homeId/avatar.jpg')
+          .delete();
+    } on FirebaseException catch (e) {
+      if (e.code != 'object-not-found') rethrow;
+    }
+    await _firestore.collection('homes').doc(homeId).update({
+      'photoUrl': FieldValue.delete(),
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
   }
 
   // DEBUG PREMIUM — REMOVE BEFORE PRODUCTION

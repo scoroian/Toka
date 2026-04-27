@@ -1,4 +1,5 @@
 import '../../../core/errors/exceptions.dart';
+import '../../homes/domain/invitation.dart';
 import 'member.dart';
 import 'vacation.dart';
 
@@ -29,6 +30,14 @@ abstract interface class MembersRepository {
   /// Observa el código de invitación activo y vigente del hogar.
   /// Emite null si no hay ninguno activo/vigente.
   Stream<({String code, DateTime expiresAt})?> watchActiveInviteCode(String homeId);
+
+  /// Stream de TODAS las invitaciones pendientes (no usadas y no expiradas).
+  /// Ordenadas por fecha de creación descendente.
+  Stream<List<Invitation>> watchPendingInvitations(String homeId);
+
+  /// Marca una invitación como usada/revocada — el código ya no podrá
+  /// canjearse. Solo admins/owner del hogar pueden revocar (firestore.rules).
+  Future<void> revokeInvitation(String homeId, String invitationId);
 
   /// Elimina a un miembro del hogar (vía CF).
   /// Lanza [CannotRemoveOwnerException] si el uid es el owner.

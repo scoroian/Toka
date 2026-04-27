@@ -281,7 +281,8 @@ class _RecurrenceFormState extends ConsumerState<RecurrenceForm> {
         _buildSubForm(context, l10n),
         const SizedBox(height: 12),
         DropdownButtonFormField<String>(
-          value: _commonTimezones.contains(_timezone) ? _timezone : 'UTC',
+          initialValue:
+              _commonTimezones.contains(_timezone) ? _timezone : 'UTC',
           decoration:
               InputDecoration(label: Text(l10n.tasks_recurrence_timezone)),
           items: _commonTimezones
@@ -667,7 +668,7 @@ class _MonthlyFixedSubForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Column(children: [
         DropdownButtonFormField<int>(
-          value: day,
+          initialValue: day,
           decoration: InputDecoration(
               label: Text(l10n.tasks_recurrence_day_of_month)),
           items: List.generate(31,
@@ -711,7 +712,7 @@ class _MonthlyNthSubForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Column(children: [
         DropdownButtonFormField<int>(
-          value: weekOfMonth,
+          initialValue: weekOfMonth,
           decoration: InputDecoration(
               label: Text(l10n.tasks_recurrence_week_of_month)),
           items: [1, 2, 3, 4]
@@ -721,7 +722,7 @@ class _MonthlyNthSubForm extends StatelessWidget {
           onChanged: (v) => onWeekOfMonthChanged(v ?? 1),
         ),
         DropdownButtonFormField<String>(
-          value: weekday,
+          initialValue: weekday,
           decoration:
               InputDecoration(label: Text(l10n.tasks_recurrence_weekday)),
           items: _dayKeys
@@ -763,7 +764,7 @@ class _YearlyFixedSubForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Column(children: [
         DropdownButtonFormField<int>(
-          value: month,
+          initialValue: month,
           decoration:
               InputDecoration(label: Text(l10n.tasks_recurrence_month)),
           items: List.generate(
@@ -773,7 +774,7 @@ class _YearlyFixedSubForm extends StatelessWidget {
           onChanged: (v) => onMonthChanged(v ?? 1),
         ),
         DropdownButtonFormField<int>(
-          value: day,
+          initialValue: day,
           decoration: InputDecoration(
               label: Text(l10n.tasks_recurrence_day_of_month)),
           items: List.generate(31,
@@ -823,7 +824,7 @@ class _YearlyNthSubForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Column(children: [
         DropdownButtonFormField<int>(
-          value: month,
+          initialValue: month,
           decoration:
               InputDecoration(label: Text(l10n.tasks_recurrence_month)),
           items: List.generate(
@@ -833,7 +834,7 @@ class _YearlyNthSubForm extends StatelessWidget {
           onChanged: (v) => onMonthChanged(v ?? 1),
         ),
         DropdownButtonFormField<int>(
-          value: weekOfMonth,
+          initialValue: weekOfMonth,
           decoration: InputDecoration(
               label: Text(l10n.tasks_recurrence_week_of_month)),
           items: [1, 2, 3, 4]
@@ -843,7 +844,7 @@ class _YearlyNthSubForm extends StatelessWidget {
           onChanged: (v) => onWeekOfMonthChanged(v ?? 1),
         ),
         DropdownButtonFormField<String>(
-          value: weekday,
+          initialValue: weekday,
           decoration:
               InputDecoration(label: Text(l10n.tasks_recurrence_weekday)),
           items: _dayKeys

@@ -14,22 +14,28 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../../core/constants/free_limits.dart';
 import '../../../../../core/constants/routes.dart';
 import '../../../../../core/utils/toka_dates.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../../../shared/widgets/ad_aware_bottom_padding.dart';
 import '../../../../../shared/widgets/futurista/task_glyph.dart';
+import '../../../../../shared/widgets/futurista/task_visual_futurista.dart';
 import '../../../../../shared/widgets/futurista/tocka_avatar.dart';
 import '../../../../../shared/widgets/futurista/tocka_btn.dart';
 import '../../../../../shared/widgets/futurista/tocka_pill.dart';
+import '../../../../auth/application/auth_provider.dart';
+import '../../../../homes/application/dashboard_provider.dart';
 import '../../../application/task_detail_view_model.dart';
 import '../../../application/task_completion_provider.dart';
 import '../../../application/task_pass_provider.dart';
 import '../../../domain/home_dashboard.dart';
 import '../../../domain/recurrence_rule.dart';
 import '../../../domain/task.dart';
+import '../../../domain/task_status.dart';
 import '../../widgets/complete_task_dialog.dart';
 import '../../widgets/pass_turn_dialog.dart';
+import '../../widgets/unfreeze_blocked_dialog.dart';
 
 class TaskDetailScreenFuturista extends ConsumerWidget {
   const TaskDetailScreenFuturista({super.key, required this.taskId});
@@ -85,26 +91,58 @@ class _Content extends ConsumerWidget {
     final cs = theme.colorScheme;
     final task = data.task;
 
-    return ListView(
-      padding: EdgeInsets.fromLTRB(
-        16,
-        12,
-        16,
-        adAwareBottomPadding(context, ref, extra: 16),
-      ),
+    final isFrozen = task.status == TaskStatus.frozen;
+    // Sólo el assignee actual puede marcar la tarea como hecha o pasar
+    // turno. El detalle SE VE para todo el mundo (información), pero los
+    // botones de acción no aparecen si no es tu turno: Cloud Function
+    // rechazaría la operación de todos modos por seguridad.
+    final myUid = ref
+        .watch(authProvider)
+        .whenOrNull(authenticated: (u) => u.uid);
+    final isMine = task.currentAssigneeUid != null &&
+        task.currentAssigneeUid == myUid;
+
+    return Column(
       children: [
-        _HeaderRow(
-          canManage: data.canManage,
-          onBack: () => context.pop(),
-          onEdit: data.canManage
-              ? () =>
-                  context.push(AppRoutes.editTask.replaceAll(':id', task.id))
-              : null,
+        // Header fijo arriba: back/editar/freeze/delete quedan anclados
+        // mientras el detalle scrollea por debajo. Paridad con v2.
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+          child: _HeaderRow(
+            canManage: data.canManage,
+            isFrozen: isFrozen,
+            freezeTooltip: isFrozen
+                ? l10n.tasks_action_unfreeze
+                : l10n.tasks_action_freeze,
+            onBack: () => context.pop(),
+            onEdit: data.canManage
+                ? () =>
+                    context.push(AppRoutes.editTask.replaceAll(':id', task.id))
+                : null,
+            onToggleFreeze: data.canManage
+                ? () => _onToggleFreeze(context, ref, task)
+                : null,
+            onDelete: data.canManage
+                ? () => _onDelete(context, ref, task)
+                : null,
+          ),
         ),
-        const SizedBox(height: 16),
+        Expanded(
+          child: ListView(
+            padding: EdgeInsets.fromLTRB(
+              16,
+              16,
+              16,
+              adAwareBottomPadding(context, ref, extra: 16),
+            ),
+            children: [
         _HeroCard(
           title: task.title,
           subtitle: _subtitle(l10n, task),
+          // Pasamos el visual del task tal cual lo eligió el usuario; el
+          // _glyphFor(task) sigue ahí como fallback cuando no hay visual.
+          visualKind: task.visualKind,
+          visualValue: task.visualValue,
           glyph: _glyphFor(task),
           pills: _pills(context, task, data),
         ),
@@ -115,10 +153,12 @@ class _Content extends ConsumerWidget {
           whenLabel: _whenLabel(context, task.nextDueAt),
           doneLabel: l10n.today_btn_done,
           passLabel: l10n.pass_turn_confirm_btn,
-          onDone: () => _onDone(context, ref, task),
-          onPass: data.currentAssigneeName != null
-              ? () => _onPass(context, ref, task)
-              : null,
+          // Sólo se muestran si es el turno del usuario actual; en otro
+          // caso el card sigue siendo informativo pero sin acciones
+          // (consistente con la pantalla Hoy, donde sólo aparecen
+          // Hecho/Pasar en las tareas de tu fila).
+          onDone: isMine ? () => _onDone(context, ref, task) : null,
+          onPass: isMine ? () => _onPass(context, ref, task) : null,
         ),
         if (task.assignmentOrder.length >= 2) ...[
           const SizedBox(height: 14),
@@ -144,6 +184,9 @@ class _Content extends ConsumerWidget {
         else
           ...data.upcomingOccurrences
               .map((o) => _HistoryRow(occurrence: o)),
+            ],
+          ),
+        ),
       ],
     );
   }
@@ -209,6 +252,62 @@ class _Content extends ConsumerWidget {
       await ref
           .read(taskPassProvider.notifier)
           .passTurn(task.homeId, task.id, reason: reason);
+    }
+  }
+
+  Future<void> _onToggleFreeze(
+      BuildContext ctx, WidgetRef ref, Task task) async {
+    final dashboard = ref.read(dashboardProvider).valueOrNull;
+    final isPremium = dashboard?.premiumFlags.isPremium ?? true;
+    final planCounters = dashboard?.planCounters;
+    final isUnfreezing = task.status == TaskStatus.frozen;
+    if (isUnfreezing &&
+        !isPremium &&
+        planCounters != null &&
+        planCounters.activeTasks >= FreeLimits.maxActiveTasks) {
+      await showUnfreezeBlockedDialog(
+        ctx,
+        current: planCounters.activeTasks,
+        limit: FreeLimits.maxActiveTasks,
+      );
+      return;
+    }
+    await vm.toggleFreeze(task);
+  }
+
+  Future<void> _onDelete(BuildContext ctx, WidgetRef ref, Task task) async {
+    final l10n = AppLocalizations.of(ctx);
+    final confirmed = await showDialog<bool>(
+      context: ctx,
+      builder: (c) => AlertDialog(
+        title: Text(l10n.tasks_delete_confirm_title),
+        content: Text(l10n.tasks_delete_confirm_body),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(c).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            key: const Key('btn_delete_confirm'),
+            onPressed: () => Navigator.of(c).pop(true),
+            child: Text(l10n.delete),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !ctx.mounted) return;
+
+    // Navegar ANTES del callable (paridad con BUG-08 fix de v2): si no, el
+    // stream emite null cuando Firestore borra el documento y la pantalla se
+    // queda colgada con un CircularProgressIndicator eterno.
+    final messenger = ScaffoldMessenger.of(ctx);
+    final errorText = l10n.error_generic;
+    ctx.pop();
+
+    try {
+      await vm.deleteTask(task);
+    } catch (_) {
+      messenger.showSnackBar(SnackBar(content: Text(errorText)));
     }
   }
 
@@ -295,7 +394,7 @@ class _Content extends ConsumerWidget {
       if (task.assignmentMode == 'smartDistribution')
         TockaPill(
           color: cs.secondary,
-          child: const Text('Reparto inteligente'),
+          child: Text(AppLocalizations.of(context).assignment_smart),
         ),
       if (d.difficultyWeight != 1.0)
         TockaPill(
@@ -305,16 +404,19 @@ class _Content extends ConsumerWidget {
     return pills;
   }
 
-  String _recurrenceLabel(BuildContext context, RecurrenceRule rule) =>
-      switch (rule) {
-        OneTimeRule _ => 'Una vez',
-        HourlyRule r => 'Cada ${r.every}h',
-        DailyRule r =>
-          r.every == 1 ? 'Cada día' : 'Cada ${r.every} días',
-        WeeklyRule _ => 'Semanal',
-        MonthlyFixedRule _ || MonthlyNthRule _ => 'Mensual',
-        YearlyFixedRule _ || YearlyNthRule _ => 'Anual',
-      };
+  String _recurrenceLabel(BuildContext context, RecurrenceRule rule) {
+    final l10n = AppLocalizations.of(context);
+    return switch (rule) {
+      OneTimeRule _ => l10n.recurrence_pill_one_time,
+      HourlyRule r => l10n.recurrence_pill_hourly(r.every),
+      DailyRule r => r.every == 1
+          ? l10n.recurrence_pill_daily
+          : l10n.recurrence_pill_daily_n(r.every),
+      WeeklyRule _ => l10n.recurrence_pill_weekly,
+      MonthlyFixedRule _ || MonthlyNthRule _ => l10n.recurrence_pill_monthly,
+      YearlyFixedRule _ || YearlyNthRule _ => l10n.recurrence_pill_yearly,
+    };
+  }
 
   String _minutesUntil(DateTime due) {
     final diff = due.difference(DateTime.now()).inMinutes;
@@ -338,13 +440,21 @@ class _Content extends ConsumerWidget {
 class _HeaderRow extends StatelessWidget {
   const _HeaderRow({
     required this.canManage,
+    required this.isFrozen,
+    required this.freezeTooltip,
     required this.onBack,
     required this.onEdit,
+    required this.onToggleFreeze,
+    required this.onDelete,
   });
 
   final bool canManage;
+  final bool isFrozen;
+  final String freezeTooltip;
   final VoidCallback onBack;
   final VoidCallback? onEdit;
+  final VoidCallback? onToggleFreeze;
+  final VoidCallback? onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -360,30 +470,46 @@ class _HeaderRow extends StatelessWidget {
           _IconSlot(
             key: const Key('fut_btn_edit'),
             icon: Icons.edit_outlined,
+            tooltip: freezeTooltip == '' ? null : null,
             onTap: onEdit,
           ),
           const SizedBox(width: 8),
+          _IconSlot(
+            key: const Key('fut_btn_freeze'),
+            icon: isFrozen
+                ? Icons.play_circle_outline
+                : Icons.pause_circle_outline,
+            tooltip: freezeTooltip,
+            onTap: onToggleFreeze,
+          ),
+          const SizedBox(width: 8),
+          _IconSlot(
+            key: const Key('fut_btn_delete'),
+            icon: Icons.delete_outline,
+            onTap: onDelete,
+          ),
         ],
-        const _IconSlot(
-          key: Key('fut_btn_more'),
-          icon: Icons.more_vert,
-          onTap: null, // placeholder; el menú vive en futuras iteraciones
-        ),
       ],
     );
   }
 }
 
 class _IconSlot extends StatelessWidget {
-  const _IconSlot({super.key, required this.icon, required this.onTap});
+  const _IconSlot({
+    super.key,
+    required this.icon,
+    required this.onTap,
+    this.tooltip,
+  });
 
   final IconData icon;
   final VoidCallback? onTap;
+  final String? tooltip;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return InkWell(
+    final slot = InkWell(
       borderRadius: BorderRadius.circular(12),
       onTap: onTap,
       child: Container(
@@ -397,6 +523,7 @@ class _IconSlot extends StatelessWidget {
         child: Icon(icon, size: 20, color: theme.colorScheme.onSurface),
       ),
     );
+    return tooltip != null ? Tooltip(message: tooltip!, child: slot) : slot;
   }
 }
 
@@ -408,12 +535,17 @@ class _HeroCard extends StatelessWidget {
   const _HeroCard({
     required this.title,
     required this.subtitle,
+    required this.visualKind,
+    required this.visualValue,
     required this.glyph,
     required this.pills,
   });
 
   final String title;
   final String subtitle;
+  final String visualKind;
+  final String visualValue;
+  // Fallback cuando no hay visual del usuario.
   final TaskGlyphKind glyph;
   final List<Widget> pills;
 
@@ -453,7 +585,14 @@ class _HeroCard extends StatelessWidget {
               ],
             ),
             alignment: Alignment.center,
-            child: TaskGlyph(kind: glyph, color: cs.primary, size: 40),
+            child: TaskVisualFuturista(
+              visualKind: visualKind,
+              visualValue: visualValue,
+              color: cs.primary,
+              size: 40,
+              fallbackGlyph: glyph,
+              // El wrapper ya pinta el slot grande; aquí solo el icono.
+            ),
           ),
           const SizedBox(height: 14),
           Text(
@@ -555,7 +694,7 @@ class _NextTurnCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'MIN',
+                      AppLocalizations.of(context).task_due_at_min_short,
                       style: TextStyle(
                         fontFamily: 'JetBrainsMono',
                         fontSize: 8,
@@ -572,7 +711,7 @@ class _NextTurnCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'PRÓXIMO TURNO',
+                      AppLocalizations.of(context).task_detail_next_turn,
                       style: TextStyle(
                         fontFamily: 'JetBrainsMono',
                         fontSize: 10,
@@ -615,6 +754,10 @@ class _NextTurnCard extends StatelessWidget {
               ),
             ],
           ),
+          // Sólo pintamos la fila de acciones si al menos una está
+          // disponible (es decir, es el turno del usuario actual). Para
+          // observadores externos, el card se queda informativo.
+          if (onDone != null || onPass != null) ...[
           const SizedBox(height: 12),
           Row(
             children: [
@@ -640,6 +783,7 @@ class _NextTurnCard extends StatelessWidget {
               ),
             ],
           ),
+          ],
         ],
       ),
     );
@@ -681,7 +825,7 @@ class _RotationCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'ROTACIÓN',
+            AppLocalizations.of(context).task_detail_rotation,
             style: TextStyle(
               fontFamily: 'JetBrainsMono',
               fontSize: 10,
@@ -758,7 +902,9 @@ class _RotationSlot extends StatelessWidget {
       );
     }
 
-    final label = isCurrent ? 'AHORA' : (isNext ? 'SIG.' : '');
+    final l10n = AppLocalizations.of(context);
+    final label =
+        isCurrent ? l10n.rotation_now : (isNext ? l10n.rotation_next : '');
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [

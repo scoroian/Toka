@@ -718,6 +718,30 @@ abstract class AppLocalizations {
   /// **'Gestionar miembros'**
   String get homes_manage_members;
 
+  /// Transfer ownership tile in home settings (owner only)
+  ///
+  /// In es, this message translates to:
+  /// **'Transferir propiedad'**
+  String get homes_transfer_ownership;
+
+  /// Cancel auto-renewal tile in home settings (premium only)
+  ///
+  /// In es, this message translates to:
+  /// **'Cancelar renovación'**
+  String get homes_cancel_renewal;
+
+  /// Freeze member tile in home settings (owner only)
+  ///
+  /// In es, this message translates to:
+  /// **'Congelar miembro'**
+  String get homes_freeze_member;
+
+  /// Snackbar when tapping a feature not yet implemented
+  ///
+  /// In es, this message translates to:
+  /// **'Próximamente'**
+  String get homes_coming_soon;
+
   /// Subtle info shown to payer in home settings
   ///
   /// In es, this message translates to:
@@ -1191,6 +1215,24 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Activos'**
   String get members_section_active;
+
+  /// Title of the household balance card
+  ///
+  /// In es, this message translates to:
+  /// **'Equilibrio del hogar'**
+  String get members_balance_title;
+
+  /// Message when household chores are evenly distributed
+  ///
+  /// In es, this message translates to:
+  /// **'Bien repartido'**
+  String get members_balance_well_distributed;
+
+  /// Message when one member has done many more tasks than the rest
+  ///
+  /// In es, this message translates to:
+  /// **'Desequilibrado · {topName}'**
+  String members_balance_unbalanced(String topName);
 
   /// Frozen members section
   ///
@@ -3405,6 +3447,726 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Oscuro, espacial, minimalista'**
   String get skinFuturistaDescription;
+
+  /// Frozen member role label
+  ///
+  /// In es, this message translates to:
+  /// **'Congelado'**
+  String get homes_role_frozen;
+
+  /// Hero pill on Today screen when a task is assigned to the current user
+  ///
+  /// In es, this message translates to:
+  /// **'TE TOCA'**
+  String get today_hero_label;
+
+  /// Header of the next-turn card in task detail
+  ///
+  /// In es, this message translates to:
+  /// **'PRÓXIMO TURNO'**
+  String get task_detail_next_turn;
+
+  /// Header of the rotation card in task detail
+  ///
+  /// In es, this message translates to:
+  /// **'ROTACIÓN'**
+  String get task_detail_rotation;
+
+  /// Label preceding the time at which a task is due
+  ///
+  /// In es, this message translates to:
+  /// **'Vence a las'**
+  String get task_due_at_label;
+
+  /// Short label for minutes in the next-turn countdown
+  ///
+  /// In es, this message translates to:
+  /// **'MIN'**
+  String get task_due_at_min_short;
+
+  /// Generic 'more options' button label
+  ///
+  /// In es, this message translates to:
+  /// **'Más opciones'**
+  String get common_more_options;
+
+  /// Label for the current member in a rotation strip
+  ///
+  /// In es, this message translates to:
+  /// **'AHORA'**
+  String get rotation_now;
+
+  /// Short label (3-4 chars) for the next member in a rotation strip
+  ///
+  /// In es, this message translates to:
+  /// **'SIG.'**
+  String get rotation_next;
+
+  /// Filter chip: all tasks
+  ///
+  /// In es, this message translates to:
+  /// **'Todas'**
+  String get tasks_filter_all;
+
+  /// Filter chip: tasks assigned to me
+  ///
+  /// In es, this message translates to:
+  /// **'Mías'**
+  String get tasks_filter_mine;
+
+  /// Filter chip: tasks due in the next 48h
+  ///
+  /// In es, this message translates to:
+  /// **'Por vencer'**
+  String get tasks_filter_due_soon;
+
+  /// Filter chip: weekly recurring tasks
+  ///
+  /// In es, this message translates to:
+  /// **'Semanales'**
+  String get tasks_filter_weekly_chip;
+
+  /// Filter chip: monthly recurring tasks
+  ///
+  /// In es, this message translates to:
+  /// **'Mensuales'**
+  String get tasks_filter_monthly_chip;
+
+  /// Short recurrence label: hourly
+  ///
+  /// In es, this message translates to:
+  /// **'Hora'**
+  String get recurrence_label_hourly;
+
+  /// Short recurrence label: daily
+  ///
+  /// In es, this message translates to:
+  /// **'Día'**
+  String get recurrence_label_daily;
+
+  /// Short recurrence label: weekly
+  ///
+  /// In es, this message translates to:
+  /// **'Semana'**
+  String get recurrence_label_weekly;
+
+  /// Short recurrence label: monthly
+  ///
+  /// In es, this message translates to:
+  /// **'Mes'**
+  String get recurrence_label_monthly;
+
+  /// Short recurrence label: yearly
+  ///
+  /// In es, this message translates to:
+  /// **'Año'**
+  String get recurrence_label_yearly;
+
+  /// Pill label for hourly recurrence (e.g. 'Cada 2h')
+  ///
+  /// In es, this message translates to:
+  /// **'Cada {n}h'**
+  String recurrence_pill_hourly(int n);
+
+  /// Pill label for daily recurrence (every day)
+  ///
+  /// In es, this message translates to:
+  /// **'Cada día'**
+  String get recurrence_pill_daily;
+
+  /// Pill label for daily recurrence with interval > 1
+  ///
+  /// In es, this message translates to:
+  /// **'Cada {n} días'**
+  String recurrence_pill_daily_n(int n);
+
+  /// Pill label for weekly recurrence
+  ///
+  /// In es, this message translates to:
+  /// **'Semanal'**
+  String get recurrence_pill_weekly;
+
+  /// Pill label for monthly recurrence
+  ///
+  /// In es, this message translates to:
+  /// **'Mensual'**
+  String get recurrence_pill_monthly;
+
+  /// Pill label for yearly recurrence
+  ///
+  /// In es, this message translates to:
+  /// **'Anual'**
+  String get recurrence_pill_yearly;
+
+  /// Pill label for one-time recurrence (singular)
+  ///
+  /// In es, this message translates to:
+  /// **'Una vez'**
+  String get recurrence_pill_one_time;
+
+  /// 1-char short label for Monday in weekday picker
+  ///
+  /// In es, this message translates to:
+  /// **'L'**
+  String get weekday_mon_short;
+
+  /// 1-char short label for Tuesday
+  ///
+  /// In es, this message translates to:
+  /// **'M'**
+  String get weekday_tue_short;
+
+  /// 1-char short label for Wednesday (X in Spanish, W in English)
+  ///
+  /// In es, this message translates to:
+  /// **'X'**
+  String get weekday_wed_short;
+
+  /// 1-char short label for Thursday
+  ///
+  /// In es, this message translates to:
+  /// **'J'**
+  String get weekday_thu_short;
+
+  /// 1-char short label for Friday
+  ///
+  /// In es, this message translates to:
+  /// **'V'**
+  String get weekday_fri_short;
+
+  /// 1-char short label for Saturday
+  ///
+  /// In es, this message translates to:
+  /// **'S'**
+  String get weekday_sat_short;
+
+  /// 1-char short label for Sunday
+  ///
+  /// In es, this message translates to:
+  /// **'D'**
+  String get weekday_sun_short;
+
+  /// Mono-uppercase header for title field on task form
+  ///
+  /// In es, this message translates to:
+  /// **'TÍTULO'**
+  String get tasks_section_label_title;
+
+  /// Mono-uppercase header for visual picker on task form
+  ///
+  /// In es, this message translates to:
+  /// **'VISUAL'**
+  String get tasks_section_label_visual;
+
+  /// Mono-uppercase header for recurrence card on task form
+  ///
+  /// In es, this message translates to:
+  /// **'RECURRENCIA'**
+  String get tasks_section_label_recurrence;
+
+  /// Mono-uppercase header for description field on task form
+  ///
+  /// In es, this message translates to:
+  /// **'DESCRIPCIÓN'**
+  String get tasks_section_label_description;
+
+  /// Mono-uppercase header for assignees list on task form
+  ///
+  /// In es, this message translates to:
+  /// **'ASIGNADOS'**
+  String get tasks_section_label_assigned;
+
+  /// Mono-uppercase header for assignment mode card on task form
+  ///
+  /// In es, this message translates to:
+  /// **'REPARTO'**
+  String get tasks_section_label_assignment;
+
+  /// Assignment mode: round-robin rotation
+  ///
+  /// In es, this message translates to:
+  /// **'Rotación'**
+  String get assignment_rotation;
+
+  /// Assignment mode: smart distribution (Premium)
+  ///
+  /// In es, this message translates to:
+  /// **'Inteligente'**
+  String get assignment_smart;
+
+  /// Compact stat suffix for tasks completed by a member
+  ///
+  /// In es, this message translates to:
+  /// **'hechas'**
+  String get member_stat_completed_short;
+
+  /// Compact stat suffix for turn-passes by a member
+  ///
+  /// In es, this message translates to:
+  /// **'pases'**
+  String get member_stat_passed_short;
+
+  /// Prefix shown on completed task cards before the actor name
+  ///
+  /// In es, this message translates to:
+  /// **'Hecho por'**
+  String get task_card_done_by;
+
+  /// Prefix shown on pending task cards before the assignee name
+  ///
+  /// In es, this message translates to:
+  /// **'Toca a'**
+  String get task_card_assigned_to;
+
+  /// Mono header for total tasks stat on profile
+  ///
+  /// In es, this message translates to:
+  /// **'TAREAS'**
+  String get profile_stat_tasks_label;
+
+  /// Mono header for current streak stat on profile
+  ///
+  /// In es, this message translates to:
+  /// **'RACHA'**
+  String get profile_stat_streak_label;
+
+  /// Mono header for average compliance stat on profile
+  ///
+  /// In es, this message translates to:
+  /// **'MEDIA'**
+  String get profile_stat_average_label;
+
+  /// Section header in home settings (general info)
+  ///
+  /// In es, this message translates to:
+  /// **'GENERAL'**
+  String get home_settings_section_general;
+
+  /// Section header in home settings (members and roles)
+  ///
+  /// In es, this message translates to:
+  /// **'MIEMBROS Y ROLES'**
+  String get home_settings_section_members;
+
+  /// Section header in home settings (subscription)
+  ///
+  /// In es, this message translates to:
+  /// **'SUSCRIPCIÓN'**
+  String get home_settings_section_subscription;
+
+  /// Section header in home settings (destructive actions)
+  ///
+  /// In es, this message translates to:
+  /// **'ZONA DE PELIGRO'**
+  String get home_settings_section_danger;
+
+  /// Section header in home settings (debug-only, hidden in prod)
+  ///
+  /// In es, this message translates to:
+  /// **'DEBUG'**
+  String get home_settings_section_debug;
+
+  /// Row label: home avatar (placeholder, not implemented)
+  ///
+  /// In es, this message translates to:
+  /// **'Avatar del hogar'**
+  String get home_settings_avatar;
+
+  /// Row label: home timezone (placeholder, not implemented)
+  ///
+  /// In es, this message translates to:
+  /// **'Zona horaria'**
+  String get home_settings_timezone;
+
+  /// Row label: pending invitations counter
+  ///
+  /// In es, this message translates to:
+  /// **'Invitaciones pendientes'**
+  String get home_settings_pending_invites;
+
+  /// Row label: admin members counter
+  ///
+  /// In es, this message translates to:
+  /// **'Administradores'**
+  String get home_settings_admins;
+
+  /// Row label: current premium plan
+  ///
+  /// In es, this message translates to:
+  /// **'Plan actual'**
+  String get home_settings_plan_current;
+
+  /// Row label: subscription renewal date
+  ///
+  /// In es, this message translates to:
+  /// **'Renovación'**
+  String get home_settings_renewal;
+
+  /// Short prefix shown before the home id snippet
+  ///
+  /// In es, this message translates to:
+  /// **'CODE'**
+  String get home_settings_code_short;
+
+  /// Hero subtitle on the futurist vacation screen
+  ///
+  /// In es, this message translates to:
+  /// **'Mientras estés en vacaciones, las tareas no te tocarán a ti.'**
+  String get vacation_subtitle_futurista;
+
+  /// Mono uppercase label preceding the vacation reason input
+  ///
+  /// In es, this message translates to:
+  /// **'MOTIVO'**
+  String get vacation_reason_label_short;
+
+  /// Hero title on the futurist rescue screen (allows newline)
+  ///
+  /// In es, this message translates to:
+  /// **'Decide qué sigue\nactivo en Free.'**
+  String get rescue_hero_title_futurista;
+
+  /// First part of rescue subtitle, before the date
+  ///
+  /// In es, this message translates to:
+  /// **'Si no reactivas, tu hogar bajará a Free el '**
+  String get rescue_subtitle_prefix;
+
+  /// Second part of rescue subtitle, after the date
+  ///
+  /// In es, this message translates to:
+  /// **'. El resto quedará congelado 30 días · restaurable.'**
+  String get rescue_subtitle_suffix;
+
+  /// Back-to-home navigation label
+  ///
+  /// In es, this message translates to:
+  /// **'Volver al hogar'**
+  String get common_back_to_home;
+
+  /// Subtext of the monthly plan card on paywall (price unit)
+  ///
+  /// In es, this message translates to:
+  /// **'al mes · hogar'**
+  String get plan_per_month_home;
+
+  /// Subtext of the annual plan card on paywall (price + monthly equivalent)
+  ///
+  /// In es, this message translates to:
+  /// **'al año · 2,50€/mes'**
+  String get plan_per_year_breakdown;
+
+  /// Mono uppercase label of the monthly plan card
+  ///
+  /// In es, this message translates to:
+  /// **'MENSUAL'**
+  String get plan_label_monthly_short;
+
+  /// Mono uppercase label of the annual plan card
+  ///
+  /// In es, this message translates to:
+  /// **'ANUAL'**
+  String get plan_label_annual_short;
+
+  /// Discount badge shown on the annual plan card
+  ///
+  /// In es, this message translates to:
+  /// **'-37%'**
+  String get plan_annual_discount_badge;
+
+  /// Status pill: Premium active
+  ///
+  /// In es, this message translates to:
+  /// **'Activa'**
+  String get subscription_status_pill_active;
+
+  /// Status pill: cancelled, still active until end
+  ///
+  /// In es, this message translates to:
+  /// **'Cancelado'**
+  String get subscription_status_pill_cancelled;
+
+  /// Status pill: rescue window (3 days before downgrade)
+  ///
+  /// In es, this message translates to:
+  /// **'En rescate'**
+  String get subscription_status_pill_rescue;
+
+  /// Status pill: Premium expired
+  ///
+  /// In es, this message translates to:
+  /// **'Expirado'**
+  String get subscription_status_pill_expired;
+
+  /// Status pill: 30-day restore window after downgrade
+  ///
+  /// In es, this message translates to:
+  /// **'Restaurable'**
+  String get subscription_status_pill_restorable;
+
+  /// Detail line: next auto-renewal date
+  ///
+  /// In es, this message translates to:
+  /// **'Renovación: {date}'**
+  String subscription_renewal_detail(String date);
+
+  /// Detail line: premium expired on date
+  ///
+  /// In es, this message translates to:
+  /// **'Expiró: {date}'**
+  String subscription_expired_detail(String date);
+
+  /// Detail line: restore deadline
+  ///
+  /// In es, this message translates to:
+  /// **'Restaurar antes de: {date}'**
+  String subscription_restore_detail(String date);
+
+  /// Detail line: rescue window countdown
+  ///
+  /// In es, this message translates to:
+  /// **'Vence en {days} días'**
+  String subscription_expires_in_days(int days);
+
+  /// Detail line: cancelled subscription end date
+  ///
+  /// In es, this message translates to:
+  /// **'Vence: {date}'**
+  String subscription_expires_on_detail(String date);
+
+  /// Phone visibility chip: nobody can see the phone number
+  ///
+  /// In es, this message translates to:
+  /// **'Nadie'**
+  String get phone_visibility_none;
+
+  /// Phone visibility chip: only home members can see the phone number
+  ///
+  /// In es, this message translates to:
+  /// **'Hogar'**
+  String get phone_visibility_home;
+
+  /// Phone visibility chip: everyone (default)
+  ///
+  /// In es, this message translates to:
+  /// **'Todos'**
+  String get phone_visibility_all;
+
+  /// Stats row label on profile screens — global compliance across all homes
+  ///
+  /// In es, this message translates to:
+  /// **'Cumplimiento global'**
+  String get profile_global_compliance_label;
+
+  /// Push notification title — task is about to expire
+  ///
+  /// In es, this message translates to:
+  /// **'Tarea por vencer'**
+  String get notif_deadline_title;
+
+  /// Push notification body — task expiring
+  ///
+  /// In es, this message translates to:
+  /// **'{taskTitle} · vence en {minutes} min'**
+  String notif_deadline_body(String taskTitle, int minutes);
+
+  /// Push notification title — someone assigned you a task
+  ///
+  /// In es, this message translates to:
+  /// **'{assigner} te asignó una tarea'**
+  String notif_assignment_title(String assigner);
+
+  /// Push notification body — assignment with due date
+  ///
+  /// In es, this message translates to:
+  /// **'{taskTitle} · {dueAt}'**
+  String notif_assignment_body(String taskTitle, String dueAt);
+
+  /// Push notification title — reminder N min before due
+  ///
+  /// In es, this message translates to:
+  /// **'En {minutes} min: {taskTitle}'**
+  String notif_reminder_title(int minutes, String taskTitle);
+
+  /// Push notification body — reminder with due time
+  ///
+  /// In es, this message translates to:
+  /// **'Vence a las {dueAt}'**
+  String notif_reminder_body(String dueAt);
+
+  /// Push notification title — daily summary
+  ///
+  /// In es, this message translates to:
+  /// **'Hoy: {total} tareas · tú tienes {mine}'**
+  String notif_daily_summary_title(int total, int mine);
+
+  /// Push notification body — daily summary
+  ///
+  /// In es, this message translates to:
+  /// **'Pulsa para ver la lista'**
+  String get notif_daily_summary_body;
+
+  /// Push notification title — review received
+  ///
+  /// In es, this message translates to:
+  /// **'Valoración: {taskTitle}'**
+  String notif_feedback_title(String taskTitle);
+
+  /// Push notification message body — review with stars and private note
+  ///
+  /// In es, this message translates to:
+  /// **'{stars} · Te ha dejado una nota privada'**
+  String notif_feedback_msg_body(String stars);
+
+  /// Push notification title — weekly rotation summary
+  ///
+  /// In es, this message translates to:
+  /// **'Rotaciones de esta semana'**
+  String get notif_rotation_title;
+
+  /// Inbox-style summary line — rotation count for home
+  ///
+  /// In es, this message translates to:
+  /// **'{homeName} · {count} tareas'**
+  String notif_rotation_summary(String homeName, int count);
+
+  /// Empty state in transfer ownership sheet when no eligible candidates
+  ///
+  /// In es, this message translates to:
+  /// **'No hay miembros activos a los que transferir.'**
+  String get homes_transfer_no_candidates;
+
+  /// Confirm dialog title before transferring ownership
+  ///
+  /// In es, this message translates to:
+  /// **'¿Transferir propiedad?'**
+  String get homes_transfer_confirm_title;
+
+  /// Confirm dialog body, named after the new owner
+  ///
+  /// In es, this message translates to:
+  /// **'{name} pasará a ser el nuevo propietario y tú quedarás como administrador.'**
+  String homes_transfer_confirm_body(String name);
+
+  /// Snackbar after successful transfer
+  ///
+  /// In es, this message translates to:
+  /// **'{name} es ahora el propietario del hogar.'**
+  String homes_transfer_success(String name);
+
+  /// Error when payer tries to transfer ownership during active Premium
+  ///
+  /// In es, this message translates to:
+  /// **'No puedes transferir la propiedad mientras pagues el Premium del hogar. Cancela la renovación o transfiere al final del periodo.'**
+  String get homes_transfer_error_payer_locked;
+
+  /// Pluralized admin count shown as the value of the admins row
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =0{Sin administradores} =1{1 administrador} other{{count} administradores}}'**
+  String homes_admins_count(int count);
+
+  /// Sheet title for managing admin roles
+  ///
+  /// In es, this message translates to:
+  /// **'Administradores'**
+  String get homes_admins_sheet_title;
+
+  /// Sheet body explaining admin management
+  ///
+  /// In es, this message translates to:
+  /// **'Promociona o degrada miembros. Los admins pueden gestionar tareas y miembros pero no transferir la propiedad.'**
+  String get homes_admins_sheet_body;
+
+  /// Action: promote member to admin
+  ///
+  /// In es, this message translates to:
+  /// **'Promover'**
+  String get homes_admins_promote;
+
+  /// Action: demote admin to member
+  ///
+  /// In es, this message translates to:
+  /// **'Degradar'**
+  String get homes_admins_demote;
+
+  /// Tooltip / snack when free-plan tries to promote
+  ///
+  /// In es, this message translates to:
+  /// **'Sólo Premium puede tener varios administradores.'**
+  String get homes_admins_promote_blocked_free;
+
+  /// Pluralized pending invitation count shown as the value of the invitations row
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =0{Ninguna} =1{1 pendiente} other{{count} pendientes}}'**
+  String homes_invitations_count(int count);
+
+  /// Sheet title for managing pending invitations
+  ///
+  /// In es, this message translates to:
+  /// **'Invitaciones pendientes'**
+  String get homes_invitations_sheet_title;
+
+  /// Empty state in pending invitations sheet
+  ///
+  /// In es, this message translates to:
+  /// **'No hay invitaciones activas.'**
+  String get homes_invitations_empty;
+
+  /// Subtitle line — when this invitation expires (relative)
+  ///
+  /// In es, this message translates to:
+  /// **'Caduca en {label}'**
+  String homes_invitations_expires_in(String label);
+
+  /// Action: revoke / invalidate an invitation code
+  ///
+  /// In es, this message translates to:
+  /// **'Revocar'**
+  String get homes_invitations_revoke;
+
+  /// Snackbar after successful revoke
+  ///
+  /// In es, this message translates to:
+  /// **'Invitación revocada.'**
+  String get homes_invitations_revoked;
+
+  /// Sheet title for editing the home avatar
+  ///
+  /// In es, this message translates to:
+  /// **'Avatar del hogar'**
+  String get homes_avatar_sheet_title;
+
+  /// Action: pick from photo gallery
+  ///
+  /// In es, this message translates to:
+  /// **'Elegir de galería'**
+  String get homes_avatar_pick_gallery;
+
+  /// Action: take photo with camera
+  ///
+  /// In es, this message translates to:
+  /// **'Hacer foto'**
+  String get homes_avatar_pick_camera;
+
+  /// Action: remove existing home photo
+  ///
+  /// In es, this message translates to:
+  /// **'Quitar foto'**
+  String get homes_avatar_remove;
+
+  /// Snackbar / progress while uploading
+  ///
+  /// In es, this message translates to:
+  /// **'Subiendo foto…'**
+  String get homes_avatar_uploading;
+
+  /// Snackbar after successful update
+  ///
+  /// In es, this message translates to:
+  /// **'Foto del hogar actualizada.'**
+  String get homes_avatar_updated;
 }
 
 class _AppLocalizationsDelegate

@@ -22,8 +22,10 @@ import '../../../../../shared/widgets/futurista/tocka_btn.dart';
 import '../../../../../shared/widgets/futurista/tocka_pill.dart';
 import '../../../../../shared/widgets/futurista/tocka_ring.dart';
 import '../../../../../shared/widgets/futurista/tocka_top_bar.dart';
+import '../../../../../shared/widgets/premium_upgrade_banner.dart';
 import '../../../../auth/application/auth_provider.dart';
 import '../../../../homes/application/current_home_provider.dart';
+import '../../../../homes/presentation/home_selector_widget.dart';
 import '../../../../homes/domain/home_membership.dart';
 import '../../../application/members_view_model.dart';
 import '../../../domain/member.dart';
@@ -62,7 +64,11 @@ class MembersScreenFuturista extends ConsumerWidget {
             if (data == null) {
               return Column(
                 children: [
-                  TockaTopBar(homeName: homeName, members: const []),
+                  TockaTopBar(
+                    homeName: homeName,
+                    members: const [],
+                    onHomeTap: () => showHomeSelectorSheet(context, ref),
+                  ),
                   Expanded(
                     child: Center(
                       child: Padding(
@@ -101,7 +107,11 @@ class MembersScreenFuturista extends ConsumerWidget {
                 bottom: adAwareBottomPadding(context, ref, extra: 80),
               ),
               children: [
-                TockaTopBar(homeName: homeName, members: topBarMembers),
+                TockaTopBar(
+                  homeName: homeName,
+                  members: topBarMembers,
+                  onHomeTap: () => showHomeSelectorSheet(context, ref),
+                ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
                   child: Row(
@@ -134,11 +144,29 @@ class MembersScreenFuturista extends ConsumerWidget {
                     ],
                   ),
                 ),
+                if (data.freeLimitReached)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                    child: PremiumUpgradeBanner(
+                      key: const Key('members_free_limit_banner'),
+                      message: l10n.free_limit_members_reached,
+                      highlight: l10n.free_members_counter(
+                        data.activeMembersCount,
+                        data.maxMembersFree,
+                      ),
+                      cta: l10n.free_go_premium_cta,
+                      ctaKey: const Key('members_free_limit_banner_cta'),
+                      onCta: () => context.push(AppRoutes.paywall),
+                    ),
+                  ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: _BalanceHero(
                     value: balance,
                     label: balanceMessage,
+                    titleLabel: l10n.members_balance_title.toUpperCase(),
+                    headlineWell: l10n.members_balance_well_distributed,
+                    headlineUnbalanced: l10n.members_balance_unbalanced(''),
                   ),
                 ),
                 if (data.activeMembers.isNotEmpty) ...[
@@ -242,10 +270,19 @@ class MembersScreenFuturista extends ConsumerWidget {
 // -----------------------------------------------------------------------------
 
 class _BalanceHero extends StatelessWidget {
-  const _BalanceHero({required this.value, required this.label});
+  const _BalanceHero({
+    required this.value,
+    required this.label,
+    required this.titleLabel,
+    required this.headlineWell,
+    required this.headlineUnbalanced,
+  });
 
   final double value;
   final String label;
+  final String titleLabel;
+  final String headlineWell;
+  final String headlineUnbalanced;
 
   @override
   Widget build(BuildContext context) {
@@ -282,7 +319,7 @@ class _BalanceHero extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'EQUILIBRIO DEL HOGAR',
+                  titleLabel,
                   style: const TextStyle(
                     fontFamily: 'JetBrainsMono',
                     fontSize: 10.5,
@@ -292,7 +329,7 @@ class _BalanceHero extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  percent >= 75 ? 'Bien repartido' : 'Desequilibrado',
+                  percent >= 75 ? headlineWell : headlineUnbalanced,
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
@@ -323,7 +360,7 @@ class _BalanceHero extends StatelessWidget {
 // Card de miembro futurista
 // -----------------------------------------------------------------------------
 
-class _MemberRowFuturista extends StatelessWidget {
+class _MemberRowFuturista extends ConsumerWidget {
   const _MemberRowFuturista({
     required this.member,
     required this.isMine,
@@ -335,7 +372,8 @@ class _MemberRowFuturista extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final frozen = member.status == MemberStatus.frozen;
@@ -418,7 +456,7 @@ class _MemberRowFuturista extends StatelessWidget {
                     const SizedBox(width: 8),
                     TockaPill(
                       color: isOwner ? cs.primary : null,
-                      child: Text(_roleLabel(member.role)),
+                      child: Text(_roleLabel(member.role, l10n)),
                     ),
                   ],
                 ),
@@ -426,7 +464,7 @@ class _MemberRowFuturista extends StatelessWidget {
                 Row(
                   children: [
                     Text(
-                      '${member.tasksCompleted} hechas',
+                      '${member.tasksCompleted} ${l10n.member_stat_completed_short}',
                       style: TextStyle(
                         fontFamily: 'JetBrainsMono',
                         fontSize: 10.5,
@@ -435,7 +473,7 @@ class _MemberRowFuturista extends StatelessWidget {
                     ),
                     const SizedBox(width: 10),
                     Text(
-                      '${member.passedCount} pases',
+                      '${member.passedCount} ${l10n.member_stat_passed_short}',
                       style: TextStyle(
                         fontFamily: 'JetBrainsMono',
                         fontSize: 10.5,
@@ -490,11 +528,11 @@ class _MemberRowFuturista extends StatelessWidget {
     return n.replaceAll(RegExp(r'\s+'), '_');
   }
 
-  String _roleLabel(MemberRole role) => switch (role) {
-        MemberRole.owner => 'Owner',
-        MemberRole.admin => 'Admin',
-        MemberRole.member => 'Member',
-        MemberRole.frozen => 'Frozen',
+  String _roleLabel(MemberRole role, AppLocalizations l10n) => switch (role) {
+        MemberRole.owner => l10n.homes_role_owner,
+        MemberRole.admin => l10n.homes_role_admin,
+        MemberRole.member => l10n.homes_role_member,
+        MemberRole.frozen => l10n.homes_role_frozen,
       };
 }
 

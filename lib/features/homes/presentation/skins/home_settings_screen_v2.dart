@@ -6,9 +6,16 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/routes.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/loading_widget.dart';
+import '../../../members/application/members_provider.dart';
+import '../../../members/domain/member.dart';
 import '../../../subscription/presentation/widgets/premium_state_banner.dart';
+import '../../domain/home_membership.dart';
 import '../../application/home_settings_view_model.dart';
 import '../../domain/homes_repository.dart';
+import '../widgets/admins_sheet.dart';
+import '../widgets/home_avatar_sheet.dart';
+import '../widgets/pending_invitations_sheet.dart';
+import '../widgets/transfer_ownership_sheet.dart';
 
 class HomeSettingsScreenV2 extends ConsumerStatefulWidget {
   const HomeSettingsScreenV2({super.key});
@@ -202,8 +209,48 @@ class _HomeSettingsScreenV2State extends ConsumerState<HomeSettingsScreenV2> {
           return ListView(
             children: [
               const PremiumStateBanner(),
+              // Avatar grande del hogar — tap abre el sheet (solo
+              // admin/owner pueden editarlo, las rules backuppen).
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      key: const Key('home_avatar_tile'),
+                      onTap: data.canEdit
+                          ? () => showHomeAvatarSheet(context)
+                          : null,
+                      child: CircleAvatar(
+                        radius: 32,
+                        backgroundImage: data.photoUrl != null
+                            ? NetworkImage(data.photoUrl!)
+                            : null,
+                        child: data.photoUrl == null
+                            ? Text(
+                                data.homeName.isNotEmpty
+                                    ? data.homeName[0].toUpperCase()
+                                    : '?',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .headlineSmall,
+                              )
+                            : null,
+                      ),
+                    ),
+                    if (data.canEdit) ...[
+                      const SizedBox(width: 12),
+                      TextButton.icon(
+                        key: const Key('home_avatar_change_btn'),
+                        onPressed: () => showHomeAvatarSheet(context),
+                        icon: const Icon(Icons.edit_outlined),
+                        label: Text(l10n.homes_avatar_sheet_title),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
                 child: data.canEdit
                     ? TextField(
                         key: const Key('home_name_field'),
@@ -256,6 +303,78 @@ class _HomeSettingsScreenV2State extends ConsumerState<HomeSettingsScreenV2> {
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => context.go(AppRoutes.members),
               ),
+              // Administradores: contador real + sheet de gestión.
+              Consumer(builder: (ctx, ref, _) {
+                final members = ref
+                        .watch(homeMembersProvider(data.homeId))
+                        .valueOrNull ??
+                    const <Member>[];
+                final adminCount = members
+                    .where((m) =>
+                        m.role == MemberRole.owner ||
+                        m.role == MemberRole.admin)
+                    .length;
+                return ListTile(
+                  key: const Key('admins_tile'),
+                  leading: const Icon(Icons.shield_outlined),
+                  title: Text(l10n.homes_admins_sheet_title),
+                  subtitle: Text(l10n.homes_admins_count(adminCount)),
+                  trailing: data.isOwner
+                      ? const Icon(Icons.chevron_right)
+                      : null,
+                  onTap: data.isOwner
+                      ? () => showAdminsSheet(ctx, homeId: data.homeId)
+                      : null,
+                );
+              }),
+              // Invitaciones pendientes: contador reactivo + sheet con
+              // listado revocable. Solo visible para admin/owner (las
+              // reglas Firestore protegen la lectura igualmente).
+              if (data.isOwner)
+                Consumer(builder: (ctx, ref, _) {
+                  final invs = ref
+                          .watch(pendingInvitationsProvider(data.homeId))
+                          .valueOrNull ??
+                      const [];
+                  return ListTile(
+                    key: const Key('pending_invitations_tile'),
+                    leading: const Icon(Icons.mail_outline),
+                    title: Text(l10n.homes_invitations_sheet_title),
+                    subtitle: Text(l10n.homes_invitations_count(invs.length)),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => showPendingInvitationsSheet(
+                      ctx,
+                      homeId: data.homeId,
+                    ),
+                  );
+                }),
+              if (data.isOwner)
+                ListTile(
+                  key: const Key('transfer_ownership_tile'),
+                  leading: const Icon(Icons.swap_horiz),
+                  title: Text(l10n.homes_transfer_ownership),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => showTransferOwnershipSheet(
+                    context,
+                    homeId: data.homeId,
+                  ),
+                ),
+              if (data.isPayer)
+                ListTile(
+                  key: const Key('cancel_renewal_tile'),
+                  leading: Icon(
+                    Icons.cancel_outlined,
+                    color: Theme.of(context).colorScheme.error,
+                  ),
+                  title: Text(
+                    l10n.homes_cancel_renewal,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push(AppRoutes.subscription),
+                ),
               const Divider(),
               ListTile(
                 key: const Key('leave_home_tile'),

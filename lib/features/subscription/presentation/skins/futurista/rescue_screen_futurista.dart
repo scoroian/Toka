@@ -93,7 +93,7 @@ class RescueScreenFuturista extends ConsumerWidget {
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
                 child: Text(
-                  'Decide qué sigue\nactivo en Free.',
+                  l10n.rescue_hero_title_futurista,
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.w800,
@@ -115,10 +115,7 @@ class RescueScreenFuturista extends ConsumerWidget {
                       color: cs.onSurfaceVariant,
                     ),
                     children: [
-                      const TextSpan(
-                        text:
-                            'Si no reactivas, tu hogar bajará a Free el ',
-                      ),
+                      TextSpan(text: l10n.rescue_subtitle_prefix),
                       TextSpan(
                         text: endsAtFormatted,
                         style: TextStyle(
@@ -127,10 +124,7 @@ class RescueScreenFuturista extends ConsumerWidget {
                           color: cs.onSurface,
                         ),
                       ),
-                      const TextSpan(
-                        text:
-                            '. El resto quedará congelado 30 días · restaurable.',
-                      ),
+                      TextSpan(text: l10n.rescue_subtitle_suffix),
                     ],
                   ),
                 ),
@@ -168,7 +162,7 @@ class RescueScreenFuturista extends ConsumerWidget {
                   size: TockaBtnSize.md,
                   fullWidth: true,
                   onPressed: () => context.pop(),
-                  child: const Text('Volver al hogar'),
+                  child: Text(l10n.common_back_to_home),
                 ),
               ),
             ],

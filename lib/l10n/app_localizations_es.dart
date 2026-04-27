@@ -343,6 +343,18 @@ class AppLocalizationsEs extends AppLocalizations {
   String get homes_manage_members => 'Gestionar miembros';
 
   @override
+  String get homes_transfer_ownership => 'Transferir propiedad';
+
+  @override
+  String get homes_cancel_renewal => 'Cancelar renovación';
+
+  @override
+  String get homes_freeze_member => 'Congelar miembro';
+
+  @override
+  String get homes_coming_soon => 'Próximamente';
+
+  @override
   String get homes_payer_info_body =>
       'Tu cuenta está pagando el Premium de este hogar.';
 
@@ -610,6 +622,17 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get members_section_active => 'Activos';
+
+  @override
+  String get members_balance_title => 'Equilibrio del hogar';
+
+  @override
+  String get members_balance_well_distributed => 'Bien repartido';
+
+  @override
+  String members_balance_unbalanced(String topName) {
+    return 'Desequilibrado · $topName';
+  }
 
   @override
   String get members_section_frozen => 'Congelados';
@@ -1876,4 +1899,427 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get skinFuturistaDescription => 'Oscuro, espacial, minimalista';
+
+  @override
+  String get homes_role_frozen => 'Congelado';
+
+  @override
+  String get today_hero_label => 'TE TOCA';
+
+  @override
+  String get task_detail_next_turn => 'PRÓXIMO TURNO';
+
+  @override
+  String get task_detail_rotation => 'ROTACIÓN';
+
+  @override
+  String get task_due_at_label => 'Vence a las';
+
+  @override
+  String get task_due_at_min_short => 'MIN';
+
+  @override
+  String get common_more_options => 'Más opciones';
+
+  @override
+  String get rotation_now => 'AHORA';
+
+  @override
+  String get rotation_next => 'SIG.';
+
+  @override
+  String get tasks_filter_all => 'Todas';
+
+  @override
+  String get tasks_filter_mine => 'Mías';
+
+  @override
+  String get tasks_filter_due_soon => 'Por vencer';
+
+  @override
+  String get tasks_filter_weekly_chip => 'Semanales';
+
+  @override
+  String get tasks_filter_monthly_chip => 'Mensuales';
+
+  @override
+  String get recurrence_label_hourly => 'Hora';
+
+  @override
+  String get recurrence_label_daily => 'Día';
+
+  @override
+  String get recurrence_label_weekly => 'Semana';
+
+  @override
+  String get recurrence_label_monthly => 'Mes';
+
+  @override
+  String get recurrence_label_yearly => 'Año';
+
+  @override
+  String recurrence_pill_hourly(int n) {
+    return 'Cada ${n}h';
+  }
+
+  @override
+  String get recurrence_pill_daily => 'Cada día';
+
+  @override
+  String recurrence_pill_daily_n(int n) {
+    return 'Cada $n días';
+  }
+
+  @override
+  String get recurrence_pill_weekly => 'Semanal';
+
+  @override
+  String get recurrence_pill_monthly => 'Mensual';
+
+  @override
+  String get recurrence_pill_yearly => 'Anual';
+
+  @override
+  String get recurrence_pill_one_time => 'Una vez';
+
+  @override
+  String get weekday_mon_short => 'L';
+
+  @override
+  String get weekday_tue_short => 'M';
+
+  @override
+  String get weekday_wed_short => 'X';
+
+  @override
+  String get weekday_thu_short => 'J';
+
+  @override
+  String get weekday_fri_short => 'V';
+
+  @override
+  String get weekday_sat_short => 'S';
+
+  @override
+  String get weekday_sun_short => 'D';
+
+  @override
+  String get tasks_section_label_title => 'TÍTULO';
+
+  @override
+  String get tasks_section_label_visual => 'VISUAL';
+
+  @override
+  String get tasks_section_label_recurrence => 'RECURRENCIA';
+
+  @override
+  String get tasks_section_label_description => 'DESCRIPCIÓN';
+
+  @override
+  String get tasks_section_label_assigned => 'ASIGNADOS';
+
+  @override
+  String get tasks_section_label_assignment => 'REPARTO';
+
+  @override
+  String get assignment_rotation => 'Rotación';
+
+  @override
+  String get assignment_smart => 'Inteligente';
+
+  @override
+  String get member_stat_completed_short => 'hechas';
+
+  @override
+  String get member_stat_passed_short => 'pases';
+
+  @override
+  String get task_card_done_by => 'Hecho por';
+
+  @override
+  String get task_card_assigned_to => 'Toca a';
+
+  @override
+  String get profile_stat_tasks_label => 'TAREAS';
+
+  @override
+  String get profile_stat_streak_label => 'RACHA';
+
+  @override
+  String get profile_stat_average_label => 'MEDIA';
+
+  @override
+  String get home_settings_section_general => 'GENERAL';
+
+  @override
+  String get home_settings_section_members => 'MIEMBROS Y ROLES';
+
+  @override
+  String get home_settings_section_subscription => 'SUSCRIPCIÓN';
+
+  @override
+  String get home_settings_section_danger => 'ZONA DE PELIGRO';
+
+  @override
+  String get home_settings_section_debug => 'DEBUG';
+
+  @override
+  String get home_settings_avatar => 'Avatar del hogar';
+
+  @override
+  String get home_settings_timezone => 'Zona horaria';
+
+  @override
+  String get home_settings_pending_invites => 'Invitaciones pendientes';
+
+  @override
+  String get home_settings_admins => 'Administradores';
+
+  @override
+  String get home_settings_plan_current => 'Plan actual';
+
+  @override
+  String get home_settings_renewal => 'Renovación';
+
+  @override
+  String get home_settings_code_short => 'CODE';
+
+  @override
+  String get vacation_subtitle_futurista =>
+      'Mientras estés en vacaciones, las tareas no te tocarán a ti.';
+
+  @override
+  String get vacation_reason_label_short => 'MOTIVO';
+
+  @override
+  String get rescue_hero_title_futurista => 'Decide qué sigue\nactivo en Free.';
+
+  @override
+  String get rescue_subtitle_prefix =>
+      'Si no reactivas, tu hogar bajará a Free el ';
+
+  @override
+  String get rescue_subtitle_suffix =>
+      '. El resto quedará congelado 30 días · restaurable.';
+
+  @override
+  String get common_back_to_home => 'Volver al hogar';
+
+  @override
+  String get plan_per_month_home => 'al mes · hogar';
+
+  @override
+  String get plan_per_year_breakdown => 'al año · 2,50€/mes';
+
+  @override
+  String get plan_label_monthly_short => 'MENSUAL';
+
+  @override
+  String get plan_label_annual_short => 'ANUAL';
+
+  @override
+  String get plan_annual_discount_badge => '-37%';
+
+  @override
+  String get subscription_status_pill_active => 'Activa';
+
+  @override
+  String get subscription_status_pill_cancelled => 'Cancelado';
+
+  @override
+  String get subscription_status_pill_rescue => 'En rescate';
+
+  @override
+  String get subscription_status_pill_expired => 'Expirado';
+
+  @override
+  String get subscription_status_pill_restorable => 'Restaurable';
+
+  @override
+  String subscription_renewal_detail(String date) {
+    return 'Renovación: $date';
+  }
+
+  @override
+  String subscription_expired_detail(String date) {
+    return 'Expiró: $date';
+  }
+
+  @override
+  String subscription_restore_detail(String date) {
+    return 'Restaurar antes de: $date';
+  }
+
+  @override
+  String subscription_expires_in_days(int days) {
+    return 'Vence en $days días';
+  }
+
+  @override
+  String subscription_expires_on_detail(String date) {
+    return 'Vence: $date';
+  }
+
+  @override
+  String get phone_visibility_none => 'Nadie';
+
+  @override
+  String get phone_visibility_home => 'Hogar';
+
+  @override
+  String get phone_visibility_all => 'Todos';
+
+  @override
+  String get profile_global_compliance_label => 'Cumplimiento global';
+
+  @override
+  String get notif_deadline_title => 'Tarea por vencer';
+
+  @override
+  String notif_deadline_body(String taskTitle, int minutes) {
+    return '$taskTitle · vence en $minutes min';
+  }
+
+  @override
+  String notif_assignment_title(String assigner) {
+    return '$assigner te asignó una tarea';
+  }
+
+  @override
+  String notif_assignment_body(String taskTitle, String dueAt) {
+    return '$taskTitle · $dueAt';
+  }
+
+  @override
+  String notif_reminder_title(int minutes, String taskTitle) {
+    return 'En $minutes min: $taskTitle';
+  }
+
+  @override
+  String notif_reminder_body(String dueAt) {
+    return 'Vence a las $dueAt';
+  }
+
+  @override
+  String notif_daily_summary_title(int total, int mine) {
+    return 'Hoy: $total tareas · tú tienes $mine';
+  }
+
+  @override
+  String get notif_daily_summary_body => 'Pulsa para ver la lista';
+
+  @override
+  String notif_feedback_title(String taskTitle) {
+    return 'Valoración: $taskTitle';
+  }
+
+  @override
+  String notif_feedback_msg_body(String stars) {
+    return '$stars · Te ha dejado una nota privada';
+  }
+
+  @override
+  String get notif_rotation_title => 'Rotaciones de esta semana';
+
+  @override
+  String notif_rotation_summary(String homeName, int count) {
+    return '$homeName · $count tareas';
+  }
+
+  @override
+  String get homes_transfer_no_candidates =>
+      'No hay miembros activos a los que transferir.';
+
+  @override
+  String get homes_transfer_confirm_title => '¿Transferir propiedad?';
+
+  @override
+  String homes_transfer_confirm_body(String name) {
+    return '$name pasará a ser el nuevo propietario y tú quedarás como administrador.';
+  }
+
+  @override
+  String homes_transfer_success(String name) {
+    return '$name es ahora el propietario del hogar.';
+  }
+
+  @override
+  String get homes_transfer_error_payer_locked =>
+      'No puedes transferir la propiedad mientras pagues el Premium del hogar. Cancela la renovación o transfiere al final del periodo.';
+
+  @override
+  String homes_admins_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count administradores',
+      one: '1 administrador',
+      zero: 'Sin administradores',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get homes_admins_sheet_title => 'Administradores';
+
+  @override
+  String get homes_admins_sheet_body =>
+      'Promociona o degrada miembros. Los admins pueden gestionar tareas y miembros pero no transferir la propiedad.';
+
+  @override
+  String get homes_admins_promote => 'Promover';
+
+  @override
+  String get homes_admins_demote => 'Degradar';
+
+  @override
+  String get homes_admins_promote_blocked_free =>
+      'Sólo Premium puede tener varios administradores.';
+
+  @override
+  String homes_invitations_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pendientes',
+      one: '1 pendiente',
+      zero: 'Ninguna',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get homes_invitations_sheet_title => 'Invitaciones pendientes';
+
+  @override
+  String get homes_invitations_empty => 'No hay invitaciones activas.';
+
+  @override
+  String homes_invitations_expires_in(String label) {
+    return 'Caduca en $label';
+  }
+
+  @override
+  String get homes_invitations_revoke => 'Revocar';
+
+  @override
+  String get homes_invitations_revoked => 'Invitación revocada.';
+
+  @override
+  String get homes_avatar_sheet_title => 'Avatar del hogar';
+
+  @override
+  String get homes_avatar_pick_gallery => 'Elegir de galería';
+
+  @override
+  String get homes_avatar_pick_camera => 'Hacer foto';
+
+  @override
+  String get homes_avatar_remove => 'Quitar foto';
+
+  @override
+  String get homes_avatar_uploading => 'Subiendo foto…';
+
+  @override
+  String get homes_avatar_updated => 'Foto del hogar actualizada.';
 }

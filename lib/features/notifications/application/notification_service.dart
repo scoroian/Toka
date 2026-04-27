@@ -20,6 +20,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../l10n/app_localizations.dart';
+
 part 'notification_service.g.dart';
 
 enum TokaNotificationType {
@@ -212,7 +214,13 @@ class NotificationService {
   // ──────────────────────────────────────────────────────────────
 
   /// 1 · Tarea por vencer · Compacto (1-A)
+  ///
+  /// `l10n` viene del caller (que sí tiene `BuildContext`). El servicio en sí
+  /// vive en `application/`, sin acceso a contexto, así que delegamos la
+  /// elección de idioma al sitio que llama. Las notifs remotas via FCM las
+  /// genera Cloud Functions con su propia traducción.
   Future<void> showDeadline({
+    required AppLocalizations l10n,
     required String homeId,
     required String homeName,
     required String taskId,
@@ -221,8 +229,8 @@ class NotificationService {
   }) =>
       _show(
         type: TokaNotificationType.deadline,
-        title: 'Tarea por vencer',
-        body: '$taskTitle · vence en $minutesLeft min',
+        title: l10n.notif_deadline_title,
+        body: l10n.notif_deadline_body(taskTitle, minutesLeft),
         homeId: homeId,
         homeName: homeName,
         entityId: taskId,
@@ -231,6 +239,7 @@ class NotificationService {
 
   /// 2 · Tarea asignada · Compacto con asignador (2-A)
   Future<void> showAssignment({
+    required AppLocalizations l10n,
     required String homeId,
     required String homeName,
     required String taskId,
@@ -240,8 +249,8 @@ class NotificationService {
   }) =>
       _show(
         type: TokaNotificationType.assignment,
-        title: '$assignerName te asignó una tarea',
-        body: '$taskTitle · $dueAtLabel',
+        title: l10n.notif_assignment_title(assignerName),
+        body: l10n.notif_assignment_body(taskTitle, dueAtLabel),
         homeId: homeId,
         homeName: homeName,
         entityId: taskId,
@@ -250,6 +259,7 @@ class NotificationService {
 
   /// 3 · Recordatorio N min antes · Compacto (3-A)
   Future<void> showReminder({
+    required AppLocalizations l10n,
     required String homeId,
     required String homeName,
     required String taskId,
@@ -259,8 +269,8 @@ class NotificationService {
   }) =>
       _show(
         type: TokaNotificationType.reminder,
-        title: 'En $minutesLeft min: $taskTitle',
-        body: 'Vence a las $dueAtLabel',
+        title: l10n.notif_reminder_title(minutesLeft, taskTitle),
+        body: l10n.notif_reminder_body(dueAtLabel),
         homeId: homeId,
         homeName: homeName,
         entityId: taskId,
@@ -269,6 +279,7 @@ class NotificationService {
 
   /// 4 · Resumen diario · Compacto con contador (4-C)
   Future<void> showDailySummary({
+    required AppLocalizations l10n,
     required String homeId,
     required String homeName,
     required int totalToday,
@@ -276,8 +287,8 @@ class NotificationService {
   }) =>
       _show(
         type: TokaNotificationType.dailySummary,
-        title: 'Hoy: $totalToday tareas · tú tienes $myToday',
-        body: 'Pulsa para ver la lista',
+        title: l10n.notif_daily_summary_title(totalToday, myToday),
+        body: l10n.notif_daily_summary_body,
         homeId: homeId,
         homeName: homeName,
         route: '/home',
@@ -285,6 +296,7 @@ class NotificationService {
 
   /// 5 · Valoración recibida · MessagingStyle con nota (5-B)
   Future<void> showFeedback({
+    required AppLocalizations l10n,
     required String homeId,
     required String homeName,
     required String feedbackId,
@@ -295,11 +307,11 @@ class NotificationService {
     final starsStr = '⭐' * stars.clamp(1, 5);
     final messaging = MessagingStyleInformation(
       Person(name: raterName, key: raterName),
-      conversationTitle: 'Valoración: $taskTitle',
+      conversationTitle: l10n.notif_feedback_title(taskTitle),
       groupConversation: false,
       messages: <Message>[
         Message(
-          '$starsStr · Te ha dejado una nota privada',
+          l10n.notif_feedback_msg_body(starsStr),
           DateTime.now(),
           Person(name: raterName, key: raterName),
         ),
@@ -307,7 +319,7 @@ class NotificationService {
     );
     await _show(
       type: TokaNotificationType.feedback,
-      title: 'Valoración: $taskTitle',
+      title: l10n.notif_feedback_title(taskTitle),
       body: '$raterName · $starsStr',
       homeId: homeId,
       homeName: homeName,
@@ -319,18 +331,19 @@ class NotificationService {
 
   /// 6 · Rotación · InboxStyle resumen (6-C)
   Future<void> showRotation({
+    required AppLocalizations l10n,
     required String homeId,
     required String homeName,
     required List<String> rotationLines,
   }) async {
     final inbox = InboxStyleInformation(
       rotationLines,
-      contentTitle: 'Rotaciones de esta semana',
-      summaryText: '$homeName · ${rotationLines.length} tareas',
+      contentTitle: l10n.notif_rotation_title,
+      summaryText: l10n.notif_rotation_summary(homeName, rotationLines.length),
     );
     await _show(
       type: TokaNotificationType.rotation,
-      title: 'Rotaciones de esta semana',
+      title: l10n.notif_rotation_title,
       body: rotationLines.take(3).join(' · '),
       homeId: homeId,
       homeName: homeName,

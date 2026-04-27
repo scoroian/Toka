@@ -29,6 +29,7 @@ class HomeModel {
       createdAt: (data['createdAt'] as Timestamp).toDate(),
       updatedAt: (data['updatedAt'] as Timestamp).toDate(),
       lastBillingError: data['lastBillingError'] as String?,
+      photoUrl: data['photoUrl'] as String?,
     );
   }
 

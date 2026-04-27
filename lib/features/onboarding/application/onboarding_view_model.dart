@@ -1,4 +1,7 @@
 // lib/features/onboarding/application/onboarding_view_model.dart
+//
+// Falsos positivos del analyzer (ver explicación en `login_view_model.dart`).
+// ignore_for_file: unused_element_parameter, library_private_types_in_public_api
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 

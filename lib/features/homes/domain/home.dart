@@ -38,5 +38,9 @@ class Home with _$Home {
     required DateTime createdAt,
     required DateTime updatedAt,
     String? lastBillingError,
+    // URL de la foto del hogar en Cloud Storage. null cuando el hogar
+    // todavía usa la inicial. Se actualiza desde el sheet de "Avatar
+    // del hogar" en `home_settings_screen` (ambas skins).
+    String? photoUrl,
   }) = _Home;
 }

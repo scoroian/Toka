@@ -357,21 +357,24 @@ class _EditProfileScreenFuturistaState
                           key: const Key('vis_chip_none'),
                           active: _vis == _PhoneVis.none,
                           onTap: () => _setVis(_PhoneVis.none),
-                          child: const Text('Nadie'),
+                          child: Text(
+                              AppLocalizations.of(context).phone_visibility_none),
                         ),
                         const SizedBox(width: 8),
                         TockaChip(
                           key: const Key('vis_chip_home'),
                           active: _vis == _PhoneVis.home,
                           onTap: () => _setVis(_PhoneVis.home),
-                          child: const Text('Hogar'),
+                          child: Text(
+                              AppLocalizations.of(context).phone_visibility_home),
                         ),
                         const SizedBox(width: 8),
                         TockaChip(
                           key: const Key('vis_chip_all'),
                           active: _vis == _PhoneVis.all,
                           onTap: () => _setVis(_PhoneVis.all),
-                          child: const Text('Todos'),
+                          child: Text(
+                              AppLocalizations.of(context).phone_visibility_all),
                         ),
                       ],
                     ),

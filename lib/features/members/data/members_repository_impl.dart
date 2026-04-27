@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 
 import '../../../core/errors/exceptions.dart';
+import '../../homes/domain/invitation.dart';
 import '../data/member_model.dart';
 import '../domain/member.dart';
 import '../domain/members_repository.dart';
@@ -91,6 +92,57 @@ class MembersRepositoryImpl implements MembersRepository {
         }
       }
       return null;
+    });
+  }
+
+  @override
+  Stream<List<Invitation>> watchPendingInvitations(String homeId) {
+    return _firestore
+        .collection('homes')
+        .doc(homeId)
+        .collection('invitations')
+        .where('used', isEqualTo: false)
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snap) {
+      final now = DateTime.now();
+      return snap.docs
+          .map((d) {
+            final data = d.data();
+            final expiresAt =
+                (data['expiresAt'] as Timestamp?)?.toDate() ?? now;
+            final createdAt =
+                (data['createdAt'] as Timestamp?)?.toDate() ?? now;
+            return Invitation(
+              id: d.id,
+              code: (data['code'] as String?) ?? '',
+              createdBy: (data['createdBy'] as String?) ?? '',
+              expiresAt: expiresAt.toLocal(),
+              createdAt: createdAt.toLocal(),
+              used: (data['used'] as bool?) ?? false,
+            );
+          })
+          // Filtramos las ya expiradas en cliente; el cron de Functions
+          // no las marca `used:true` automáticamente, solo se invalidan
+          // por fecha. La regla Firestore ya restringe la lectura a
+          // admin/owner, así que no hay riesgo de fuga de datos.
+          .where((inv) => !inv.isExpired)
+          .toList();
+    });
+  }
+
+  @override
+  Future<void> revokeInvitation(String homeId, String invitationId) async {
+    // Las firestore.rules permiten `update` directo a admin/owner del
+    // hogar. No hace falta callable para esta operación.
+    await _firestore
+        .collection('homes')
+        .doc(homeId)
+        .collection('invitations')
+        .doc(invitationId)
+        .update({
+      'used': true,
+      'revokedAt': FieldValue.serverTimestamp(),
     });
   }
 

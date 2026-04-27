@@ -109,13 +109,13 @@ class ProfileScreenFuturista extends ConsumerWidget {
           isPremium: isPremium,
           role: null,
           streak: null,
-          stats: const _Kpis(
+          stats: _Kpis(
             value1: '—',
             value2: '—',
             value3: '—',
-            label1: 'TAREAS',
-            label2: 'RACHA',
-            label3: 'MEDIA',
+            label1: l10n.profile_stat_tasks_label,
+            label2: l10n.profile_stat_streak_label,
+            label3: l10n.profile_stat_average_label,
           ),
           radarEntries: radarEntries,
           ctaButton: TockaBtn(
@@ -173,9 +173,13 @@ class ProfileScreenFuturista extends ConsumerWidget {
             isOwn: false,
             onBack: () => context.pop(),
             onSettings: null,
-            onMore: data.canManageRoles || data.canRemoveMember
-                ? () => _showAdminSheet(context, ref, data, l10n)
-                : null,
+            // Cualquier viewer (no self) puede abrir el sheet: la opción
+            // "Valorar" está disponible para todos los miembros del hogar.
+            // El sheet decide internamente qué acciones admin mostrar
+            // (eliminar, gestionar rol) según `canRemoveMember`/`canManageRoles`.
+            onMore: data.isSelf
+                ? null
+                : () => _showAdminSheet(context, ref, data, l10n),
           ),
           displayName: m.nickname,
           handle: m.uid,
@@ -205,10 +209,13 @@ class ProfileScreenFuturista extends ConsumerWidget {
 
   String? _roleLabel(AppLocalizations l10n, MemberRole role) =>
       switch (role) {
-        MemberRole.owner => 'OWNER',
-        MemberRole.admin => 'ADMIN',
-        MemberRole.member => 'MEMBER',
-        MemberRole.frozen => 'FROZEN',
+        // Mono uppercase para encajar en la pill futurista, pero el texto
+        // viene del ARB para que en español lea "PROPIETARIO" en vez de
+        // "OWNER" (caso reportado por el usuario).
+        MemberRole.owner => l10n.members_role_badge_owner.toUpperCase(),
+        MemberRole.admin => l10n.members_role_badge_admin.toUpperCase(),
+        MemberRole.member => l10n.members_role_badge_member.toUpperCase(),
+        MemberRole.frozen => l10n.members_role_badge_frozen.toUpperCase(),
       };
 
   Future<void> _showAdminSheet(
@@ -387,14 +394,17 @@ class _ProfileBody extends StatelessWidget {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
 
-    return ListView(
-      padding: EdgeInsets.fromLTRB(0, 10, 0, bottomPadding),
+    return Column(
       children: [
+        // Header fijo: el botón back/settings/more queda anclado arriba.
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
           child: header,
         ),
-        const SizedBox(height: 12),
+        Expanded(
+          child: ListView(
+            padding: EdgeInsets.fromLTRB(0, 12, 0, bottomPadding),
+            children: [
         // Hero perfil
         Center(
           child: _HeroAvatar(
@@ -441,15 +451,17 @@ class _ProfileBody extends StatelessWidget {
                   child: Text(role!),
                 ),
               if (isPremium)
-                const TockaPill(
-                  color: Color(0xFFF5B544),
+                TockaPill(
+                  color: const Color(0xFFF5B544),
                   glow: true,
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.workspace_premium, size: 12),
-                      SizedBox(width: 4),
-                      Text('PREMIUM'),
+                      const Icon(Icons.workspace_premium, size: 12),
+                      const SizedBox(width: 4),
+                      Text(AppLocalizations.of(context)
+                          .homes_plan_premium
+                          .toUpperCase()),
                     ],
                   ),
                 ),
@@ -503,6 +515,9 @@ class _ProfileBody extends StatelessWidget {
             ),
           ),
         ],
+            ],
+          ),
+        ),
       ],
     );
   }
@@ -549,7 +564,10 @@ class _Header extends StatelessWidget {
             icon: Icons.settings_outlined,
             onTap: onSettings,
           )
-        else
+        else if (onMore != null)
+          // Sólo renderizamos el slot de tres puntos cuando hay acciones
+          // realmente disponibles. Pintarlo siempre y dejarlo sin onTap hace
+          // que el usuario lo pulse y no pase nada (parece roto).
           _IconSlot(
             key: const Key('fut_btn_more'),
             icon: Icons.more_vert,

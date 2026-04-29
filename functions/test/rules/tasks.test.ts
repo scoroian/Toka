@@ -11,6 +11,8 @@ import {
   setDoc,
   updateDoc,
   deleteDoc,
+  serverTimestamp,
+  Timestamp,
 } from 'firebase/firestore';
 import { readFileSync } from 'fs';
 import * as path from 'path';
@@ -22,6 +24,35 @@ const ADMIN_UID = 'admin1';
 const MEMBER_UID = 'member1';
 const FROZEN_UID = 'frozen1';
 const OUTSIDER_UID = 'outsider1';
+
+function validTask(homeId = HOME1, createdByUid = OWNER_UID, overrides: Record<string, unknown> = {}) {
+  return {
+    homeId,
+    title: 'Limpiar cocina',
+    description: 'Pasar escoba y fregar',
+    visualKind: 'emoji',
+    visualValue: '🧹',
+    status: 'active',
+    recurrenceType: 'daily',
+    recurrenceRule: {
+      type: 'daily',
+      every: 1,
+      time: '09:00',
+      timezone: 'Europe/Madrid',
+    },
+    assignmentMode: 'basicRotation',
+    assignmentOrder: [OWNER_UID, MEMBER_UID],
+    currentAssigneeUid: OWNER_UID,
+    nextDueAt: Timestamp.fromDate(new Date('2026-04-28T09:00:00.000Z')),
+    difficultyWeight: 1,
+    completedCount90d: 0,
+    createdByUid,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+    onMissAssign: 'sameAssignee',
+    ...overrides,
+  };
+}
 
 beforeAll(async () => {
   testEnv = await initializeTestEnvironment({
@@ -44,19 +75,13 @@ beforeEach(async () => {
   await testEnv.withSecurityRulesDisabled(async (ctx) => {
     const db = ctx.firestore();
 
-    // premiumStatus='active' para no activar gates Free en los tests existentes.
-    // Los tests Free tienen su propio bloque al final del archivo con homes
-    // separados (premiumStatus='free' + planCounters en dashboard).
+    // premiumStatus='active' para no activar gates Free en los tests base.
     await setDoc(doc(db, `homes/${HOME1}`), {
       ownerUid: OWNER_UID,
       name: 'Test Home',
       premiumStatus: 'active',
     });
-    await setDoc(doc(db, `homes/${HOME1}/tasks/task1`), {
-      title: 'Limpiar cocina',
-      status: 'active',
-      currentAssigneeUid: MEMBER_UID,
-    });
+    await setDoc(doc(db, `homes/${HOME1}/tasks/task1`), validTask());
 
     await setDoc(doc(db, `users/${OWNER_UID}/memberships/${HOME1}`), { status: 'active', role: 'owner' });
     await setDoc(doc(db, `users/${ADMIN_UID}/memberships/${HOME1}`), { status: 'active', role: 'admin' });
@@ -103,43 +128,59 @@ describe('tasks — read', () => {
 // ─── CREATE ────────────────────────────────────────────────────────────────────
 
 describe('tasks — create', () => {
-  const newTask = { title: 'Nueva tarea', status: 'active' };
-
-  it('owner activo puede crear tarea', async () => {
+  it('owner activo puede crear tarea válida', async () => {
     const ctx = testEnv.authenticatedContext(OWNER_UID);
-    await assertSucceeds(setDoc(doc(ctx.firestore(), `homes/${HOME1}/tasks/task2`), newTask));
+    await assertSucceeds(setDoc(doc(ctx.firestore(), `homes/${HOME1}/tasks/task2`), validTask(HOME1, OWNER_UID)));
   });
 
-  it('admin activo puede crear tarea', async () => {
+  it('admin activo puede crear tarea válida', async () => {
     const ctx = testEnv.authenticatedContext(ADMIN_UID);
-    await assertSucceeds(setDoc(doc(ctx.firestore(), `homes/${HOME1}/tasks/task3`), newTask));
+    await assertSucceeds(setDoc(doc(ctx.firestore(), `homes/${HOME1}/tasks/task3`), validTask(HOME1, ADMIN_UID)));
   });
 
   it('member raso activo NO puede crear tarea', async () => {
     const ctx = testEnv.authenticatedContext(MEMBER_UID);
-    await assertFails(setDoc(doc(ctx.firestore(), `homes/${HOME1}/tasks/task4`), newTask));
+    await assertFails(setDoc(doc(ctx.firestore(), `homes/${HOME1}/tasks/task4`), validTask(HOME1, MEMBER_UID)));
   });
 
   it('admin frozen NO puede crear tarea', async () => {
     const ctx = testEnv.authenticatedContext(FROZEN_UID);
-    await assertFails(setDoc(doc(ctx.firestore(), `homes/${HOME1}/tasks/task5`), newTask));
+    await assertFails(setDoc(doc(ctx.firestore(), `homes/${HOME1}/tasks/task5`), validTask(HOME1, FROZEN_UID)));
   });
 
   it('outsider autenticado NO puede crear tarea', async () => {
     const ctx = testEnv.authenticatedContext(OUTSIDER_UID);
-    await assertFails(setDoc(doc(ctx.firestore(), `homes/${HOME1}/tasks/task6`), newTask));
+    await assertFails(setDoc(doc(ctx.firestore(), `homes/${HOME1}/tasks/task6`), validTask(HOME1, OUTSIDER_UID)));
   });
 
   it('no autenticado NO puede crear tarea', async () => {
     const ctx = testEnv.unauthenticatedContext();
-    await assertFails(setDoc(doc(ctx.firestore(), `homes/${HOME1}/tasks/task7`), newTask));
+    await assertFails(setDoc(doc(ctx.firestore(), `homes/${HOME1}/tasks/task7`), validTask(HOME1, OWNER_UID)));
+  });
+
+  it('admin NO puede crear tarea con completedCount90d distinto de cero', async () => {
+    const ctx = testEnv.authenticatedContext(ADMIN_UID);
+    await assertFails(setDoc(doc(ctx.firestore(), `homes/${HOME1}/tasks/task_bad_counter`),
+      validTask(HOME1, ADMIN_UID, { completedCount90d: 10 })));
+  });
+
+  it('admin NO puede crear tarea con homeId distinto al path', async () => {
+    const ctx = testEnv.authenticatedContext(ADMIN_UID);
+    await assertFails(setDoc(doc(ctx.firestore(), `homes/${HOME1}/tasks/task_bad_home`),
+      validTask('other-home', ADMIN_UID)));
+  });
+
+  it('admin NO puede crear tarea declarando otro createdByUid', async () => {
+    const ctx = testEnv.authenticatedContext(ADMIN_UID);
+    await assertFails(setDoc(doc(ctx.firestore(), `homes/${HOME1}/tasks/task_bad_creator`),
+      validTask(HOME1, OWNER_UID)));
   });
 });
 
 // ─── UPDATE ────────────────────────────────────────────────────────────────────
 
 describe('tasks — update', () => {
-  const patch = { title: 'Título actualizado' };
+  const patch = { title: 'Título actualizado', updatedAt: serverTimestamp() };
 
   it('owner activo puede actualizar tarea', async () => {
     const ctx = testEnv.authenticatedContext(OWNER_UID);
@@ -169,6 +210,38 @@ describe('tasks — update', () => {
   it('no autenticado NO puede actualizar tarea', async () => {
     const ctx = testEnv.unauthenticatedContext();
     await assertFails(updateDoc(doc(ctx.firestore(), `homes/${HOME1}/tasks/task1`), patch));
+  });
+
+  it('admin NO puede modificar completedCount90d desde cliente', async () => {
+    const ctx = testEnv.authenticatedContext(ADMIN_UID);
+    await assertFails(updateDoc(doc(ctx.firestore(), `homes/${HOME1}/tasks/task1`), {
+      completedCount90d: 999,
+      updatedAt: serverTimestamp(),
+    }));
+  });
+
+  it('admin NO puede modificar createdByUid desde cliente', async () => {
+    const ctx = testEnv.authenticatedContext(ADMIN_UID);
+    await assertFails(updateDoc(doc(ctx.firestore(), `homes/${HOME1}/tasks/task1`), {
+      createdByUid: ADMIN_UID,
+      updatedAt: serverTimestamp(),
+    }));
+  });
+
+  it('admin puede hacer soft-delete con status=deleted', async () => {
+    const ctx = testEnv.authenticatedContext(ADMIN_UID);
+    await assertSucceeds(updateDoc(doc(ctx.firestore(), `homes/${HOME1}/tasks/task1`), {
+      status: 'deleted',
+      updatedAt: serverTimestamp(),
+    }));
+  });
+
+  it('admin NO puede escribir estado desconocido', async () => {
+    const ctx = testEnv.authenticatedContext(ADMIN_UID);
+    await assertFails(updateDoc(doc(ctx.firestore(), `homes/${HOME1}/tasks/task1`), {
+      status: 'completedOneTime',
+      updatedAt: serverTimestamp(),
+    }));
   });
 });
 
@@ -242,11 +315,11 @@ describe('tasks — create (Free plan limits)', () => {
     });
     const ctx = testEnv.authenticatedContext(OWNER_UID);
     await assertSucceeds(
-      setDoc(doc(ctx.firestore(), `homes/${FREE_HOME}/tasks/t_ot`), {
-        title: 'Puntual',
-        status: 'active',
-        recurrenceRule: { kind: 'oneTime' },
-      }),
+      setDoc(doc(ctx.firestore(), `homes/${FREE_HOME}/tasks/t_ot`),
+        validTask(FREE_HOME, OWNER_UID, {
+          recurrenceType: 'oneTime',
+          recurrenceRule: { kind: 'oneTime', date: '2026-04-28', time: '09:00', timezone: 'Europe/Madrid' },
+        })),
     );
   });
 
@@ -266,11 +339,11 @@ describe('tasks — create (Free plan limits)', () => {
     });
     const ctx = testEnv.authenticatedContext(OWNER_UID);
     await assertFails(
-      setDoc(doc(ctx.firestore(), `homes/${FREE_HOME}/tasks/t_fail`), {
-        title: 'Extra',
-        status: 'active',
-        recurrenceRule: { kind: 'oneTime' },
-      }),
+      setDoc(doc(ctx.firestore(), `homes/${FREE_HOME}/tasks/t_fail`),
+        validTask(FREE_HOME, OWNER_UID, {
+          recurrenceType: 'oneTime',
+          recurrenceRule: { kind: 'oneTime', date: '2026-04-28', time: '09:00', timezone: 'Europe/Madrid' },
+        })),
     );
   });
 
@@ -290,11 +363,10 @@ describe('tasks — create (Free plan limits)', () => {
     });
     const ctx = testEnv.authenticatedContext(OWNER_UID);
     await assertFails(
-      setDoc(doc(ctx.firestore(), `homes/${FREE_HOME}/tasks/t_rec`), {
-        title: 'Recurrente',
-        status: 'active',
-        recurrenceRule: { kind: 'daily' },
-      }),
+      setDoc(doc(ctx.firestore(), `homes/${FREE_HOME}/tasks/t_rec`),
+        validTask(FREE_HOME, OWNER_UID, {
+          recurrenceRule: { kind: 'daily', every: 1, time: '09:00', timezone: 'Europe/Madrid' },
+        })),
     );
   });
 
@@ -317,11 +389,11 @@ describe('tasks — create (Free plan limits)', () => {
     });
     const ctx = testEnv.authenticatedContext(OWNER_UID);
     await assertSucceeds(
-      setDoc(doc(ctx.firestore(), `homes/${FREE_HOME}/tasks/t_premium`), {
-        title: 'Ilimitado',
-        status: 'active',
-        recurrenceRule: { kind: 'weekly' },
-      }),
+      setDoc(doc(ctx.firestore(), `homes/${FREE_HOME}/tasks/t_premium`),
+        validTask(FREE_HOME, OWNER_UID, {
+          recurrenceType: 'weekly',
+          recurrenceRule: { kind: 'weekly', weekdays: ['MON'], time: '09:00', timezone: 'Europe/Madrid' },
+        })),
     );
   });
 });

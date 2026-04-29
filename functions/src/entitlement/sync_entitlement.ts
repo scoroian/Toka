@@ -6,8 +6,18 @@ import { FieldValue, Timestamp } from "firebase-admin/firestore";
 import { unlockSlotIfEligibleTx } from "./slot_ledger";
 import { parseReceiptData, validateReceipt } from "./sync_entitlement_helpers";
 import { DEFAULT_BANNER_UNIT_ID } from "../shared/ad_constants";
+import { isPremium, normalizePremiumStatus } from "../shared/free_limits";
 
 const db = () => admin.firestore();
+
+// Defensa en profundidad: aunque App Check + validateReceipt cierran el vector
+// principal, mientras la verificación server-to-server real (Google Play /
+// App Store) no esté integrada, este gate impide habilitar Premium en
+// producción accidentalmente. En producción ambos env vars deben estar a false.
+function allowUnverifiedReceiptParsing(): boolean {
+  return process.env.FUNCTIONS_EMULATOR === "true" ||
+    process.env.TOKA_ALLOW_UNVERIFIED_RECEIPTS === "true";
+}
 
 // `appCheck: true` exige que la petición venga de un cliente con attestation
 // válida (DeviceCheck en iOS, Play Integrity en Android). Combinado con la
@@ -16,6 +26,13 @@ const db = () => admin.firestore();
 export const syncEntitlement = onCall({ enforceAppCheck: true }, async (request) => {
   if (!request.auth) {
     throw new HttpsError("unauthenticated", "Not authenticated");
+  }
+
+  if (!allowUnverifiedReceiptParsing()) {
+    throw new HttpsError(
+      "failed-precondition",
+      "store-receipt-validation-not-enabled",
+    );
   }
 
   const uid = request.auth.uid;
@@ -38,15 +55,15 @@ export const syncEntitlement = onCall({ enforceAppCheck: true }, async (request)
 
   const firestore = db();
 
-  // Validar que el usuario es miembro del hogar
+  // Validar que el usuario es miembro activo del hogar
   const memberRef = firestore
     .collection("homes")
     .doc(homeId)
     .collection("members")
     .doc(uid);
   const memberSnap = await memberRef.get();
-  if (!memberSnap.exists) {
-    throw new HttpsError("permission-denied", "User is not a member of this home");
+  if (!memberSnap.exists || memberSnap.data()?.["status"] !== "active") {
+    throw new HttpsError("permission-denied", "User is not an active member of this home");
   }
 
   // Parsear el recibo: el cliente solo envía datos firmables por la store
@@ -56,8 +73,9 @@ export const syncEntitlement = onCall({ enforceAppCheck: true }, async (request)
   // hace verificación server-side real y rechaza si la suscripción no
   // está activa o el token está corrupto. En dev infiere por productId
   // con warnings — App Check sigue siendo el gate primario.
-  const { status, plan, endsAt, autoRenewEnabled, storeVerified } =
-    await validateReceipt(rawReceipt, platform);
+  const validated = await validateReceipt(rawReceipt, platform);
+  const status = normalizePremiumStatus(validated.status);
+  const { plan, endsAt, autoRenewEnabled, storeVerified } = validated;
 
   // Actualizar el hogar
   const homeRef = firestore.collection("homes").doc(homeId);
@@ -133,7 +151,7 @@ async function updatePremiumFlagsInDashboard(
   homeId: string,
   premiumStatus: string,
 ): Promise<void> {
-  const isPremium = ["active", "cancelled_pending_end", "rescue"].includes(premiumStatus);
+  const homeIsPremium = isPremium(premiumStatus);
   const dashRef = firestore
     .collection("homes")
     .doc(homeId)
@@ -142,15 +160,15 @@ async function updatePremiumFlagsInDashboard(
   await dashRef.set(
     {
       premiumFlags: {
-        isPremium,
-        showAds: !isPremium,
-        canUseSmartDistribution: isPremium,
-        canUseVacations: isPremium,
-        canUseReviews: isPremium,
+        isPremium: homeIsPremium,
+        showAds: !homeIsPremium,
+        canUseSmartDistribution: homeIsPremium,
+        canUseVacations: homeIsPremium,
+        canUseReviews: homeIsPremium,
       },
       adFlags: {
-        showBanner: !isPremium,
-        bannerUnit: isPremium ? "" : DEFAULT_BANNER_UNIT_ID,
+        showBanner: !homeIsPremium,
+        bannerUnit: homeIsPremium ? "" : DEFAULT_BANNER_UNIT_ID,
       },
       updatedAt: FieldValue.serverTimestamp(),
     },

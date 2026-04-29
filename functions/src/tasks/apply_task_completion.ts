@@ -66,10 +66,10 @@ export const applyTaskCompletion = onCall(async (request) => {
     const assignmentOrder: string[] = task["assignmentOrder"] ?? [uid];
     const frozenUids: string[] = task["frozenUids"] ?? [];
     const allExcluded = [...new Set([...frozenUids, ...excludedUids])];
-    const distributionMode: string = task["distributionMode"] ?? "round_robin";
+    const distributionMode: string = task["distributionMode"] ?? task["assignmentMode"] ?? "round_robin";
 
     let nextAssigneeUid: string;
-    if (distributionMode === "smart") {
+    if (distributionMode === "smart" || distributionMode === "smartDistribution") {
       nextAssigneeUid = getNextAssigneeSmart(assignmentOrder, uid, allExcluded, loadDataMap);
     } else {
       nextAssigneeUid = getNextAssigneeRoundRobin(assignmentOrder, uid, allExcluded) ?? uid;
@@ -111,11 +111,14 @@ export const applyTaskCompletion = onCall(async (request) => {
     }
     tx.update(taskRef, taskUpdate);
 
-    // Usamos el snapshot ya leído de membersSnap para evitar read-after-write en la transacción
+    // Usamos el snapshot ya leído de membersSnap para evitar read-after-write en la transacción.
+    // Campo canónico: completedCount. Se conserva fallback de tasksCompleted para datos legacy.
     const memberRef = db.collection("homes").doc(homeId).collection("members").doc(uid);
     const memberDocInSnap = membersSnap.docs.find((d) => d.id === uid);
     const member = memberDocInSnap?.data() ?? {};
-    const newCompleted = ((member["tasksCompleted"] as number) ?? 0) + 1;
+    const legacyCompleted = (member["tasksCompleted"] as number | undefined) ?? 0;
+    const completedBefore = (member["completedCount"] as number | undefined) ?? legacyCompleted;
+    const newCompleted = completedBefore + 1;
     const newPassed: number = (member["passedCount"] as number) ?? 0;
     const newCompliance = newCompleted / (newCompleted + newPassed);
 
@@ -147,7 +150,8 @@ export const applyTaskCompletion = onCall(async (request) => {
     }
 
     tx.update(memberRef, {
-      tasksCompleted: FieldValue.increment(1),
+      completedCount: newCompleted,
+      tasksCompleted: FieldValue.delete(),
       completions60d: FieldValue.increment(1),
       complianceRate: newCompliance,
       currentStreak: newStreak,

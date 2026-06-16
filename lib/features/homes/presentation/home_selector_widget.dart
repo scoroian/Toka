@@ -262,9 +262,9 @@ class _HomeSelectorSheet extends ConsumerWidget {
 /// Abre el sheet de selección de hogar (lista + acción "Añadir hogar").
 ///
 /// Paridad funcional para skins que no pueden usar `HomeSelectorWidget`
-/// directamente (por ejemplo, el `TockaTopBar` futurista, que sólo expone un
-/// callback `onHomeTap`). Reutiliza `_HomeSelectorSheet` con la lista
-/// ordenada y el handler de switchHome ya implementados.
+/// directamente (una top bar que sólo expone un callback `onHomeTap`).
+/// Reutiliza `_HomeSelectorSheet` con la lista ordenada y el handler de
+/// switchHome ya implementados.
 void showHomeSelectorSheet(BuildContext context, WidgetRef ref) {
   final l10n = AppLocalizations.of(context);
   final currentHome = ref.read(currentHomeProvider).valueOrNull;

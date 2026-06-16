@@ -1201,10 +1201,6 @@
   "@skinClassicLabel": { "description": "Name of the classic (v2) skin" },
   "skinClassicDescription": "Cálido, luminoso, familiar",
   "@skinClassicDescription": { "description": "Short description of the classic (v2) skin" },
-  "skinFuturistaLabel": "Futurista",
-  "@skinFuturistaLabel": { "description": "Name of the futurist skin" },
-  "skinFuturistaDescription": "Oscuro, espacial, minimalista",
-  "@skinFuturistaDescription": { "description": "Short description of the futurist skin" },
 
   "homes_role_frozen": "Congelado",
   "@homes_role_frozen": { "description": "Frozen member role label" },
@@ -1344,13 +1340,9 @@
   "home_settings_code_short": "CODE",
   "@home_settings_code_short": { "description": "Short prefix shown before the home id snippet" },
 
-  "vacation_subtitle_futurista": "Mientras estés en vacaciones, las tareas no te tocarán a ti.",
-  "@vacation_subtitle_futurista": { "description": "Hero subtitle on the futurist vacation screen" },
   "vacation_reason_label_short": "MOTIVO",
   "@vacation_reason_label_short": { "description": "Mono uppercase label preceding the vacation reason input" },
 
-  "rescue_hero_title_futurista": "Decide qué sigue\nactivo en Free.",
-  "@rescue_hero_title_futurista": { "description": "Hero title on the futurist rescue screen (allows newline)" },
   "rescue_subtitle_prefix": "Si no reactivas, tu hogar bajará a Free el ",
   "@rescue_subtitle_prefix": { "description": "First part of rescue subtitle, before the date" },
   "rescue_subtitle_suffix": ". El resto quedará congelado 30 días · restaurable.",

@@ -160,7 +160,7 @@ class MembersScreenV2 extends ConsumerWidget {
   }
 }
 
-/// Tarjeta "Equilibrio del hogar" (paridad con `_BalanceHero` futurista).
+/// Tarjeta "Equilibrio del hogar".
 ///
 /// Muestra el promedio de `complianceRate` de miembros activos como un
 /// porcentaje con barra. Si la diferencia entre el miembro con más tareas

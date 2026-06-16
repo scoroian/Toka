@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_skin.dart';
-import '../../../../core/theme/futurista/futurista_colors.dart';
-import '../../../../core/theme/futurista/futurista_tokens.dart';
 import '../../../../core/theme/skin_provider.dart';
 import '../../../../l10n/app_localizations.dart';
 
-/// Selector visual del skin de la app. Dos cards lado a lado (v2 / futurista);
-/// al tocar una, [skinModeProvider] cambia y la app se retematiza en caliente.
+/// Selector visual del skin de la app. Pinta una card por cada [AppSkin]; al
+/// tocar una, [skinModeProvider] cambia y la app se retematiza en caliente.
+/// Por ahora solo existe la skin `v2`, así que se muestra una única card; al
+/// añadir nuevas skins aparecerán automáticamente.
 class AppearancePicker extends ConsumerWidget {
   const AppearancePicker({super.key});
 
@@ -52,8 +52,6 @@ class _SkinCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final (label, description) = switch (skin) {
       AppSkin.v2 => (l10n.skinClassicLabel, l10n.skinClassicDescription),
-      AppSkin.futurista =>
-        (l10n.skinFuturistaLabel, l10n.skinFuturistaDescription),
     };
     final theme = Theme.of(context);
 
@@ -76,8 +74,6 @@ class _SkinCard extends StatelessWidget {
                   : theme.dividerColor,
               width: selected ? 2 : 1,
             ),
-            boxShadow:
-                (selected && skin == AppSkin.futurista) ? FShadows.glowCyan : null,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -124,11 +120,6 @@ class _MiniPreview extends StatelessWidget {
           const Color(0xFFF9F9F7),
           const Color(0xFFF4845F),
           const Color(0xFFFFFFFF),
-        ),
-      AppSkin.futurista => (
-          FuturistaColors.bg0,
-          FuturistaColors.primary,
-          FuturistaColors.bg2,
         ),
     };
 

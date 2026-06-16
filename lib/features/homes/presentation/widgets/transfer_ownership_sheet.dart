@@ -1,7 +1,7 @@
 // lib/features/homes/presentation/widgets/transfer_ownership_sheet.dart
 //
 // Sheet para transferir la propiedad del hogar. Llamada desde
-// `home_settings_screen_v2` y `home_settings_screen_futurista`. Usa el
+// `home_settings_screen_v2`. Usa el
 // `MemberActionsProvider.transferOwnership` (callable `transferOwnership`)
 // que ya existe.
 //

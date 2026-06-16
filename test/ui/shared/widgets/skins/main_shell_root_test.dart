@@ -7,17 +7,13 @@ import 'package:toka/core/theme/app_skin.dart';
 import 'package:toka/core/theme/skin_provider.dart';
 import 'package:toka/l10n/app_localizations.dart';
 import 'package:toka/shared/widgets/ad_banner_config_provider.dart';
-import 'package:toka/shared/widgets/skins/main_shell_futurista.dart';
 import 'package:toka/shared/widgets/skins/main_shell_root.dart';
+import 'package:toka/shared/widgets/skins/main_shell_v2.dart';
 
-/// Harness ligero: monta MainShellRoot con un child identificable.
-/// Evita MaterialApp.router (que arrastraría providers reales del shell v2)
-/// usando ShellRoute dentro de un GoRouter mínimo, pero sólo pumpeamos el
-/// skin `futurista`, que es el que nos interesa validar aquí.
-Widget harness({
-  required ProviderContainer container,
-  required AppSkin initialSkin,
-}) {
+/// Harness ligero: monta MainShellRoot con un child identificable usando un
+/// ShellRoute dentro de un GoRouter mínimo. Inyecta un AdBannerConfig OFF para
+/// evitar timers / streams Firestore reales del banner.
+Widget harness({required ProviderContainer container}) {
   final router = GoRouter(
     initialLocation: '/home',
     routes: [
@@ -46,42 +42,22 @@ Widget harness({
 void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
-  testWidgets('skin default (v2) selects MainShellV2 variant', (tester) async {
-    // Overrideamos el skinModeProvider a v2 explícito y, para no montar
-    // todo el shell v2 real, inyectamos overrides mínimos via un harness
-    // más simple: nos basta comprobar el tipo de shell que elige SkinSwitch
-    // cuando el provider está en v2.
+  testWidgets('skin v2 renders MainShellV2 + child', (tester) async {
     final c = ProviderContainer(
       overrides: [
         skinModeProvider.overrideWith(_FakeSkinMode.new),
-      ],
-    );
-    addTearDown(c.dispose);
-    // Bootstrap estado inicial = v2.
-    c.read(skinModeProvider.notifier).set(AppSkin.v2);
-    expect(c.read(skinModeProvider), AppSkin.v2);
-  });
-
-  testWidgets('futurista skin renders MainShellFuturista + child', (tester) async {
-    final c = ProviderContainer(
-      overrides: [
-        skinModeProvider.overrideWith(_FakeSkinMode.new),
-        // El nuevo MainShellFuturista (Task 2e) watchea adBannerConfigProvider
-        // para decidir si pintar el AdBanner real. En este harness no hay
-        // Firebase ni currentHomeProvider, así que devolvemos un config OFF
-        // estable y evitamos timers pendientes / streams Firestore reales.
         adBannerConfigProvider.overrideWith(
           (ref) => const AdBannerConfig(show: false, unitId: ''),
         ),
       ],
     );
     addTearDown(c.dispose);
-    c.read(skinModeProvider.notifier).set(AppSkin.futurista);
+    c.read(skinModeProvider.notifier).set(AppSkin.v2);
 
-    await tester.pumpWidget(harness(container: c, initialSkin: AppSkin.futurista));
+    await tester.pumpWidget(harness(container: c));
     await tester.pumpAndSettle();
 
-    expect(find.byType(MainShellFuturista), findsOneWidget);
+    expect(find.byType(MainShellV2), findsOneWidget);
     expect(find.text('home-content'), findsOneWidget);
   });
 }

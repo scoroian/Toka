@@ -174,8 +174,7 @@ class _HistoryScreenV2State extends ConsumerState<HistoryScreenV2> {
     );
   }
 
-  /// Intencionalmente duplicado entre v2 y futurista: la skin v2 usa
-  /// `ElevatedButton` (Material) y la futurista usa `TockaBtn`. La spec 2F
+  /// Botón de acción de la skin v2: usa `ElevatedButton` (Material). La spec 2F
   /// (§3 "decisiones tomadas") decide NO deduplicar este sheet por la
   /// divergencia visual establecida en el commit `4f90fef`.
   void _showUpgradeSheet() {

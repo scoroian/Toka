@@ -3,8 +3,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:toka/core/theme/app_skin.dart';
-import 'package:toka/core/theme/skin_provider.dart';
 import 'package:toka/features/settings/presentation/widgets/appearance_picker.dart';
 import 'package:toka/l10n/app_localizations.dart';
 
@@ -31,37 +29,20 @@ void main() {
     SharedPreferences.setMockInitialValues({});
   });
 
-  testWidgets('renders a card per AppSkin value', (tester) async {
+  testWidgets('renderiza una card por AppSkin (solo Clásico por ahora)',
+      (tester) async {
     await tester.pumpWidget(_harness());
     await tester.pumpAndSettle();
 
     expect(find.text('Clásico'), findsOneWidget);
-    expect(find.text('Futurista'), findsOneWidget);
+    // La skin Futurista se eliminó: no debe aparecer su card.
+    expect(find.text('Futurista'), findsNothing);
   });
 
-  testWidgets('tap on Futurista updates skinModeProvider', (tester) async {
+  testWidgets('la card activa (Clásico) muestra el check', (tester) async {
     await tester.pumpWidget(_harness());
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Futurista'));
-    await tester.pumpAndSettle();
-
-    final container = ProviderScope.containerOf(
-      tester.element(find.byType(AppearancePicker)),
-    );
-    expect(container.read(skinModeProvider), AppSkin.futurista);
-  });
-
-  testWidgets('selected card shows check icon', (tester) async {
-    await tester.pumpWidget(_harness());
-    await tester.pumpAndSettle();
-
-    // por defecto v2 está seleccionado → debería haber un check
-    expect(find.byIcon(Icons.check_circle), findsOneWidget);
-
-    // al cambiar a futurista, solo hay un check (ahora en la card futurista)
-    await tester.tap(find.text('Futurista'));
-    await tester.pumpAndSettle();
     expect(find.byIcon(Icons.check_circle), findsOneWidget);
   });
 }

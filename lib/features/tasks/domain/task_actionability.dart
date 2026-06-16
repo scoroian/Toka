@@ -4,8 +4,8 @@ import '../../../core/utils/toka_dates.dart';
 import 'home_dashboard.dart' show TaskPreview;
 
 /// Lógica de actionability + formato de mensaje "vence el {fecha}" para
-/// tareas. Compartida entre la skin v2 (`TodayTaskCardTodoV2`) y la skin
-/// futurista (`TodayScreenFuturista`).
+/// tareas. Usada por la skin v2 (`TodayTaskCardTodoV2`) y reutilizable por
+/// cualquier skin futura.
 ///
 /// Pure-static: no estado, no providers, no dependencias UI más allá de
 /// `Locale` (para `intl`). Testeable con `test()` puro sin widget tester.

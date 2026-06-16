@@ -12,7 +12,6 @@ import 'core/constants/routes.dart';
 import 'core/services/locale_service.dart';
 import 'core/theme/app_skin.dart';
 import 'core/theme/app_theme_v2.dart';
-import 'core/theme/futurista/futurista_theme.dart';
 import 'core/theme/skin_provider.dart';
 import 'core/theme/theme_mode_provider.dart';
 import 'features/auth/application/auth_provider.dart';
@@ -197,7 +196,7 @@ GoRouter appRouter(AppRouterRef ref) {
         builder: (_, __) => const NotificationRationaleScreen(),
       ),
 
-      // ── Shell principal (v2 NavigationBar / futurista TockaTabBar) ──
+      // ── Shell principal (v2 NavigationBar) ──
       ShellRoute(
         builder: (context, state, child) => MainShellRoot(child: child),
         routes: [
@@ -427,8 +426,7 @@ class _TokaAppState extends ConsumerState<TokaApp>
     final themeMode = ref.watch(themeModeNotifierProvider);
     final skin = ref.watch(skinModeProvider);
     final (lightTheme, darkTheme) = switch (skin) {
-      AppSkin.v2        => (AppThemeV2.light,   AppThemeV2.dark),
-      AppSkin.futurista => (FuturistaTheme.light, FuturistaTheme.dark),
+      AppSkin.v2 => (AppThemeV2.light, AppThemeV2.dark),
     };
 
     return KeyboardVisibilityBuilder(

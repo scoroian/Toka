@@ -79,7 +79,7 @@ Widget _wrap(ProviderContainer container) {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: [Locale('es')],
-      // En producción TodayScreenV2 siempre vive bajo MainShellV2 / Futurista;
+      // En producción TodayScreenV2 siempre vive bajo MainShellV2;
       // el shell aporta `ShellPresenceMarker`. Aquí lo simulamos para que
       // adAwareBottomPadding NO caiga en el early-return out-of-shell.
       home: ShellPresenceMarker(child: TodayScreenV2()),

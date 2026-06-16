@@ -173,9 +173,9 @@ class _InviteMemberSheetState extends ConsumerState<InviteMemberSheet> {
                   ],
                   const SizedBox(height: 8),
                   // Wrap (no Row) para que cuando los labels traducidos sean
-                  // largos en una skin con tipografía ancha (futurista usa
-                  // Inter), los botones bajen a la siguiente línea en vez de
-                  // provocar un right-overflowed pill rojo.
+                  // largos en una skin con tipografía ancha, los botones bajen
+                  // a la siguiente línea en vez de provocar un
+                  // right-overflowed pill rojo.
                   Wrap(
                     alignment: WrapAlignment.center,
                     spacing: 8,

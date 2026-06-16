@@ -10,22 +10,24 @@ import 'skin_provider.dart';
 /// Uso típico:
 /// ```dart
 /// SkinSwitch(
-///   v2:        (c) => const TodayScreenV2(),
-///   futurista: (c) => const TodayScreenFuturista(),
+///   v2: (c) => const TodayScreenV2(),
 /// );
 /// ```
 ///
-/// Ambos builders reciben el mismo [BuildContext] y deben consumir los mismos
-/// providers/ViewModels. El widget es únicamente presentación.
+/// Por ahora solo existe la skin `v2`, pero el `switch (skin)` se mantiene como
+/// punto de extensión: al añadir un valor a [AppSkin] habrá que sumar aquí su
+/// builder (p. ej. un nuevo named param) y la rama correspondiente.
+///
+/// El builder recibe el [BuildContext] y debe consumir los mismos
+/// providers/ViewModels que las demás skins. El widget es únicamente
+/// presentación.
 class SkinSwitch extends ConsumerWidget {
   const SkinSwitch({
     super.key,
     required this.v2,
-    required this.futurista,
   });
 
   final WidgetBuilder v2;
-  final WidgetBuilder futurista;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -37,7 +39,6 @@ class SkinSwitch extends ConsumerWidget {
         key: ValueKey<AppSkin>(skin),
         child: switch (skin) {
           AppSkin.v2 => v2(context),
-          AppSkin.futurista => futurista(context),
         },
       ),
     );

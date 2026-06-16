@@ -3436,18 +3436,6 @@ abstract class AppLocalizations {
   /// **'Cálido, luminoso, familiar'**
   String get skinClassicDescription;
 
-  /// Name of the futurist skin
-  ///
-  /// In es, this message translates to:
-  /// **'Futurista'**
-  String get skinFuturistaLabel;
-
-  /// Short description of the futurist skin
-  ///
-  /// In es, this message translates to:
-  /// **'Oscuro, espacial, minimalista'**
-  String get skinFuturistaDescription;
-
   /// Frozen member role label
   ///
   /// In es, this message translates to:
@@ -3808,23 +3796,11 @@ abstract class AppLocalizations {
   /// **'CODE'**
   String get home_settings_code_short;
 
-  /// Hero subtitle on the futurist vacation screen
-  ///
-  /// In es, this message translates to:
-  /// **'Mientras estés en vacaciones, las tareas no te tocarán a ti.'**
-  String get vacation_subtitle_futurista;
-
   /// Mono uppercase label preceding the vacation reason input
   ///
   /// In es, this message translates to:
   /// **'MOTIVO'**
   String get vacation_reason_label_short;
-
-  /// Hero title on the futurist rescue screen (allows newline)
-  ///
-  /// In es, this message translates to:
-  /// **'Decide qué sigue\nactivo en Free.'**
-  String get rescue_hero_title_futurista;
 
   /// First part of rescue subtitle, before the date
   ///

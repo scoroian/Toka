@@ -14,7 +14,7 @@ import 'skins/shell_metrics.dart';
 ///
 /// Las dimensiones (NavBar height/bottom, bannerGap) salen de
 /// `shellMetricsProvider`, que devuelve la impl correcta según la skin
-/// activa (56+12 en v2, 64+12 en futurista). Sin esto, los sheets que
+/// activa (56+12 en v2). Sin esto, los sheets que
 /// se montan sobre el shell quedan tapados por la NavBar flotante en
 /// teléfonos sin gesture area amplia.
 double bottomSheetSafeBottom(

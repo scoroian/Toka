@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/skin_switcher.dart';
-import 'futurista/language_step_futurista.dart';
 import 'language_step_v2.dart';
 
 /// Wrapper que selecciona la implementación de [LanguageStep] según el skin
-/// activo (v2 / futurista). Mantiene una API estable para el flujo onboarding.
+/// activo (v2). Mantiene una API estable para el flujo onboarding.
 class LanguageStep extends StatelessWidget {
   const LanguageStep({
     super.key,
@@ -23,12 +22,6 @@ class LanguageStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) => SkinSwitch(
         v2: (_) => LanguageStepV2(
-          selectedLocale: selectedLocale,
-          onLocaleSelected: onLocaleSelected,
-          onNext: onNext,
-          onPrev: onPrev,
-        ),
-        futurista: (_) => LanguageStepFuturista(
           selectedLocale: selectedLocale,
           onLocaleSelected: onLocaleSelected,
           onNext: onNext,

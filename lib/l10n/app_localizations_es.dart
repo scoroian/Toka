@@ -1895,12 +1895,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get skinClassicDescription => 'Cálido, luminoso, familiar';
 
   @override
-  String get skinFuturistaLabel => 'Futurista';
-
-  @override
-  String get skinFuturistaDescription => 'Oscuro, espacial, minimalista';
-
-  @override
   String get homes_role_frozen => 'Congelado';
 
   @override
@@ -2085,14 +2079,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get home_settings_code_short => 'CODE';
 
   @override
-  String get vacation_subtitle_futurista =>
-      'Mientras estés en vacaciones, las tareas no te tocarán a ti.';
-
-  @override
   String get vacation_reason_label_short => 'MOTIVO';
-
-  @override
-  String get rescue_hero_title_futurista => 'Decide qué sigue\nactivo en Free.';
 
   @override
   String get rescue_subtitle_prefix =>

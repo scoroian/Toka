@@ -90,7 +90,7 @@ class _HomeAvatarSheet extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
-    // Limites idénticos a `EditProfileScreenFuturista._pickPhoto` para
+    // Limites idénticos a `EditProfileScreenV2._pickPhoto` para
     // no colar a Storage imágenes pesadas. ImagePicker hace el resize
     // antes de devolvernos el path.
     final picker = ImagePicker();

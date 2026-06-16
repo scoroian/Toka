@@ -15,8 +15,8 @@ import 'skins/shell_presence_marker.dart';
 /// Devuelve:
 ///   - `safeArea + extra` si el widget está FUERA del shell (push routes
 ///     como /paywall, /profile, /vacation: no renderizan NavBar ni AdBanner).
-///   - `banner + navBar + safeArea + extra` si está bajo un `MainShellV2` o
-///     `MainShellFuturista` (detectado vía `ShellPresenceMarker`).
+///   - `banner + navBar + safeArea + extra` si está bajo un `MainShellV2`
+///     (detectado vía `ShellPresenceMarker`).
 ///
 /// Tanto `banner` como `navBar` se evalúan a 0 cuando el teclado del
 /// sistema está visible: la spec oculta ambos mientras el usuario escribe
@@ -27,7 +27,7 @@ import 'skins/shell_presence_marker.dart';
 ///
 /// Las dimensiones (NavBar height/bottom, bannerGap) se obtienen del
 /// `shellMetricsProvider`, que devuelve la impl correcta según la skin
-/// activa. Esto evita el desfase entre v2 (56+12) y futurista (64+12).
+/// activa (por ahora `MainShellV2Metrics`: 56+12).
 double adAwareBottomPadding(
   BuildContext context,
   WidgetRef ref, {

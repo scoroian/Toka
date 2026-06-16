@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 /// `InheritedWidget` que marca la presencia de un shell de skin
-/// (`MainShellV2` o `MainShellFuturista`) como ancestro.
+/// (`MainShellV2`, y cualquier shell de skins futuras) como ancestro.
 ///
 /// Permite a widgets descendientes (especialmente `adAwareBottomPadding`)
 /// saber si están renderizándose bajo un shell con NavBar y AdBanner

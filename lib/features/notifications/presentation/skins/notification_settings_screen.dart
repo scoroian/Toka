@@ -1,14 +1,11 @@
 // lib/features/notifications/presentation/skins/notification_settings_screen.dart
 //
-// Wrapper que elige entre `NotificationSettingsScreenV2` y
-// `NotificationSettingsScreenFuturista` según el `SkinMode` persistido.
-// Ambas variantes consumen los mismos providers (`notificationSettingsProvider`
-// y `notificationSettingsActionsProvider`), por lo que el cambio es solo
-// visual.
+// Wrapper "skin-aware" que renderiza `NotificationSettingsScreenV2` (única
+// skin activa) según el `SkinMode` persistido. Consume
+// `notificationSettingsProvider` y `notificationSettingsActionsProvider`.
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/skin_switcher.dart';
-import 'futurista/notification_settings_screen_futurista.dart';
 import 'notification_settings_screen_v2.dart';
 
 class NotificationSettingsScreen extends StatelessWidget {
@@ -24,7 +21,5 @@ class NotificationSettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) => SkinSwitch(
         v2: (_) => NotificationSettingsScreenV2(homeId: homeId, uid: uid),
-        futurista: (_) =>
-            NotificationSettingsScreenFuturista(homeId: homeId, uid: uid),
       );
 }

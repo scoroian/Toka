@@ -28,24 +28,9 @@ void main() {
     expect(metrics.navBarBottom, 12);
   });
 
-  test('returns MainShellFuturistaMetrics when skin is futurista', () {
-    final c = ProviderContainer(
-      overrides: [skinModeProvider.overrideWith(_FakeSkinMode.new)],
-    );
-    addTearDown(c.dispose);
-    c.read(skinModeProvider.notifier).set(AppSkin.futurista);
-    final metrics = c.read(shellMetricsProvider);
-    expect(metrics, isA<MainShellFuturistaMetrics>());
-    expect(metrics.navBarHeight, 64);
-    expect(metrics.navBarBottom, 12);
-  });
-
-  test('suppresses banner only on /settings in both impls', () {
+  test('suppresses banner only on /settings', () {
     const v2 = MainShellV2Metrics();
-    const fut = MainShellFuturistaMetrics();
     expect(v2.suppressBannerFor(AppRoutes.settings), isTrue);
     expect(v2.suppressBannerFor(AppRoutes.home), isFalse);
-    expect(fut.suppressBannerFor(AppRoutes.settings), isTrue);
-    expect(fut.suppressBannerFor(AppRoutes.home), isFalse);
   });
 }

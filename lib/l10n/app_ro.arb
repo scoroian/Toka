@@ -1201,10 +1201,6 @@
   "@skinClassicLabel": { "description": "Name of the classic (v2) skin" },
   "skinClassicDescription": "Cald, luminos, familiar",
   "@skinClassicDescription": { "description": "Short description of the classic (v2) skin" },
-  "skinFuturistaLabel": "Futurist",
-  "@skinFuturistaLabel": { "description": "Name of the futurist skin" },
-  "skinFuturistaDescription": "Întunecat, cosmic, minimalist",
-  "@skinFuturistaDescription": { "description": "Short description of the futurist skin" },
 
   "homes_role_frozen": "Înghețat",
   "@homes_role_frozen": { "description": "Frozen member role label" },
@@ -1344,13 +1340,9 @@
   "home_settings_code_short": "COD",
   "@home_settings_code_short": { "description": "Short prefix shown before the home id snippet" },
 
-  "vacation_subtitle_futurista": "Cât timp ești în vacanță, sarcinile nu îți vor fi alocate.",
-  "@vacation_subtitle_futurista": { "description": "Hero subtitle on the futurist vacation screen" },
   "vacation_reason_label_short": "MOTIV",
   "@vacation_reason_label_short": { "description": "Mono uppercase label preceding the vacation reason input" },
 
-  "rescue_hero_title_futurista": "Decide ce rămâne\nactiv în Free.",
-  "@rescue_hero_title_futurista": { "description": "Hero title on the futurist rescue screen (allows newline)" },
   "rescue_subtitle_prefix": "Dacă nu reactivezi, casa ta va trece la Free pe ",
   "@rescue_subtitle_prefix": { "description": "First part of rescue subtitle, before the date" },
   "rescue_subtitle_suffix": ". Restul va fi înghețat 30 zile · restaurabil.",

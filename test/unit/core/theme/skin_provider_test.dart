@@ -21,18 +21,17 @@ void main() {
       expect(container.read(skinModeProvider), AppSkin.v2);
     });
 
-    test('build() resolves to persisted value (futurista)', () async {
+    test('valor persistido desconocido (la antigua "futurista") cae a v2',
+        () async {
+      // La skin futurista se eliminó; un valor antiguo guardado en disco debe
+      // resolver al fallback v2 sin romper.
       SharedPreferences.setMockInitialValues({'tocka.skin': 'futurista'});
 
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
-      // primer frame aún no ha cargado del storage
-      expect(container.read(skinModeProvider), AppSkin.v2);
-
-      // dejar correr microtask del _load
       await Future.delayed(Duration.zero);
-      expect(container.read(skinModeProvider), AppSkin.futurista);
+      expect(container.read(skinModeProvider), AppSkin.v2);
     });
 
     test('garbage in SharedPreferences falls back to v2', () async {
@@ -45,22 +44,22 @@ void main() {
       expect(container.read(skinModeProvider), AppSkin.v2);
     });
 
-    test('set(futurista) updates state and persists', () async {
+    test('set(v2) updates state and persists', () async {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
       // Materializa el provider y deja que su _load() asíncrono termine antes
       // de llamar a set(), para evitar que el microtask de _load sobrescriba
-      // el nuevo state con el valor persistido (vacío → v2).
+      // el nuevo state.
       container.read(skinModeProvider);
       await Future.delayed(Duration.zero);
 
-      await container.read(skinModeProvider.notifier).set(AppSkin.futurista);
+      await container.read(skinModeProvider.notifier).set(AppSkin.v2);
 
-      expect(container.read(skinModeProvider), AppSkin.futurista);
+      expect(container.read(skinModeProvider), AppSkin.v2);
 
       final prefs = await SharedPreferences.getInstance();
-      expect(prefs.getString('tocka.skin'), 'futurista');
+      expect(prefs.getString('tocka.skin'), 'v2');
     });
   });
 }

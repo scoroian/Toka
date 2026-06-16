@@ -2,6 +2,7 @@ import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { onDocumentUpdated } from "firebase-functions/v2/firestore";
 import * as admin from "firebase-admin";
 import * as logger from "firebase-functions/logger";
+import { randomInt } from "crypto";
 import { buildNewMemberDoc } from "./member_factory";
 import { FREE_LIMITS, FREE_LIMIT_CODES, isPremium } from "../shared/free_limits";
 import {
@@ -29,13 +30,32 @@ export const createHome = onCall(async (request) => {
   if (!name) {
     throw new HttpsError("invalid-argument", "Home name is required");
   }
+  // Validación de longitud: evita documentos abusivos / overflow en UI.
+  if (name.length > 60) {
+    throw new HttpsError("invalid-argument", "Home name too long (max 60 chars)");
+  }
+  if (data.emoji && data.emoji.length > 8) {
+    throw new HttpsError("invalid-argument", "Emoji too long");
+  }
 
   // Check available slots
   const userDoc = await db.collection("users").doc(uid).get();
   const userData = userDoc.exists ? userDoc.data()! : {};
-  const baseSlots = (userData["baseSlots"] as number) ?? 2;
-  const lifetimeUnlocked = (userData["lifetimeUnlocked"] as number) ?? 0;
-  const totalSlots = baseSlots + lifetimeUnlocked;
+  // Leer los campos CANÓNICOS de plazas. slot_ledger escribe
+  // baseHomeSlots/lifetimeUnlockedHomeSlots/homeSlotCap y BORRA los legacy
+  // baseSlots/lifetimeUnlocked. Si solo leyéramos los legacy (como antes),
+  // tras comprar una plaza extra createHome vería siempre 2 y nunca dejaría
+  // crear los hogares pagados. Mantenemos fallback a legacy para datos viejos.
+  const baseSlots =
+    (userData["baseHomeSlots"] as number) ??
+    (userData["baseSlots"] as number) ??
+    2;
+  const lifetimeUnlocked =
+    (userData["lifetimeUnlockedHomeSlots"] as number) ??
+    (userData["lifetimeUnlocked"] as number) ??
+    0;
+  const totalSlots =
+    (userData["homeSlotCap"] as number) ?? baseSlots + lifetimeUnlocked;
 
   const membershipsSnap = await db
     .collection("users")
@@ -274,6 +294,33 @@ export const joinHomeByCode = onCall(async (request) => {
   if (!code) {
     throw new HttpsError("invalid-argument", "code is required");
   }
+
+  // Rate-limiting: defensa contra fuerza bruta de códigos de invitación.
+  // Máx JOIN_MAX_ATTEMPTS intentos por usuario en una ventana de JOIN_WINDOW_MS.
+  // El código es un secreto de 6 chars consultable por collectionGroup, así que
+  // sin esto un usuario autenticado podría enumerar códigos activos ajenos.
+  const JOIN_WINDOW_MS = 60 * 60 * 1000; // 1 hora
+  const JOIN_MAX_ATTEMPTS = 10;
+  const rlRef = db
+    .collection("users").doc(uid)
+    .collection("rateLimits").doc("joinHomeByCode");
+  const nowMs = Date.now();
+  await db.runTransaction(async (tx) => {
+    const snap = await tx.get(rlRef);
+    const d = snap.data();
+    const windowStart = (d?.["windowStart"] as number | undefined) ?? 0;
+    const count = (d?.["count"] as number | undefined) ?? 0;
+    if (nowMs - windowStart > JOIN_WINDOW_MS) {
+      tx.set(rlRef, { windowStart: nowMs, count: 1 });
+    } else if (count >= JOIN_MAX_ATTEMPTS) {
+      throw new HttpsError(
+        "resource-exhausted",
+        "too-many-join-attempts",
+      );
+    } else {
+      tx.update(rlRef, { count: count + 1 });
+    }
+  });
 
   const query = await db
     .collectionGroup("invitations")
@@ -620,11 +667,14 @@ export const generateInviteCode = onCall(async (request) => {
     throw new HttpsError("permission-denied", "Not a member of this home");
   }
 
-  // Generar código único de 6 caracteres alfanuméricos
+  // Generar código único de 6 caracteres alfanuméricos. Usamos randomInt
+  // (CSPRNG) en vez de Math.random(): el código es un secreto que da acceso
+  // al hogar y se consulta por collectionGroup global, así que no debe ser
+  // predecible.
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   let code = "";
   for (let i = 0; i < 6; i++) {
-    code += chars[Math.floor(Math.random() * chars.length)];
+    code += chars[randomInt(chars.length)];
   }
 
   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 días
@@ -948,6 +998,14 @@ export const transferOwnership = onCall(async (request) => {
     // Frozen members can receive ownership (Caso D: only frozen members remain)
     if (!newOwnerMemberDoc.exists) {
       throw new HttpsError("not-found", "New owner is not a member of this home");
+    }
+    // ...pero un ex-miembro (status 'left') NO puede recibir la propiedad: el
+    // hogar quedaría con un owner que ya no participa y sin ruta de cierre.
+    if (newOwnerMemberDoc.data()?.["status"] === "left") {
+      throw new HttpsError(
+        "failed-precondition",
+        "Cannot transfer ownership to a member who left the home"
+      );
     }
 
     // Payer lock: si el caller es payer con Premium activo, no puede transferir

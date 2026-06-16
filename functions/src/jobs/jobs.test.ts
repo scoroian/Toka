@@ -54,7 +54,15 @@ describe("openRescueWindow — ventana de rescate", () => {
     alreadyInRescue: boolean
   ): boolean {
     if (alreadyInRescue) return false;
-    if (premiumStatus !== "cancelled_pending_end") return false;
+    // Acepta el valor canónico camelCase (cancelledPendingEnd) y el legacy
+    // snake_case, igual que el cron real tras el fix. Antes solo aceptaba el
+    // snake_case y los hogares cancelados reales nunca entraban en rescue.
+    if (
+      premiumStatus !== "cancelled_pending_end" &&
+      premiumStatus !== "cancelledPendingEnd"
+    ) {
+      return false;
+    }
     const threeDaysMs = 3 * 24 * 60 * 60 * 1000;
     return premiumEndsAtMs <= nowMs + threeDaysMs;
   }
@@ -74,6 +82,39 @@ describe("openRescueWindow — ventana de rescate", () => {
   it("active → no necesita rescue aunque esté cerca", () => {
     const in1day = Date.now() + 1 * 24 * 60 * 60 * 1000;
     expect(needsRescue("active", in1day, Date.now(), false)).toBe(false);
+  });
+  it("cancelledPendingEnd (camelCase canónico) con <3 días → necesita rescue [regresión]", () => {
+    const in2days = Date.now() + 2 * 24 * 60 * 60 * 1000;
+    expect(needsRescue("cancelledPendingEnd", in2days, Date.now(), false)).toBe(true);
+  });
+});
+
+describe("applyDowngradeJob — estados elegibles para downgrade", () => {
+  // El cron filtra premiumStatus IN [...] AND premiumEndsAt <= now.
+  // Debe incluir el valor canónico camelCase que persiste syncEntitlement.
+  const ELIGIBLE = ["rescue", "cancelled_pending_end", "cancelledPendingEnd"];
+  function isDowngradeEligible(
+    premiumStatus: string,
+    premiumEndsAtMs: number,
+    nowMs: number
+  ): boolean {
+    return ELIGIBLE.includes(premiumStatus) && premiumEndsAtMs <= nowMs;
+  }
+
+  it("cancelledPendingEnd (camelCase) vencido → degradar [regresión: antes nunca se degradaba]", () => {
+    expect(isDowngradeEligible("cancelledPendingEnd", Date.now() - 1000, Date.now())).toBe(true);
+  });
+  it("cancelled_pending_end (legacy) vencido → degradar", () => {
+    expect(isDowngradeEligible("cancelled_pending_end", Date.now() - 1000, Date.now())).toBe(true);
+  });
+  it("rescue vencido → degradar", () => {
+    expect(isDowngradeEligible("rescue", Date.now() - 1000, Date.now())).toBe(true);
+  });
+  it("cancelledPendingEnd no vencido → no degradar todavía", () => {
+    expect(isDowngradeEligible("cancelledPendingEnd", Date.now() + 1000, Date.now())).toBe(false);
+  });
+  it("active → no degradar", () => {
+    expect(isDowngradeEligible("active", Date.now() - 1000, Date.now())).toBe(false);
   });
 });
 

@@ -16,7 +16,15 @@ export const applyDowngradeJob = onSchedule("*/30 * * * *", async () => {
 
   const snapshot = await db
     .collection("homes")
-    .where("premiumStatus", "in", ["rescue", "cancelled_pending_end"])
+    // Aceptar tanto el valor canónico camelCase persistido por syncEntitlement
+    // (`cancelledPendingEnd`) como la variante legacy snake_case. Si solo se
+    // filtrara el snake_case, los hogares cancelados por el flujo real nunca se
+    // degradarían y quedarían en Premium efectivo perpetuo.
+    .where("premiumStatus", "in", [
+      "rescue",
+      "cancelled_pending_end",
+      "cancelledPendingEnd",
+    ])
     .where("premiumEndsAt", "<=", now)
     .get();
 

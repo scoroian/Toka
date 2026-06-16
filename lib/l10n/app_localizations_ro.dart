@@ -18,6 +18,10 @@ class AppLocalizationsRo extends AppLocalizations {
   String get error_generic => 'Ceva a mers greșit. Încearcă din nou.';
 
   @override
+  String get error_too_many_attempts =>
+      'Prea multe încercări. Așteaptă câteva minute și încearcă din nou.';
+
+  @override
   String get retry => 'Reîncearcă';
 
   @override

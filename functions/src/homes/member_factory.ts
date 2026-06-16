@@ -21,11 +21,14 @@ export function buildNewMemberDoc(p: NewMemberParams): Record<string, unknown> {
     role: p.role,
     status: "active",
     joinedAt: FieldValue.serverTimestamp(),
-    completedCount: 0,
+    // Campos canónicos que lee el cliente (member_model.dart): tasksCompleted
+    // y averageScore. No usar completedCount/avgReviewScore: el cliente no los
+    // lee y dejaría el perfil mostrando 0 (regresión del bug #26).
+    tasksCompleted: 0,
     completions60d: 0,
     passedCount: 0,
     complianceRate: 0.0,
     currentStreak: 0,
-    avgReviewScore: null,
+    averageScore: 0.0,
   };
 }

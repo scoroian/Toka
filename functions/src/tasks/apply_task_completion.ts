@@ -63,6 +63,14 @@ export const applyTaskCompletion = onCall(async (request) => {
       });
     }
 
+    // Autorización: el caller debe ser miembro ACTIVO del hogar. No basta con
+    // ser el currentAssigneeUid: un ex-miembro (status 'left') o congelado no
+    // debe poder mutar contadores/streak/dashboard del hogar.
+    const callerMember = membersSnap.docs.find((d) => d.id === uid)?.data();
+    if (!callerMember || callerMember["status"] !== "active") {
+      throw new HttpsError("permission-denied", "Not an active member of this home");
+    }
+
     const assignmentOrder: string[] = task["assignmentOrder"] ?? [uid];
     const frozenUids: string[] = task["frozenUids"] ?? [];
     const allExcluded = [...new Set([...frozenUids, ...excludedUids])];
@@ -112,12 +120,14 @@ export const applyTaskCompletion = onCall(async (request) => {
     tx.update(taskRef, taskUpdate);
 
     // Usamos el snapshot ya leído de membersSnap para evitar read-after-write en la transacción.
-    // Campo canónico: completedCount. Se conserva fallback de tasksCompleted para datos legacy.
+    // Campo canónico: tasksCompleted (lo lee el cliente). Se conserva fallback
+    // a completedCount para migrar suavemente datos escritos por la versión
+    // anterior sin perder el conteo.
     const memberRef = db.collection("homes").doc(homeId).collection("members").doc(uid);
     const memberDocInSnap = membersSnap.docs.find((d) => d.id === uid);
     const member = memberDocInSnap?.data() ?? {};
-    const legacyCompleted = (member["tasksCompleted"] as number | undefined) ?? 0;
-    const completedBefore = (member["completedCount"] as number | undefined) ?? legacyCompleted;
+    const legacyCompleted = (member["completedCount"] as number | undefined) ?? 0;
+    const completedBefore = (member["tasksCompleted"] as number | undefined) ?? legacyCompleted;
     const newCompleted = completedBefore + 1;
     const newPassed: number = (member["passedCount"] as number) ?? 0;
     const newCompliance = newCompleted / (newCompleted + newPassed);
@@ -150,8 +160,8 @@ export const applyTaskCompletion = onCall(async (request) => {
     }
 
     tx.update(memberRef, {
-      completedCount: newCompleted,
-      tasksCompleted: FieldValue.delete(),
+      tasksCompleted: newCompleted,
+      completedCount: FieldValue.delete(),
       completions60d: FieldValue.increment(1),
       complianceRate: newCompliance,
       currentStreak: newStreak,

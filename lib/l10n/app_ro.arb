@@ -6,6 +6,8 @@
   "@loading": { "description": "Generic loading message" },
   "error_generic": "Ceva a mers greșit. Încearcă din nou.",
   "@error_generic": { "description": "Generic error message" },
+  "error_too_many_attempts": "Prea multe încercări. Așteaptă câteva minute și încearcă din nou.",
+  "@error_too_many_attempts": { "description": "Rate-limit exceeded (e.g. join by code brute force)" },
   "retry": "Reîncearcă",
   "@retry": { "description": "Retry button label" },
   "cancel": "Anulează",

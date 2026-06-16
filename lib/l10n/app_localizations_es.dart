@@ -18,6 +18,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get error_generic => 'Algo salió mal. Inténtalo de nuevo.';
 
   @override
+  String get error_too_many_attempts =>
+      'Demasiados intentos. Espera unos minutos e inténtalo de nuevo.';
+
+  @override
   String get retry => 'Reintentar';
 
   @override

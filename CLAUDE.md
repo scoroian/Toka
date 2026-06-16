@@ -158,7 +158,7 @@ storage.rules
 ## Internacionalización (i18n)
 
 - Idiomas iniciales: **Español (es), Inglés (en), Rumano (ro)**.
-- La lista de idiomas disponibles se obtiene de Firestore: `app_config/languages` (colección pública).
+- La lista de idiomas disponibles se obtiene de Firestore: la colección raíz `languages` (colección pública).
 - Estructura de cada documento en esa colección:
   ```json
   {

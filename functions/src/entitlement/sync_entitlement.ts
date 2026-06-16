@@ -77,8 +77,14 @@ export const syncEntitlement = onCall({ enforceAppCheck: true }, async (request)
   const status = normalizePremiumStatus(validated.status);
   const { plan, endsAt, autoRenewEnabled, storeVerified } = validated;
 
-  // Actualizar el hogar
+  // Actualizar el hogar. Leemos antes el pagador anterior para degradarlo a
+  // 'formerPayer' si cambia el pagador.
   const homeRef = firestore.collection("homes").doc(homeId);
+  const prevHomeSnap = await homeRef.get();
+  const prevPayerUid = prevHomeSnap.data()?.["currentPayerUid"] as
+    | string
+    | null
+    | undefined;
   await homeRef.update({
     premiumStatus: status,
     premiumPlan: plan,
@@ -87,6 +93,25 @@ export const syncEntitlement = onCall({ enforceAppCheck: true }, async (request)
     currentPayerUid: uid,
     updatedAt: FieldValue.serverTimestamp(),
   });
+
+  // Sincronizar billingState en los memberships. Sin esto, las reglas de
+  // subscriptions (que exigen billingState in ['currentPayer','formerPayer'])
+  // nunca dejan al pagador leer su propio historial de cargos.
+  const billingUpdates: Promise<unknown>[] = [
+    firestore
+      .collection("users").doc(uid)
+      .collection("memberships").doc(homeId)
+      .set({ billingState: "currentPayer" }, { merge: true }),
+  ];
+  if (prevPayerUid && prevPayerUid !== uid) {
+    billingUpdates.push(
+      firestore
+        .collection("users").doc(prevPayerUid)
+        .collection("memberships").doc(homeId)
+        .set({ billingState: "formerPayer" }, { merge: true }),
+    );
+  }
+  await Promise.all(billingUpdates);
 
   // Guardar historial del cargo + intentar unlock en UNA sola transacción.
   // Esto previene la carrera en la que dos peticiones concurrentes con el
@@ -109,7 +134,11 @@ export const syncEntitlement = onCall({ enforceAppCheck: true }, async (request)
       return false; // ya procesado — idempotencia
     }
 
-    const validForUnlock = status === "active";
+    // El desbloqueo de una plaza de hogar es PERMANENTE, así que solo se concede
+    // si el recibo fue verificado server-side contra la store (storeVerified).
+    // En modo inferencia/dev (storeVerified === false) se puede activar Premium
+    // temporalmente para QA, pero NUNCA se acumulan créditos de plaza falsos.
+    const validForUnlock = status === "active" && storeVerified === true;
 
     tx.set(chargeRef, {
       chargeId,

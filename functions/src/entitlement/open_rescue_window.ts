@@ -16,7 +16,7 @@ export const openRescueWindow = onSchedule("0 9 * * *", async () => {
 
   const snapshot = await db
     .collection("homes")
-    .where("premiumStatus", "==", "cancelled_pending_end")
+    .where("premiumStatus", "in", ["cancelled_pending_end", "cancelledPendingEnd"])
     .where("premiumEndsAt", "<=", admin.firestore.Timestamp.fromDate(threeDaysFromNow))
     .get();
 

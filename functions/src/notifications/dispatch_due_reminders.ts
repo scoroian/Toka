@@ -72,7 +72,9 @@ export const dispatchDueReminders = onSchedule("*/15 * * * *", async () => {
         await sentRef.set({ sentAt: admin.firestore.FieldValue.serverTimestamp() });
         sent++;
       } catch (err) {
-        logger.warn(`FCM send failed for token ${fcmToken}:`, err);
+        // No loguear el fcmToken: es un secreto que permite enviar push a ese
+        // dispositivo. Identificamos el envío por assigneeUid + taskId.
+        logger.warn("FCM send failed", { homeId, assigneeUid, taskId: taskDoc.id, err });
       }
     }
   }

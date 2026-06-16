@@ -281,5 +281,17 @@ service cloud.firestore {
     match /{path=**}/invitations/{inviteId} {
       allow list: if isAuth();
     }
+
+    // Collection group para valoraciones (perfil de miembro + isRated).
+    // Privacidad (regla de negocio #8): solo el autor (reviewerUid) o el
+    // evaluado (performerUid) pueden leer una valoración. Las queries del
+    // cliente (memberVisibleReviews) filtran por uno de esos campos, así que
+    // Firestore valida estáticamente que todo resultado cumple la condición.
+    match /{path=**}/reviews/{reviewId} {
+      allow read: if isAuth() && (
+        request.auth.uid == resource.data.reviewerUid ||
+        request.auth.uid == resource.data.performerUid
+      );
+    }
   }
 }

@@ -89,6 +89,82 @@ describe("createHome — memberships abandonados no ocupan cupo", () => {
   }
 });
 
+describe("createHome — lectura de slots canónicos vs legacy [regresión]", () => {
+  // slot_ledger escribe baseHomeSlots/lifetimeUnlockedHomeSlots/homeSlotCap y
+  // BORRA los legacy baseSlots/lifetimeUnlocked. createHome debe leer los
+  // canónicos; si solo leyera legacy, tras comprar una plaza vería siempre 2.
+  function readTotalSlots(userData: Record<string, number | undefined>): number {
+    const baseSlots = userData["baseHomeSlots"] ?? userData["baseSlots"] ?? 2;
+    const lifetimeUnlocked =
+      userData["lifetimeUnlockedHomeSlots"] ?? userData["lifetimeUnlocked"] ?? 0;
+    return userData["homeSlotCap"] ?? baseSlots + lifetimeUnlocked;
+  }
+
+  it("usuario nuevo sin campos → 2 slots", () => {
+    expect(readTotalSlots({})).toBe(2);
+  });
+  it("homeSlotCap canónico tras comprar 1 plaza → 3 (antes daba 2 leyendo legacy)", () => {
+    expect(
+      readTotalSlots({ baseHomeSlots: 2, lifetimeUnlockedHomeSlots: 1, homeSlotCap: 3 })
+    ).toBe(3);
+  });
+  it("campos canónicos sin homeSlotCap → suma base+unlocked", () => {
+    expect(readTotalSlots({ baseHomeSlots: 2, lifetimeUnlockedHomeSlots: 3 })).toBe(5);
+  });
+  it("datos legacy (baseSlots/lifetimeUnlocked) → fallback compatible", () => {
+    expect(readTotalSlots({ baseSlots: 2, lifetimeUnlocked: 1 })).toBe(3);
+  });
+  it("tope máximo 5 con 3 plazas desbloqueadas", () => {
+    expect(readTotalSlots({ homeSlotCap: 5 })).toBe(5);
+  });
+});
+
+describe("createHome — validación de longitud de inputs", () => {
+  function validateLength(name: string, emoji?: string): string | null {
+    if (name.length > 60) return "name-too-long";
+    if (emoji && emoji.length > 8) return "emoji-too-long";
+    return null;
+  }
+  it("nombre de 60 chars → OK", () => {
+    expect(validateLength("a".repeat(60))).toBeNull();
+  });
+  it("nombre de 61 chars → error", () => {
+    expect(validateLength("a".repeat(61))).toBe("name-too-long");
+  });
+  it("emoji de 9 chars → error", () => {
+    expect(validateLength("Casa", "a".repeat(9))).toBe("emoji-too-long");
+  });
+  it("emoji normal → OK", () => {
+    expect(validateLength("Casa", "🏠")).toBeNull();
+  });
+});
+
+describe("transferOwnership — status del nuevo owner [regresión]", () => {
+  // Frozen puede recibir la propiedad (Caso D). 'left' NO: dejaría el hogar
+  // con un owner ausente y sin ruta de cierre.
+  function canReceiveOwnership(
+    memberExists: boolean,
+    status: string | undefined
+  ): { ok: boolean; code?: string } {
+    if (!memberExists) return { ok: false, code: "not-a-member" };
+    if (status === "left") return { ok: false, code: "left-cannot-receive" };
+    return { ok: true };
+  }
+
+  it("miembro activo → puede recibir", () => {
+    expect(canReceiveOwnership(true, "active")).toEqual({ ok: true });
+  });
+  it("miembro frozen → puede recibir (Caso D)", () => {
+    expect(canReceiveOwnership(true, "frozen")).toEqual({ ok: true });
+  });
+  it("ex-miembro (left) → NO puede recibir", () => {
+    expect(canReceiveOwnership(true, "left")).toEqual({ ok: false, code: "left-cannot-receive" });
+  });
+  it("no es miembro → error", () => {
+    expect(canReceiveOwnership(false, undefined)).toEqual({ ok: false, code: "not-a-member" });
+  });
+});
+
 describe("leaveHome — validación rol owner", () => {
   function canLeave(role: string): boolean {
     return role !== "owner";
@@ -97,6 +173,35 @@ describe("leaveHome — validación rol owner", () => {
   it("member puede salir", () => expect(canLeave("member")).toBe(true));
   it("admin puede salir", () => expect(canLeave("admin")).toBe(true));
   it("owner no puede salir", () => expect(canLeave("owner")).toBe(false));
+});
+
+describe("joinHomeByCode — rate limit anti fuerza bruta", () => {
+  const WINDOW_MS = 60 * 60 * 1000;
+  const MAX = 10;
+  function evalLimit(
+    nowMs: number,
+    windowStart: number,
+    count: number
+  ): { action: "reset" | "increment" | "block"; next?: number } {
+    if (nowMs - windowStart > WINDOW_MS) return { action: "reset" };
+    if (count >= MAX) return { action: "block" };
+    return { action: "increment", next: count + 1 };
+  }
+
+  it("primera vez (windowStart=0, now real) → reset", () => {
+    // En prod Date.now() es ~1.7e12; con windowStart 0 la diferencia supera la
+    // ventana y se reinicia el contador.
+    expect(evalLimit(1_700_000_000_000, 0, 0)).toEqual({ action: "reset" });
+  });
+  it("dentro de ventana, count < max → incrementa", () => {
+    expect(evalLimit(1_000_000, 1_000_000, 3)).toEqual({ action: "increment", next: 4 });
+  });
+  it("dentro de ventana, count == max → bloquea", () => {
+    expect(evalLimit(1_000_000, 1_000_000, 10)).toEqual({ action: "block" });
+  });
+  it("fuera de ventana (>1h) → reset aunque count alto", () => {
+    expect(evalLimit(1_000_000 + WINDOW_MS + 1, 1_000_000, 50)).toEqual({ action: "reset" });
+  });
 });
 
 describe("joinHome — validación de invitación expirada", () => {

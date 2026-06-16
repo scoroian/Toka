@@ -6,6 +6,8 @@
   "@loading": { "description": "Generic loading message" },
   "error_generic": "Something went wrong. Please try again.",
   "@error_generic": { "description": "Generic error message" },
+  "error_too_many_attempts": "Too many attempts. Please wait a few minutes and try again.",
+  "@error_too_many_attempts": { "description": "Rate-limit exceeded (e.g. join by code brute force)" },
   "retry": "Retry",
   "@retry": { "description": "Retry button label" },
   "cancel": "Cancel",

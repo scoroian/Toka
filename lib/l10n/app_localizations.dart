@@ -118,6 +118,12 @@ abstract class AppLocalizations {
   /// **'Algo salió mal. Inténtalo de nuevo.'**
   String get error_generic;
 
+  /// Rate-limit exceeded (e.g. join by code brute force)
+  ///
+  /// In es, this message translates to:
+  /// **'Demasiados intentos. Espera unos minutos e inténtalo de nuevo.'**
+  String get error_too_many_attempts;
+
   /// Retry button label
   ///
   /// In es, this message translates to:

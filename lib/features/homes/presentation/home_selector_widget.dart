@@ -480,11 +480,15 @@ class _AddHomeSheetState extends ConsumerState<_AddHomeSheet> {
       final l10n = AppLocalizations.of(context);
       setState(() {
         _isLoading = false;
-        _error = e.toString().contains('invalid')
+        final msg = e.toString();
+        _error = msg.contains('invalid')
             ? l10n.homes_error_invalid_code
-            : e.toString().contains('expired')
+            : msg.contains('expired')
                 ? l10n.homes_error_expired_code
-                : l10n.error_generic;
+                : (msg.contains('too-many') ||
+                        msg.contains('resource-exhausted'))
+                    ? l10n.error_too_many_attempts
+                    : l10n.error_generic;
       });
     }
   }

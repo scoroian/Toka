@@ -6,6 +6,8 @@
   "@loading": { "description": "Generic loading message" },
   "error_generic": "Algo salió mal. Inténtalo de nuevo.",
   "@error_generic": { "description": "Generic error message" },
+  "error_too_many_attempts": "Demasiados intentos. Espera unos minutos e inténtalo de nuevo.",
+  "@error_too_many_attempts": { "description": "Rate-limit exceeded (e.g. join by code brute force)" },
   "retry": "Reintentar",
   "@retry": { "description": "Retry button label" },
   "cancel": "Cancelar",

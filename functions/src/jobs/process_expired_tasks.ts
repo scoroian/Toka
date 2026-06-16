@@ -116,7 +116,7 @@ export const processExpiredTasks = onSchedule("5 0 * * *", async () => {
         const memberRef = db.collection("homes").doc(homeId).collection("members").doc(actorUid);
         const memberDocInSnap = membersSnap.docs.find((d) => d.id === actorUid);
         const member = memberDocInSnap?.data() ?? {};
-        const completed: number = (member["completedCount"] as number) ?? 0;
+        const completed: number = (member["tasksCompleted"] as number) ?? (member["completedCount"] as number) ?? 0;
         const passed: number    = (member["passedCount"]   as number) ?? 0;
         const missed: number    = (member["missedCount"]   as number) ?? 0;
         const complianceBefore  = completed / Math.max(completed + passed + missed, 1);

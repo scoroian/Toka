@@ -31,9 +31,13 @@ class TasksRepositoryImpl implements TasksRepository {
 
   @override
   Stream<List<Task>> watchHomeTasks(String homeId) {
+    // Cota de seguridad (convención: nunca leer listas completas sin límite).
+    // Un hogar no debería tener cientos de tareas activas; 200 cubre con holgura
+    // y evita una lectura ilimitada si los datos se corrompen.
     return _col(homeId)
         .where('status', whereIn: ['active', 'frozen'])
         .orderBy('nextDueAt')
+        .limit(200)
         .snapshots()
         .map((s) => s.docs.map(TaskModel.fromFirestore).toList());
   }

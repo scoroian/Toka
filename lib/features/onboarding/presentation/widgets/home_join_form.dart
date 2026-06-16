@@ -126,6 +126,7 @@ class _HomeJoinFormState extends State<HomeJoinForm> {
                 'expired_invite' => l10n.onboarding_error_expired_invite,
                 'network_error' => l10n.onboarding_error_network,
                 'permission_denied' => l10n.onboarding_error_permission_denied,
+                'too_many_attempts' => l10n.error_too_many_attempts,
                 _ => l10n.onboarding_error_unexpected,
               },
               style: TextStyle(color: Theme.of(context).colorScheme.error),

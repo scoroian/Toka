@@ -231,6 +231,7 @@ class OnboardingNotifier extends _$OnboardingNotifier {
       final errorCode = switch (e.code) {
         'permission-denied' => 'permission_denied',
         'not-found' => 'invalid_invite',
+        'resource-exhausted' => 'too_many_attempts',
         _ => 'unexpected_error',
       };
       state = state.copyWith(isLoading: false, error: errorCode);

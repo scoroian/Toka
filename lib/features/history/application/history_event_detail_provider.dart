@@ -1,5 +1,6 @@
 // lib/features/history/application/history_event_detail_provider.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../domain/task_event.dart';
@@ -66,12 +67,29 @@ Stream<HistoryEventDetail> historyEventDetail(
   await for (final eventSnap in eventRef.snapshots()) {
     if (!eventSnap.exists) continue;
     final event = TaskEvent.fromFirestore(eventSnap);
-    final reviewsSnap = await reviewsCol.get();
-    final reviews = reviewsSnap.docs
-        .map((d) => EventReview.fromDoc(d))
-        .toList(growable: false)
-      ..sort((a, b) =>
-          (b.createdAt ?? DateTime(0)).compareTo(a.createdAt ?? DateTime(0)));
+
+    // Privacidad + permisos (regla de negocio #8): un reviewer solo puede leer
+    // SU propia valoración; el evaluado (performerUid) puede leerlas todas.
+    // Listar toda la subcolección como tercero lanza PERMISSION_DENIED, lo que
+    // antes provocaba "Algo salió mal" al abrir cualquier evento ajeno.
+    final data = eventSnap.data() ?? const <String, dynamic>{};
+    final performerUid =
+        (data['performerUid'] ?? data['actorUid']) as String?;
+    final currentUid = FirebaseAuth.instance.currentUser?.uid;
+
+    List<EventReview> reviews;
+    if (currentUid != null && currentUid == performerUid) {
+      final reviewsSnap = await reviewsCol.get();
+      reviews =
+          reviewsSnap.docs.map((d) => EventReview.fromDoc(d)).toList();
+    } else if (currentUid != null) {
+      final mine = await reviewsCol.doc(currentUid).get();
+      reviews = mine.exists ? [EventReview.fromDoc(mine)] : <EventReview>[];
+    } else {
+      reviews = <EventReview>[];
+    }
+    reviews.sort((a, b) =>
+        (b.createdAt ?? DateTime(0)).compareTo(a.createdAt ?? DateTime(0)));
     yield HistoryEventDetail(event: event, reviews: reviews);
   }
 }

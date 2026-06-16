@@ -40,6 +40,7 @@ export async function sendPassNotification(
     });
     logger.info(`sendPassNotification: sent to ${toUid} for task ${taskId}`);
   } catch (err) {
-    logger.warn(`sendPassNotification failed for token ${fcmToken}:`, err);
+    // No loguear el fcmToken (secreto). Identificamos por toUid + taskId.
+    logger.warn("sendPassNotification failed", { homeId, toUid, taskId, err });
   }
 }

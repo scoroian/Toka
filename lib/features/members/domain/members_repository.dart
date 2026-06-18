@@ -52,6 +52,8 @@ abstract interface class MembersRepository {
 
   /// Transfiere propiedad al nuevo uid (vía CF).
   /// El owner anterior pasa a ser admin.
+  /// Lanza [PayerLockedException] si el caller es el pagador del Premium
+  /// activo (no puede transferir mientras la facturación siga vigente).
   Future<void> transferOwnership(String homeId, String newOwnerUid);
 
   /// Guarda las vacaciones de un miembro.

@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/constants/routes.dart';
+import '../../../core/errors/exceptions.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/application/auth_provider.dart';
 import '../../homes/application/current_home_provider.dart';
@@ -37,6 +38,15 @@ Future<void> _transferAndLeave(
         .leaveHome(homeId, uid: uid);
     ref.invalidate(currentHomeProvider);
     if (context.mounted) context.go(AppRoutes.home);
+  } on PayerLockedException {
+    // El owner es además el pagador del Premium activo: el backend rechaza la
+    // transferencia (sería un backdoor para salir del hogar). Avisamos con el
+    // mensaje específico en vez del error genérico.
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.members_error_payer_locked)),
+      );
+    }
   } catch (_) {
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -242,6 +252,7 @@ class SettingsScreen extends ConsumerWidget {
             onTap: () => context.push(AppRoutes.subscription),
           ),
           ListTile(
+            key: const Key('settings_restore_purchases'),
             leading: const Icon(Icons.restore),
             title: Text(l10n.settings_restore_purchases),
             onTap: () => context.push(AppRoutes.subscription),
@@ -299,9 +310,28 @@ class SettingsScreen extends ConsumerWidget {
                   ),
                 );
                 if (confirmed != true || !context.mounted) return;
-                await ref.read(homesRepositoryProvider).leaveHome(homeId, uid: uid);
-                ref.invalidate(currentHomeProvider);
-                if (context.mounted) context.go(AppRoutes.home);
+                try {
+                  await ref
+                      .read(homesRepositoryProvider)
+                      .leaveHome(homeId, uid: uid);
+                  ref.invalidate(currentHomeProvider);
+                  if (context.mounted) context.go(AppRoutes.home);
+                } on PayerLockedException {
+                  // Edge case: un miembro no-owner que sigue siendo el pagador
+                  // del Premium activo no puede abandonar el hogar.
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                          content: Text(l10n.members_error_payer_locked)),
+                    );
+                  }
+                } catch (_) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(l10n.error_generic)),
+                    );
+                  }
+                }
                 return;
               }
 

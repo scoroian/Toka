@@ -47,7 +47,7 @@ final onboardingCompletedProvider = FutureProvider<bool>.internal(
 // ignore: unused_element
 typedef OnboardingCompletedRef = FutureProviderRef<bool>;
 String _$onboardingNotifierHash() =>
-    r'9fe5ed90cf5410265dd5208dc5b103472e7247e0';
+    r'6483e363e642345bae08e625589d9718e5bff91e';
 
 /// See also [OnboardingNotifier].
 @ProviderFor(OnboardingNotifier)

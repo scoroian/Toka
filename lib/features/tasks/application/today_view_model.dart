@@ -11,6 +11,7 @@ import '../../homes/application/homes_provider.dart';
 import '../../homes/domain/home_membership.dart';
 import '../../members/application/members_provider.dart';
 import '../domain/home_dashboard.dart';
+import '../domain/pass_turn_logic.dart';
 import '../domain/recurrence_order.dart';
 import '../domain/recurrence_rule.dart';
 import '../domain/task.dart';
@@ -26,6 +27,79 @@ typedef RecurrenceGroup = ({
   List<TaskPreview> todos,
   List<DoneTaskPreview> dones,
 });
+
+/// Datos que necesita el diálogo de "Pasar turno": cumplimiento antes/después
+/// y el nombre del siguiente responsable (null si no hay candidato).
+typedef PassTurnInfo = ({
+  double complianceBefore,
+  double estimatedAfter,
+  String? nextAssigneeName,
+});
+
+/// Calcula la información del diálogo de pasar turno tal como lo haría el
+/// callable `passTaskTurn`: lee la tarea (para `assignmentOrder`) y la
+/// colección de miembros (para detectar congelados/ausentes, resolver el
+/// nombre del siguiente responsable y leer los contadores del propio usuario).
+///
+/// Espejo de getNextEligibleMember en
+/// functions/src/tasks/pass_turn_helpers.ts. Función de nivel superior para
+/// poder testearla con `FakeFirebaseFirestore`.
+@visibleForTesting
+Future<PassTurnInfo> fetchPassTurnInfo(
+  FirebaseFirestore db,
+  String homeId,
+  String taskId,
+  String currentUid,
+) async {
+  final homeRef = db.collection('homes').doc(homeId);
+  // Lanzamos ambas lecturas en paralelo.
+  final taskFuture = homeRef.collection('tasks').doc(taskId).get();
+  final membersFuture = homeRef.collection('members').get();
+  final taskSnap = await taskFuture;
+  final membersSnap = await membersFuture;
+
+  final order =
+      (taskSnap.data()?['assignmentOrder'] as List<dynamic>?)?.cast<String>() ??
+          <String>[currentUid];
+
+  final frozenUids = <String>[];
+  final names = <String, String>{};
+  var completed = 0;
+  var passed = 0;
+  for (final doc in membersSnap.docs) {
+    final data = doc.data();
+    final status = data['status'] as String?;
+    // El backend trata `frozen` y `absent` (vacaciones) como no elegibles.
+    if (status == 'frozen' || status == 'absent') {
+      frozenUids.add(doc.id);
+    }
+    names[doc.id] = (data['nickname'] as String?) ?? '';
+    if (doc.id == currentUid) {
+      // El backend migró `completedCount` (legacy) → `tasksCompleted` y borra
+      // el primero, así que preferimos `tasksCompleted` con fallback.
+      final legacy = (data['completedCount'] as int?) ?? 0;
+      completed = (data['tasksCompleted'] as int?) ?? legacy;
+      passed = (data['passedCount'] as int?) ?? 0;
+    }
+  }
+
+  final denom = (completed + passed) == 0 ? 1 : completed + passed;
+  final before = completed / denom;
+  final after = PassTurnDialog.calcEstimatedCompliance(
+    completedCount: completed,
+    passedCount: passed,
+  );
+
+  final nextUid = getNextEligibleMember(order, currentUid, frozenUids);
+  final nextName = nextUid == currentUid ? null : names[nextUid];
+
+  return (
+    complianceBefore: before,
+    estimatedAfter: after,
+    nextAssigneeName:
+        (nextName != null && nextName.isNotEmpty) ? nextName : null,
+  );
+}
 
 @visibleForTesting
 Map<String, RecurrenceGroup> groupByRecurrence(
@@ -130,8 +204,7 @@ abstract class TodayViewModel {
   List<HomeDropdownItem> get homes;
   void selectHome(String homeId);
   Future<void> completeTask(String taskId);
-  Future<({double complianceBefore, double estimatedAfter})> fetchPassStats(
-      String currentUid);
+  Future<PassTurnInfo> fetchPassInfo(String taskId, String currentUid);
   Future<void> passTurn(String taskId, {String? reason});
   void retry();
 }
@@ -165,31 +238,28 @@ class _TodayViewModelImpl implements TodayViewModel {
   }
 
   @override
-  Future<({double complianceBefore, double estimatedAfter})> fetchPassStats(
-      String currentUid) async {
+  Future<PassTurnInfo> fetchPassInfo(String taskId, String currentUid) async {
     final homeId = _homeId;
     if (homeId == null || homeId.isEmpty) {
-      return (complianceBefore: 1.0, estimatedAfter: 1.0);
+      return (
+        complianceBefore: 1.0,
+        estimatedAfter: 1.0,
+        nextAssigneeName: null,
+      );
     }
     try {
-      final snap = await FirebaseFirestore.instance
-          .collection('homes')
-          .doc(homeId)
-          .collection('members')
-          .doc(currentUid)
-          .get();
-      final data = snap.data() ?? {};
-      final completed = (data['completedCount'] as int?) ?? 0;
-      final passed = (data['passedCount'] as int?) ?? 0;
-      final before = (data['complianceRate'] as double?) ??
-          completed / (completed + passed).clamp(1, double.maxFinite);
-      final after = PassTurnDialog.calcEstimatedCompliance(
-        completedCount: completed,
-        passedCount: passed,
+      return await fetchPassTurnInfo(
+        FirebaseFirestore.instance,
+        homeId,
+        taskId,
+        currentUid,
       );
-      return (complianceBefore: before, estimatedAfter: after);
     } catch (_) {
-      return (complianceBefore: 1.0, estimatedAfter: 1.0);
+      return (
+        complianceBefore: 1.0,
+        estimatedAfter: 1.0,
+        nextAssigneeName: null,
+      );
     }
   }
 
@@ -214,7 +284,13 @@ TaskPreview _taskToPreview(
 ) {
   final now = DateTime.now();
   final todayStart = DateTime(now.year, now.month, now.day);
+  final todayEnd = todayStart.add(const Duration(days: 1));
   final isOverdue = task.nextDueAt.isBefore(todayStart);
+  // Ruta de fallback (sin dashboard): clasificamos en la zona del dispositivo.
+  // En la ruta normal manda `isDueToday` que calcula el backend en la zona del
+  // hogar (ver TaskPreview).
+  final isDueToday =
+      !task.nextDueAt.isBefore(todayStart) && task.nextDueAt.isBefore(todayEnd);
   final recurrenceType = switch (task.recurrenceRule) {
     OneTimeRule _ => 'oneTime',
     HourlyRule _ => 'hourly',
@@ -238,6 +314,7 @@ TaskPreview _taskToPreview(
         : null,
     nextDueAt: task.nextDueAt,
     isOverdue: isOverdue,
+    isDueToday: isDueToday,
     status: task.status.name,
   );
 }
@@ -298,13 +375,8 @@ TodayViewModel todayViewModel(TodayViewModelRef ref) {
       counters: DashboardCounters(
         totalActiveTasks: activeTasks.length,
         totalMembers: members.length,
-        tasksDueToday: previews.where((t) => t.isOverdue || (() {
-          final now = DateTime.now();
-          final start = DateTime(now.year, now.month, now.day);
-          final end = start.add(const Duration(days: 1));
-          return t.nextDueAt.isAfter(start.subtract(const Duration(seconds: 1))) &&
-              t.nextDueAt.isBefore(end);
-        })()).length,
+        // Estricto: solo las que vencen hoy (sin vencidas), igual que el backend.
+        tasksDueToday: previews.where((t) => t.isDueToday).length,
         tasksDoneToday: 0,
       ),
       showAdBanner: false,

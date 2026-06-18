@@ -188,10 +188,24 @@ class MembersRepositoryImpl implements MembersRepository {
 
   @override
   Future<void> transferOwnership(String homeId, String newOwnerUid) async {
-    await _functions.httpsCallable('transferOwnership').call({
-      'homeId': homeId,
-      'newOwnerUid': newOwnerUid,
-    });
+    try {
+      await _functions.httpsCallable('transferOwnership').call({
+        'homeId': homeId,
+        'newOwnerUid': newOwnerUid,
+      });
+    } on FirebaseFunctionsException catch (e) {
+      // El pagador con Premium activo no puede transferir la propiedad (sería
+      // un backdoor para salir del hogar). El backend rechaza con
+      // failed-precondition + este mensaje; lo mapeamos a PayerLockedException
+      // para que la UI muestre el aviso específico (igual que removeMember/
+      // leaveHome).
+      if (e.code == 'failed-precondition' &&
+          (e.message ?? '')
+              .contains('payer-cannot-transfer-ownership-while-premium-active')) {
+        throw const PayerLockedException();
+      }
+      rethrow;
+    }
   }
 
   @override

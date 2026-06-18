@@ -117,15 +117,23 @@ export const passTaskTurn = onCall(async (request) => {
     return { toUid, noCandidate, complianceBefore, complianceAfter };
   });
 
-  // Actualizar dashboard
-  updateHomeDashboard(homeId).catch((err) =>
-    logger.error("Failed to update dashboard after pass", err)
-  );
+  // Reconstruir el dashboard ANTES de responder (mismo motivo que en
+  // applyTaskCompletion: en gen2 el trabajo fire-and-forget tras la respuesta se
+  // estrangula y tardaba ~10s en reflejarse). Un fallo del rebuild no revierte el
+  // pase ya confirmado; el cron lo reconstruirá.
+  try {
+    await updateHomeDashboard(homeId);
+  } catch (err) {
+    logger.error("Failed to update dashboard after pass", err);
+  }
 
   if (!result.noCandidate) {
-    sendPassNotification(homeId, taskId, taskTitle, result.toUid, uid).catch((err) =>
-      logger.warn("sendPassNotification failed", err)
-    );
+    // También se espera el push: un envío fire-and-forget se estrangularía igual.
+    try {
+      await sendPassNotification(homeId, taskId, taskTitle, result.toUid, uid);
+    } catch (err) {
+      logger.warn("sendPassNotification failed", err);
+    }
   }
 
   return result;

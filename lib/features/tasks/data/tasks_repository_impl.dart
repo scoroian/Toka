@@ -91,8 +91,12 @@ class TasksRepositoryImpl implements TasksRepository {
   @override
   Future<void> deleteTask(
       String homeId, String taskId, String deletedByUid) async {
+    // Borrado lógico: la tarea queda con status 'deleted' pero se conserva el
+    // documento. `deletedAt` deja constancia del momento para auditoría y para
+    // una futura limpieza/purga de tareas borradas.
     await _col(homeId).doc(taskId).update({
       'status': 'deleted',
+      'deletedAt': FieldValue.serverTimestamp(),
       'updatedAt': FieldValue.serverTimestamp(),
     });
     await _refreshDashboard(homeId);

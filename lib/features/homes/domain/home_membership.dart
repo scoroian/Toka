@@ -19,5 +19,10 @@ class HomeMembership with _$HomeMembership {
     required DateTime joinedAt,
     DateTime? leftAt,
     @Default(false) bool hasPendingToday,
+    // Snapshot de la foto del hogar (`homes/{homeId}.photoUrl`) denormalizado
+    // en la membership, igual que `homeNameSnapshot`. Lo escribe el backend al
+    // unirse/crear y lo mantiene fresco el trigger `syncHomeSnapshotToMemberships`.
+    // null cuando el hogar usa la inicial.
+    String? homePhotoSnapshot,
   }) = _HomeMembership;
 }

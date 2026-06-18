@@ -116,13 +116,30 @@ service cloud.firestore {
         'updatedAt',
         'onMissAssign',
         'status',
-        'frozenUids'
+        'frozenUids',
+        'deletedAt'
       ]);
     }
 
     function taskUpdateValuesAllowed() {
       return !request.resource.data.diff(resource.data).affectedKeys().hasAny(['status'])
         || request.resource.data.status in ['active', 'frozen', 'deleted'];
+    }
+
+    // La distribución inteligente (assignmentMode == 'smartDistribution') es una
+    // feature Premium. En CREATE solo se permite si el hogar es Premium.
+    function taskCreateSmartAllowed(homeId) {
+      return request.resource.data.assignmentMode != 'smartDistribution'
+        || isHomePremium(homeId);
+    }
+
+    // En UPDATE: cambiar a smart requiere Premium, pero conservar un smart ya
+    // existente (o pasar a básico) siempre se permite, para no bloquear la
+    // edición de una tarea tras un downgrade del hogar.
+    function taskUpdateSmartAllowed(homeId) {
+      return request.resource.data.assignmentMode != 'smartDistribution'
+        || resource.data.assignmentMode == 'smartDistribution'
+        || isHomePremium(homeId);
     }
 
     // ─── Idiomas (pública) ──────────────────────────────────────────────────────
@@ -205,13 +222,15 @@ service cloud.firestore {
         allow create: if isAdminOrOwner(homeId) && isActiveMember(homeId)
                          && taskCreateKeysAllowed()
                          && taskCreateValuesAllowed(homeId)
+                         && taskCreateSmartAllowed(homeId)
                          && (isHomePremium(homeId) || freeCanCreateTask(homeId));
         // Update cliente: solo configuración editable por admin/owner. Campos
         // derivados/auditoría (completedCount90d, createdByUid, createdAt,
         // homeId) quedan reservados a Cloud Functions/Admin SDK.
         allow update: if isAdminOrOwner(homeId) && isActiveMember(homeId)
                          && taskUpdateFieldsAllowed()
-                         && taskUpdateValuesAllowed();
+                         && taskUpdateValuesAllowed()
+                         && taskUpdateSmartAllowed(homeId);
         allow delete: if false; // Soft delete via update
       }
 

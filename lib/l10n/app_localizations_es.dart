@@ -249,6 +249,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get onboarding_home_choice_title => '¿Qué quieres hacer?';
 
   @override
+  String get onboarding_create_home_title => 'Crea tu hogar';
+
+  @override
+  String get onboarding_join_home_title => 'Únete a un hogar';
+
+  @override
   String get onboarding_create_home_description =>
       'Crea tu hogar y añade a tus compañeros';
 
@@ -1368,6 +1374,13 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get tasks_assignment_smart => 'Distribución inteligente';
+
+  @override
+  String get tasks_assignment_smart_hint =>
+      'Asigna cada turno al miembro con menos carga reciente.';
+
+  @override
+  String get tasks_assignment_premium_locked => 'Disponible con Premium';
 
   @override
   String get tasks_assignment_members => 'Miembros asignados';

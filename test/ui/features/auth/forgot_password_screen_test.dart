@@ -78,4 +78,20 @@ void main() {
     // Form stays visible — no confirmation icon
     expect(find.byType(TextFormField), findsOneWidget);
   });
+
+  testWidgets('email validation error clears after correcting the email',
+      (tester) async {
+    await tester.pumpWidget(_wrap());
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextFormField), 'not-an-email');
+    await tester.tap(find.byType(FilledButton));
+    await tester.pumpAndSettle();
+    expect(find.text('Introduce un email válido'), findsOneWidget);
+
+    // Corregir el email → el error desaparece al teclear (sin reenviar).
+    await tester.enterText(find.byType(TextFormField), 'user@toka.app');
+    await tester.pumpAndSettle();
+    expect(find.text('Introduce un email válido'), findsNothing);
+  });
 }

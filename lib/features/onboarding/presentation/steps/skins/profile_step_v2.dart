@@ -74,6 +74,9 @@ class _ProfileStepV2State extends State<ProfileStepV2> {
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         child: Form(
           key: _formKey,
+          // Revalida al teclear tras pulsar "Siguiente" para que el error del
+          // apodo desaparezca en cuanto el campo deja de estar vacío.
+          autovalidateMode: AutovalidateMode.onUserInteraction,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [

@@ -4,6 +4,11 @@ import * as logger from "firebase-functions/logger";
 import { onSchedule } from "firebase-functions/v2/scheduler";
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { isPremium as isHomePremium } from "../shared/free_limits";
+import {
+  classifyDue,
+  summarizeDue,
+  normalizeTimeZone,
+} from "./today_window";
 
 const db = admin.firestore();
 const FieldValue = admin.firestore.FieldValue;
@@ -59,11 +64,29 @@ export async function updateHomeDashboard(homeId: string): Promise<void> {
     .get();
 
   const now = admin.firestore.Timestamp.now().toDate();
-  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const todayEnd = new Date(todayStart.getTime() + 24 * 60 * 60 * 1000);
+  // "Hoy" se define SIEMPRE en la zona horaria del hogar (no en la del proceso,
+  // que es UTC, ni en la del dispositivo). Así el contador coincide con lo que
+  // ve cualquier miembro. Los hogares antiguos sin `timezone` caen a Madrid.
+  const homeTimeZone = normalizeTimeZone(
+    homeData["timezone"] as string | undefined
+  );
+
+  // --- Contadores del día con la zona del hogar ---
+  // tasksDueToday = SOLO las que vencen hoy (estricto). Las vencidas de días
+  // anteriores se muestran arriba en la lista pero NO inflan el contador.
+  // pendingTodayCount (vencidas + hoy) alimenta `hasPendingToday` del selector.
+  const dueDates = tasksSnap.docs
+    .map((d) =>
+      (d.data()["nextDueAt"] as admin.firestore.Timestamp | undefined)?.toDate()
+    )
+    .filter((d): d is Date => !!d);
+  const {
+    bounds: dayBounds,
+    dueTodayCount,
+    pendingTodayCount,
+  } = summarizeDue(dueDates, now, homeTimeZone);
 
   const activeTasksPreview: Record<string, unknown>[] = [];
-  let pendingTodayCount = 0; // tareas accionables hoy (vencidas + due today)
   let automaticRecurringTasks = 0; // tareas activas con recurrencia automática (no oneTime)
   for (const doc of tasksSnap.docs) {
     const t = doc.data();
@@ -74,8 +97,11 @@ export async function updateHomeDashboard(homeId: string): Promise<void> {
     // Incluir TODAS las tareas activas (también las de próximas semanas/meses/años)
     // para que la pantalla Hoy muestre las próximas fechas de cada tarea.
     // El cliente Flutter decide si el botón "Hecho" está activo según recurrenceType.
-    if (nextDueAt < todayEnd) pendingTodayCount++;
-    const isOverdue = nextDueAt < todayStart;
+    // La clasificación overdue/today/future es la MISMA que usan los contadores
+    // (zona del hogar) para que el contador y las etiquetas de los tiles cuadren.
+    const bucket = classifyDue(nextDueAt, dayBounds);
+    const isOverdue = bucket === "overdue";
+    const isDueToday = bucket === "today";
 
     const assigneeUid = (t["currentAssigneeUid"] as string | null) ?? null;
     const assigneeInfo = assigneeUid ? memberMap.get(assigneeUid) : undefined;
@@ -91,6 +117,7 @@ export async function updateHomeDashboard(homeId: string): Promise<void> {
       currentAssigneePhoto: assigneeInfo?.photoUrl ?? null,
       nextDueAt: t["nextDueAt"],
       isOverdue,
+      isDueToday,
       status: "active",
     });
   }
@@ -98,8 +125,8 @@ export async function updateHomeDashboard(homeId: string): Promise<void> {
   // --- 3. Leer completados de hoy desde taskEvents ---
   const eventsSnap = await homeRef.collection("taskEvents")
     .where("eventType", "==", "completed")
-    .where("completedAt", ">=", admin.firestore.Timestamp.fromDate(todayStart))
-    .where("completedAt", "<", admin.firestore.Timestamp.fromDate(todayEnd))
+    .where("completedAt", ">=", admin.firestore.Timestamp.fromDate(dayBounds.start))
+    .where("completedAt", "<", admin.firestore.Timestamp.fromDate(dayBounds.end))
     .get();
 
   const doneTasksPreview: Record<string, unknown>[] = [];
@@ -179,8 +206,9 @@ export async function updateHomeDashboard(homeId: string): Promise<void> {
   const counters = {
     totalActiveTasks: tasksSnap.size,
     totalMembers: memberPreview.length,
-    // tareas pendientes de hoy (no incluye las ya completadas)
-    tasksDueToday: pendingTodayCount,
+    // tareas que vencen HOY (estricto, zona del hogar; no incluye vencidas ni
+    // las ya completadas)
+    tasksDueToday: dueTodayCount,
     tasksDoneToday: doneTasksPreview.length,
   };
 

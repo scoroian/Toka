@@ -90,13 +90,22 @@ void main() {
     expect(task.status, TaskStatus.active);
   });
 
-  test('deleteTask → soft delete (status=deleted), no aparece en watch',
-      () async {
+  test(
+      'deleteTask → soft delete (status=deleted, deletedAt registrado), '
+      'no aparece en watch', () async {
     final id = await repo.createTask(_homeId, _dailyInput(), _uid);
     await repo.deleteTask(_homeId, id, _uid);
     // fetchTask todavía puede leerlo
     final task = await repo.fetchTask(_homeId, id);
     expect(task.status, TaskStatus.deleted);
+    // deletedAt queda registrado para auditoría/limpieza futura
+    final raw = await fakeDb
+        .collection('homes')
+        .doc(_homeId)
+        .collection('tasks')
+        .doc(id)
+        .get();
+    expect(raw.data()!['deletedAt'], isNotNull);
     // pero watchHomeTasks no lo incluye
     final tasks = await repo.watchHomeTasks(_homeId).first;
     expect(tasks.where((t) => t.id == id), isEmpty);

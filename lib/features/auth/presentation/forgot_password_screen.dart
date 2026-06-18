@@ -78,6 +78,9 @@ class _FormView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Form(
       key: formKey,
+      // Revalida al teclear tras el primer submit para limpiar el error en
+      // rojo en cuanto el email pasa a ser válido.
+      autovalidateMode: AutovalidateMode.onUserInteraction,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

@@ -49,11 +49,21 @@ class MemberActions extends _$MemberActions {
   }
 
   Future<void> transferOwnership(String homeId, String newOwnerUid) async {
+    // OJO: NO usar AsyncValue.guard aquí. guard captura la excepción y la
+    // guarda en `state` SIN relanzarla, por lo que el try/catch de la UI
+    // (transfer_ownership_sheet) nunca veía el payer-lock y mostraba un falso
+    // "éxito". Replicamos el patrón de generateInviteCode: guardamos el error
+    // en el estado y lo relanzamos para que la pantalla pueda reaccionar.
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(
-        () => ref
-            .read(membersRepositoryProvider)
-            .transferOwnership(homeId, newOwnerUid));
+    try {
+      await ref
+          .read(membersRepositoryProvider)
+          .transferOwnership(homeId, newOwnerUid);
+      state = const AsyncValue.data(null);
+    } catch (e, s) {
+      state = AsyncValue.error(e, s);
+      rethrow;
+    }
   }
 
   Future<void> revokeInvitation(String homeId, String invitationId) async {

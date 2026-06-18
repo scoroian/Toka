@@ -25,7 +25,12 @@ mixin _$TaskPreview {
   String? get currentAssigneeName => throw _privateConstructorUsedError;
   String? get currentAssigneePhoto => throw _privateConstructorUsedError;
   DateTime get nextDueAt => throw _privateConstructorUsedError;
-  bool get isOverdue => throw _privateConstructorUsedError;
+  bool get isOverdue =>
+      throw _privateConstructorUsedError; // Calculado por el backend en la zona horaria del hogar (igual que
+// `counters.tasksDueToday`). El tile lo usa para decidir la etiqueta "Hoy",
+// de modo que el contador y las etiquetas siempre cuadran. Para snapshots
+// antiguos sin el campo, cae a false.
+  bool get isDueToday => throw _privateConstructorUsedError;
   String get status => throw _privateConstructorUsedError;
 
   /// Create a copy of TaskPreview
@@ -52,6 +57,7 @@ abstract class $TaskPreviewCopyWith<$Res> {
       String? currentAssigneePhoto,
       DateTime nextDueAt,
       bool isOverdue,
+      bool isDueToday,
       String status});
 }
 
@@ -80,6 +86,7 @@ class _$TaskPreviewCopyWithImpl<$Res, $Val extends TaskPreview>
     Object? currentAssigneePhoto = freezed,
     Object? nextDueAt = null,
     Object? isOverdue = null,
+    Object? isDueToday = null,
     Object? status = null,
   }) {
     return _then(_value.copyWith(
@@ -123,6 +130,10 @@ class _$TaskPreviewCopyWithImpl<$Res, $Val extends TaskPreview>
           ? _value.isOverdue
           : isOverdue // ignore: cast_nullable_to_non_nullable
               as bool,
+      isDueToday: null == isDueToday
+          ? _value.isDueToday
+          : isDueToday // ignore: cast_nullable_to_non_nullable
+              as bool,
       status: null == status
           ? _value.status
           : status // ignore: cast_nullable_to_non_nullable
@@ -150,6 +161,7 @@ abstract class _$$TaskPreviewImplCopyWith<$Res>
       String? currentAssigneePhoto,
       DateTime nextDueAt,
       bool isOverdue,
+      bool isDueToday,
       String status});
 }
 
@@ -176,6 +188,7 @@ class __$$TaskPreviewImplCopyWithImpl<$Res>
     Object? currentAssigneePhoto = freezed,
     Object? nextDueAt = null,
     Object? isOverdue = null,
+    Object? isDueToday = null,
     Object? status = null,
   }) {
     return _then(_$TaskPreviewImpl(
@@ -219,6 +232,10 @@ class __$$TaskPreviewImplCopyWithImpl<$Res>
           ? _value.isOverdue
           : isOverdue // ignore: cast_nullable_to_non_nullable
               as bool,
+      isDueToday: null == isDueToday
+          ? _value.isDueToday
+          : isDueToday // ignore: cast_nullable_to_non_nullable
+              as bool,
       status: null == status
           ? _value.status
           : status // ignore: cast_nullable_to_non_nullable
@@ -241,6 +258,7 @@ class _$TaskPreviewImpl implements _TaskPreview {
       required this.currentAssigneePhoto,
       required this.nextDueAt,
       required this.isOverdue,
+      this.isDueToday = false,
       required this.status});
 
   @override
@@ -263,12 +281,19 @@ class _$TaskPreviewImpl implements _TaskPreview {
   final DateTime nextDueAt;
   @override
   final bool isOverdue;
+// Calculado por el backend en la zona horaria del hogar (igual que
+// `counters.tasksDueToday`). El tile lo usa para decidir la etiqueta "Hoy",
+// de modo que el contador y las etiquetas siempre cuadran. Para snapshots
+// antiguos sin el campo, cae a false.
+  @override
+  @JsonKey()
+  final bool isDueToday;
   @override
   final String status;
 
   @override
   String toString() {
-    return 'TaskPreview(taskId: $taskId, title: $title, visualKind: $visualKind, visualValue: $visualValue, recurrenceType: $recurrenceType, currentAssigneeUid: $currentAssigneeUid, currentAssigneeName: $currentAssigneeName, currentAssigneePhoto: $currentAssigneePhoto, nextDueAt: $nextDueAt, isOverdue: $isOverdue, status: $status)';
+    return 'TaskPreview(taskId: $taskId, title: $title, visualKind: $visualKind, visualValue: $visualValue, recurrenceType: $recurrenceType, currentAssigneeUid: $currentAssigneeUid, currentAssigneeName: $currentAssigneeName, currentAssigneePhoto: $currentAssigneePhoto, nextDueAt: $nextDueAt, isOverdue: $isOverdue, isDueToday: $isDueToday, status: $status)';
   }
 
   @override
@@ -294,6 +319,8 @@ class _$TaskPreviewImpl implements _TaskPreview {
                 other.nextDueAt == nextDueAt) &&
             (identical(other.isOverdue, isOverdue) ||
                 other.isOverdue == isOverdue) &&
+            (identical(other.isDueToday, isDueToday) ||
+                other.isDueToday == isDueToday) &&
             (identical(other.status, status) || other.status == status));
   }
 
@@ -310,6 +337,7 @@ class _$TaskPreviewImpl implements _TaskPreview {
       currentAssigneePhoto,
       nextDueAt,
       isOverdue,
+      isDueToday,
       status);
 
   /// Create a copy of TaskPreview
@@ -333,6 +361,7 @@ abstract class _TaskPreview implements TaskPreview {
       required final String? currentAssigneePhoto,
       required final DateTime nextDueAt,
       required final bool isOverdue,
+      final bool isDueToday,
       required final String status}) = _$TaskPreviewImpl;
 
   @override
@@ -354,7 +383,13 @@ abstract class _TaskPreview implements TaskPreview {
   @override
   DateTime get nextDueAt;
   @override
-  bool get isOverdue;
+  bool
+      get isOverdue; // Calculado por el backend en la zona horaria del hogar (igual que
+// `counters.tasksDueToday`). El tile lo usa para decidir la etiqueta "Hoy",
+// de modo que el contador y las etiquetas siempre cuadran. Para snapshots
+// antiguos sin el campo, cae a false.
+  @override
+  bool get isDueToday;
   @override
   String get status;
 

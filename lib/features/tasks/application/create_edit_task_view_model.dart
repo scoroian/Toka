@@ -179,7 +179,11 @@ class CreateEditTaskViewModelNotifier
 
   @override
   List<UpcomingDateItem> get upcomingDates {
-    final rule = ref.read(taskFormNotifierProvider).recurrenceRule;
+    // Tipo explícito: el CFE no resuelve el tipo de estado del provider
+    // generado y trataría `rule` como `dynamic`, rompiendo la exhaustividad del
+    // `switch` de abajo en build limpio de release (el analyzer sí lo infiere).
+    final RecurrenceRule? rule =
+        ref.read(taskFormNotifierProvider).recurrenceRule;
     if (rule == null) return [];
     final dates = ref.read(upcomingOccurrencesProvider(rule));
     final order = ref.read(taskFormNotifierProvider).assignmentOrder;

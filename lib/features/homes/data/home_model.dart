@@ -26,8 +26,13 @@ class HomeModel {
         maxMembers: (data['limits']?['maxMembers'] as int?) ?? 5,
         isPremium: isHomePremium(premiumStatus),
       ),
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
-      updatedAt: (data['updatedAt'] as Timestamp).toDate(),
+      // `createdAt`/`updatedAt` pueden venir `null` en la emisión optimista
+      // del dispositivo que acaba de escribir con `FieldValue.serverTimestamp()`
+      // (latency compensation): el snapshot local llega antes de que el servidor
+      // resuelva el timestamp. Toleramos ese estado transitorio; el siguiente
+      // snapshot confirmado traerá el valor real.
+      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       lastBillingError: data['lastBillingError'] as String?,
       photoUrl: data['photoUrl'] as String?,
     );
@@ -54,6 +59,7 @@ class HomeModel {
       joinedAt: (data['joinedAt'] as Timestamp).toDate(),
       leftAt: (data['leftAt'] as Timestamp?)?.toDate(),
       hasPendingToday: data['hasPendingToday'] as bool? ?? false,
+      homePhotoSnapshot: data['homePhotoSnapshot'] as String?,
     );
   }
 }

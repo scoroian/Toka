@@ -15,6 +15,7 @@ class PlanSummaryCard extends StatelessWidget {
     super.key,
     required this.data,
     this.currentUserUid,
+    this.payerName,
   });
 
   final SubscriptionDashboard data;
@@ -22,6 +23,12 @@ class PlanSummaryCard extends StatelessWidget {
   /// Si coincide con `data.currentPayerUid` se muestra "tú" en el campo
   /// pagador. Se pasa opcional para poder probar el widget sin auth.
   final String? currentUserUid;
+
+  /// Nombre (nickname) del miembro pagador. Cuando el pagador NO es el propio
+  /// usuario y este nombre está disponible, se muestra en lugar del genérico
+  /// "otro miembro" — así se ve quién del hogar paga. Si es null/vacío se cae
+  /// al placeholder genérico.
+  final String? payerName;
 
   @override
   Widget build(BuildContext context) {
@@ -335,15 +342,22 @@ class PlanSummaryCard extends StatelessWidget {
   Widget _payerRow(ThemeData theme, AppLocalizations l10n) {
     final isSelf = currentUserUid != null &&
         currentUserUid == data.currentPayerUid;
-    final name =
-        isSelf ? l10n.subscription_payer_you : l10n.subscription_payer_other;
+    final hasName = payerName != null && payerName!.trim().isNotEmpty;
+    final name = isSelf
+        ? l10n.subscription_payer_you
+        : (hasName ? payerName!.trim() : l10n.subscription_payer_other);
     return Row(
       children: [
         Icon(Icons.person_outline,
             size: 18, color: theme.colorScheme.onSurfaceVariant),
         const SizedBox(width: 8),
-        Text('${l10n.subscription_payer_label}: $name',
-            style: theme.textTheme.bodyMedium),
+        // Expanded: el nombre del pagador es de longitud variable (nickname del
+        // miembro); sin esto, un nombre largo desborda la fila en pantallas
+        // estrechas. Así se ajusta y parte en líneas en vez de overflow.
+        Expanded(
+          child: Text('${l10n.subscription_payer_label}: $name',
+              style: theme.textTheme.bodyMedium),
+        ),
       ],
     );
   }

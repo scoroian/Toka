@@ -8,6 +8,7 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/ad_aware_bottom_padding.dart';
 import '../../../auth/application/auth_provider.dart';
 import '../../../homes/domain/home.dart';
+import '../../../members/application/members_provider.dart';
 import '../../application/paywall_provider.dart';
 import '../../application/subscription_management_view_model.dart';
 import '../../domain/subscription_dashboard.dart';
@@ -26,6 +27,24 @@ class SubscriptionManagementScreenV2 extends ConsumerWidget {
     final vm = ref.watch(subscriptionManagementViewModelProvider);
     final currentUid =
         ref.watch(authProvider).whenOrNull(authenticated: (u) => u.uid);
+
+    // Nombre del miembro pagador, para mostrarlo cuando el pagador NO soy yo
+    // (así se ve quién del hogar paga). Watch condicional: solo se leen los
+    // miembros si hay un pagador distinto al usuario actual, evitando lecturas
+    // en estados sin pagador (free/expired/restorable) o cuando pago yo.
+    final payerUid = vm.dashboard.valueOrNull?.currentPayerUid;
+    String? payerName;
+    if (payerUid != null && payerUid != currentUid && vm.homeId.isNotEmpty) {
+      final members = ref.watch(homeMembersProvider(vm.homeId)).valueOrNull;
+      if (members != null) {
+        for (final m in members) {
+          if (m.uid == payerUid) {
+            payerName = m.nickname;
+            break;
+          }
+        }
+      }
+    }
 
     ref.listen<AsyncValue<dynamic>>(paywallProvider, (_, next) {
       next.whenOrNull(
@@ -63,6 +82,7 @@ class SubscriptionManagementScreenV2 extends ConsumerWidget {
             PlanSummaryCard(
               data: dashboard,
               currentUserUid: currentUid,
+              payerName: payerName,
             ),
             _ActionSection(
               data: dashboard,

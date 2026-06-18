@@ -101,6 +101,11 @@ class _CreateEditTaskScreenV2State
     // backend y las reglas Firestore siempre son el backstop).
     final dashboard = ref.watch(dashboardProvider).valueOrNull;
     final isPremium = dashboard?.premiumFlags.isPremium ?? true;
+    // Gate de la distribución inteligente. Pesimista mientras el dashboard no
+    // ha llegado (default false) para que un hogar Free nunca vea el modo
+    // smart como disponible; las reglas Firestore son el backstop definitivo.
+    final canUseSmart =
+        dashboard?.premiumFlags.canUseSmartDistribution ?? false;
     final planCounters = dashboard?.planCounters;
     final currentRule = formState.recurrenceRule;
     final isOneTimeSelected = currentRule is OneTimeRule;
@@ -263,6 +268,11 @@ class _CreateEditTaskScreenV2State
             ),
           const SizedBox(height: 16),
 
+          // Modo de asignación: rotación básica vs distribución inteligente
+          // (Premium). Se persiste en task.assignmentMode y el backend lo usa
+          // en applyTaskCompletion para elegir al siguiente responsable.
+          _AssignmentModeSelector(vm: vm, canUseSmart: canUseSmart),
+
           // Comportamiento al vencer sin completar
           _OnMissAssignSelector(vm: vm),
 
@@ -331,6 +341,85 @@ class _CreateEditTaskScreenV2State
     if (state.title.trim().isEmpty) return l10n.tasks_validation_title_empty;
     if (state.assignmentOrder.isEmpty) return l10n.tasks_validation_no_assignees;
     return '';
+  }
+}
+
+/// Selector del modo de reparto del turno: rotación básica (orden fijo) vs
+/// distribución inteligente (siguiente = miembro con menos carga reciente).
+/// La opción smart está gated por Premium: si el hogar es Free se muestra con
+/// candado y, al pulsarla, se abre el paywall en lugar de seleccionarla.
+class _AssignmentModeSelector extends StatelessWidget {
+  const _AssignmentModeSelector({required this.vm, required this.canUseSmart});
+  final CreateEditTaskViewModel vm;
+  final bool canUseSmart;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final assignedCount = vm.orderedMembers.where((m) => m.isAssigned).length;
+
+    // Con 0 miembros asignados no tiene sentido elegir modo de reparto.
+    if (assignedCount == 0) return const SizedBox.shrink();
+
+    final mode = vm.formState.assignmentMode;
+    // El reparto (básico o smart) solo importa con ≥2 miembros asignados.
+    final isEnabled = assignedCount >= 2;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(l10n.tasks_field_assignment_mode,
+              style: Theme.of(context).textTheme.titleSmall),
+          const SizedBox(height: 8),
+          SegmentedButton<String>(
+            key: const Key('assignment_mode_selector'),
+            segments: [
+              ButtonSegment(
+                value: 'basicRotation',
+                label: Text(l10n.tasks_assignment_basic_rotation),
+                icon: const Icon(Icons.repeat),
+              ),
+              ButtonSegment(
+                value: 'smartDistribution',
+                label: Text(l10n.tasks_assignment_smart),
+                icon: Icon(
+                    canUseSmart ? Icons.auto_awesome : Icons.lock_outline),
+              ),
+            ],
+            selected: {mode},
+            onSelectionChanged: isEnabled
+                ? (set) {
+                    final picked = set.first;
+                    // Gate Premium: no cambiamos el modo, abrimos el paywall.
+                    if (picked == 'smartDistribution' && !canUseSmart) {
+                      context.push(AppRoutes.paywall);
+                      return;
+                    }
+                    vm.setAssignmentMode(picked);
+                  }
+                : null,
+          ),
+          const SizedBox(height: 4),
+          Padding(
+            padding: const EdgeInsets.only(left: 4),
+            child: Text(
+              !isEnabled
+                  ? l10n.tasks_rotation_requires_two_members
+                  : (canUseSmart
+                      ? l10n.tasks_assignment_smart_hint
+                      : l10n.tasks_assignment_premium_locked),
+              key: const Key('assignment_mode_hint'),
+              style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

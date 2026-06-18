@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:go_router/go_router.dart';
 
@@ -43,18 +44,22 @@ class _MemberProfileScreenV2State extends ConsumerState<MemberProfileScreenV2> {
   ) async {
     final ok = await showDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
+      // Usar el context del builder del diálogo: showDialog empuja la ruta en
+      // el navigator RAÍZ (useRootNavigator: true por defecto), mientras que el
+      // context de la pantalla apunta al navigator del ShellRoute. Hacer
+      // Navigator.pop(context) cerraría la ruta del perfil, no el diálogo.
+      builder: (dialogContext) => AlertDialog(
         title: Text(l10n.member_profile_remove_member),
         content: Text(
             l10n.member_profile_remove_member_confirm(data.member.nickname)),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, false),
+            onPressed: () => Navigator.of(dialogContext).pop(false),
             child: Text(l10n.cancel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
-            onPressed: () => Navigator.pop(context, true),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
             child: Text(l10n.member_profile_remove_member),
           ),
         ],
@@ -98,17 +103,19 @@ class _MemberProfileScreenV2State extends ConsumerState<MemberProfileScreenV2> {
         : l10n.member_profile_promote_admin;
     final ok = await showDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
+      // Ver nota en _confirmRemoveMember: el diálogo vive en el navigator raíz,
+      // así que hay que cerrarlo con el context del builder, no el de pantalla.
+      builder: (dialogContext) => AlertDialog(
         title: Text(action),
         content: Text(isAdmin
             ? l10n.member_profile_demote_admin_confirm(data.member.nickname)
             : l10n.member_profile_promote_admin_confirm(data.member.nickname)),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(context, false),
+              onPressed: () => Navigator.of(dialogContext).pop(false),
               child: Text(l10n.cancel)),
           FilledButton(
-              onPressed: () => Navigator.pop(context, true),
+              onPressed: () => Navigator.of(dialogContext).pop(true),
               child: Text(action)),
         ],
       ),
@@ -189,6 +196,19 @@ class _MemberProfileScreenV2State extends ConsumerState<MemberProfileScreenV2> {
                               : AppColorsV2.textPrimaryLight)),
                   const SizedBox(height: 4),
                   MemberRoleBadge(role: member.role),
+                  // Teléfono: solo visible si el miembro optó por compartirlo
+                  // (phoneVisibility == sameHomeMembers) o si es el propio
+                  // usuario. La lógica vive en Member.phoneForViewer y se expone
+                  // como data.visiblePhone.
+                  if (data.visiblePhone != null &&
+                      data.visiblePhone!.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    _PhoneChip(
+                      key: const Key('member_phone_chip'),
+                      phone: data.visiblePhone!,
+                      isDark: isDark,
+                    ),
+                  ],
                 ]),
               ),
               const SizedBox(height: 20),
@@ -377,6 +397,47 @@ class _LastReviewTile extends StatelessWidget {
       ),
       trailing: const Icon(Icons.chevron_right),
       onTap: onTap,
+    );
+  }
+}
+
+class _PhoneChip extends StatelessWidget {
+  const _PhoneChip({super.key, required this.phone, required this.isDark});
+  final String phone;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    final fg = isDark
+        ? AppColorsV2.textPrimaryDark
+        : AppColorsV2.textPrimaryLight;
+    final surf = isDark ? AppColorsV2.surfaceDark : AppColorsV2.surfaceLight;
+    final bd = isDark ? AppColorsV2.borderDark : AppColorsV2.borderLight;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: () => launchUrl(
+          Uri(scheme: 'tel', path: phone),
+          mode: LaunchMode.externalApplication,
+        ),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          decoration: BoxDecoration(
+            color: surf,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: bd),
+          ),
+          child: Row(mainAxisSize: MainAxisSize.min, children: [
+            const Icon(Icons.phone_outlined,
+                size: 16, color: AppColorsV2.primary),
+            const SizedBox(width: 8),
+            Text(phone,
+                style: GoogleFonts.plusJakartaSans(
+                    fontSize: 14, fontWeight: FontWeight.w700, color: fg)),
+          ]),
+        ),
+      ),
     );
   }
 }

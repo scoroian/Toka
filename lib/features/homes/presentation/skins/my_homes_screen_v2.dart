@@ -7,6 +7,7 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/loading_widget.dart';
 import '../../application/my_homes_view_model.dart';
 import '../../domain/home_membership.dart';
+import '../widgets/home_avatar.dart';
 
 class MyHomesScreenV2 extends ConsumerWidget {
   const MyHomesScreenV2({super.key});
@@ -41,6 +42,11 @@ class MyHomesScreenV2 extends ConsumerWidget {
             final isActive = m.homeId == vm.currentHomeId;
             return ListTile(
               key: Key('home_list_tile_${m.homeId}'),
+              leading: HomeAvatar(
+                photoUrl: m.homePhotoSnapshot,
+                name: m.homeNameSnapshot,
+                radius: 20,
+              ),
               title: Text(m.homeNameSnapshot),
               subtitle: Text(_roleLabel(m.role, l10n)),
               trailing: isActive

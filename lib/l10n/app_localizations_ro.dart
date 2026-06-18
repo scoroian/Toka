@@ -248,6 +248,12 @@ class AppLocalizationsRo extends AppLocalizations {
   String get onboarding_home_choice_title => 'Ce vrei să faci?';
 
   @override
+  String get onboarding_create_home_title => 'Creează-ți locuința';
+
+  @override
+  String get onboarding_join_home_title => 'Alătură-te unei locuințe';
+
+  @override
   String get onboarding_create_home_description =>
       'Creează-ți locuința și adaugă-ți colegii';
 
@@ -1364,6 +1370,13 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get tasks_assignment_smart => 'Distribuție inteligentă';
+
+  @override
+  String get tasks_assignment_smart_hint =>
+      'Atribuie fiecare tură membrului cu cea mai mică încărcare recentă.';
+
+  @override
+  String get tasks_assignment_premium_locked => 'Disponibil cu Premium';
 
   @override
   String get tasks_assignment_members => 'Membri atribuiți';

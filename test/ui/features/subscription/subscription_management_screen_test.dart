@@ -4,6 +4,9 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:toka/features/homes/domain/home.dart';
+import 'package:toka/features/homes/domain/home_membership.dart';
+import 'package:toka/features/members/application/members_provider.dart';
+import 'package:toka/features/members/domain/member.dart';
 import 'package:toka/features/subscription/application/paywall_provider.dart';
 import 'package:toka/features/subscription/application/subscription_dashboard_provider.dart';
 import 'package:toka/features/subscription/domain/purchase_result.dart';
@@ -36,7 +39,8 @@ class _FakePaywall extends Paywall {
   Future<void> restorePremium({required String homeId}) async {}
 }
 
-SubscriptionDashboard _makeDashboard(HomePremiumStatus status) =>
+SubscriptionDashboard _makeDashboard(HomePremiumStatus status,
+        {String? payerUid}) =>
     SubscriptionDashboard(
       homeId: 'h1',
       status: status,
@@ -44,8 +48,26 @@ SubscriptionDashboard _makeDashboard(HomePremiumStatus status) =>
       endsAt: DateTime(2026, 5),
       restoreUntil: DateTime(2026, 6),
       autoRenew: false,
-      currentPayerUid: null,
+      currentPayerUid: payerUid,
       planCounters: PlanCounters.empty(),
+    );
+
+Member _makeMember({required String uid, required String nickname}) => Member(
+      uid: uid,
+      homeId: 'h1',
+      nickname: nickname,
+      photoUrl: null,
+      bio: null,
+      phone: null,
+      phoneVisibility: 'none',
+      role: MemberRole.member,
+      status: MemberStatus.active,
+      joinedAt: DateTime(2024),
+      tasksCompleted: 0,
+      passedCount: 0,
+      complianceRate: 1.0,
+      currentStreak: 0,
+      averageScore: 0.0,
     );
 
 List<Override> _overridesFor(SubscriptionDashboard dashboard) => [
@@ -145,5 +167,30 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('btn_reactivate_premium')), findsOneWidget);
+  });
+
+  testWidgets(
+      'SubscriptionManagementScreen: muestra el NOMBRE del pagador (no "otro miembro")',
+      (tester) async {
+    await tester.pumpWidget(_wrap(
+      const SubscriptionManagementScreenV2(),
+      overrides: [
+        ..._overridesFor(
+          _makeDashboard(HomePremiumStatus.active, payerUid: 'payer1'),
+        ),
+        // currentUid no se sobreescribe → null → el pagador NO soy yo → debe
+        // resolver el nickname del miembro pagador desde homeMembers.
+        homeMembersProvider('h1').overrideWith(
+          (_) => Stream.value([
+            _makeMember(uid: 'payer1', nickname: 'Sebas N2'),
+            _makeMember(uid: 'other', nickname: 'QA Tel N3'),
+          ]),
+        ),
+      ],
+    ));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Pagador: Sebas N2'), findsOneWidget);
+    expect(find.text('Pagador: otro miembro'), findsNothing);
   });
 }

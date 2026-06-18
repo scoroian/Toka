@@ -16,6 +16,11 @@ class TaskPreview with _$TaskPreview {
     required String? currentAssigneePhoto,
     required DateTime nextDueAt,
     required bool isOverdue,
+    // Calculado por el backend en la zona horaria del hogar (igual que
+    // `counters.tasksDueToday`). El tile lo usa para decidir la etiqueta "Hoy",
+    // de modo que el contador y las etiquetas siempre cuadran. Para snapshots
+    // antiguos sin el campo, cae a false.
+    @Default(false) bool isDueToday,
     required String status,
   }) = _TaskPreview;
 
@@ -30,6 +35,7 @@ class TaskPreview with _$TaskPreview {
         currentAssigneePhoto: map['currentAssigneePhoto'] as String?,
         nextDueAt: (map['nextDueAt'] as Timestamp?)?.toDate().toLocal() ?? DateTime.now(),
         isOverdue: map['isOverdue'] as bool? ?? false,
+        isDueToday: map['isDueToday'] as bool? ?? false,
         status: map['status'] as String? ?? 'active',
       );
 }

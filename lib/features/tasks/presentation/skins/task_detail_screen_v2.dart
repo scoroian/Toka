@@ -122,6 +122,7 @@ class TaskDetailScreenV2 extends ConsumerWidget {
                   onPressed: () => _handleToggleFreeze(context, ref, vm, task),
                 ),
                 IconButton(
+                  tooltip: l10n.tasks_action_delete,
                   icon: const Icon(Icons.delete_outline),
                   onPressed: () => _confirmDelete(context, l10n, vm, task),
                 ),

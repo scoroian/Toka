@@ -4,6 +4,10 @@ import {
   parseDebugPremiumAllowedUids,
   isDebugPremiumAllowed,
 } from "./debug_premium_allowlist";
+import {
+  DEBUG_VALID_STATUSES,
+  buildDebugDashboardFlags,
+} from "./debug_premium_flags";
 
 // Testea la lógica de negocio de createHome: validación nombre, control de slots, error si sin nombre
 
@@ -325,6 +329,53 @@ describe("debugSetPremiumStatus — isDebugPremiumAllowed", () => {
   });
   it("emulador '1' (no 'true' exacto) + uid no allowlist → denegado", () => {
     expect(isDebugPremiumAllowed("1", "otro", allowed)).toBe(false);
+  });
+});
+
+describe("debugSetPremiumStatus — buildDebugDashboardFlags (coherencia ads)", () => {
+  const premiumStates = ["active", "cancelledPendingEnd", "rescue"] as const;
+  const freeStates = ["free", "expiredFree", "restorable"] as const;
+
+  it("invariante: adFlags.showBanner === premiumFlags.showAds en TODOS los estados", () => {
+    for (const status of DEBUG_VALID_STATUSES) {
+      const { premiumFlags, adFlags } = buildDebugDashboardFlags(status);
+      // El bug QA: estos dos divergían (showAds=false pero showBanner=true).
+      expect(adFlags.showBanner).toBe(premiumFlags.showAds);
+    }
+  });
+
+  it("estados premium → ads off, sin banner, bannerUnit vacío", () => {
+    for (const status of premiumStates) {
+      const { isPremium, premiumFlags, adFlags } =
+        buildDebugDashboardFlags(status);
+      expect(isPremium).toBe(true);
+      expect(premiumFlags.showAds).toBe(false);
+      expect(adFlags.showBanner).toBe(false);
+      expect(adFlags.bannerUnit).toBe("");
+    }
+  });
+
+  it("estados gratis → ads on, banner visible con unit de test", () => {
+    for (const status of freeStates) {
+      const { isPremium, premiumFlags, adFlags } =
+        buildDebugDashboardFlags(status);
+      expect(isPremium).toBe(false);
+      expect(premiumFlags.showAds).toBe(true);
+      expect(adFlags.showBanner).toBe(true);
+      expect(adFlags.bannerUnit.length).toBeGreaterThan(0);
+    }
+  });
+
+  it("rescue → isInRescue=true con daysLeft", () => {
+    const { rescueFlags } = buildDebugDashboardFlags("rescue");
+    expect(rescueFlags.isInRescue).toBe(true);
+    expect(rescueFlags.daysLeft).toBe(2);
+  });
+
+  it("active → no rescue", () => {
+    const { rescueFlags } = buildDebugDashboardFlags("active");
+    expect(rescueFlags.isInRescue).toBe(false);
+    expect(rescueFlags.daysLeft).toBeNull();
   });
 });
 

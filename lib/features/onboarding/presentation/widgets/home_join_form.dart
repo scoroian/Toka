@@ -11,12 +11,18 @@ class HomeJoinForm extends StatefulWidget {
     required this.error,
     required this.onJoin,
     required this.onBack,
+    this.onClearError,
   });
 
   final bool isLoading;
   final String? error;
   final ValueChanged<String> onJoin;
   final VoidCallback onBack;
+
+  /// Se invoca al editar el código para limpiar el error de servidor
+  /// ("Código de invitación inválido", etc.), que vive en el view model y no
+  /// se reevalúa solo al teclear.
+  final VoidCallback? onClearError;
 
   @override
   State<HomeJoinForm> createState() => _HomeJoinFormState();
@@ -64,6 +70,8 @@ class _HomeJoinFormState extends State<HomeJoinForm> {
     final l10n = AppLocalizations.of(context);
     return Form(
       key: _formKey,
+      // Revalida la longitud del código al teclear tras el primer submit.
+      autovalidateMode: AutovalidateMode.onUserInteraction,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -112,6 +120,10 @@ class _HomeJoinFormState extends State<HomeJoinForm> {
                 onPressed: widget.isLoading ? null : _openScanner,
               ),
             ),
+            onChanged: (_) {
+              // Al corregir el código, descarta el error de servidor previo.
+              if (widget.error != null) widget.onClearError?.call();
+            },
             validator: (v) {
               if (v == null || v.trim().length != 6) {
                 return l10n.onboarding_invite_code_length_error;

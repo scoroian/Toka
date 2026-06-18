@@ -57,7 +57,9 @@ describe('applyTaskCompletion — happy path', () => {
     const memberDoc = await getDb()
       .collection('homes').doc(HOME).collection('members').doc(MEMBER).get();
     const data = memberDoc.data()!;
-    expect(data['completedCount']).toBeGreaterThan(0);
+    // Campo canónico tras el hardening: tasksCompleted (completedCount se borra
+    // con FieldValue.delete() para migrar datos de la versión anterior).
+    expect(data['tasksCompleted']).toBeGreaterThan(0);
     expect(data['complianceRate']).toBeGreaterThan(0);
   });
 
@@ -66,6 +68,17 @@ describe('applyTaskCompletion — happy path', () => {
       .collection('homes').doc(HOME).collection('tasks').doc('task1').get();
     // El siguiente después de MEMBER en [MEMBER, OWNER] es OWNER
     expect(taskDoc.data()!['currentAssigneeUid']).toBe(OWNER);
+  });
+
+  it('reconstruye el dashboard dentro de la llamada (no fire-and-forget)', async () => {
+    // Con applyTaskCompletion esperando a updateHomeDashboard, el dashboard ya
+    // refleja la completación al volver de la llamada. Antes era fire-and-forget
+    // y, en Cloud Functions gen2, el rebuild quedaba estrangulado tras la
+    // respuesta (~10s de desfase en la pantalla Hoy). task1 se completó arriba.
+    const dash = await getDb()
+      .collection('homes').doc(HOME).collection('views').doc('dashboard').get();
+    expect(dash.exists).toBe(true);
+    expect(dash.data()!['counters']['tasksDoneToday']).toBeGreaterThanOrEqual(1);
   });
 });
 

@@ -12,6 +12,7 @@ import '../application/current_home_provider.dart';
 import '../application/home_slot_provider.dart';
 import '../application/homes_provider.dart';
 import '../domain/home_membership.dart';
+import 'widgets/home_avatar.dart';
 
 @visibleForTesting
 List<HomeMembership> sortMembershipsForSelector(
@@ -79,10 +80,22 @@ class HomeSelectorWidget extends ConsumerWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            currentHome?.name ?? l10n.loading,
-            style: Theme.of(context).appBarTheme.titleTextStyle ??
-                Theme.of(context).textTheme.titleLarge,
+          if (currentHome != null) ...[
+            HomeAvatar(
+              key: const Key('home_selector_avatar'),
+              photoUrl: currentHome.photoUrl,
+              name: currentHome.name,
+              radius: 16,
+            ),
+            const SizedBox(width: 8),
+          ],
+          Flexible(
+            child: Text(
+              currentHome?.name ?? l10n.loading,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).appBarTheme.titleTextStyle ??
+                  Theme.of(context).textTheme.titleLarge,
+            ),
           ),
           const SizedBox(width: 4),
           const Icon(
@@ -146,6 +159,11 @@ class _HomeSelectorSheet extends ConsumerWidget {
                 final isActive = membership.homeId == currentHomeId;
                 return ListTile(
                   key: Key('home_tile_${membership.homeId}'),
+                  leading: HomeAvatar(
+                    photoUrl: membership.homePhotoSnapshot,
+                    name: membership.homeNameSnapshot,
+                    radius: 20,
+                  ),
                   title: Text(membership.homeNameSnapshot),
                   subtitle: Text(roleLabel(membership.role)),
                   trailing: isActive

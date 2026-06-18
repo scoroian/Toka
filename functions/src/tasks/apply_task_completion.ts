@@ -172,9 +172,17 @@ export const applyTaskCompletion = onCall(async (request) => {
     return { eventId: eventRef.id, nextAssigneeUid };
   });
 
-  updateHomeDashboard(homeId).catch((err) =>
-    logger.error("Failed to update dashboard after completion", err)
-  );
+  // Reconstruir el dashboard ANTES de responder al cliente. En Cloud Functions
+  // gen2 (Cloud Run) el CPU se estrangula en cuanto se envía la respuesta, por lo
+  // que un rebuild fire-and-forget quedaba en segundo plano y tardaba ~10s en
+  // reflejarse en la pantalla Hoy. Hacerlo dentro del ciclo de la petición
+  // elimina ese desfase. Un fallo del rebuild NO revierte la completación (ya
+  // está confirmada en la transacción); el cron diario lo reconstruirá.
+  try {
+    await updateHomeDashboard(homeId);
+  } catch (err) {
+    logger.error("Failed to update dashboard after completion", err);
+  }
 
   return result;
 });

@@ -51,6 +51,28 @@ describe("getNextAssigneeSmart", () => {
   it("retorna currentUid para orden vacío", () => {
     expect(getNextAssigneeSmart([], "u1", [], new Map())).toBe("u1");
   });
+  it("favorece a quien lleva más días sin ejecutar (recencia)", () => {
+    const loadData = new Map([
+      ["u1", { completionsRecent: 1, difficultyWeight: 1.0, daysSinceLastExecution: 0 }],  // score 1
+      ["u2", { completionsRecent: 1, difficultyWeight: 1.0, daysSinceLastExecution: 30 }], // score 1 - 3 = -2
+    ]);
+    expect(getNextAssigneeSmart(["u1", "u2"], "u1", [], loadData)).toBe("u2");
+  });
+  it("la dificultad acumulada pesa en el score", () => {
+    const loadData = new Map([
+      ["u1", { completionsRecent: 3, difficultyWeight: 3.0, daysSinceLastExecution: 0 }], // score 9
+      ["u2", { completionsRecent: 4, difficultyWeight: 1.0, daysSinceLastExecution: 0 }], // score 4
+    ]);
+    // u1 hizo menos tareas pero más difíciles → mayor carga → elige u2.
+    expect(getNextAssigneeSmart(["u1", "u2"], "u1", [], loadData)).toBe("u2");
+  });
+  it("usa carga por defecto (0) para miembros sin datos", () => {
+    const loadData = new Map([
+      ["u1", { completionsRecent: 5, difficultyWeight: 1.0, daysSinceLastExecution: 0 }], // score 5
+      // u2 sin entrada → default score 0 → menor carga
+    ]);
+    expect(getNextAssigneeSmart(["u1", "u2"], "u1", [], loadData)).toBe("u2");
+  });
 });
 
 describe("addRecurrenceInterval", () => {

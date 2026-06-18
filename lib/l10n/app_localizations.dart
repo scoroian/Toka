@@ -550,6 +550,18 @@ abstract class AppLocalizations {
   /// **'¿Qué quieres hacer?'**
   String get onboarding_home_choice_title;
 
+  /// Title shown above the create-home subform
+  ///
+  /// In es, this message translates to:
+  /// **'Crea tu hogar'**
+  String get onboarding_create_home_title;
+
+  /// Title shown above the join-home subform
+  ///
+  /// In es, this message translates to:
+  /// **'Únete a un hogar'**
+  String get onboarding_join_home_title;
+
   /// Create home option description
   ///
   /// In es, this message translates to:
@@ -2547,6 +2559,18 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Distribución inteligente'**
   String get tasks_assignment_smart;
+
+  /// Hint below the assignment-mode selector explaining smart distribution
+  ///
+  /// In es, this message translates to:
+  /// **'Asigna cada turno al miembro con menos carga reciente.'**
+  String get tasks_assignment_smart_hint;
+
+  /// Lock hint on the smart-distribution option for Free homes
+  ///
+  /// In es, this message translates to:
+  /// **'Disponible con Premium'**
+  String get tasks_assignment_premium_locked;
 
   /// No description provided for @tasks_assignment_members.
   ///

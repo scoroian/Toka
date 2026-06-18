@@ -120,6 +120,12 @@ class _HistoryViewModelImpl implements HistoryViewModel {
           score: rating,
           note: note,
         );
+    // Marca optimista: el `snapshots()` de ratedEventIds puede tardar en
+    // propagar el cambio escrito por la CF, así que reflejamos "valorado" en la
+    // UI al instante. Solo se ejecuta si submitReview no lanzó.
+    ref
+        .read(optimisticRatedEventIdsProvider(homeId!).notifier)
+        .markRated(eventId);
   }
 }
 
@@ -154,11 +160,23 @@ HistoryViewModel historyViewModel(HistoryViewModelRef ref) {
   final nameMap  = {for (final m in members) m.uid: m.nickname};
   final photoMap = {for (final m in members) m.uid: m.photoUrl};
 
-  final ratedIds = ref.watch(
-    ratedEventIdsProvider(homeId: homeId, currentUid: currentUid),
-  ).valueOrNull ?? {};
+  final streamRatedIds = ref.watch(
+        ratedEventIdsProvider(homeId: homeId, currentUid: currentUid),
+      ).valueOrNull ??
+      const <String>{};
+  // Fusionamos los IDs confirmados por Firestore con los marcados de forma
+  // optimista tras un envío reciente, para que el botón cambie en vivo.
+  final optimisticRatedIds =
+      ref.watch(optimisticRatedEventIdsProvider(homeId));
+  final ratedIds = optimisticRatedIds.isEmpty
+      ? streamRatedIds
+      : <String>{...streamRatedIds, ...optimisticRatedIds};
 
-  final items = rawEvents.whenData((events) => events.map((e) {
+  // Tipo explícito `TaskEvent e`: el compilador de build (CFE) no infiere el
+  // sealed a través de whenData(...).map(...) y trata `e` como `dynamic`,
+  // rompiendo la exhaustividad de los `switch` en build limpio de release
+  // (el analyzer sí lo infiere). Anotar lo alinea sin cambiar comportamiento.
+  final items = rawEvents.whenData((events) => events.map((TaskEvent e) {
         final actorUid = switch (e) {
           CompletedEvent c => c.actorUid,
           PassedEvent p    => p.actorUid,

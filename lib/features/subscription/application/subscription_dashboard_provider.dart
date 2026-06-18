@@ -26,9 +26,13 @@ Stream<SubscriptionDashboard> subscriptionDashboard(
   SubscriptionDashboardRef ref, {
   FirebaseFirestore? firestoreOverride,
 }) {
-  final home = ref.watch(currentHomeProvider).valueOrNull;
-  if (home == null) return const Stream.empty();
-  final homeId = home.id;
+  // Observar SOLO el id: este provider ya escucha el documento del hogar por su
+  // cuenta (`homes/{homeId}` snapshots), así que no debe reconstruirse cuando
+  // `currentHomeProvider` re-emite por un cambio de campo del mismo hogar —
+  // eso solo re-crearía el combineLatest. Reacciona únicamente al cambio de id.
+  final homeId =
+      ref.watch(currentHomeProvider.select((h) => h.valueOrNull?.id));
+  if (homeId == null) return const Stream.empty();
 
   final firestore = firestoreOverride ?? FirebaseFirestore.instance;
   final homeStream = firestore.doc('homes/$homeId').snapshots();

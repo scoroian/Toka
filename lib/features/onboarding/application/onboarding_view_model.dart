@@ -34,6 +34,7 @@ abstract class OnboardingViewModel {
   void setPhoneNumber(String? phone);
   void setPhoneVisible(bool visible);
   void setPhotoLocalPath(String? path);
+  void clearError();
   Future<void> saveProfileAndContinue();
   Future<void> createHome(String name, String? emoji);
   Future<void> joinHome(String code);
@@ -131,6 +132,9 @@ class OnboardingViewModelNotifier extends _$OnboardingViewModelNotifier
 
   @override
   void setPhotoLocalPath(String? path) => _inner.setPhotoLocalPath(path);
+
+  @override
+  void clearError() => _inner.clearError();
 
   @override
   Future<void> saveProfileAndContinue() => _inner.saveProfileAndContinue();

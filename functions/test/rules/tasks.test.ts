@@ -236,6 +236,15 @@ describe('tasks — update', () => {
     }));
   });
 
+  it('admin puede hacer soft-delete incluyendo deletedAt (auditoría)', async () => {
+    const ctx = testEnv.authenticatedContext(ADMIN_UID);
+    await assertSucceeds(updateDoc(doc(ctx.firestore(), `homes/${HOME1}/tasks/task1`), {
+      status: 'deleted',
+      deletedAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    }));
+  });
+
   it('admin NO puede escribir estado desconocido', async () => {
     const ctx = testEnv.authenticatedContext(ADMIN_UID);
     await assertFails(updateDoc(doc(ctx.firestore(), `homes/${HOME1}/tasks/task1`), {
@@ -395,5 +404,90 @@ describe('tasks — create (Free plan limits)', () => {
           recurrenceRule: { kind: 'weekly', weekdays: ['MON'], time: '09:00', timezone: 'Europe/Madrid' },
         })),
     );
+  });
+});
+
+// ─── SMART DISTRIBUTION (gate Premium) ───────────────────────────────────────
+
+describe('tasks — smart distribution (gate Premium)', () => {
+  const FREE = 'home_free_smart';
+  const PREM = 'home_prem_smart';
+
+  beforeEach(async () => {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      const db = ctx.firestore();
+      await setDoc(doc(db, `homes/${FREE}`), {
+        ownerUid: OWNER_UID, name: 'Free', premiumStatus: 'free',
+      });
+      await setDoc(doc(db, `homes/${PREM}`), {
+        ownerUid: OWNER_UID, name: 'Prem', premiumStatus: 'active',
+      });
+      await setDoc(doc(db, `users/${OWNER_UID}/memberships/${FREE}`), { status: 'active', role: 'owner' });
+      await setDoc(doc(db, `users/${OWNER_UID}/memberships/${PREM}`), { status: 'active', role: 'owner' });
+      // Contadores bajo el tope para que el gate Free de límites NO interfiera:
+      // así el único motivo de fallo posible es el gate de smart distribution.
+      await setDoc(doc(db, `homes/${FREE}/views/dashboard`), {
+        planCounters: { activeTasks: 0, automaticRecurringTasks: 0, activeMembers: 1, totalAdmins: 1 },
+      });
+      // Tareas existentes en el home Free para los tests de update:
+      // una smart (creada cuando el hogar era Premium, antes del downgrade) y una básica.
+      await setDoc(doc(db, `homes/${FREE}/tasks/smart_existing`),
+        validTask(FREE, OWNER_UID, { assignmentMode: 'smartDistribution' }));
+      await setDoc(doc(db, `homes/${FREE}/tasks/basic_existing`),
+        validTask(FREE, OWNER_UID, { assignmentMode: 'basicRotation' }));
+      await setDoc(doc(db, `homes/${PREM}/tasks/prem_basic`),
+        validTask(PREM, OWNER_UID, { assignmentMode: 'basicRotation' }));
+    });
+  });
+
+  it('Free NO puede CREAR tarea con smartDistribution', async () => {
+    const ctx = testEnv.authenticatedContext(OWNER_UID);
+    await assertFails(setDoc(doc(ctx.firestore(), `homes/${FREE}/tasks/new_smart`),
+      validTask(FREE, OWNER_UID, { assignmentMode: 'smartDistribution' })));
+  });
+
+  it('Free SÍ puede CREAR tarea con basicRotation', async () => {
+    const ctx = testEnv.authenticatedContext(OWNER_UID);
+    await assertSucceeds(setDoc(doc(ctx.firestore(), `homes/${FREE}/tasks/new_basic`),
+      validTask(FREE, OWNER_UID, { assignmentMode: 'basicRotation' })));
+  });
+
+  it('Premium SÍ puede CREAR tarea con smartDistribution', async () => {
+    const ctx = testEnv.authenticatedContext(OWNER_UID);
+    await assertSucceeds(setDoc(doc(ctx.firestore(), `homes/${PREM}/tasks/new_smart`),
+      validTask(PREM, OWNER_UID, { assignmentMode: 'smartDistribution' })));
+  });
+
+  it('Free NO puede CAMBIAR una tarea de básica a smart', async () => {
+    const ctx = testEnv.authenticatedContext(OWNER_UID);
+    await assertFails(updateDoc(doc(ctx.firestore(), `homes/${FREE}/tasks/basic_existing`), {
+      assignmentMode: 'smartDistribution',
+      updatedAt: serverTimestamp(),
+    }));
+  });
+
+  it('Free SÍ puede EDITAR (conservando smart) una tarea ya smart tras downgrade', async () => {
+    const ctx = testEnv.authenticatedContext(OWNER_UID);
+    await assertSucceeds(updateDoc(doc(ctx.firestore(), `homes/${FREE}/tasks/smart_existing`), {
+      title: 'Editada tras downgrade',
+      assignmentMode: 'smartDistribution',
+      updatedAt: serverTimestamp(),
+    }));
+  });
+
+  it('Free SÍ puede pasar una tarea smart a básica', async () => {
+    const ctx = testEnv.authenticatedContext(OWNER_UID);
+    await assertSucceeds(updateDoc(doc(ctx.firestore(), `homes/${FREE}/tasks/smart_existing`), {
+      assignmentMode: 'basicRotation',
+      updatedAt: serverTimestamp(),
+    }));
+  });
+
+  it('Premium SÍ puede CAMBIAR una tarea de básica a smart', async () => {
+    const ctx = testEnv.authenticatedContext(OWNER_UID);
+    await assertSucceeds(updateDoc(doc(ctx.firestore(), `homes/${PREM}/tasks/prem_basic`), {
+      assignmentMode: 'smartDistribution',
+      updatedAt: serverTimestamp(),
+    }));
   });
 });

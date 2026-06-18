@@ -28,7 +28,7 @@ class TodayScreenV2 extends ConsumerWidget {
 
   Future<void> _onPass(BuildContext ctx, TodayViewModel vm, TaskPreview task, String? uid) async {
     if (uid == null) return;
-    final stats = await vm.fetchPassStats(uid);
+    final info = await vm.fetchPassInfo(task.taskId, uid);
     if (!ctx.mounted) return;
     String? reason;
     bool confirmed = false;
@@ -36,9 +36,9 @@ class TodayScreenV2 extends ConsumerWidget {
       context: ctx,
       builder: (_) => PassTurnDialog(
         task: task,
-        currentComplianceRate: stats.complianceBefore,
-        estimatedComplianceAfter: stats.estimatedAfter,
-        nextAssigneeName: null,
+        currentComplianceRate: info.complianceBefore,
+        estimatedComplianceAfter: info.estimatedAfter,
+        nextAssigneeName: info.nextAssigneeName,
         onConfirm: (r) { confirmed = true; reason = r; },
       ),
     );

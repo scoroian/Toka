@@ -135,6 +135,7 @@ class _OnboardingFlowScreenState extends ConsumerState<OnboardingFlowScreen> {
                   onCreateHome: (name, emoji) => vm.createHome(name, emoji),
                   onJoinHome: vm.joinHome,
                   onPrev: vm.prevStep,
+                  onClearError: vm.clearError,
                 ),
               ],
             ),

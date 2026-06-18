@@ -25,7 +25,7 @@ final onboardingViewModelProvider = Provider<OnboardingViewModel>.internal(
 // ignore: unused_element
 typedef OnboardingViewModelRef = ProviderRef<OnboardingViewModel>;
 String _$onboardingViewModelNotifierHash() =>
-    r'3d5deb2dcc7a4fa1e02fbb80aed63fc3a039b437';
+    r'00f8e8999edccb8682719d798eb7c70546513b00';
 
 /// See also [OnboardingViewModelNotifier].
 @ProviderFor(OnboardingViewModelNotifier)

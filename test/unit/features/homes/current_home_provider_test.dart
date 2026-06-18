@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -118,7 +120,7 @@ void main() {
 
     when(() => repo.getLastSelectedHomeId('uid1'))
         .thenAnswer((_) async => null);
-    when(() => repo.fetchHome('h1')).thenAnswer((_) async => home);
+    when(() => repo.watchHome('h1')).thenAnswer((_) => Stream.value(home));
 
     final container = _makeContainer(
       authState: const AuthState.authenticated(_fakeUser),
@@ -129,6 +131,46 @@ void main() {
 
     final result = await container.read(currentHomeProvider.future);
     expect(result, home);
+  });
+
+  test('re-emits live when the home document changes (BUG-05)', () async {
+    final membership = _membership('h1', 'Casa Principal');
+    final initial = _home('h1', 'Casa Principal');
+    final updated = initial.copyWith(
+      name: 'Casa Renombrada',
+      photoUrl: 'https://example.com/avatar.jpg',
+      premiumStatus: HomePremiumStatus.active,
+    );
+
+    // Stream del documento controlado a mano: simula dos snapshots de Firestore
+    // (estado inicial + cambio aplicado vía Admin SDK con la app abierta).
+    final controller = StreamController<Home?>();
+    addTearDown(controller.close);
+
+    when(() => repo.getLastSelectedHomeId('uid1'))
+        .thenAnswer((_) async => null);
+    when(() => repo.watchHome('h1')).thenAnswer((_) => controller.stream);
+
+    final container = _makeContainer(
+      authState: const AuthState.authenticated(_fakeUser),
+      repo: repo,
+      membershipsStream: Stream.value([membership]),
+    );
+    addTearDown(container.dispose);
+
+    // Mantener vivo el provider para que la suscripción interna no se cancele.
+    final sub = container.listen(currentHomeProvider, (_, __) {});
+    addTearDown(sub.close);
+
+    // Primera emisión → resuelve el estado inicial.
+    controller.add(initial);
+    expect(await container.read(currentHomeProvider.future), initial);
+
+    // Segunda emisión (cambio del doc) → debe propagarse a la UI sin reiniciar.
+    controller.add(updated);
+    await Future<void>.delayed(Duration.zero);
+
+    expect(container.read(currentHomeProvider).valueOrNull, updated);
   });
 
   test('with empty memberships returns null', () async {
@@ -169,7 +211,7 @@ void main() {
 
     when(() => repo.getLastSelectedHomeId('uid1'))
         .thenAnswer((_) async => null);
-    when(() => repo.fetchHome('h1')).thenAnswer((_) async => home);
+    when(() => repo.watchHome('h1')).thenAnswer((_) => Stream.value(home));
     when(() => repo.updateLastSelectedHome('uid1', 'h2'))
         .thenAnswer((_) async {});
     // After invalidation the provider will rebuild — return null to keep test simple.

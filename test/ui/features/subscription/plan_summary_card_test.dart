@@ -142,6 +142,51 @@ void main() {
     );
   });
 
+  // ── Campo "Pagador" (estado active) ──────────────────────────────────────
+
+  testWidgets('Pagador: muestra "tú" cuando el usuario actual es el pagador',
+      (t) async {
+    await t.pumpWidget(_wrap(
+      PlanSummaryCard(
+        data: _dashboard(HomePremiumStatus.active, payerUid: 'u1'),
+        currentUserUid: 'u1',
+        payerName: 'Sebas N2',
+      ),
+    ));
+    await t.pumpAndSettle();
+    expect(find.text('Pagador: tú'), findsOneWidget);
+    expect(find.text('Pagador: Sebas N2'), findsNothing);
+  });
+
+  testWidgets(
+      'Pagador: muestra el NOMBRE del pagador cuando no soy yo y hay nombre',
+      (t) async {
+    await t.pumpWidget(_wrap(
+      PlanSummaryCard(
+        data: _dashboard(HomePremiumStatus.active, payerUid: 'u2'),
+        currentUserUid: 'u1',
+        payerName: 'Sebas N2',
+      ),
+    ));
+    await t.pumpAndSettle();
+    expect(find.text('Pagador: Sebas N2'), findsOneWidget);
+    expect(find.text('Pagador: otro miembro'), findsNothing);
+    expect(find.text('Pagador: tú'), findsNothing);
+  });
+
+  testWidgets(
+      'Pagador: cae al genérico "otro miembro" si no soy yo y no hay nombre',
+      (t) async {
+    await t.pumpWidget(_wrap(
+      PlanSummaryCard(
+        data: _dashboard(HomePremiumStatus.active, payerUid: 'u2'),
+        currentUserUid: 'u1',
+      ),
+    ));
+    await t.pumpAndSettle();
+    expect(find.text('Pagador: otro miembro'), findsOneWidget);
+  });
+
   testWidgets('golden: PlanSummaryCard estado restorable', (t) async {
     await t.pumpWidget(_wrap(
       PlanSummaryCard(

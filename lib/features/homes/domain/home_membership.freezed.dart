@@ -23,7 +23,12 @@ mixin _$HomeMembership {
   MemberStatus get status => throw _privateConstructorUsedError;
   DateTime get joinedAt => throw _privateConstructorUsedError;
   DateTime? get leftAt => throw _privateConstructorUsedError;
-  bool get hasPendingToday => throw _privateConstructorUsedError;
+  bool get hasPendingToday =>
+      throw _privateConstructorUsedError; // Snapshot de la foto del hogar (`homes/{homeId}.photoUrl`) denormalizado
+// en la membership, igual que `homeNameSnapshot`. Lo escribe el backend al
+// unirse/crear y lo mantiene fresco el trigger `syncHomeSnapshotToMemberships`.
+// null cuando el hogar usa la inicial.
+  String? get homePhotoSnapshot => throw _privateConstructorUsedError;
 
   /// Create a copy of HomeMembership
   /// with the given fields replaced by the non-null parameter values.
@@ -46,7 +51,8 @@ abstract class $HomeMembershipCopyWith<$Res> {
       MemberStatus status,
       DateTime joinedAt,
       DateTime? leftAt,
-      bool hasPendingToday});
+      bool hasPendingToday,
+      String? homePhotoSnapshot});
 }
 
 /// @nodoc
@@ -72,6 +78,7 @@ class _$HomeMembershipCopyWithImpl<$Res, $Val extends HomeMembership>
     Object? joinedAt = null,
     Object? leftAt = freezed,
     Object? hasPendingToday = null,
+    Object? homePhotoSnapshot = freezed,
   }) {
     return _then(_value.copyWith(
       homeId: null == homeId
@@ -106,6 +113,10 @@ class _$HomeMembershipCopyWithImpl<$Res, $Val extends HomeMembership>
           ? _value.hasPendingToday
           : hasPendingToday // ignore: cast_nullable_to_non_nullable
               as bool,
+      homePhotoSnapshot: freezed == homePhotoSnapshot
+          ? _value.homePhotoSnapshot
+          : homePhotoSnapshot // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -126,7 +137,8 @@ abstract class _$$HomeMembershipImplCopyWith<$Res>
       MemberStatus status,
       DateTime joinedAt,
       DateTime? leftAt,
-      bool hasPendingToday});
+      bool hasPendingToday,
+      String? homePhotoSnapshot});
 }
 
 /// @nodoc
@@ -150,6 +162,7 @@ class __$$HomeMembershipImplCopyWithImpl<$Res>
     Object? joinedAt = null,
     Object? leftAt = freezed,
     Object? hasPendingToday = null,
+    Object? homePhotoSnapshot = freezed,
   }) {
     return _then(_$HomeMembershipImpl(
       homeId: null == homeId
@@ -184,6 +197,10 @@ class __$$HomeMembershipImplCopyWithImpl<$Res>
           ? _value.hasPendingToday
           : hasPendingToday // ignore: cast_nullable_to_non_nullable
               as bool,
+      homePhotoSnapshot: freezed == homePhotoSnapshot
+          ? _value.homePhotoSnapshot
+          : homePhotoSnapshot // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -199,7 +216,8 @@ class _$HomeMembershipImpl implements _HomeMembership {
       required this.status,
       required this.joinedAt,
       this.leftAt,
-      this.hasPendingToday = false});
+      this.hasPendingToday = false,
+      this.homePhotoSnapshot});
 
   @override
   final String homeId;
@@ -218,10 +236,16 @@ class _$HomeMembershipImpl implements _HomeMembership {
   @override
   @JsonKey()
   final bool hasPendingToday;
+// Snapshot de la foto del hogar (`homes/{homeId}.photoUrl`) denormalizado
+// en la membership, igual que `homeNameSnapshot`. Lo escribe el backend al
+// unirse/crear y lo mantiene fresco el trigger `syncHomeSnapshotToMemberships`.
+// null cuando el hogar usa la inicial.
+  @override
+  final String? homePhotoSnapshot;
 
   @override
   String toString() {
-    return 'HomeMembership(homeId: $homeId, homeNameSnapshot: $homeNameSnapshot, role: $role, billingState: $billingState, status: $status, joinedAt: $joinedAt, leftAt: $leftAt, hasPendingToday: $hasPendingToday)';
+    return 'HomeMembership(homeId: $homeId, homeNameSnapshot: $homeNameSnapshot, role: $role, billingState: $billingState, status: $status, joinedAt: $joinedAt, leftAt: $leftAt, hasPendingToday: $hasPendingToday, homePhotoSnapshot: $homePhotoSnapshot)';
   }
 
   @override
@@ -240,12 +264,23 @@ class _$HomeMembershipImpl implements _HomeMembership {
                 other.joinedAt == joinedAt) &&
             (identical(other.leftAt, leftAt) || other.leftAt == leftAt) &&
             (identical(other.hasPendingToday, hasPendingToday) ||
-                other.hasPendingToday == hasPendingToday));
+                other.hasPendingToday == hasPendingToday) &&
+            (identical(other.homePhotoSnapshot, homePhotoSnapshot) ||
+                other.homePhotoSnapshot == homePhotoSnapshot));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, homeId, homeNameSnapshot, role,
-      billingState, status, joinedAt, leftAt, hasPendingToday);
+  int get hashCode => Object.hash(
+      runtimeType,
+      homeId,
+      homeNameSnapshot,
+      role,
+      billingState,
+      status,
+      joinedAt,
+      leftAt,
+      hasPendingToday,
+      homePhotoSnapshot);
 
   /// Create a copy of HomeMembership
   /// with the given fields replaced by the non-null parameter values.
@@ -266,7 +301,8 @@ abstract class _HomeMembership implements HomeMembership {
       required final MemberStatus status,
       required final DateTime joinedAt,
       final DateTime? leftAt,
-      final bool hasPendingToday}) = _$HomeMembershipImpl;
+      final bool hasPendingToday,
+      final String? homePhotoSnapshot}) = _$HomeMembershipImpl;
 
   @override
   String get homeId;
@@ -283,7 +319,13 @@ abstract class _HomeMembership implements HomeMembership {
   @override
   DateTime? get leftAt;
   @override
-  bool get hasPendingToday;
+  bool
+      get hasPendingToday; // Snapshot de la foto del hogar (`homes/{homeId}.photoUrl`) denormalizado
+// en la membership, igual que `homeNameSnapshot`. Lo escribe el backend al
+// unirse/crear y lo mantiene fresco el trigger `syncHomeSnapshotToMemberships`.
+// null cuando el hogar usa la inicial.
+  @override
+  String? get homePhotoSnapshot;
 
   /// Create a copy of HomeMembership
   /// with the given fields replaced by the non-null parameter values.

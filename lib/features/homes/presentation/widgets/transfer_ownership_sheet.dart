@@ -17,6 +17,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/errors/exceptions.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/bottom_sheet_padding.dart';
 import '../../../members/application/member_actions_provider.dart';
@@ -177,10 +178,16 @@ class _TransferOwnershipSheet extends ConsumerWidget {
     // desmontado).
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
+    // IMPORTANTE: cerramos el sheet (maybePop) ANTES de mostrar el SnackBar en
+    // TODOS los caminos. El SnackBar del ScaffoldMessenger se pinta al fondo de
+    // la pantalla; si el bottom sheet sigue abierto queda tapado por él y el
+    // usuario no ve el mensaje (verificado en dispositivo: el aviso de
+    // payer-lock era invisible porque el sheet permanecía encima).
     try {
       await ref
           .read(memberActionsProvider.notifier)
           .transferOwnership(homeId, newOwner.uid);
+      navigator.maybePop();
       messenger.showSnackBar(
         SnackBar(
           content: Text(
@@ -190,22 +197,19 @@ class _TransferOwnershipSheet extends ConsumerWidget {
           ),
         ),
       );
+    } on PayerLockedException {
+      // El repo mapea `payer-cannot-transfer-ownership-while-premium-active`
+      // (failed-precondition) a PayerLockedException. Mostramos el mensaje
+      // específico para que el usuario sepa que debe cancelar la suscripción /
+      // esperar al fin del periodo antes de transferir.
       navigator.maybePop();
-    } on Exception catch (e) {
-      // `payer-cannot-transfer-ownership-while-premium-active` viene
-      // como FirebaseFunctionsException con code='failed-precondition'.
-      // Mostramos mensaje específico para que el usuario sepa que tiene
-      // que cancelar la suscripción / esperar al fin del periodo.
-      final errMsg = e.toString();
-      final isPayerLock = errMsg.contains('payer-cannot-transfer-ownership');
       messenger.showSnackBar(
-        SnackBar(
-          content: Text(
-            isPayerLock
-                ? l10n.homes_transfer_error_payer_locked
-                : l10n.error_generic,
-          ),
-        ),
+        SnackBar(content: Text(l10n.homes_transfer_error_payer_locked)),
+      );
+    } catch (_) {
+      navigator.maybePop();
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.error_generic)),
       );
     }
   }

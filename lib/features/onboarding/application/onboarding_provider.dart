@@ -141,6 +141,14 @@ class OnboardingNotifier extends _$OnboardingNotifier {
     state = state.copyWith(photoLocalPath: path);
   }
 
+  /// Limpia el error actual (p. ej. al editar un campo tras un fallo de
+  /// servidor como "código inválido" o "no_slots").
+  void clearError() {
+    if (state.error != null) {
+      state = state.copyWith(error: null);
+    }
+  }
+
   /// Validates and saves profile data. Does not advance if nickname is empty.
   Future<void> saveProfileAndContinue() async {
     final nickname = state.nickname?.trim() ?? '';

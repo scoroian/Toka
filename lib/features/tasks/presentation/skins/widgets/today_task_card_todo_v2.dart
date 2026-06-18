@@ -87,8 +87,10 @@ class _TodayTaskCardTodoV2State extends ConsumerState<TodayTaskCardTodoV2>
     final due      = widget.task.nextDueAt.toLocal();
     final locale   = Localizations.localeOf(context);
     final timeStr  = TokaDates.timeShort(due, locale);
-    final isToday  = due.year == now.year && due.month == now.month && due.day == now.day;
-    if (isToday) return l10n.today_due_today(timeStr);
+    // "Hoy" lo decide la clasificación del backend (zona del hogar), la misma
+    // que alimenta el contador `tasksDueToday`, para que ambos cuadren aunque la
+    // zona del dispositivo difiera de la del hogar.
+    if (widget.task.isDueToday) return l10n.today_due_today(timeStr);
     // BUG-23: para tareas anuales a más de 30 días vista, mostrar fecha
     // completa con año para no confundir con tareas mensuales.
     final isYearly = widget.task.recurrenceType == 'yearly';

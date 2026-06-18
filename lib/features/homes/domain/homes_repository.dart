@@ -8,8 +8,15 @@ abstract interface class HomesRepository {
   /// Escucha en tiempo real las membresías del usuario en `users/{uid}/memberships`.
   Stream<List<HomeMembership>> watchUserMemberships(String uid);
 
-  /// Obtiene un hogar por su ID desde `homes/{homeId}`.
+  /// Obtiene un hogar por su ID desde `homes/{homeId}` (lectura única).
   Future<Home> fetchHome(String homeId);
+
+  /// Escucha en tiempo real el documento `homes/{homeId}`. Re-emite ante
+  /// cualquier cambio del documento (foto, nombre, estado premium, banners,
+  /// pagador), de modo que la UI refresca en vivo sin reiniciar la app —
+  /// igual que el stream de `views/dashboard`. Emite `null` si el documento
+  /// no existe (p. ej. el hogar fue cerrado).
+  Stream<Home?> watchHome(String homeId);
 
   /// Llama a la Cloud Function `createHome`. Retorna homeId.
   /// Lanza [NoAvailableSlotsException] si el usuario no tiene plazas.

@@ -132,5 +132,32 @@ void main() {
       final vm = container.read(onboardingViewModelProvider);
       expect(vm.totalSteps, 4);
     });
+
+    test('clearError clears the inner error state', () {
+      final notifier =
+          container.read(onboardingViewModelNotifierProvider.notifier);
+      // Construir el notifier interno antes de push() (inicializa su element).
+      container.read(onboardingNotifierProvider);
+      fakeOnboarding.push(const OnboardingState(error: 'invalid_invite'));
+      expect(
+          container.read(onboardingNotifierProvider).error, 'invalid_invite');
+
+      notifier.clearError();
+
+      expect(container.read(onboardingNotifierProvider).error, isNull);
+    });
+
+    test('clearError is a no-op when there is no error', () {
+      final notifier =
+          container.read(onboardingViewModelNotifierProvider.notifier);
+      container.read(onboardingNotifierProvider);
+      fakeOnboarding.push(const OnboardingState(currentStep: 2));
+
+      notifier.clearError();
+
+      final state = container.read(onboardingNotifierProvider);
+      expect(state.error, isNull);
+      expect(state.currentStep, 2);
+    });
   });
 }

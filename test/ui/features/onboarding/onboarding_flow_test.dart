@@ -8,6 +8,8 @@ import 'package:toka/features/i18n/application/language_provider.dart';
 import 'package:toka/features/i18n/domain/language.dart';
 import 'package:toka/features/onboarding/application/onboarding_view_model.dart';
 import 'package:toka/features/onboarding/presentation/onboarding_flow_screen.dart';
+import 'package:toka/features/onboarding/presentation/steps/skins/home_choice_step_v2.dart';
+import 'package:toka/features/onboarding/presentation/steps/skins/profile_step_v2.dart';
 import 'package:toka/features/onboarding/presentation/widgets/home_join_form.dart';
 import 'package:toka/l10n/app_localizations.dart';
 
@@ -43,6 +45,7 @@ _MockOnboardingVM _defaultMock({int currentStep = 0, int totalSteps = 4}) {
   when(() => m.setPhoneNumber(any())).thenReturn(null);
   when(() => m.setPhoneVisible(any())).thenReturn(null);
   when(() => m.setPhotoLocalPath(any())).thenReturn(null);
+  when(() => m.clearError()).thenReturn(null);
   when(() => m.saveProfileAndContinue()).thenAnswer((_) async {});
   when(() => m.createHome(any(), any())).thenAnswer((_) async {});
   when(() => m.joinHome(any())).thenAnswer((_) async {});
@@ -127,6 +130,60 @@ void main() {
     expect(find.byKey(const Key('join_home_card')), findsOneWidget);
   });
 
+  // Se prueba HomeChoiceStepV2 aislado (igual que ProfileStepV2) para no
+  // depender de la animación del PageView ni del GoRouter del flow completo.
+  Widget wrapHomeChoiceStep() => MaterialApp(
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: const [Locale('es')],
+        home: Scaffold(
+          body: HomeChoiceStepV2(
+            isLoading: false,
+            error: null,
+            onCreateHome: (_, __) async {},
+            onJoinHome: (_) async {},
+            onPrev: () {},
+          ),
+        ),
+      );
+
+  testWidgets('HomeChoiceStepV2 título cambia a "Crea tu hogar" al elegir crear',
+      (tester) async {
+    await tester.pumpWidget(wrapHomeChoiceStep());
+    await tester.pumpAndSettle();
+
+    // En la elección inicial se ve el título de la pantalla.
+    expect(find.text('¿Qué quieres hacer?'), findsOneWidget);
+    expect(find.text('Crea tu hogar'), findsNothing);
+
+    // Al entrar al subformulario de crear, el título es propio y el anterior
+    // desaparece (antes persistía "¿Qué quieres hacer?").
+    await tester.tap(find.byKey(const Key('create_home_card')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Crea tu hogar'), findsOneWidget);
+    expect(find.text('¿Qué quieres hacer?'), findsNothing);
+    expect(find.byKey(const Key('home_name_field')), findsOneWidget);
+  });
+
+  testWidgets(
+      'HomeChoiceStepV2 título cambia a "Únete a un hogar" al elegir unirse',
+      (tester) async {
+    await tester.pumpWidget(wrapHomeChoiceStep());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('join_home_card')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Únete a un hogar'), findsOneWidget);
+    expect(find.text('¿Qué quieres hacer?'), findsNothing);
+    expect(find.byKey(const Key('invite_code_field')), findsOneWidget);
+  });
+
   testWidgets('progress bar reflects current step', (tester) async {
     await tester.pumpWidget(_wrap(currentStep: 2, totalSteps: 4));
     await tester.pumpAndSettle();
@@ -144,6 +201,50 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('El apodo es obligatorio'), findsOneWidget);
+  });
+
+  // Se prueba ProfileStepV2 aislado (no a través del flow) para no depender de
+  // la animación del PageView del OnboardingFlowScreen.
+  Widget wrapProfileStep() => MaterialApp(
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: const [Locale('es')],
+        home: Scaffold(
+          body: ProfileStepV2(
+            nickname: null,
+            phoneNumber: null,
+            phoneVisible: false,
+            photoLocalPath: null,
+            isLoading: false,
+            error: null,
+            onNicknameChanged: (_) {},
+            onPhoneChanged: (_) {},
+            onPhoneVisibleChanged: (_) {},
+            onPhotoChanged: (_) {},
+            onNext: () {},
+            onPrev: () {},
+          ),
+        ),
+      );
+
+  testWidgets(
+      'ProfileStepV2 limpia el error del apodo al escribir uno válido',
+      (tester) async {
+    await tester.pumpWidget(wrapProfileStep());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('next_button')));
+    await tester.pumpAndSettle();
+    expect(find.text('El apodo es obligatorio'), findsOneWidget);
+
+    // Al escribir un apodo válido, el error desaparece sin reenviar.
+    await tester.enterText(find.byKey(const Key('nickname_field')), 'Seba');
+    await tester.pumpAndSettle();
+    expect(find.text('El apodo es obligatorio'), findsNothing);
   });
 
   testWidgets('advancing past totalSteps does nothing', (tester) async {
@@ -235,6 +336,65 @@ void main() {
       find.text('Ha ocurrido un error inesperado. Inténtalo de nuevo.'),
       findsNothing,
     );
+    expect(find.text('Código de invitación inválido'), findsNothing);
+  });
+
+  testWidgets(
+      'HomeJoinForm limpia el error de longitud al completar el código',
+      (tester) async {
+    await tester.pumpWidget(wrapJoinForm());
+    await tester.pumpAndSettle();
+
+    // Submit con el campo vacío → error de longitud.
+    await tester.tap(find.byKey(const Key('join_button')));
+    await tester.pumpAndSettle();
+    expect(find.text('El código debe tener 6 caracteres'), findsOneWidget);
+
+    // Al completar los 6 caracteres, el error desaparece al teclear.
+    await tester.enterText(
+        find.byKey(const Key('invite_code_field')), 'ABC123');
+    await tester.pumpAndSettle();
+    expect(find.text('El código debe tener 6 caracteres'), findsNothing);
+  });
+
+  // Host con estado que simula el view model: al editar el código se llama a
+  // onClearError, que pone el error a null (como hace OnboardingNotifier).
+  Widget wrapJoinFormStateful({required String initialError}) {
+    String? error = initialError;
+    return MaterialApp(
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [Locale('es')],
+      home: Scaffold(
+        body: StatefulBuilder(
+          builder: (context, setState) => HomeJoinForm(
+            isLoading: false,
+            error: error,
+            onJoin: (_) async {},
+            onBack: () {},
+            onClearError: () => setState(() => error = null),
+          ),
+        ),
+      ),
+    );
+  }
+
+  testWidgets(
+      'HomeJoinForm limpia el error de servidor al editar el código',
+      (tester) async {
+    await tester
+        .pumpWidget(wrapJoinFormStateful(initialError: 'invalid_invite'));
+    await tester.pumpAndSettle();
+    expect(find.text('Código de invitación inválido'), findsOneWidget);
+
+    // Al corregir el código, el error de servidor desaparece sin reenviar.
+    await tester.enterText(
+        find.byKey(const Key('invite_code_field')), 'XYZ789');
+    await tester.pumpAndSettle();
     expect(find.text('Código de invitación inválido'), findsNothing);
   });
 }

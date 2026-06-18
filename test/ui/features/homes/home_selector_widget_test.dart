@@ -13,6 +13,7 @@ import 'package:toka/features/homes/domain/home_limits.dart';
 import 'package:toka/features/homes/domain/home_membership.dart';
 import 'package:toka/features/homes/domain/homes_repository.dart';
 import 'package:toka/features/homes/presentation/home_selector_widget.dart';
+import 'package:toka/features/homes/presentation/widgets/home_avatar.dart';
 import 'package:toka/l10n/app_localizations.dart';
 
 // ---------------------------------------------------------------------------
@@ -207,6 +208,78 @@ void main() {
     expect(find.byKey(const Key('home_selector_list')), findsOneWidget);
     expect(find.byKey(const Key('home_tile_h1')), findsOneWidget);
     expect(find.byKey(const Key('home_tile_h2')), findsOneWidget);
+  });
+
+  testWidgets('la cabecera muestra el avatar del hogar (inicial sin foto) (§10)',
+      (tester) async {
+    final home = _makeHome(id: 'h1', name: 'Casa Única');
+    final memberships = [
+      _makeMembership(homeId: 'h1', homeName: 'Casa Única'),
+    ];
+
+    await tester.pumpWidget(
+      _wrap(
+        const HomeSelectorWidget(),
+        overrides: [
+          authProvider.overrideWith(() => _FakeAuth(
+                const AuthState.authenticated(_fakeUser),
+              )),
+          currentHomeProvider.overrideWith(() => _FakeCurrentHome(home)),
+          homesRepositoryProvider.overrideWithValue(mockRepo),
+          userMembershipsProvider('uid1').overrideWith(
+            (ref) => Stream.value(memberships),
+          ),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final avatar = find.byKey(const Key('home_selector_avatar'));
+    expect(avatar, findsOneWidget);
+    // Sin foto → inicial del nombre.
+    expect(
+      find.descendant(of: avatar, matching: find.text('C')),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('cada tile del selector muestra un avatar de hogar (§10)',
+      (tester) async {
+    final home = _makeHome(id: 'h1', name: 'Casa A');
+    final memberships = [
+      _makeMembership(homeId: 'h1', homeName: 'Casa A'),
+      _makeMembership(homeId: 'h2', homeName: 'Casa B'),
+    ];
+
+    await tester.pumpWidget(
+      _wrap(
+        const HomeSelectorWidget(),
+        overrides: [
+          authProvider.overrideWith(() => _FakeAuth(
+                const AuthState.authenticated(_fakeUser),
+              )),
+          currentHomeProvider.overrideWith(() => _FakeCurrentHome(home)),
+          homesRepositoryProvider.overrideWithValue(mockRepo),
+          userMembershipsProvider('uid1').overrideWith(
+            (ref) => Stream.value(memberships),
+          ),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('home_selector')));
+    await tester.pumpAndSettle();
+
+    // Un HomeAvatar en la cabecera + uno por cada tile de la lista.
+    expect(find.byType(HomeAvatar), findsNWidgets(3));
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('home_tile_h2')),
+        matching: find.byType(HomeAvatar),
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('golden: selector con 3 hogares', (tester) async {

@@ -43,6 +43,29 @@ void main() {
       expect(task.status, 'active');
     });
 
+    test('parsea isDueToday cuando viene del backend', () {
+      final map = {
+        'taskId': 't1',
+        'title': 'Barrer',
+        'recurrenceType': 'daily',
+        'nextDueAt': Timestamp.fromDate(DateTime(2026, 4, 6, 20)),
+        'isOverdue': false,
+        'isDueToday': true,
+        'status': 'active',
+      };
+      expect(TaskPreview.fromMap(map).isDueToday, isTrue);
+    });
+
+    test('isDueToday cae a false en snapshots antiguos sin el campo', () {
+      final map = {
+        'taskId': 't2',
+        'title': 'Fregar',
+        'recurrenceType': 'weekly',
+        'nextDueAt': Timestamp.fromDate(DateTime(2026, 4, 6)),
+      };
+      expect(TaskPreview.fromMap(map).isDueToday, isFalse);
+    });
+
     test('usa DateTime.now() como fallback cuando nextDueAt es null', () {
       final before = DateTime.now().subtract(const Duration(seconds: 1));
       final map = {

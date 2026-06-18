@@ -77,6 +77,28 @@ void main() {
     expect(find.text('Este campo es obligatorio'), findsWidgets);
   });
 
+  testWidgets(
+      'email error clears when the field becomes valid without resubmitting',
+      (tester) async {
+    await tester.pumpWidget(_wrap());
+    await tester.pumpAndSettle();
+
+    // Email inválido + password válido, enviar → aparece el error de email.
+    await tester.enterText(
+        find.byKey(const Key('email_field')), 'noesunemail');
+    await tester.enterText(
+        find.byKey(const Key('password_field')), 'password123');
+    await tester.tap(find.byKey(const Key('submit_button')));
+    await tester.pumpAndSettle();
+    expect(find.text('Introduce un email válido'), findsOneWidget);
+
+    // Corregir el email → el error desaparece al teclear (sin reenviar).
+    await tester.enterText(
+        find.byKey(const Key('email_field')), 'user@toka.app');
+    await tester.pumpAndSettle();
+    expect(find.text('Introduce un email válido'), findsNothing);
+  });
+
   testWidgets('shows spinner when loading', (tester) async {
     final m = _MockLoginViewModel();
     when(() => m.isLoading).thenReturn(true);

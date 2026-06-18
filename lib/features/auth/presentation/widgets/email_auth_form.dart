@@ -51,6 +51,10 @@ class _EmailAuthFormState extends State<EmailAuthForm> {
     final l10n = AppLocalizations.of(context);
     return Form(
       key: _formKey,
+      // Tras el primer submit, revalida cada campo al teclear para que el
+      // error en rojo desaparezca en cuanto el valor pasa a ser válido (no
+      // hasta el siguiente submit).
+      autovalidateMode: AutovalidateMode.onUserInteraction,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

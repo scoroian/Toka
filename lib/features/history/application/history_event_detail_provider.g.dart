@@ -7,7 +7,7 @@ part of 'history_event_detail_provider.dart';
 // **************************************************************************
 
 String _$historyEventDetailHash() =>
-    r'74bd80b20d68b9582df1f82274a7c7099af870f1';
+    r'4fbbd7fedf095b5db213c7a37a8756e7991f8052';
 
 /// Copied from Dart SDK
 class _SystemHash {

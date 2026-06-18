@@ -3,12 +3,18 @@ import { onDocumentUpdated } from "firebase-functions/v2/firestore";
 import * as admin from "firebase-admin";
 import * as logger from "firebase-functions/logger";
 import { randomInt } from "crypto";
-import { buildNewMemberDoc } from "./member_factory";
+import { buildNewMemberDoc, readMemberProfileFields } from "./member_factory";
 import { FREE_LIMITS, FREE_LIMIT_CODES, isPremium } from "../shared/free_limits";
 import {
   parseDebugPremiumAllowedUids,
   isDebugPremiumAllowed,
 } from "./debug_premium_allowlist";
+import {
+  DEBUG_VALID_STATUSES,
+  DebugPremiumStatus,
+  buildDebugDashboardFlags,
+} from "./debug_premium_flags";
+import { normalizeTimeZone } from "../tasks/today_window";
 
 const db = admin.firestore();
 const FieldValue = admin.firestore.FieldValue;
@@ -24,7 +30,7 @@ export const createHome = onCall(async (request) => {
   }
 
   const uid = request.auth.uid;
-  const data = request.data as { name?: string; emoji?: string };
+  const data = request.data as { name?: string; emoji?: string; timezone?: string };
   const name = data.name?.trim();
 
   if (!name) {
@@ -82,6 +88,9 @@ export const createHome = onCall(async (request) => {
     restoreUntil: null,
     autoRenewEnabled: false,
     limits: { maxMembers: 5 },
+    // Zona horaria del hogar: define qué cuenta como "hoy" en el dashboard.
+    // El cliente puede enviarla; si no, o si es inválida, cae a Europe/Madrid.
+    timezone: normalizeTimeZone(data.timezone),
     createdAt: now,
     updatedAt: now,
   };
@@ -89,6 +98,9 @@ export const createHome = onCall(async (request) => {
 
   const membershipData = {
     homeNameSnapshot: name,
+    // El hogar recién creado todavía no tiene foto; el avatar se sube después
+    // y el trigger `syncHomeSnapshotToMemberships` propaga el cambio.
+    homePhotoSnapshot: null,
     role: "owner",
     billingState: "none",
     status: "active",
@@ -99,14 +111,16 @@ export const createHome = onCall(async (request) => {
   // Fetch user display name for the member document
   const userSnap = await db.collection("users").doc(uid).get();
   const userData2 = userSnap.exists ? userSnap.data()! : {};
-  const nickname = (userData2["nickname"] as string | undefined) ?? "";
-  const photoUrl = (userData2["photoUrl"] as string | undefined) ?? null;
+  const { nickname, photoUrl, phone, phoneVisibility } =
+    readMemberProfileFields(userData2);
 
   const memberData = buildNewMemberDoc({
     uid,
     nickname,
     role: "owner",
     photoUrl,
+    phone,
+    phoneVisibility,
   });
 
   const batch = db.batch();
@@ -235,9 +249,7 @@ export const joinHome = onCall(async (request) => {
     }
 
     const homeName = homeDataTx["name"] as string;
-    const userDataTx = userDoc.data() ?? {};
-    const memberNickname = (userDataTx["nickname"] as string | undefined) ?? "";
-    const memberPhotoUrl = (userDataTx["photoUrl"] as string | undefined) ?? null;
+    const profile = readMemberProfileFields(userDoc.data());
     const now = FieldValue.serverTimestamp();
 
     // Rejoin: preservar rol previo (admin/member) si el doc ya existía.
@@ -249,6 +261,7 @@ export const joinHome = onCall(async (request) => {
       db.collection("users").doc(uid).collection("memberships").doc(homeId),
       {
         homeNameSnapshot: homeName,
+        homePhotoSnapshot: (homeDataTx["photoUrl"] as string | undefined) ?? null,
         role: preservedRole,
         billingState: "none",
         status: "active",
@@ -258,8 +271,10 @@ export const joinHome = onCall(async (request) => {
     );
     if (existingMember.exists) {
       tx.update(memberRef, {
-        nickname: memberNickname,
-        photoUrl: memberPhotoUrl,
+        nickname: profile.nickname,
+        photoUrl: profile.photoUrl,
+        phone: profile.phone,
+        phoneVisibility: profile.phoneVisibility,
         status: "active",
         rejoinedAt: now,
       });
@@ -268,9 +283,11 @@ export const joinHome = onCall(async (request) => {
         memberRef,
         buildNewMemberDoc({
           uid,
-          nickname: memberNickname,
+          nickname: profile.nickname,
           role: "member",
-          photoUrl: memberPhotoUrl,
+          photoUrl: profile.photoUrl,
+          phone: profile.phone,
+          phoneVisibility: profile.phoneVisibility,
         })
       );
     }
@@ -373,9 +390,7 @@ export const joinHomeByCode = onCall(async (request) => {
     }
 
     const homeName = homeDataTx["name"] as string;
-    const userDataTx = userDoc.data() ?? {};
-    const memberNickname = (userDataTx["nickname"] as string | undefined) ?? "";
-    const memberPhotoUrl = (userDataTx["photoUrl"] as string | undefined) ?? null;
+    const profile = readMemberProfileFields(userDoc.data());
     const now = FieldValue.serverTimestamp();
 
     // Rejoin: preservar rol previo (admin/member) si el doc ya existía.
@@ -387,6 +402,7 @@ export const joinHomeByCode = onCall(async (request) => {
       db.collection("users").doc(uid).collection("memberships").doc(homeRef.id),
       {
         homeNameSnapshot: homeName,
+        homePhotoSnapshot: (homeDataTx["photoUrl"] as string | undefined) ?? null,
         role: preservedRole,
         billingState: "none",
         status: "active",
@@ -396,8 +412,10 @@ export const joinHomeByCode = onCall(async (request) => {
     );
     if (existingMember.exists) {
       tx.update(memberRef, {
-        nickname: memberNickname,
-        photoUrl: memberPhotoUrl,
+        nickname: profile.nickname,
+        photoUrl: profile.photoUrl,
+        phone: profile.phone,
+        phoneVisibility: profile.phoneVisibility,
         status: "active",
         rejoinedAt: now,
       });
@@ -406,9 +424,11 @@ export const joinHomeByCode = onCall(async (request) => {
         memberRef,
         buildNewMemberDoc({
           uid,
-          nickname: memberNickname,
+          nickname: profile.nickname,
           role: "member",
-          photoUrl: memberPhotoUrl,
+          photoUrl: profile.photoUrl,
+          phone: profile.phone,
+          phoneVisibility: profile.phoneVisibility,
         })
       );
     }
@@ -747,18 +767,17 @@ export const repairMemberDocument = onCall(async (request) => {
     return { created: false };
   }
 
-  // Obtener perfil del usuario para el nickname y foto
+  // Obtener perfil del usuario para nickname, foto, teléfono y su visibilidad
   const userSnap = await db.collection("users").doc(uid).get();
-  const userData = userSnap.exists ? userSnap.data()! : {};
-  const nickname = (userData["nickname"] as string | undefined) ?? "";
-  const photoUrl = (userData["photoUrl"] as string | undefined) ?? null;
+  const { nickname, photoUrl, phone, phoneVisibility } =
+    readMemberProfileFields(userSnap.exists ? userSnap.data() : undefined);
 
   await memberRef.set({
     nickname,
     photoUrl,
     bio: null,
-    phone: null,
-    phoneVisibility: "hidden",
+    phone,
+    phoneVisibility,
     role,
     status,
     joinedAt,
@@ -892,8 +911,11 @@ export const demoteFromAdmin = onCall(async (request) => {
 
 // ---------------------------------------------------------------------------
 // syncMemberProfile  (Firestore trigger)
-// Cuando users/{uid} se actualiza, propaga nickname y photoUrl a todos los
-// documentos homes/{homeId}/members/{uid} en los que el usuario participa.
+// Cuando users/{uid} se actualiza, propaga el perfil (nickname, photoUrl,
+// teléfono y su visibilidad) a todos los documentos homes/{homeId}/members/{uid}
+// en los que el usuario participa. El teléfono y su visibilidad son
+// preferencias globales del usuario: al editarlas deben re-sincronizarse en
+// todos los hogares para que los demás miembros las vean (o dejen de verlas).
 // ---------------------------------------------------------------------------
 export const syncMemberProfile = onDocumentUpdated(
   "users/{uid}",
@@ -903,12 +925,15 @@ export const syncMemberProfile = onDocumentUpdated(
     const after = event.data?.after.data();
     if (!before || !after) return;
 
-    const nicknameBefore = (before["nickname"] as string | undefined) ?? "";
-    const nicknameAfter = (after["nickname"] as string | undefined) ?? "";
-    const photoUrlBefore = (before["photoUrl"] as string | undefined) ?? null;
-    const photoUrlAfter = (after["photoUrl"] as string | undefined) ?? null;
+    const profileBefore = readMemberProfileFields(before);
+    const profileAfter = readMemberProfileFields(after);
 
-    if (nicknameBefore === nicknameAfter && photoUrlBefore === photoUrlAfter) {
+    if (
+      profileBefore.nickname === profileAfter.nickname &&
+      profileBefore.photoUrl === profileAfter.photoUrl &&
+      profileBefore.phone === profileAfter.phone &&
+      profileBefore.phoneVisibility === profileAfter.phoneVisibility
+    ) {
       return; // Sin cambios relevantes
     }
 
@@ -929,14 +954,82 @@ export const syncMemberProfile = onDocumentUpdated(
         .collection("members")
         .doc(uid);
       batch.update(memberRef, {
-        nickname: nicknameAfter,
-        photoUrl: photoUrlAfter,
+        nickname: profileAfter.nickname,
+        photoUrl: profileAfter.photoUrl,
+        phone: profileAfter.phone,
+        phoneVisibility: profileAfter.phoneVisibility,
       });
     }
 
     await batch.commit();
     logger.info(
       `syncMemberProfile: synced uid=${uid} to ${membershipsSnap.size} home(s)`
+    );
+  }
+);
+
+// ---------------------------------------------------------------------------
+// syncHomeSnapshotToMemberships  (Firestore trigger)
+// Cuando homes/{homeId} se actualiza (nombre o foto), propaga el snapshot
+// (`homeNameSnapshot` + `homePhotoSnapshot`) a todas las memberships
+// users/{uid}/memberships/{homeId} de sus miembros. Es el equivalente "al revés"
+// de syncMemberProfile: aquí la fuente es el hogar y los destinos las
+// membership cards que pintan el selector de hogares y "Mis hogares" (que NO
+// leen el documento del hogar en vivo, sino su snapshot denormalizado). Sin
+// esto, renombrar el hogar o cambiar su avatar dejaba el selector con el dato
+// viejo hasta re-unirse.
+// ---------------------------------------------------------------------------
+export const syncHomeSnapshotToMemberships = onDocumentUpdated(
+  "homes/{homeId}",
+  async (event) => {
+    const homeId = event.params.homeId;
+    const before = event.data?.before.data();
+    const after = event.data?.after.data();
+    if (!before || !after) return;
+
+    const nameBefore = (before["name"] as string | undefined) ?? "";
+    const nameAfter = (after["name"] as string | undefined) ?? "";
+    const photoBefore = (before["photoUrl"] as string | undefined) ?? null;
+    const photoAfter = (after["photoUrl"] as string | undefined) ?? null;
+
+    if (nameBefore === nameAfter && photoBefore === photoAfter) {
+      return; // Sin cambios relevantes para el snapshot de membership
+    }
+
+    // Miembros vigentes del hogar (cada uno tiene su membership card a
+    // sincronizar). Los que dejaron el hogar (left/removed) no nos interesan.
+    const membersSnap = await db
+      .collection("homes")
+      .doc(homeId)
+      .collection("members")
+      .where("status", "in", ["active", "frozen"])
+      .get();
+
+    if (membersSnap.empty) return;
+
+    // Update individual con .catch (como en update_dashboard): una membership
+    // que ya no exista no debe tumbar la sincronización del resto.
+    const updates = membersSnap.docs.map((memberDoc) =>
+      db
+        .collection("users")
+        .doc(memberDoc.id)
+        .collection("memberships")
+        .doc(homeId)
+        .update({
+          homeNameSnapshot: nameAfter,
+          homePhotoSnapshot: photoAfter,
+        })
+        .catch((err: unknown) =>
+          logger.warn(
+            `syncHomeSnapshotToMemberships: could not update membership ` +
+              `uid=${memberDoc.id} home=${homeId}: ${String(err)}`
+          )
+        )
+    );
+    await Promise.all(updates);
+    logger.info(
+      `syncHomeSnapshotToMemberships: synced home=${homeId} to ` +
+        `${membersSnap.size} membership(s)`
     );
   }
 );
@@ -1076,16 +1169,6 @@ export const transferOwnership = onCall(async (request) => {
 //          | "rescue" | "expiredFree" | "restorable" }
 // Output: { ok: true }
 // ===========================================================================
-const DEBUG_VALID_STATUSES = [
-  "free",
-  "active",
-  "cancelledPendingEnd",
-  "rescue",
-  "expiredFree",
-  "restorable",
-] as const;
-
-type DebugPremiumStatus = typeof DEBUG_VALID_STATUSES[number];
 
 export const debugSetPremiumStatus = onCall(async (request) => {
   const allowedUids = parseDebugPremiumAllowedUids(
@@ -1170,10 +1253,8 @@ export const debugSetPremiumStatus = onCall(async (request) => {
       break;
   }
 
-  const isPremium =
-    typed === "active" ||
-    typed === "cancelledPendingEnd" ||
-    typed === "rescue";
+  const flags = buildDebugDashboardFlags(typed);
+  const isPremium = flags.isPremium;
 
   // En prod syncEntitlement setea currentPayerUid al uid comprador. En QA lo
   // alineamos con el owner para que los guards de payer-lock funcionen igual.
@@ -1192,17 +1273,12 @@ export const debugSetPremiumStatus = onCall(async (request) => {
   batch.set(
     dashboardRef,
     {
-      premiumFlags: {
-        isPremium,
-        showAds: !isPremium,
-        canUseSmartDistribution: isPremium,
-        canUseVacations: isPremium,
-        canUseReviews: isPremium,
-      },
-      rescueFlags: {
-        isInRescue: typed === "rescue",
-        daysLeft: typed === "rescue" ? 2 : null,
-      },
+      premiumFlags: flags.premiumFlags,
+      // `adFlags` debe quedar coherente con `premiumFlags`: si no, un hogar
+      // premium conserva `showBanner:true` stale y la UI sigue pintando banner
+      // hasta el siguiente recompute completo del dashboard.
+      adFlags: flags.adFlags,
+      rescueFlags: flags.rescueFlags,
       updatedAt: FieldValue.serverTimestamp(),
     },
     { merge: true }

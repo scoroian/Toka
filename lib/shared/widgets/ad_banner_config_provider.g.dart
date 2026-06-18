@@ -6,7 +6,7 @@ part of 'ad_banner_config_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$adBannerConfigHash() => r'5fb04046f2dd091d9cadcc4abeb54bd79f8c59da';
+String _$adBannerConfigHash() => r'1f5c7ae98148592b83596ea42423556ae4c94bd9';
 
 /// See also [adBannerConfig].
 @ProviderFor(adBannerConfig)

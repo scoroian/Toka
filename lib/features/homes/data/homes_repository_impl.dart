@@ -40,6 +40,15 @@ class HomesRepositoryImpl implements HomesRepository {
   }
 
   @override
+  Stream<Home?> watchHome(String homeId) {
+    return _firestore
+        .collection('homes')
+        .doc(homeId)
+        .snapshots()
+        .map((doc) => doc.exists ? HomeModel.fromFirestore(doc) : null);
+  }
+
+  @override
   Future<String> createHome(String name) async {
     try {
       final callable = _functions.httpsCallable('createHome');

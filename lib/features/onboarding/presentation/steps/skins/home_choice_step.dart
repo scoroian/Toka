@@ -14,6 +14,7 @@ class HomeChoiceStep extends StatelessWidget {
     required this.onCreateHome,
     required this.onJoinHome,
     required this.onPrev,
+    this.onClearError,
   });
 
   final bool isLoading;
@@ -21,6 +22,7 @@ class HomeChoiceStep extends StatelessWidget {
   final Future<void> Function(String name, String? emoji) onCreateHome;
   final Future<void> Function(String code) onJoinHome;
   final VoidCallback onPrev;
+  final VoidCallback? onClearError;
 
   @override
   Widget build(BuildContext context) => SkinSwitch(
@@ -30,6 +32,7 @@ class HomeChoiceStep extends StatelessWidget {
           onCreateHome: onCreateHome,
           onJoinHome: onJoinHome,
           onPrev: onPrev,
+          onClearError: onClearError,
         ),
       );
 }

@@ -10,7 +10,13 @@ part 'dashboard_provider.g.dart';
 
 @riverpod
 Stream<HomeDashboard?> dashboard(DashboardRef ref) {
-  final homeId = ref.watch(currentHomeProvider).valueOrNull?.id;
+  // Observar SOLO el id: ahora `currentHomeProvider` re-emite ante cualquier
+  // cambio del documento del hogar (foto, premium, nombre…). Sin el `.select`,
+  // este provider se reconstruiría en cada uno de esos cambios, re-suscribiendo
+  // el snapshot del dashboard y re-invocando la Cloud Function `refreshDashboard`
+  // innecesariamente. Solo nos interesa reaccionar al cambio de hogar.
+  final homeId =
+      ref.watch(currentHomeProvider.select((h) => h.valueOrNull?.id));
   if (homeId == null) return Stream.value(null);
 
   final docRef = FirebaseFirestore.instance

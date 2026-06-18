@@ -6,6 +6,8 @@ import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:toka/features/i18n/application/language_provider.dart';
 import 'package:toka/features/i18n/domain/language.dart';
+import 'package:toka/features/onboarding/application/onboarding_provider.dart';
+import 'package:toka/features/onboarding/application/onboarding_state.dart';
 import 'package:toka/features/onboarding/application/onboarding_view_model.dart';
 import 'package:toka/features/onboarding/presentation/onboarding_flow_screen.dart';
 import 'package:toka/features/onboarding/presentation/steps/skins/home_choice_step_v2.dart';
@@ -24,6 +26,21 @@ GoRouter _fakeRouter() => GoRouter(
     );
 
 class _MockOnboardingVM extends Mock implements OnboardingViewModel {}
+
+/// El OnboardingFlowScreen lee currentStep/totalSteps de onboardingNotifierProvider
+/// (no del mock). Este fake fija ese estado y deja loadSavedProgress como no-op
+/// para no tocar SharedPreferences ni reescribir el paso durante la init del
+/// onboardingViewModelNotifierProvider real (que pone isInitialized=true).
+class _FakeOnboardingNotifier extends OnboardingNotifier {
+  _FakeOnboardingNotifier(this._initial);
+  final OnboardingState _initial;
+
+  @override
+  OnboardingState build() => _initial;
+
+  @override
+  Future<void> loadSavedProgress() async {}
+}
 
 _MockOnboardingVM _defaultMock({int currentStep = 0, int totalSteps = 4}) {
   final m = _MockOnboardingVM();
@@ -62,6 +79,11 @@ Widget _wrap({
   return ProviderScope(
     overrides: [
       onboardingViewModelProvider.overrideWithValue(mock),
+      onboardingNotifierProvider.overrideWith(
+        () => _FakeOnboardingNotifier(
+          OnboardingState(currentStep: currentStep, totalSteps: totalSteps),
+        ),
+      ),
       availableLanguagesProvider
           .overrideWith((ref) => Future.value(languages)),
     ],

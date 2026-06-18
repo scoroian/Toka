@@ -24,6 +24,21 @@ class MainShellV2 extends ConsumerWidget {
     return 0;
   }
 
+  /// Ruta actual desde [GoRouterState], o cadena vacía si quien llama a los
+  /// helpers estáticos de padding (`bottomContentPadding`/`fabBottomPadding`)
+  /// no está bajo un [GoRouter]. En producción las pantallas tab siempre viven
+  /// dentro del shell con router; el fallback `''` es defensivo para tests o
+  /// goldens que montan una pantalla suelta. Con `''`, `suppressBannerFor`
+  /// devuelve `false` (cálculo conservador: reserva el espacio del banner).
+  /// Misma estrategia que `_safeLocation` en `ad_aware_bottom_padding.dart`.
+  static String _safeLocation(BuildContext ctx) {
+    try {
+      return GoRouterState.of(ctx).matchedLocation;
+    } catch (_) {
+      return '';
+    }
+  }
+
   // Constantes públicas reexportadas desde ShellMetrics. Ningún consumidor
   // externo necesita migrar — siguen funcionando con el mismo nombre y valor.
   static const double kNavBarHeight  = MainShellV2Metrics.kNavBarHeight;
@@ -59,7 +74,7 @@ class MainShellV2 extends ConsumerWidget {
     final safeBottom = MediaQuery.of(ctx).padding.bottom;
     final cfg = ref.watch(adBannerConfigProvider);
     final keyboardVisible = ref.watch(keyboardVisibleProvider);
-    final location = GoRouterState.of(ctx).matchedLocation;
+    final location = _safeLocation(ctx);
     final metrics = ref.watch(shellMetricsProvider);
     final bannerVisible = cfg.show
         && cfg.unitId.isNotEmpty
@@ -84,7 +99,7 @@ class MainShellV2 extends ConsumerWidget {
   static double fabBottomPadding(BuildContext ctx, WidgetRef ref) {
     final cfg = ref.watch(adBannerConfigProvider);
     final keyboardVisible = ref.watch(keyboardVisibleProvider);
-    final location = GoRouterState.of(ctx).matchedLocation;
+    final location = _safeLocation(ctx);
     final metrics = ref.watch(shellMetricsProvider);
     final bannerVisible = cfg.show
         && cfg.unitId.isNotEmpty

@@ -96,8 +96,20 @@ class Auth extends _$Auth {
   Future<void> register(String email, String password) async {
     state = const AuthState.loading();
     try {
-      await _repo.registerWithEmailPassword(email, password);
-      await _repo.sendEmailVerification();
+      final user = await _repo.registerWithEmailPassword(email, password);
+      // El alta tuvo éxito: el usuario ya está creado y autenticado. Lo
+      // reflejamos explícitamente (igual que signInWithEmail) sin depender del
+      // timing del stream authStateChanges.
+      state = AuthState.authenticated(user);
+      // El email de verificación es best-effort: si falla (p.ej.
+      // 'too-many-requests', que Firebase aplica con frecuencia, o un fallo de
+      // red) NO debe revertir el registro ni mandar al usuario de vuelta al
+      // login. Hay pantalla/acción de reenvío para verificar más tarde.
+      try {
+        await _repo.sendEmailVerification();
+      } catch (_) {
+        // Ignorado a propósito.
+      }
     } on AuthFailure catch (f) {
       state = AuthState.error(f);
     } catch (_) {

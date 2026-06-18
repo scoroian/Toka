@@ -97,11 +97,17 @@ class HomeSelectorWidget extends ConsumerWidget {
                   Theme.of(context).textTheme.titleLarge,
             ),
           ),
-          const SizedBox(width: 4),
-          const Icon(
-            Icons.arrow_drop_down,
-            key: Key('selector_arrow'),
-          ),
+          // La flecha de selector solo tiene sentido cuando hay más de un
+          // hogar entre los que cambiar; con uno solo es engañosa (no hay
+          // nada que elegir). Tocar la fila sigue abriendo el sheet —que
+          // ofrece "Añadir hogar"— aunque la flecha no se muestre.
+          if (memberships.length > 1) ...[
+            const SizedBox(width: 4),
+            const Icon(
+              Icons.arrow_drop_down,
+              key: Key('selector_arrow'),
+            ),
+          ],
         ],
       ),
     );

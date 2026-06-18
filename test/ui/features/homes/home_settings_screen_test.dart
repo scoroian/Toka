@@ -122,6 +122,14 @@ Widget _wrap({
 
 void main() {
   testWidgets('owner ve botón Cerrar hogar', (tester) async {
+    // El body es un ListView perezoso y close_home_tile va al final; con el
+    // viewport por defecto (800x600) no se construye. Un viewport alto lo
+    // materializa para poder comprobar su existencia.
+    tester.view.physicalSize = const Size(800, 2000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
     await tester.pumpWidget(_wrap(role: MemberRole.owner));
     await tester.pumpAndSettle();
 

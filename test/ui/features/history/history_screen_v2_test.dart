@@ -5,7 +5,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:toka/features/history/application/history_view_model.dart';
 import 'package:toka/features/history/domain/history_filter.dart';
-import 'package:toka/features/history/domain/task_event.dart';
 import 'package:toka/features/history/presentation/skins/history_screen_v2.dart';
 import 'package:toka/l10n/app_localizations.dart';
 
@@ -28,6 +27,7 @@ void main() {
 
   setUp(() {
     vm = _MockHistoryViewModel();
+    when(() => vm.hasHome).thenReturn(true);
     when(() => vm.filter).thenReturn(const HistoryFilter());
     when(() => vm.hasMore).thenReturn(false);
     when(() => vm.isPremium).thenReturn(true);

@@ -1,20 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:toka/features/profile/application/profile_provider.dart';
+import 'package:toka/features/profile/domain/user_profile.dart';
 import 'package:toka/features/tasks/domain/home_dashboard.dart';
 import 'package:toka/features/tasks/presentation/widgets/today_task_card_todo.dart';
 import 'package:toka/l10n/app_localizations.dart';
 
-Widget _wrap(Widget child) => MaterialApp(
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
+// TodayTaskCardTodo es ConsumerWidget: hace fallback a userProfileProvider
+// cuando falta nombre/foto del asignado. Necesita un ProviderScope; se override
+// con un stream vacío para no tocar Firestore (el card usa el nombre del task).
+Widget _wrap(Widget child) => ProviderScope(
+      overrides: [
+        for (final uid in const ['uid1', 'uid2'])
+          userProfileProvider(uid)
+              .overrideWith((ref) => Stream<UserProfile>.empty()),
       ],
-      supportedLocales: const [Locale('es')],
-      home: Scaffold(
-        body: SingleChildScrollView(child: child),
+      child: MaterialApp(
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: const [Locale('es')],
+        home: Scaffold(
+          body: SingleChildScrollView(child: child),
+        ),
       ),
     );
 

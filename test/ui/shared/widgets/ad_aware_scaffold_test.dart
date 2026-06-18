@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:toka/shared/widgets/ad_aware_scaffold.dart';
-import 'package:toka/shared/widgets/ad_banner.dart';
 import 'package:toka/shared/widgets/ad_banner_config_provider.dart';
 
 Widget _pump({required bool bannerVisible, Widget? fab}) {
@@ -27,9 +26,13 @@ Widget _pump({required bool bannerVisible, Widget? fab}) {
 
 void main() {
   group('AdAwareScaffold', () {
-    testWidgets('renderiza AdBanner cuando bannerVisible=true', (t) async {
+    testWidgets('no instancia un AdBanner propio (lo aporta el shell)',
+        (t) async {
+      // Tras el refactor, el único AdBanner vive en MainShellV2 para no
+      // duplicar impresiones de AdMob. AdAwareScaffold ya no pinta uno propio
+      // ni siquiera con la config de banner activa.
       await t.pumpWidget(_pump(bannerVisible: true));
-      expect(find.byKey(const Key('ad_banner')), findsOneWidget);
+      expect(find.byKey(const Key('ad_banner')), findsNothing);
     });
 
     testWidgets('no renderiza AdBanner cuando bannerVisible=false', (t) async {
@@ -37,8 +40,9 @@ void main() {
       expect(find.byKey(const Key('ad_banner')), findsNothing);
     });
 
-    testWidgets('bottomPaddingOf suma safeBottom + bannerSlot cuando hay banner',
-        (t) async {
+    testWidgets(
+        'bottomPaddingOf devuelve solo safeBottom incluso con banner activo '
+        '(el shell ya reserva el espacio del banner)', (t) async {
       double? captured;
       await t.pumpWidget(
         ProviderScope(
@@ -60,10 +64,7 @@ void main() {
           ),
         ),
       );
-      expect(
-        captured,
-        24 + AdBanner.kBannerHeight + AdBanner.kBannerGap,
-      );
+      expect(captured, 24);
     });
 
     testWidgets('bottomPaddingOf devuelve solo safeBottom cuando no hay banner',

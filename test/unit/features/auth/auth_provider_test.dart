@@ -7,6 +7,7 @@ import 'package:toka/features/auth/application/auth_provider.dart';
 import 'package:toka/features/auth/application/auth_state.dart';
 import 'package:toka/features/auth/domain/auth_repository.dart';
 import 'package:toka/features/auth/domain/auth_user.dart';
+import 'package:toka/features/auth/domain/failures/auth_failure.dart';
 import 'package:toka/features/homes/application/current_home_provider.dart';
 import 'package:toka/features/homes/domain/home.dart';
 import 'package:toka/features/i18n/application/locale_provider.dart';
@@ -28,10 +29,17 @@ class _FakeLocaleNotifier extends LocaleNotifier {
 }
 
 class _FakeRepo implements AuthRepository {
-  _FakeRepo({Stream<AuthUser?> Function()? stateChanges})
-      : _stateChanges = stateChanges ?? (() => const Stream.empty());
+  _FakeRepo({
+    Stream<AuthUser?> Function()? stateChanges,
+    Future<AuthUser> Function(String, String)? register,
+    Future<void> Function()? sendVerification,
+  })  : _stateChanges = stateChanges ?? (() => const Stream.empty()),
+        _register = register,
+        _sendVerification = sendVerification;
 
   final Stream<AuthUser?> Function() _stateChanges;
+  final Future<AuthUser> Function(String, String)? _register;
+  final Future<void> Function()? _sendVerification;
 
   @override
   Stream<AuthUser?> get authStateChanges => _stateChanges();
@@ -54,13 +62,14 @@ class _FakeRepo implements AuthRepository {
 
   @override
   Future<AuthUser> registerWithEmailPassword(String e, String p) =>
-      throw UnimplementedError();
+      _register != null ? _register(e, p) : throw UnimplementedError();
 
   @override
   Future<void> sendPasswordResetEmail(String e) => throw UnimplementedError();
 
   @override
-  Future<void> sendEmailVerification() => throw UnimplementedError();
+  Future<void> sendEmailVerification() =>
+      _sendVerification != null ? _sendVerification() : throw UnimplementedError();
 
   @override
   Future<void> linkWithGoogle() => throw UnimplementedError();
@@ -165,5 +174,58 @@ void main() {
 
     expect(container.read(authProvider), const AuthState.initial());
     await controller.close();
+  });
+
+  // El email de verificación es best-effort: si falla (p.ej. 'too-many-requests'
+  // que Firebase aplica con frecuencia, o un fallo de red) NO debe revertir un
+  // registro que ya creó al usuario, mandándolo de vuelta al login.
+  test('register: fallo de sendEmailVerification no tira el registro a login',
+      () async {
+    const user = AuthUser(
+      uid: 'uid-new',
+      email: 'new@u.com',
+      displayName: 'New',
+      photoUrl: null,
+      emailVerified: false,
+      providers: ['password'],
+    );
+    container = ProviderContainer(
+      overrides: [
+        authStateChangesProvider.overrideWith((ref) => const Stream.empty()),
+        localeNotifierProvider.overrideWith(() => _FakeLocaleNotifier()),
+        authRepositoryProvider.overrideWithValue(_FakeRepo(
+          register: (_, __) async => user,
+          sendVerification: () async =>
+              throw const AuthFailure.tooManyRequests(),
+        )),
+      ],
+    );
+
+    container.read(authProvider);
+    await container.read(authProvider.notifier).register('new@u.com', 'pw123456');
+
+    expect(container.read(authProvider), const AuthState.authenticated(user));
+  });
+
+  test('register: un fallo real del alta (email en uso) sí deja AuthState.error',
+      () async {
+    container = ProviderContainer(
+      overrides: [
+        authStateChangesProvider.overrideWith((ref) => const Stream.empty()),
+        localeNotifierProvider.overrideWith(() => _FakeLocaleNotifier()),
+        authRepositoryProvider.overrideWithValue(_FakeRepo(
+          register: (_, __) async =>
+              throw const AuthFailure.emailAlreadyInUse(),
+        )),
+      ],
+    );
+
+    container.read(authProvider);
+    await container.read(authProvider.notifier).register('dup@u.com', 'pw123456');
+
+    expect(
+      container.read(authProvider),
+      const AuthState.error(AuthFailure.emailAlreadyInUse()),
+    );
   });
 }

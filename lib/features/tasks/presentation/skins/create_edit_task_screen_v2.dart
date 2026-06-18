@@ -8,7 +8,9 @@ import '../../../../core/constants/routes.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/ad_aware_scaffold.dart';
 import '../../../../shared/widgets/premium_upgrade_banner.dart';
+import '../../../homes/application/current_home_provider.dart';
 import '../../../homes/application/dashboard_provider.dart';
+import '../../../members/application/members_provider.dart';
 import '../../application/create_edit_task_view_model.dart';
 import '../../application/task_form_provider.dart';
 import '../../domain/recurrence_rule.dart';
@@ -72,6 +74,15 @@ class _CreateEditTaskScreenV2State
     // SwitchListTile.value queda obsoleto y la semántica de accesibilidad
     // reporta checked=false aunque el estado real sea true. (Bug #13)
     ref.watch(createEditTaskViewModelNotifierProvider(widget.editTaskId));
+
+    // Reconstruye cuando el hogar o su lista de miembros llegan de forma
+    // asíncrona (apertura en frío): `vm.orderedMembers` los lee con read, así
+    // que sin observar aquí la fuente la AssignmentForm se quedaría vacía
+    // hasta la primera interacción que provoque otro rebuild.
+    final membersHomeId = ref.watch(currentHomeProvider).valueOrNull?.id;
+    if (membersHomeId != null) {
+      ref.watch(homeMembersProvider(membersHomeId));
+    }
 
     ref.listen(
       createEditTaskViewModelNotifierProvider(widget.editTaskId),

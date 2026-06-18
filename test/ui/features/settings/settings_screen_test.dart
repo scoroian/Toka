@@ -202,12 +202,18 @@ void main() {
     ));
     await tester.pumpAndSettle();
 
-    await tester.dragUntilVisible(
-      find.text('Abandonar hogar'),
-      find.byType(ListView),
-      const Offset(0, -200),
+    final leaveTile = find.text('Abandonar hogar');
+    await tester.scrollUntilVisible(
+      leaveTile,
+      200,
+      scrollable: find.byType(Scrollable).first,
     );
-    await tester.tap(find.text('Abandonar hogar'));
+    // ensureVisible deja el tile completamente dentro del viewport: tras
+    // scrollUntilVisible su centro puede quedar justo bajo el borde inferior y
+    // el tap no impactaría el ListTile.
+    await tester.ensureVisible(leaveTile);
+    await tester.pumpAndSettle();
+    await tester.tap(leaveTile);
     await tester.pumpAndSettle();
 
     expect(find.text('¿Abandonar hogar?'), findsOneWidget);
@@ -231,12 +237,18 @@ void main() {
     ));
     await tester.pumpAndSettle();
 
-    await tester.dragUntilVisible(
-      find.text('Abandonar hogar'),
-      find.byType(ListView),
-      const Offset(0, -200),
+    final leaveTile = find.text('Abandonar hogar');
+    await tester.scrollUntilVisible(
+      leaveTile,
+      200,
+      scrollable: find.byType(Scrollable).first,
     );
-    await tester.tap(find.text('Abandonar hogar'));
+    // ensureVisible deja el tile completamente dentro del viewport: tras
+    // scrollUntilVisible su centro puede quedar justo bajo el borde inferior y
+    // el tap no impactaría el ListTile.
+    await tester.ensureVisible(leaveTile);
+    await tester.pumpAndSettle();
+    await tester.tap(leaveTile);
     await tester.pumpAndSettle();
 
     expect(find.text('Transferir propiedad del hogar'), findsOneWidget);
@@ -260,12 +272,18 @@ void main() {
     ));
     await tester.pumpAndSettle();
 
-    await tester.dragUntilVisible(
-      find.text('Abandonar hogar'),
-      find.byType(ListView),
-      const Offset(0, -200),
+    final leaveTile = find.text('Abandonar hogar');
+    await tester.scrollUntilVisible(
+      leaveTile,
+      200,
+      scrollable: find.byType(Scrollable).first,
     );
-    await tester.tap(find.text('Abandonar hogar'));
+    // ensureVisible deja el tile completamente dentro del viewport: tras
+    // scrollUntilVisible su centro puede quedar justo bajo el borde inferior y
+    // el tap no impactaría el ListTile.
+    await tester.ensureVisible(leaveTile);
+    await tester.pumpAndSettle();
+    await tester.tap(leaveTile);
     await tester.pumpAndSettle();
 
     expect(find.text('Eliminar hogar'), findsOneWidget);
@@ -294,12 +312,18 @@ void main() {
     ));
     await tester.pumpAndSettle();
 
-    await tester.dragUntilVisible(
-      find.text('Abandonar hogar'),
-      find.byType(ListView),
-      const Offset(0, -200),
+    final leaveTile = find.text('Abandonar hogar');
+    await tester.scrollUntilVisible(
+      leaveTile,
+      200,
+      scrollable: find.byType(Scrollable).first,
     );
-    await tester.tap(find.text('Abandonar hogar'));
+    // ensureVisible deja el tile completamente dentro del viewport: tras
+    // scrollUntilVisible su centro puede quedar justo bajo el borde inferior y
+    // el tap no impactaría el ListTile.
+    await tester.ensureVisible(leaveTile);
+    await tester.pumpAndSettle();
+    await tester.tap(leaveTile);
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('frozen_delete_btn')), findsOneWidget);

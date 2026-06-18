@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:toka/features/auth/application/auth_provider.dart';
 import 'package:toka/features/auth/application/auth_state.dart';
@@ -20,6 +21,7 @@ import 'package:toka/features/tasks/domain/task.dart';
 import 'package:toka/features/tasks/domain/tasks_repository.dart';
 import 'package:toka/features/tasks/presentation/skins/create_edit_task_screen_v2.dart';
 import 'package:toka/l10n/app_localizations.dart';
+import 'package:timezone/data/latest.dart' as tz_data;
 
 class _MockTasksRepository extends Mock implements TasksRepository {}
 
@@ -94,21 +96,34 @@ Widget _wrap(_MockTasksRepository repo) {
             ),
           ])),
     ],
-    child: const MaterialApp(
-      localizationsDelegates: [
+    // MaterialApp.router para que `context.canPop()` (go_router), que la
+    // pantalla invoca tras guardar con éxito, encuentre un GoRouter. Con una
+    // sola ruta canPop() devuelve false y no navega — basta para no crashear.
+    child: MaterialApp.router(
+      localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: [Locale('es')],
-      home: CreateEditTaskScreenV2(),
+      supportedLocales: const [Locale('es')],
+      routerConfig: GoRouter(
+        routes: [
+          GoRoute(
+            path: '/',
+            builder: (_, __) => const CreateEditTaskScreenV2(),
+          ),
+        ],
+      ),
     ),
   );
 }
 
 void main() {
   setUpAll(() {
+    // upcomingDates() en el build llama tz.getLocation(); sin la BD de
+    // timezones inicializada lanza LocationNotFoundException.
+    tz_data.initializeTimeZones();
     registerFallbackValue(const TaskInput(
       title: 'test',
       visualKind: 'emoji',
@@ -161,6 +176,13 @@ void main() {
 
   testWidgets('AssignmentForm muestra checkbox para cada miembro del hogar',
       (tester) async {
+    // El body es un ListView perezoso: sin un viewport alto la AssignmentForm
+    // queda por debajo del fold y no se construye.
+    tester.view.physicalSize = const Size(800, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
     await tester.pumpWidget(_wrap(mockRepo));
     await tester.pumpAndSettle();
     // Stream.value emits asynchronously; pump once more to let the stream
@@ -170,24 +192,37 @@ void main() {
     expect(find.byKey(const Key('assignee_checkbox_uid1')), findsOneWidget);
   });
 
-  testWidgets('guardar sin seleccionar asignado muestra error de asignados',
+  testWidgets('sin asignados muestra el error reactivo de asignados',
       (tester) async {
+    // Viewport alto: el ListView perezoso debe construir la AssignmentForm y
+    // el texto de error que va justo debajo.
+    tester.view.physicalSize = const Size(800, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
     await tester.pumpWidget(_wrap(mockRepo));
     await tester.pumpAndSettle();
 
     await tester.enterText(find.byKey(const Key('task_title_field')), 'Mi tarea');
     await tester.pump();
 
-    // No tap on checkbox — assignmentOrder stays []
-    await tester.tap(find.byKey(const Key('save_task_button')));
-    await tester.pumpAndSettle();
-
+    // assignmentOrder vacío ⇒ el error de asignados se muestra de forma
+    // reactiva (no hace falta pulsar guardar; además el botón estaría
+    // deshabilitado por no haber asignados).
+    expect(find.byKey(const Key('assignees_error')), findsOneWidget);
     final l10n = AppLocalizations.of(
         tester.element(find.byKey(const Key('task_title_field'))));
     expect(find.text(l10n.tasks_validation_no_assignees), findsOneWidget);
+
+    final saveBtn =
+        tester.widget<TextButton>(find.byKey(const Key('save_task_button')));
+    expect(saveBtn.onPressed, isNull,
+        reason: 'guardar debe estar deshabilitado sin asignados');
   });
 
-  testWidgets('guardar sin título muestra error de título vacío', (tester) async {
+  testWidgets('título vacío deshabilita guardar y expone la razón',
+      (tester) async {
     // Enlarge viewport so the AssignmentForm is visible without scrolling.
     tester.view.physicalSize = const Size(800, 2400);
     tester.view.devicePixelRatio = 1.0;
@@ -211,17 +246,21 @@ void main() {
         ));
     await tester.pump();
 
-    // Select the assignee checkbox (visible in the large viewport)
+    // Select the assignee checkbox (visible in the large viewport) so el único
+    // requisito que falta sea el título.
     await tester.tap(find.byKey(const Key('assignee_checkbox_uid1')).first);
     await tester.pump();
 
-    // No title entered (defaults to empty)
-    await tester.tap(find.byKey(const Key('save_task_button')));
-    await tester.pumpAndSettle();
-
+    // No title entered (defaults to empty): el contrato actual es botón
+    // guardar deshabilitado + Tooltip que explica la razón (título vacío),
+    // en lugar del antiguo errorText tras pulsar guardar.
     final l10n = AppLocalizations.of(
         tester.element(find.byKey(const Key('task_title_field'))));
-    expect(find.text(l10n.tasks_validation_title_empty), findsOneWidget);
+    final saveBtn =
+        tester.widget<TextButton>(find.byKey(const Key('save_task_button')));
+    expect(saveBtn.onPressed, isNull,
+        reason: 'guardar debe estar deshabilitado con título vacío');
+    expect(find.byTooltip(l10n.tasks_validation_title_empty), findsOneWidget);
   });
 
   testWidgets('guardar con datos válidos llama a createTask del repositorio',

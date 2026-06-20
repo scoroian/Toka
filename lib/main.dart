@@ -6,6 +6,7 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
@@ -18,6 +19,11 @@ void main() {
   runZonedGuarded(
     () async {
       WidgetsFlutterBinding.ensureInitialized();
+      // La app es solo-retrato: bloqueamos la orientación (refuerza el
+      // android:screenOrientation="portrait" del manifest, y cubre iOS).
+      await SystemChrome.setPreferredOrientations(
+        const [DeviceOrientation.portraitUp],
+      );
       tz_data.initializeTimeZones();
 
       await Firebase.initializeApp(

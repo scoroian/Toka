@@ -53,7 +53,8 @@ class TasksRepositoryImpl implements TasksRepository {
       String homeId, TaskInput input, String createdByUid) async {
     final id = _uuid.v4();
     final nextDue = RecurrenceCalculator.nextDue(
-        input.recurrenceRule, DateTime.now());
+        input.recurrenceRule, DateTime.now(),
+        preferToday: input.applyToday);
     final data = TaskModel.toFirestore(input, homeId, createdByUid, nextDue);
     await _col(homeId).doc(id).set(data);
     await _refreshDashboard(homeId);
@@ -64,7 +65,8 @@ class TasksRepositoryImpl implements TasksRepository {
   Future<void> updateTask(
       String homeId, String taskId, TaskInput input) async {
     final nextDue = RecurrenceCalculator.nextDue(
-        input.recurrenceRule, DateTime.now());
+        input.recurrenceRule, DateTime.now(),
+        preferToday: input.applyToday);
     final data = TaskModel.toUpdateMap(input, nextDue);
     await _col(homeId).doc(taskId).update(data);
     await _refreshDashboard(homeId);

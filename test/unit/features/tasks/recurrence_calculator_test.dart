@@ -171,4 +171,67 @@ void main() {
       expect(dates[1].isBefore(dates[2]), isTrue);
     });
   });
+
+  group('preferToday (checkbox "asignar también hoy")', () {
+    test('diaria cuya hora ya pasó → SIN preferToday salta a mañana', () {
+      const rule = RecurrenceRule.daily(
+          every: 1, time: '09:00', timezone: 'Europe/Madrid');
+      final from = madridTime(2026, 6, 20, 13, 0); // ya pasaron las 9h
+      final next = RecurrenceCalculator.nextDue(rule, from);
+      expect(toMadrid(next).day, 21); // mañana (comportamiento por defecto)
+    });
+
+    test('diaria cuya hora ya pasó → CON preferToday se mantiene HOY', () {
+      const rule = RecurrenceRule.daily(
+          every: 1, time: '09:00', timezone: 'Europe/Madrid');
+      final from = madridTime(2026, 6, 20, 13, 0);
+      final next =
+          RecurrenceCalculator.nextDue(rule, from, preferToday: true);
+      expect(toMadrid(next).day, 20); // HOY
+      expect(toMadrid(next).hour, 9);
+    });
+
+    test('cada 3 días con hora pasada → preferToday fuerza HOY', () {
+      const rule = RecurrenceRule.daily(
+          every: 3, time: '09:00', timezone: 'Europe/Madrid');
+      final from = madridTime(2026, 6, 20, 10, 0);
+      final next =
+          RecurrenceCalculator.nextDue(rule, from, preferToday: true);
+      expect(toMadrid(next).day, 20);
+    });
+
+    test('preferToday NO altera una ocurrencia futura de hoy', () {
+      const rule = RecurrenceRule.daily(
+          every: 1, time: '20:00', timezone: 'Europe/Madrid');
+      final from = madridTime(2026, 6, 20, 10, 0); // antes de las 20h
+      final a = RecurrenceCalculator.nextDue(rule, from);
+      final b = RecurrenceCalculator.nextDue(rule, from, preferToday: true);
+      expect(toMadrid(a).day, 20);
+      expect(toMadrid(b).day, 20);
+      expect(a, b); // idénticas
+    });
+
+    test('semanal: hoy es día válido y la hora pasó → preferToday mantiene HOY',
+        () {
+      // 2026-06-20 es sábado
+      const rule = RecurrenceRule.weekly(
+          weekdays: ['SAT'], time: '09:00', timezone: 'Europe/Madrid');
+      final from = madridTime(2026, 6, 20, 13, 0);
+      final def = RecurrenceCalculator.nextDue(rule, from);
+      final pref =
+          RecurrenceCalculator.nextDue(rule, from, preferToday: true);
+      expect(toMadrid(def).day, 27); // sin preferToday: próximo sábado
+      expect(toMadrid(pref).day, 20); // con preferToday: hoy
+    });
+
+    test('mensual día fijo: hoy es el día y la hora pasó → preferToday HOY', () {
+      const rule = RecurrenceRule.monthlyFixed(
+          day: 20, time: '09:00', timezone: 'Europe/Madrid');
+      final from = madridTime(2026, 6, 20, 13, 0);
+      final pref =
+          RecurrenceCalculator.nextDue(rule, from, preferToday: true);
+      expect(toMadrid(pref).day, 20);
+      expect(toMadrid(pref).month, 6);
+    });
+  });
 }

@@ -10,6 +10,7 @@ import {
   addRecurrenceInterval,
   isTerminalRecurrence,
 } from "./task_assignment_helpers";
+import { isMemberCurrentlyAbsent } from "../shared/vacation";
 
 const db = admin.firestore();
 const FieldValue = admin.firestore.FieldValue;
@@ -48,7 +49,7 @@ export const applyTaskCompletion = onCall(async (request) => {
 
     for (const mDoc of membersSnap.docs) {
       const mData = mDoc.data();
-      if (mData["status"] === "frozen" || mData["status"] === "absent") {
+      if (mData["status"] === "frozen" || isMemberCurrentlyAbsent(mData)) {
         excludedUids.push(mDoc.id);
       }
       const completions60d: number = (mData["completions60d"] as number) ?? 0;

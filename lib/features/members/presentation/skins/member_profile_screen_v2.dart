@@ -15,6 +15,7 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/ad_aware_scaffold.dart';
 import '../../../auth/application/auth_provider.dart';
 import '../../../history/application/member_reviews_provider.dart';
+import '../../../homes/application/dashboard_provider.dart';
 import '../../../homes/domain/home_membership.dart';
 import '../../application/member_profile_view_model.dart';
 import '../widgets/member_role_badge.dart';
@@ -150,6 +151,13 @@ class _MemberProfileScreenV2State extends ConsumerState<MemberProfileScreenV2> {
     final MemberProfileViewModel vm = ref.watch(
         memberProfileViewModelProvider(
             homeId: widget.homeId, memberUid: widget.memberUid));
+    // Flag premium del hogar actual para el gate del modo vacaciones.
+    final canUseVacations = ref
+            .watch(dashboardProvider)
+            .valueOrNull
+            ?.premiumFlags
+            .canUseVacations ??
+        false;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bg = isDark ? AppColorsV2.backgroundDark : AppColorsV2.backgroundLight;
 
@@ -245,6 +253,34 @@ class _MemberProfileScreenV2State extends ConsumerState<MemberProfileScreenV2> {
               ]),
               const SizedBox(height: 20),
               RadarChartWidget(entries: data.radarEntries),
+              // Modo vacaciones: ajuste personal (solo el propio perfil). Es
+              // feature Premium → si el hogar no es Premium, abrimos el paywall.
+              // El backend (isMemberCurrentlyAbsent) salta al miembro del reparto
+              // mientras la vacación esté activa y hoy dentro del rango.
+              if (data.isSelf) ...[
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    key: const Key('vacation_button'),
+                    icon: const Icon(Icons.beach_access_outlined),
+                    label: Text(l10n.vacation_title),
+                    onPressed: () {
+                      if (canUseVacations) {
+                        context.push(
+                          AppRoutes.vacation,
+                          extra: {
+                            'homeId': widget.homeId,
+                            'uid': widget.memberUid,
+                          },
+                        );
+                      } else {
+                        context.push(AppRoutes.paywall);
+                      }
+                    },
+                  ),
+                ),
+              ],
               if (data.canManageRoles && !data.isSelf) ...[
                 const SizedBox(height: 20),
                 if (data.canPromoteToAdmin)

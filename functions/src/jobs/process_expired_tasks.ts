@@ -3,6 +3,7 @@ import * as admin from "firebase-admin";
 import * as logger from "firebase-functions/logger";
 import { onSchedule } from "firebase-functions/v2/scheduler";
 import { addRecurrenceInterval } from "../tasks/task_assignment_helpers";
+import { isMemberCurrentlyAbsent } from "../shared/vacation";
 
 // ── Lógica pura (exportada para tests) ───────────────────────────────────────
 
@@ -102,8 +103,10 @@ export const processExpiredTasks = onSchedule("5 0 * * *", async () => {
         );
         const frozenUids: string[] = [];
         for (const mDoc of membersSnap.docs) {
-          const s = mDoc.data()["status"] as string | undefined;
-          if (s === "frozen" || s === "absent") frozenUids.push(mDoc.id);
+          const md = mDoc.data();
+          if (md["status"] === "frozen" || isMemberCurrentlyAbsent(md)) {
+            frozenUids.push(mDoc.id);
+          }
         }
 
         const toUid = computeNextAssignee(onMissAssign, actorUid, assignmentOrder, frozenUids);

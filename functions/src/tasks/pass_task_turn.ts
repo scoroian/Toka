@@ -5,6 +5,7 @@ import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { updateHomeDashboard } from "./update_dashboard";
 import { sendPassNotification } from "../notifications/send_pass_notification";
 import { getNextEligibleMember } from "./pass_turn_helpers";
+import { isMemberCurrentlyAbsent } from "../shared/vacation";
 
 const db = admin.firestore();
 const FieldValue = admin.firestore.FieldValue;
@@ -59,7 +60,7 @@ export const passTaskTurn = onCall(async (request) => {
     const frozenUids: string[] = [];
     for (const mDoc of membersSnap.docs) {
       const mData = mDoc.data();
-      if (mData["status"] === "frozen" || mData["status"] === "absent") {
+      if (mData["status"] === "frozen" || isMemberCurrentlyAbsent(mData)) {
         frozenUids.push(mDoc.id);
       }
     }

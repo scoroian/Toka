@@ -557,7 +557,10 @@ mixin _$TaskInput {
   String get assignmentMode => throw _privateConstructorUsedError;
   List<String> get assignmentOrder => throw _privateConstructorUsedError;
   double get difficultyWeight => throw _privateConstructorUsedError;
-  String get onMissAssign => throw _privateConstructorUsedError;
+  String get onMissAssign =>
+      throw _privateConstructorUsedError; // Intención del formulario, NO se persiste: si true, la primera ocurrencia
+// se calcula con preferToday (mantiene HOY aunque su hora ya haya pasado).
+  bool get applyToday => throw _privateConstructorUsedError;
 
   /// Create a copy of TaskInput
   /// with the given fields replaced by the non-null parameter values.
@@ -580,7 +583,8 @@ abstract class $TaskInputCopyWith<$Res> {
       String assignmentMode,
       List<String> assignmentOrder,
       double difficultyWeight,
-      String onMissAssign});
+      String onMissAssign,
+      bool applyToday});
 
   $RecurrenceRuleCopyWith<$Res> get recurrenceRule;
 }
@@ -609,6 +613,7 @@ class _$TaskInputCopyWithImpl<$Res, $Val extends TaskInput>
     Object? assignmentOrder = null,
     Object? difficultyWeight = null,
     Object? onMissAssign = null,
+    Object? applyToday = null,
   }) {
     return _then(_value.copyWith(
       title: null == title
@@ -647,6 +652,10 @@ class _$TaskInputCopyWithImpl<$Res, $Val extends TaskInput>
           ? _value.onMissAssign
           : onMissAssign // ignore: cast_nullable_to_non_nullable
               as String,
+      applyToday: null == applyToday
+          ? _value.applyToday
+          : applyToday // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 
@@ -678,7 +687,8 @@ abstract class _$$TaskInputImplCopyWith<$Res>
       String assignmentMode,
       List<String> assignmentOrder,
       double difficultyWeight,
-      String onMissAssign});
+      String onMissAssign,
+      bool applyToday});
 
   @override
   $RecurrenceRuleCopyWith<$Res> get recurrenceRule;
@@ -706,6 +716,7 @@ class __$$TaskInputImplCopyWithImpl<$Res>
     Object? assignmentOrder = null,
     Object? difficultyWeight = null,
     Object? onMissAssign = null,
+    Object? applyToday = null,
   }) {
     return _then(_$TaskInputImpl(
       title: null == title
@@ -744,6 +755,10 @@ class __$$TaskInputImplCopyWithImpl<$Res>
           ? _value.onMissAssign
           : onMissAssign // ignore: cast_nullable_to_non_nullable
               as String,
+      applyToday: null == applyToday
+          ? _value.applyToday
+          : applyToday // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -760,7 +775,8 @@ class _$TaskInputImpl implements _TaskInput {
       required this.assignmentMode,
       required final List<String> assignmentOrder,
       this.difficultyWeight = 1.0,
-      this.onMissAssign = 'sameAssignee'})
+      this.onMissAssign = 'sameAssignee',
+      this.applyToday = false})
       : _assignmentOrder = assignmentOrder;
 
   @override
@@ -789,10 +805,15 @@ class _$TaskInputImpl implements _TaskInput {
   @override
   @JsonKey()
   final String onMissAssign;
+// Intención del formulario, NO se persiste: si true, la primera ocurrencia
+// se calcula con preferToday (mantiene HOY aunque su hora ya haya pasado).
+  @override
+  @JsonKey()
+  final bool applyToday;
 
   @override
   String toString() {
-    return 'TaskInput(title: $title, description: $description, visualKind: $visualKind, visualValue: $visualValue, recurrenceRule: $recurrenceRule, assignmentMode: $assignmentMode, assignmentOrder: $assignmentOrder, difficultyWeight: $difficultyWeight, onMissAssign: $onMissAssign)';
+    return 'TaskInput(title: $title, description: $description, visualKind: $visualKind, visualValue: $visualValue, recurrenceRule: $recurrenceRule, assignmentMode: $assignmentMode, assignmentOrder: $assignmentOrder, difficultyWeight: $difficultyWeight, onMissAssign: $onMissAssign, applyToday: $applyToday)';
   }
 
   @override
@@ -816,7 +837,9 @@ class _$TaskInputImpl implements _TaskInput {
             (identical(other.difficultyWeight, difficultyWeight) ||
                 other.difficultyWeight == difficultyWeight) &&
             (identical(other.onMissAssign, onMissAssign) ||
-                other.onMissAssign == onMissAssign));
+                other.onMissAssign == onMissAssign) &&
+            (identical(other.applyToday, applyToday) ||
+                other.applyToday == applyToday));
   }
 
   @override
@@ -830,7 +853,8 @@ class _$TaskInputImpl implements _TaskInput {
       assignmentMode,
       const DeepCollectionEquality().hash(_assignmentOrder),
       difficultyWeight,
-      onMissAssign);
+      onMissAssign,
+      applyToday);
 
   /// Create a copy of TaskInput
   /// with the given fields replaced by the non-null parameter values.
@@ -851,7 +875,8 @@ abstract class _TaskInput implements TaskInput {
       required final String assignmentMode,
       required final List<String> assignmentOrder,
       final double difficultyWeight,
-      final String onMissAssign}) = _$TaskInputImpl;
+      final String onMissAssign,
+      final bool applyToday}) = _$TaskInputImpl;
 
   @override
   String get title;
@@ -870,7 +895,11 @@ abstract class _TaskInput implements TaskInput {
   @override
   double get difficultyWeight;
   @override
-  String get onMissAssign;
+  String
+      get onMissAssign; // Intención del formulario, NO se persiste: si true, la primera ocurrencia
+// se calcula con preferToday (mantiene HOY aunque su hora ya haya pasado).
+  @override
+  bool get applyToday;
 
   /// Create a copy of TaskInput
   /// with the given fields replaced by the non-null parameter values.

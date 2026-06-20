@@ -248,15 +248,18 @@ class _CreateEditTaskScreenV2State
                   : l10n.tasks_fixed_time_pick),
               onTap: () => _pickTime(context, vm),
             ),
-            if (vm.showApplyToday)
-              CheckboxListTile(
-                key: const Key('apply_today_checkbox'),
-                title: Text(l10n.tasks_apply_today_label),
-                value: vm.applyToday,
-                onChanged: (v) => vm.setApplyToday(v ?? false),
-                controlAffinity: ListTileControlAffinity.leading,
-              ),
           ],
+          // Checkbox "asignar también hoy": independiente del toggle "Hora fija".
+          // Se muestra cuando la regla de recurrencia tiene una ocurrencia hoy
+          // cuya hora ya pasó (si no, la tarea saltaría al siguiente periodo).
+          if (vm.showApplyToday)
+            CheckboxListTile(
+              key: const Key('apply_today_checkbox'),
+              title: Text(l10n.tasks_apply_today_label),
+              value: vm.applyToday,
+              onChanged: (v) => vm.setApplyToday(v ?? false),
+              controlAffinity: ListTileControlAffinity.leading,
+            ),
           const SizedBox(height: 16),
 
           // Miembros (reordenables)

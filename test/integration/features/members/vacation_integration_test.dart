@@ -26,7 +26,8 @@ void main() {
     const homeId = 'h1';
     const uid = 'u1';
 
-    test('saveVacation con isActive=true y sin fechas → status cambia a absent', () async {
+    test('saveVacation escribe el campo `vacation` y NO modifica `status` '
+        '(la ausencia la calcula el backend en lectura)', () async {
       await fakeFirestore
           .collection('homes').doc(homeId)
           .collection('members').doc(uid)
@@ -45,15 +46,18 @@ void main() {
           .collection('homes').doc(homeId)
           .collection('members').doc(uid)
           .get();
-      expect(doc.data()!['status'], 'absent');
+      // El cliente solo persiste `vacation` (lo único que permiten las rules);
+      // `status` no se toca — la ausencia efectiva la deriva el backend.
+      expect(doc.data()!['status'], 'active');
       expect(doc.data()!['vacation']['isActive'], true);
     });
 
-    test('saveVacation con isActive=false → status restaurado a active', () async {
+    test('saveVacation con isActive=false persiste vacation.isActive=false '
+        'sin tocar `status`', () async {
       await fakeFirestore
           .collection('homes').doc(homeId)
           .collection('members').doc(uid)
-          .set({'status': 'absent', 'nickname': 'Test'});
+          .set({'status': 'active', 'nickname': 'Test'});
 
       final vacation = Vacation(
         uid: uid,

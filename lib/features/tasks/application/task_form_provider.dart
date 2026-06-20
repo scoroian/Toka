@@ -103,7 +103,10 @@ class TaskFormNotifier extends _$TaskFormNotifier {
       state = state.copyWith(onMissAssign: value);
 
   /// Guarda la tarea. Devuelve el ID si fue exitoso, null si hay errores.
-  Future<String?> save(String homeId, String createdByUid) async {
+  /// [applyToday] (intención del checkbox "asignar también hoy") se propaga al
+  /// repositorio para que la primera ocurrencia se mantenga hoy si procede.
+  Future<String?> save(String homeId, String createdByUid,
+      {bool applyToday = false}) async {
     if (state.recurrenceRule == null) {
       state = state.copyWith(fieldErrors: {
         ...state.fieldErrors,
@@ -122,6 +125,7 @@ class TaskFormNotifier extends _$TaskFormNotifier {
       assignmentOrder: state.assignmentOrder,
       difficultyWeight: state.difficultyWeight,
       onMissAssign: state.onMissAssign,
+      applyToday: applyToday,
     );
 
     final validation = TaskValidator.validate(input);

@@ -5,6 +5,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:timezone/timezone.dart' as tz;
 
+import '../../../core/utils/recurrence_calculator.dart';
 import '../../auth/application/auth_provider.dart';
 import '../../homes/application/current_home_provider.dart';
 import '../../members/application/members_provider.dart';
@@ -100,6 +101,20 @@ abstract class CreateEditTaskViewModel {
     return fixedMinutes > nowMinutes;
   }
 
+  /// Decide si mostrar el checkbox "asignar también hoy" a partir de la REGLA de
+  /// recurrencia (no del toggle "Hora fija"). Se muestra cuando la regla tiene
+  /// una ocurrencia HOY cuya hora ya pasó: sin el checkbox, la tarea saltaría al
+  /// siguiente periodo (el bug reportado). No aplica a puntual ni horaria.
+  static bool computeShowApplyTodayForRule(RecurrenceRule rule, DateTime now) {
+    if (rule is OneTimeRule || rule is HourlyRule) return false;
+    final todayOccurrence =
+        RecurrenceCalculator.nextDue(rule, now, preferToday: true).toLocal();
+    final isToday = todayOccurrence.year == now.year &&
+        todayOccurrence.month == now.month &&
+        todayOccurrence.day == now.day;
+    return isToday && todayOccurrence.isBefore(now);
+  }
+
   static bool computeCanSave({
     required String name,
     required int assignedMemberCount,
@@ -135,9 +150,17 @@ class CreateEditTaskViewModelNotifier
     ref.read(recurrenceNotifierProvider.notifier).hydrateFrom(
           task.recurrenceRule,
         );
+    // Al editar una tarea que estaba programada para HOY, pre-marcamos
+    // "asignar también hoy" para que guardar no la empuje a mañana (bug
+    // reportado: editar una tarea vigente hoy la reasignaba al día siguiente).
+    final due = task.nextDueAt.toLocal();
+    final now = DateTime.now();
+    final dueIsToday =
+        due.year == now.year && due.month == now.month && due.day == now.day;
     state = state.copyWith(
       loadedTitle: task.title,
       loadedDescription: task.description ?? '',
+      applyToday: dueIsToday,
     );
   }
 
@@ -168,11 +191,13 @@ class CreateEditTaskViewModelNotifier
   }
 
   @override
-  bool get showApplyToday => CreateEditTaskViewModel.computeShowApplyToday(
-        hasFixedTime: state.hasFixedTime,
-        fixedTime: fixedTime,
-        now: TimeOfDay.now(),
-      );
+  bool get showApplyToday {
+    final RecurrenceRule? rule =
+        ref.read(taskFormNotifierProvider).recurrenceRule;
+    if (rule == null) return false;
+    return CreateEditTaskViewModel.computeShowApplyTodayForRule(
+        rule, DateTime.now());
+  }
 
   @override
   bool get applyToday => state.applyToday;
@@ -333,7 +358,7 @@ class CreateEditTaskViewModelNotifier
     final uid =
         ref.read(authProvider).whenOrNull(authenticated: (u) => u.uid) ?? '';
     if (homeId == null) return;
-    final taskId = await _form.save(homeId, uid);
+    final taskId = await _form.save(homeId, uid, applyToday: state.applyToday);
     if (taskId != null) {
       state = state.copyWith(savedSuccessfully: true);
     }

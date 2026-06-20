@@ -23,31 +23,7 @@ class OnboardingFlowScreen extends ConsumerStatefulWidget {
 }
 
 class _OnboardingFlowScreenState extends ConsumerState<OnboardingFlowScreen> {
-  late final PageController _pageController;
   bool _navigationDispatched = false;
-
-  @override
-  void initState() {
-    super.initState();
-    final step = ref.read(onboardingNotifierProvider).currentStep;
-    _pageController = PageController(initialPage: step);
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
-
-  void _goToPage(int page) {
-    if (_pageController.hasClients) {
-      _pageController.animateToPage(
-        page,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -74,15 +50,6 @@ class _OnboardingFlowScreenState extends ConsumerState<OnboardingFlowScreen> {
       });
     }
 
-    // Sincronizar PageController con el paso actual.
-    final targetStep = onboardingState.currentStep;
-    if (_pageController.hasClients &&
-        _pageController.page?.round() != targetStep) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _goToPage(targetStep);
-      });
-    }
-
     if (!vmState.isInitialized && !vmState.shouldNavigateHome) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
@@ -97,9 +64,13 @@ class _OnboardingFlowScreenState extends ConsumerState<OnboardingFlowScreen> {
             totalSteps: onboardingState.totalSteps,
           ),
           Expanded(
-            child: PageView(
-              controller: _pageController,
-              physics: const NeverScrollableScrollPhysics(),
+            // IndexedStack en vez de PageView(NeverScrollableScrollPhysics): el
+            // stepper no es deslizable, y el viewport/gesture-detector del
+            // PageView interfería con el hit-testing del botón "Empezar" (no
+            // respondía a toques inyectados). IndexedStack preserva el estado de
+            // cada paso y no introduce reconocedores de gestos.
+            child: IndexedStack(
+              index: onboardingState.currentStep.clamp(0, 3),
               children: [
                 // Step 0: Welcome
                 WelcomeStep(onStart: vm.nextStep),

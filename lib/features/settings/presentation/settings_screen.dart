@@ -15,6 +15,7 @@ import '../../i18n/presentation/language_selector_widget.dart';
 import '../../members/application/members_provider.dart';
 import '../../members/domain/member.dart';
 import '../../homes/domain/home_membership.dart';
+import '../../../shared/widgets/ad_aware_bottom_padding.dart';
 import '../application/settings_view_model.dart';
 import '../../../core/theme/theme_mode_provider.dart';
 import 'widgets/appearance_picker.dart';
@@ -113,6 +114,12 @@ class SettingsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.settings_title)),
       body: ListView(
+        // Padding inferior = safe area + NavBar + banner, igual que las demás
+        // pestañas del shell. Sin esto, el último tile (Suscripción) quedaba
+        // tapado por la NavBar flotante.
+        padding: EdgeInsets.only(
+          bottom: adAwareBottomPadding(context, ref, extra: 16),
+        ),
         children: [
           // ── Cuenta ──────────────────────────────────────────────────
           _SectionHeader(key: const Key('settings_section_account'), title: l10n.settings_section_account),
@@ -212,6 +219,10 @@ class SettingsScreen extends ConsumerWidget {
             onTap: () => showModalBottomSheet<void>(
               context: context,
               isScrollControlled: true,
+              // useSafeArea: el sheet (con isScrollControlled) no debe subir bajo
+              // la barra de estado; sin esto el título "Seleccionar idioma" se
+              // solapaba con el reloj/iconos del sistema.
+              useSafeArea: true,
               builder: (ctx) => SafeArea(
                 child: Padding(
                   padding: EdgeInsets.fromLTRB(

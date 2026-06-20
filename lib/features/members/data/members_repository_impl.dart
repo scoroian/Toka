@@ -215,9 +215,13 @@ class MembersRepositoryImpl implements MembersRepository {
         .doc(homeId)
         .collection('members')
         .doc(uid);
+    // Solo escribimos `vacation`: es lo único que las Firestore rules permiten
+    // actualizar al propio miembro (`notificationPrefs` + `vacation`). La
+    // ausencia EFECTIVA la calcula el backend en lectura (isMemberCurrentlyAbsent)
+    // a partir de este campo, por lo que NO denormalizamos `status:'absent'` aquí
+    // (las rules rechazarían el write completo).
     await memberRef.update({
       'vacation': vacation.toMap(),
-      'status': vacation.isAbsent ? 'absent' : 'active',
     });
   }
 

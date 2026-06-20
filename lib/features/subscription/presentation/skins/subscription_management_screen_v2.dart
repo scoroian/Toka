@@ -88,6 +88,7 @@ class SubscriptionManagementScreenV2 extends ConsumerWidget {
               data: dashboard,
               vm: vm,
               isLoading: vm.isLoading,
+              isCurrentUserPayer: dashboard.currentPayerUid == currentUid,
             ),
           ],
         ),
@@ -103,10 +104,12 @@ class _ActionSection extends StatelessWidget {
     required this.data,
     required this.vm,
     required this.isLoading,
+    required this.isCurrentUserPayer,
   });
   final SubscriptionDashboard data;
   final SubscriptionManagementViewModel vm;
   final bool isLoading;
+  final bool isCurrentUserPayer;
 
   @override
   Widget build(BuildContext context) {
@@ -124,6 +127,11 @@ class _ActionSection extends StatelessWidget {
           ),
         ]);
       case HomePremiumStatus.active:
+        // "Gestionar facturación" y "Cancelar renovación" abren la tienda
+        // (Google Play) y solo tienen sentido para el PAGADOR. A un admin
+        // no-pagador no le mostramos estos CTAs (el PlanSummaryCard ya indica
+        // quién paga); evita que aterrice en su propia gestión de Play vacía.
+        if (!isCurrentUserPayer) return const SizedBox.shrink();
         return _actions([
           FilledButton(
             key: const Key('btn_manage_billing'),

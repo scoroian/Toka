@@ -490,12 +490,18 @@ class _AddHomeSheetState extends ConsumerState<_AddHomeSheet> {
         ref.read(currentHomeProvider.notifier).switchHome(homeId);
       }
       if (mounted) Navigator.of(context).pop();
-    } on Exception catch (e) {
+    } on NoAvailableSlotsException {
+      // Límite de hogares alcanzado (2 base + créditos): mensaje específico en
+      // vez del genérico. Catch TIPADO porque `toString().contains('slots')`
+      // era frágil (la excepción es "NoAvailableSlotsException", con S mayúscula).
       setState(() {
         _isLoading = false;
-        _error = e.toString().contains('slots')
-            ? AppLocalizations.of(context).homes_error_no_slots
-            : AppLocalizations.of(context).error_generic;
+        _error = AppLocalizations.of(context).homes_error_no_slots;
+      });
+    } on Exception {
+      setState(() {
+        _isLoading = false;
+        _error = AppLocalizations.of(context).error_generic;
       });
     }
   }

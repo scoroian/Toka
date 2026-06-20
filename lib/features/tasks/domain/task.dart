@@ -41,5 +41,8 @@ class TaskInput with _$TaskInput {
     required List<String> assignmentOrder,
     @Default(1.0) double difficultyWeight,
     @Default('sameAssignee') String onMissAssign,
+    // Intención del formulario, NO se persiste: si true, la primera ocurrencia
+    // se calcula con preferToday (mantiene HOY aunque su hora ya haya pasado).
+    @Default(false) bool applyToday,
   }) = _TaskInput;
 }

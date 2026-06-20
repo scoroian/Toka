@@ -8,16 +8,25 @@ class RecurrenceCalculator {
   /// Para [OneTimeRule] la "próxima" ocurrencia es el instante exacto de la
   /// regla. Si ese instante ya está en el pasado respecto a [from], devuelve
   /// el mismo instante igualmente (el caller decide si la tarea ya expiró).
-  static DateTime nextDue(RecurrenceRule rule, DateTime from) {
+  ///
+  /// Si [preferToday] es true, las reglas recurrentes (diaria/semanal/mensual/
+  /// anual) consideran válida la ocurrencia de HOY aunque su hora ya haya
+  /// pasado (la cota inferior pasa a ser el inicio del día en vez de [from]).
+  /// Es el soporte del checkbox "asignar también hoy": permite que, al crear o
+  /// editar una tarea cuya hora de hoy ya pasó, la ocurrencia se mantenga hoy
+  /// en lugar de saltar al siguiente periodo. No aplica a [OneTimeRule] ni
+  /// [HourlyRule].
+  static DateTime nextDue(RecurrenceRule rule, DateTime from,
+      {bool preferToday = false}) {
     return switch (rule) {
       OneTimeRule r => _nextOneTime(r),
       HourlyRule r => _nextHourly(r, from),
-      DailyRule r => _nextDaily(r, from),
-      WeeklyRule r => _nextWeekly(r, from),
-      MonthlyFixedRule r => _nextMonthlyFixed(r, from),
-      MonthlyNthRule r => _nextMonthlyNth(r, from),
-      YearlyFixedRule r => _nextYearlyFixed(r, from),
-      YearlyNthRule r => _nextYearlyNth(r, from),
+      DailyRule r => _nextDaily(r, from, preferToday: preferToday),
+      WeeklyRule r => _nextWeekly(r, from, preferToday: preferToday),
+      MonthlyFixedRule r => _nextMonthlyFixed(r, from, preferToday: preferToday),
+      MonthlyNthRule r => _nextMonthlyNth(r, from, preferToday: preferToday),
+      YearlyFixedRule r => _nextYearlyFixed(r, from, preferToday: preferToday),
+      YearlyNthRule r => _nextYearlyNth(r, from, preferToday: preferToday),
     };
   }
 
@@ -57,6 +66,15 @@ class RecurrenceCalculator {
   static ({int h, int m}) _parseTime(String time) {
     final parts = time.split(':');
     return (h: int.parse(parts[0]), m: int.parse(parts[1]));
+  }
+
+  /// Cota inferior para las comparaciones: con [preferToday] es el inicio del
+  /// día de [tzFrom] (00:00 en la zona de la regla), de modo que la ocurrencia
+  /// de hoy sea aceptada aunque su hora ya haya pasado.
+  static tz.TZDateTime _lowerBound(
+      tz.TZDateTime tzFrom, tz.Location location, bool preferToday) {
+    if (!preferToday) return tzFrom;
+    return tz.TZDateTime(location, tzFrom.year, tzFrom.month, tzFrom.day);
   }
 
   static int _weekdayToInt(String day) {
@@ -108,14 +126,16 @@ class RecurrenceCalculator {
     return candidate.toLocal();
   }
 
-  static DateTime _nextDaily(DailyRule rule, DateTime from) {
+  static DateTime _nextDaily(DailyRule rule, DateTime from,
+      {bool preferToday = false}) {
     final location = tz.getLocation(rule.timezone);
     final tzFrom = tz.TZDateTime.from(from, location);
     final t = _parseTime(rule.time);
+    final lower = _lowerBound(tzFrom, location, preferToday);
 
     var candidate =
         tz.TZDateTime(location, tzFrom.year, tzFrom.month, tzFrom.day, t.h, t.m);
-    while (!candidate.isAfter(tzFrom)) {
+    while (!candidate.isAfter(lower)) {
       final next =
           DateTime(candidate.year, candidate.month, candidate.day + rule.every);
       candidate = tz.TZDateTime(location, next.year, next.month, next.day, t.h, t.m);
@@ -123,10 +143,12 @@ class RecurrenceCalculator {
     return candidate.toLocal();
   }
 
-  static DateTime _nextWeekly(WeeklyRule rule, DateTime from) {
+  static DateTime _nextWeekly(WeeklyRule rule, DateTime from,
+      {bool preferToday = false}) {
     final location = tz.getLocation(rule.timezone);
     final tzFrom = tz.TZDateTime.from(from, location);
     final t = _parseTime(rule.time);
+    final lower = _lowerBound(tzFrom, location, preferToday);
     final weekdayInts = rule.weekdays.map(_weekdayToInt).toSet();
 
     for (var i = 0; i < 8; i++) {
@@ -135,7 +157,7 @@ class RecurrenceCalculator {
       if (weekdayInts.contains(date.weekday)) {
         final candidate = tz.TZDateTime(
             location, date.year, date.month, date.day, t.h, t.m);
-        if (candidate.isAfter(tzFrom)) return candidate.toLocal();
+        if (candidate.isAfter(lower)) return candidate.toLocal();
       }
     }
     // Si todos los candidatos de esta semana ya pasaron, avanzar 7 días
@@ -145,16 +167,18 @@ class RecurrenceCalculator {
       if (weekdayInts.contains(d.weekday)) {
         final candidate =
             tz.TZDateTime(location, d.year, d.month, d.day, t.h, t.m);
-        if (candidate.isAfter(tzFrom)) return candidate.toLocal();
+        if (candidate.isAfter(lower)) return candidate.toLocal();
       }
     }
     throw StateError('No weekly occurrence found for weekdays=${rule.weekdays}');
   }
 
-  static DateTime _nextMonthlyFixed(MonthlyFixedRule rule, DateTime from) {
+  static DateTime _nextMonthlyFixed(MonthlyFixedRule rule, DateTime from,
+      {bool preferToday = false}) {
     final location = tz.getLocation(rule.timezone);
     final tzFrom = tz.TZDateTime.from(from, location);
     final t = _parseTime(rule.time);
+    final lower = _lowerBound(tzFrom, location, preferToday);
     var year = tzFrom.year;
     var month = tzFrom.month;
 
@@ -163,7 +187,7 @@ class RecurrenceCalculator {
       final day = rule.day.clamp(1, lastDay);
       final candidate =
           tz.TZDateTime(location, year, month, day, t.h, t.m);
-      if (candidate.isAfter(tzFrom)) return candidate.toLocal();
+      if (candidate.isAfter(lower)) return candidate.toLocal();
       month++;
       if (month > 12) {
         month = 1;
@@ -173,10 +197,12 @@ class RecurrenceCalculator {
     throw StateError('No monthly fixed occurrence found');
   }
 
-  static DateTime _nextMonthlyNth(MonthlyNthRule rule, DateTime from) {
+  static DateTime _nextMonthlyNth(MonthlyNthRule rule, DateTime from,
+      {bool preferToday = false}) {
     final location = tz.getLocation(rule.timezone);
     final tzFrom = tz.TZDateTime.from(from, location);
     final t = _parseTime(rule.time);
+    final lower = _lowerBound(tzFrom, location, preferToday);
     final weekdayInt = _weekdayToInt(rule.weekday);
     var year = tzFrom.year;
     var month = tzFrom.month;
@@ -186,7 +212,7 @@ class RecurrenceCalculator {
       if (date != null) {
         final candidate =
             tz.TZDateTime(location, date.year, date.month, date.day, t.h, t.m);
-        if (candidate.isAfter(tzFrom)) return candidate.toLocal();
+        if (candidate.isAfter(lower)) return candidate.toLocal();
       }
       month++;
       if (month > 12) {
@@ -197,10 +223,12 @@ class RecurrenceCalculator {
     throw StateError('No monthly Nth occurrence found');
   }
 
-  static DateTime _nextYearlyFixed(YearlyFixedRule rule, DateTime from) {
+  static DateTime _nextYearlyFixed(YearlyFixedRule rule, DateTime from,
+      {bool preferToday = false}) {
     final location = tz.getLocation(rule.timezone);
     final tzFrom = tz.TZDateTime.from(from, location);
     final t = _parseTime(rule.time);
+    final lower = _lowerBound(tzFrom, location, preferToday);
     var year = tzFrom.year;
 
     for (var i = 0; i < 3; i++) {
@@ -208,16 +236,18 @@ class RecurrenceCalculator {
       final day = rule.day.clamp(1, lastDay);
       final candidate =
           tz.TZDateTime(location, year, rule.month, day, t.h, t.m);
-      if (candidate.isAfter(tzFrom)) return candidate.toLocal();
+      if (candidate.isAfter(lower)) return candidate.toLocal();
       year++;
     }
     throw StateError('No yearly fixed occurrence found');
   }
 
-  static DateTime _nextYearlyNth(YearlyNthRule rule, DateTime from) {
+  static DateTime _nextYearlyNth(YearlyNthRule rule, DateTime from,
+      {bool preferToday = false}) {
     final location = tz.getLocation(rule.timezone);
     final tzFrom = tz.TZDateTime.from(from, location);
     final t = _parseTime(rule.time);
+    final lower = _lowerBound(tzFrom, location, preferToday);
     final weekdayInt = _weekdayToInt(rule.weekday);
     var year = tzFrom.year;
 
@@ -227,7 +257,7 @@ class RecurrenceCalculator {
       if (date != null) {
         final candidate =
             tz.TZDateTime(location, date.year, date.month, date.day, t.h, t.m);
-        if (candidate.isAfter(tzFrom)) return candidate.toLocal();
+        if (candidate.isAfter(lower)) return candidate.toLocal();
       }
       year++;
     }

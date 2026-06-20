@@ -72,6 +72,8 @@ void main() {
       const data = MembersViewData(
         activeMembers: [],
         frozenMembers: [],
+        leftMembers: [],
+        canReinstate: false,
         canInvite: false,
         homeId: 'home1',
         isPremium: true,
@@ -83,6 +85,8 @@ void main() {
       expect(data.canInvite, isFalse);
       expect(data.activeMembers, isEmpty);
       expect(data.frozenMembers, isEmpty);
+      expect(data.leftMembers, isEmpty);
+      expect(data.canReinstate, isFalse);
       expect(data.isPremium, isTrue);
       expect(data.freeLimitReached, isFalse);
     });

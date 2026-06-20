@@ -6,7 +6,7 @@ part of 'members_view_model.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$membersViewModelHash() => r'e1b3036ffce2da74759aed05cf1bfafc8c888047';
+String _$membersViewModelHash() => r'0531f844421cc496bc8d08a020b8d13207df7a34';
 
 /// See also [membersViewModel].
 @ProviderFor(membersViewModel)

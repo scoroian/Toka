@@ -31,6 +31,37 @@ class MembersRepositoryImpl implements MembersRepository {
   }
 
   @override
+  Stream<List<Member>> watchLeftMembers(String homeId) {
+    // Miembros que abandonaron/fueron expulsados (status='left'), para poder
+    // reincorporarlos. Query separada: la principal los excluye a propósito
+    // (no deben aparecer en listas/pickers de asignación).
+    return _firestore
+        .collection('homes')
+        .doc(homeId)
+        .collection('members')
+        .where('status', isEqualTo: 'left')
+        .snapshots()
+        .map((snap) =>
+            snap.docs.map((d) => MemberModel.fromFirestore(d, homeId)).toList());
+  }
+
+  @override
+  Future<void> reinstateMember(String homeId, String uid) async {
+    try {
+      await _functions.httpsCallable('reinstateMember').call({
+        'homeId': homeId,
+        'targetUid': uid,
+      });
+    } on FirebaseFunctionsException catch (e) {
+      if (e.code == 'failed-precondition' &&
+          (e.message ?? '').contains('free_limit_members')) {
+        throw const MaxMembersReachedException();
+      }
+      rethrow;
+    }
+  }
+
+  @override
   Future<Member> fetchMember(String homeId, String uid) async {
     final doc = await _firestore
         .collection('homes')

@@ -648,6 +648,22 @@ class AppLocalizationsEs extends AppLocalizations {
   String get members_section_frozen => 'Congelados';
 
   @override
+  String get members_section_left => 'Antiguos miembros';
+
+  @override
+  String get members_reinstate => 'Reincorporar';
+
+  @override
+  String members_reinstate_confirm(String name) {
+    return '¿Reincorporar a $name al hogar?';
+  }
+
+  @override
+  String members_reinstate_success(String name) {
+    return '$name se ha reincorporado';
+  }
+
+  @override
   String members_pending_tasks(int count) {
     return '$count tareas pendientes';
   }

@@ -16,6 +16,8 @@ class MembersViewData {
   const MembersViewData({
     required this.activeMembers,
     required this.frozenMembers,
+    required this.leftMembers,
+    required this.canReinstate,
     required this.canInvite,
     required this.homeId,
     required this.isPremium,
@@ -25,6 +27,10 @@ class MembersViewData {
   });
   final List<Member> activeMembers;
   final List<Member> frozenMembers;
+  /// Miembros 'left' que se pueden reincorporar.
+  final List<Member> leftMembers;
+  /// True si el usuario actual (owner/admin) puede reincorporar miembros.
+  final bool canReinstate;
   /// True cuando rol permite invitar Y no se ha alcanzado el límite Free.
   final bool canInvite;
   final String homeId;
@@ -69,6 +75,10 @@ MembersViewModel membersViewModel(MembersViewModelRef ref) {
         allMembers.where((m) => m.status == MemberStatus.active).toList();
     final frozenMembers =
         allMembers.where((m) => m.status == MemberStatus.frozen).toList();
+    // Antiguos miembros (status='left') para reincorporación — provider aparte
+    // (la lista principal los excluye a propósito).
+    final leftMembers =
+        ref.watch(leftMembersProvider(home.id)).valueOrNull ?? const [];
 
     // Free plan gating: obtenemos premium/counters del dashboard. Fallback
     // conservador: asumimos Premium hasta que llegue el dashboard (el backend
@@ -84,6 +94,8 @@ MembersViewModel membersViewModel(MembersViewModelRef ref) {
     return MembersViewData(
       activeMembers: activeMembers,
       frozenMembers: frozenMembers,
+      leftMembers: leftMembers,
+      canReinstate: roleCanInvite,
       canInvite: roleCanInvite && !freeLimitReached,
       homeId: home.id,
       isPremium: isPremium,

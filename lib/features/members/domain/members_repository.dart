@@ -15,6 +15,10 @@ abstract interface class MembersRepository {
   /// Stream de todos los miembros (activos + congelados) del hogar.
   Stream<List<Member>> watchHomeMembers(String homeId);
 
+  /// Stream de los miembros que abandonaron/fueron expulsados (status='left'),
+  /// para poder reincorporarlos.
+  Stream<List<Member>> watchLeftMembers(String homeId);
+
   /// Obtiene un miembro concreto por su uid.
   Future<Member> fetchMember(String homeId, String uid);
 
@@ -42,6 +46,10 @@ abstract interface class MembersRepository {
   /// Elimina a un miembro del hogar (vía CF).
   /// Lanza [CannotRemoveOwnerException] si el uid es el owner.
   Future<void> removeMember(String homeId, String uid);
+
+  /// Reincorpora a un miembro 'left' (vía CF reinstateMember). Owner/admin.
+  /// Lanza [MaxMembersReachedException] si el plan Free está al límite.
+  Future<void> reinstateMember(String homeId, String uid);
 
   /// Promueve a un miembro a admin (vía CF).
   /// Lanza [MaxAdminsReachedException] en plan Free si ya hay 1 admin.

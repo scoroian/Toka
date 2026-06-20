@@ -1258,6 +1258,30 @@ abstract class AppLocalizations {
   /// **'Congelados'**
   String get members_section_frozen;
 
+  /// Former (left) members section
+  ///
+  /// In es, this message translates to:
+  /// **'Antiguos miembros'**
+  String get members_section_left;
+
+  /// Reinstate member button
+  ///
+  /// In es, this message translates to:
+  /// **'Reincorporar'**
+  String get members_reinstate;
+
+  /// Confirm reinstate dialog body
+  ///
+  /// In es, this message translates to:
+  /// **'¿Reincorporar a {name} al hogar?'**
+  String members_reinstate_confirm(String name);
+
+  /// Reinstate success snackbar
+  ///
+  /// In es, this message translates to:
+  /// **'{name} se ha reincorporado'**
+  String members_reinstate_success(String name);
+
   /// Pending tasks badge on member card
   ///
   /// In es, this message translates to:

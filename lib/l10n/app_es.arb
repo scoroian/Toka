@@ -433,6 +433,20 @@
   },
   "members_section_frozen": "Congelados",
   "@members_section_frozen": { "description": "Frozen members section" },
+  "members_section_left": "Antiguos miembros",
+  "@members_section_left": { "description": "Former (left) members section" },
+  "members_reinstate": "Reincorporar",
+  "@members_reinstate": { "description": "Reinstate member button" },
+  "members_reinstate_confirm": "¿Reincorporar a {name} al hogar?",
+  "@members_reinstate_confirm": {
+    "description": "Confirm reinstate dialog body",
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "members_reinstate_success": "{name} se ha reincorporado",
+  "@members_reinstate_success": {
+    "description": "Reinstate success snackbar",
+    "placeholders": { "name": { "type": "String" } }
+  },
   "members_pending_tasks": "{count} tareas pendientes",
   "@members_pending_tasks": {
     "description": "Pending tasks badge on member card",

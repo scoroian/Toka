@@ -19,6 +19,7 @@ void main() {
     int? completedCount,
     int passedCount = 0,
     String status = 'active',
+    Map<String, dynamic>? vacation,
   }) async {
     await db
         .collection('homes')
@@ -31,6 +32,7 @@ void main() {
       if (completedCount != null) 'completedCount': completedCount,
       'passedCount': passedCount,
       'status': status,
+      if (vacation != null) 'vacation': vacation,
     });
   }
 
@@ -87,15 +89,31 @@ void main() {
     expect(info.nextAssigneeName, 'Carlos');
   });
 
-  test('miembro ausente (vacaciones) se salta como el backend', () async {
+  test('miembro con vacación activa se salta como el backend', () async {
     await seedTask(['A', 'B', 'C'], 'A');
     await seedMember('A', nickname: 'Ana', tasksCompleted: 4);
-    await seedMember('B', nickname: 'Bob', status: 'absent');
+    await seedMember('B', nickname: 'Bob', vacation: {'isActive': true});
     await seedMember('C', nickname: 'Carlos');
 
     final info = await fetchPassTurnInfo(db, homeId, taskId, 'A');
 
     expect(info.nextAssigneeName, 'Carlos');
+  });
+
+  test('vacación FUTURA no salta (aún no empezó)', () async {
+    await seedTask(['A', 'B', 'C'], 'A');
+    await seedMember('A', nickname: 'Ana', tasksCompleted: 4);
+    await seedMember('B', nickname: 'Bob', vacation: {
+      'isActive': true,
+      'startDate':
+          Timestamp.fromDate(DateTime.now().add(const Duration(days: 7))),
+    });
+    await seedMember('C', nickname: 'Carlos');
+
+    final info = await fetchPassTurnInfo(db, homeId, taskId, 'A');
+
+    // Bob no está de vacaciones aún → es el siguiente en la rotación.
+    expect(info.nextAssigneeName, 'Bob');
   });
 
   test('todos los demás congelados → sin candidato', () async {

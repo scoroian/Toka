@@ -647,6 +647,22 @@ class AppLocalizationsRo extends AppLocalizations {
   String get members_section_frozen => 'Înghețați';
 
   @override
+  String get members_section_left => 'Foști membri';
+
+  @override
+  String get members_reinstate => 'Reintegrează';
+
+  @override
+  String members_reinstate_confirm(String name) {
+    return 'Reintegrezi pe $name în cămin?';
+  }
+
+  @override
+  String members_reinstate_success(String name) {
+    return '$name a fost reintegrat';
+  }
+
+  @override
   String members_pending_tasks(int count) {
     return '$count sarcini în așteptare';
   }

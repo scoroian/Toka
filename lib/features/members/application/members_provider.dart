@@ -22,6 +22,12 @@ Stream<List<Member>> homeMembers(HomeMembersRef ref, String homeId) {
   return ref.watch(membersRepositoryProvider).watchHomeMembers(homeId);
 }
 
+/// Miembros 'left' (antiguos) del hogar, para la sección de reincorporación.
+@Riverpod(keepAlive: true)
+Stream<List<Member>> leftMembers(LeftMembersRef ref, String homeId) {
+  return ref.watch(membersRepositoryProvider).watchLeftMembers(homeId);
+}
+
 @riverpod
 Stream<({String code, DateTime expiresAt})?> activeInviteCode(
     ActiveInviteCodeRef ref, String homeId) {

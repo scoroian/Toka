@@ -6,7 +6,7 @@ enum MemberRole { owner, admin, member, frozen }
 
 enum BillingState { currentPayer, formerPayer, none }
 
-enum MemberStatus { active, frozen }
+enum MemberStatus { active, frozen, left }
 
 @freezed
 class HomeMembership with _$HomeMembership {

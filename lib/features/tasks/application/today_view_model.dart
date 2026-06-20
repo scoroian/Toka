@@ -44,6 +44,20 @@ typedef PassTurnInfo = ({
 /// Espejo de getNextEligibleMember en
 /// functions/src/tasks/pass_turn_helpers.ts. Función de nivel superior para
 /// poder testearla con `FakeFirebaseFirestore`.
+/// Réplica cliente de `isMemberCurrentlyAbsent` (functions/src/shared/vacation.ts):
+/// true si el miembro tiene una vacación activa cuyo rango incluye HOY (fin de
+/// día inclusivo). Mantener en sync con el backend.
+bool _isOnVacationNow(dynamic vacationField, [DateTime? now]) {
+  if (vacationField is! Map) return false;
+  if (vacationField['isActive'] != true) return false;
+  final n = now ?? DateTime.now();
+  final start = (vacationField['startDate'] as Timestamp?)?.toDate();
+  final end = (vacationField['endDate'] as Timestamp?)?.toDate();
+  if (start != null && n.isBefore(start)) return false;
+  if (end != null && n.isAfter(end.add(const Duration(days: 1)))) return false;
+  return true;
+}
+
 @visibleForTesting
 Future<PassTurnInfo> fetchPassTurnInfo(
   FirebaseFirestore db,
@@ -69,8 +83,11 @@ Future<PassTurnInfo> fetchPassTurnInfo(
   for (final doc in membersSnap.docs) {
     final data = doc.data();
     final status = data['status'] as String?;
-    // El backend trata `frozen` y `absent` (vacaciones) como no elegibles.
-    if (status == 'frozen' || status == 'absent') {
+    // El backend (isMemberCurrentlyAbsent) salta a los congelados y a quienes
+    // tienen una vacación ACTIVA hoy (campo `vacation`, no `status`). Replicamos
+    // esa lógica para que el preview "siguiente responsable" coincida con lo que
+    // hará realmente el backend al pasar turno.
+    if (status == 'frozen' || _isOnVacationNow(data['vacation'])) {
       frozenUids.add(doc.id);
     }
     names[doc.id] = (data['nickname'] as String?) ?? '';

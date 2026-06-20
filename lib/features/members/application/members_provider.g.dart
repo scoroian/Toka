@@ -174,6 +174,148 @@ class _HomeMembersProviderElement extends StreamProviderElement<List<Member>>
   String get homeId => (origin as HomeMembersProvider).homeId;
 }
 
+String _$leftMembersHash() => r'42cd3cbbdce6812ce5b03f7b2a5ddccc41f3264a';
+
+/// Miembros 'left' (antiguos) del hogar, para la sección de reincorporación.
+///
+/// Copied from [leftMembers].
+@ProviderFor(leftMembers)
+const leftMembersProvider = LeftMembersFamily();
+
+/// Miembros 'left' (antiguos) del hogar, para la sección de reincorporación.
+///
+/// Copied from [leftMembers].
+class LeftMembersFamily extends Family<AsyncValue<List<Member>>> {
+  /// Miembros 'left' (antiguos) del hogar, para la sección de reincorporación.
+  ///
+  /// Copied from [leftMembers].
+  const LeftMembersFamily();
+
+  /// Miembros 'left' (antiguos) del hogar, para la sección de reincorporación.
+  ///
+  /// Copied from [leftMembers].
+  LeftMembersProvider call(
+    String homeId,
+  ) {
+    return LeftMembersProvider(
+      homeId,
+    );
+  }
+
+  @override
+  LeftMembersProvider getProviderOverride(
+    covariant LeftMembersProvider provider,
+  ) {
+    return call(
+      provider.homeId,
+    );
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'leftMembersProvider';
+}
+
+/// Miembros 'left' (antiguos) del hogar, para la sección de reincorporación.
+///
+/// Copied from [leftMembers].
+class LeftMembersProvider extends StreamProvider<List<Member>> {
+  /// Miembros 'left' (antiguos) del hogar, para la sección de reincorporación.
+  ///
+  /// Copied from [leftMembers].
+  LeftMembersProvider(
+    String homeId,
+  ) : this._internal(
+          (ref) => leftMembers(
+            ref as LeftMembersRef,
+            homeId,
+          ),
+          from: leftMembersProvider,
+          name: r'leftMembersProvider',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$leftMembersHash,
+          dependencies: LeftMembersFamily._dependencies,
+          allTransitiveDependencies:
+              LeftMembersFamily._allTransitiveDependencies,
+          homeId: homeId,
+        );
+
+  LeftMembersProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.homeId,
+  }) : super.internal();
+
+  final String homeId;
+
+  @override
+  Override overrideWith(
+    Stream<List<Member>> Function(LeftMembersRef provider) create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: LeftMembersProvider._internal(
+        (ref) => create(ref as LeftMembersRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        homeId: homeId,
+      ),
+    );
+  }
+
+  @override
+  StreamProviderElement<List<Member>> createElement() {
+    return _LeftMembersProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is LeftMembersProvider && other.homeId == homeId;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, homeId.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin LeftMembersRef on StreamProviderRef<List<Member>> {
+  /// The parameter `homeId` of this provider.
+  String get homeId;
+}
+
+class _LeftMembersProviderElement extends StreamProviderElement<List<Member>>
+    with LeftMembersRef {
+  _LeftMembersProviderElement(super.provider);
+
+  @override
+  String get homeId => (origin as LeftMembersProvider).homeId;
+}
+
 String _$activeInviteCodeHash() => r'47563f5e45357170c3afddd1eb87f7f9f60feefd';
 
 /// See also [activeInviteCode].

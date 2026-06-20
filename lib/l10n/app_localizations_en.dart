@@ -640,6 +640,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get members_section_frozen => 'Frozen';
 
   @override
+  String get members_section_left => 'Former members';
+
+  @override
+  String get members_reinstate => 'Reinstate';
+
+  @override
+  String members_reinstate_confirm(String name) {
+    return 'Reinstate $name to the home?';
+  }
+
+  @override
+  String members_reinstate_success(String name) {
+    return '$name has been reinstated';
+  }
+
+  @override
   String members_pending_tasks(int count) {
     return '$count pending tasks';
   }

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/routes.dart';
+import '../../../../core/errors/exceptions.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/ad_aware_bottom_padding.dart';
 import '../../../../shared/widgets/loading_widget.dart';
@@ -11,6 +12,7 @@ import '../../../../shared/widgets/premium_upgrade_banner.dart';
 import '../../../../shared/widgets/skins/main_shell_v2.dart';
 import '../../../profile/application/profile_provider.dart';
 import '../../../profile/domain/user_profile.dart';
+import '../../application/members_provider.dart';
 import '../../application/members_view_model.dart';
 import '../../domain/member.dart';
 import '../widgets/invite_member_sheet.dart';
@@ -50,6 +52,7 @@ class MembersScreenV2 extends ConsumerWidget {
         final allMembers = [
           ...data.activeMembers,
           ...data.frozenMembers,
+          ...data.leftMembers,
         ];
         final profileFallback = <String, UserProfile>{};
         for (final m in allMembers) {
@@ -152,11 +155,87 @@ class MembersScreenV2 extends ConsumerWidget {
                             ),
                           )),
                     ],
+                    // Antiguos miembros (status='left') — reincorporables por
+                    // owner/admin. Fila simple con botón inline (no navega al
+                    // perfil, que no carga miembros 'left').
+                    if (data.canReinstate && data.leftMembers.isNotEmpty) ...[
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+                        child: Text(
+                          l10n.members_section_left,
+                          key: const Key('section_left'),
+                          style: Theme.of(context).textTheme.labelLarge,
+                        ),
+                      ),
+                      ...data.leftMembers.map((m) {
+                        final em = enrich(m);
+                        final name = em.nickname.isNotEmpty ? em.nickname : m.uid;
+                        return ListTile(
+                          key: Key('left_member_${m.uid}'),
+                          leading: CircleAvatar(
+                            child: Text(name.isNotEmpty
+                                ? name[0].toUpperCase()
+                                : '?'),
+                          ),
+                          title: Text(name),
+                          trailing: OutlinedButton(
+                            key: Key('reinstate_${m.uid}'),
+                            onPressed: () => _reinstateMember(
+                                context, ref, data.homeId, m.uid, name, l10n),
+                            child: Text(l10n.members_reinstate),
+                          ),
+                        );
+                      }),
+                    ],
                   ],
                 ),
         );
       },
     );
+  }
+}
+
+/// Reincorpora a un miembro 'left' (owner/admin) con confirmación y feedback.
+Future<void> _reinstateMember(
+  BuildContext context,
+  WidgetRef ref,
+  String homeId,
+  String uid,
+  String name,
+  AppLocalizations l10n,
+) async {
+  final ok = await showDialog<bool>(
+    context: context,
+    builder: (dctx) => AlertDialog(
+      title: Text(l10n.members_reinstate),
+      content: Text(l10n.members_reinstate_confirm(name)),
+      actions: [
+        TextButton(
+            onPressed: () => Navigator.of(dctx).pop(false),
+            child: Text(l10n.cancel)),
+        FilledButton(
+            onPressed: () => Navigator.of(dctx).pop(true),
+            child: Text(l10n.confirm)),
+      ],
+    ),
+  );
+  if (ok != true || !context.mounted) return;
+  try {
+    await ref.read(membersRepositoryProvider).reinstateMember(homeId, uid);
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.members_reinstate_success(name))));
+    }
+  } on MaxMembersReachedException {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.free_limit_members_reached)));
+    }
+  } catch (_) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.error_generic)));
+    }
   }
 }
 

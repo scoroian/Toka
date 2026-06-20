@@ -608,6 +608,98 @@ export const removeMember = onCall(async (request) => {
 });
 
 // ---------------------------------------------------------------------------
+// reinstateMember
+// Owner/admin REINCORPORA a un miembro que dejó el hogar (status="left"),
+// reactivando su membresía (status="active") en ambos documentos. Respeta el
+// límite de miembros del plan Free. El rol vuelve a "member" (no se restaura
+// admin automáticamente; el owner puede re-promover).
+// Input:  { homeId: string, targetUid: string }
+// ---------------------------------------------------------------------------
+export const reinstateMember = onCall(async (request) => {
+  if (!request.auth) {
+    throw new HttpsError("unauthenticated", "Must be authenticated");
+  }
+
+  const callerUid = request.auth.uid;
+  const { homeId, targetUid } = request.data as {
+    homeId?: string;
+    targetUid?: string;
+  };
+
+  if (!homeId?.trim() || !targetUid?.trim()) {
+    throw new HttpsError(
+      "invalid-argument",
+      "homeId and targetUid are required"
+    );
+  }
+
+  const homeRef = db.collection("homes").doc(homeId);
+  const callerMemberRef = homeRef.collection("members").doc(callerUid);
+  const targetMemberRef = homeRef.collection("members").doc(targetUid);
+  const targetMembershipRef = db
+    .collection("users")
+    .doc(targetUid)
+    .collection("memberships")
+    .doc(homeId);
+
+  await db.runTransaction(async (tx) => {
+    const [homeDoc, callerDoc, targetDoc] = await Promise.all([
+      tx.get(homeRef),
+      tx.get(callerMemberRef),
+      tx.get(targetMemberRef),
+    ]);
+
+    if (!callerDoc.exists) {
+      throw new HttpsError("permission-denied", "caller-not-member");
+    }
+    if (!targetDoc.exists) {
+      throw new HttpsError("not-found", "target-not-member");
+    }
+
+    const callerRole = callerDoc.data()!["role"] as string | undefined;
+    const callerStatus = callerDoc.data()!["status"] as string | undefined;
+    if (
+      callerStatus !== "active" ||
+      (callerRole !== "owner" && callerRole !== "admin")
+    ) {
+      throw new HttpsError("permission-denied", "insufficient-role");
+    }
+
+    const targetStatus = targetDoc.data()!["status"] as string | undefined;
+    if (targetStatus !== "left") {
+      throw new HttpsError("failed-precondition", "target-not-left");
+    }
+
+    // Límite de miembros del plan Free (el target está 'left', no cuenta aún).
+    if (!isPremium(homeDoc.data()?.["premiumStatus"] as string | undefined)) {
+      const activeMembersSnap = await tx.get(
+        homeRef.collection("members").where("status", "==", "active")
+      );
+      if (activeMembersSnap.size >= FREE_LIMITS.maxActiveMembers) {
+        throw new HttpsError("failed-precondition", FREE_LIMIT_CODES.members);
+      }
+    }
+
+    const now = FieldValue.serverTimestamp();
+    tx.update(targetMemberRef, {
+      status: "active",
+      role: "member",
+      rejoinedAt: now,
+      leftAt: FieldValue.delete(),
+    });
+    tx.set(
+      targetMembershipRef,
+      { status: "active", rejoinedAt: now, leftAt: FieldValue.delete() },
+      { merge: true }
+    );
+  });
+
+  logger.info(
+    `reinstateMember: target=${targetUid} in home=${homeId} by caller=${callerUid}`
+  );
+});
+
+// ---------------------------------------------------------------------------
 // closeHome
 // Input:  { homeId: string }
 // ---------------------------------------------------------------------------

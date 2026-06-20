@@ -70,6 +70,12 @@ class HomesRepositoryImpl implements HomesRepository {
     } on FirebaseFunctionsException catch (e) {
       if (e.code == 'not-found') throw const InvalidInviteCodeException();
       if (e.code == 'deadline-exceeded') throw const ExpiredInviteCodeException();
+      // El backend lanza failed-precondition cuando el hogar (plan Free) ya
+      // alcanzó el máximo de miembros activos. Lo mapeamos a una excepción de
+      // dominio para mostrar el motivo en vez del genérico "Algo salió mal".
+      if (e.code == 'failed-precondition') {
+        throw const MaxMembersReachedException();
+      }
       rethrow;
     }
   }

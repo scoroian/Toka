@@ -150,6 +150,23 @@ class TaskDetailScreenV2 extends ConsumerWidget {
                   ),
                 ),
               ]),
+              if ((task.description ?? '').trim().isNotEmpty) ...[
+                const SizedBox(height: 12),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    task.description!.trim(),
+                    key: const Key('detail_description'),
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 15,
+                      height: 1.4,
+                      color: isDark
+                          ? AppColorsV2.textSecondaryDark
+                          : AppColorsV2.textSecondaryLight,
+                    ),
+                  ),
+                ),
+              ],
               const SizedBox(height: 20),
               Container(
                 padding: const EdgeInsets.all(16),

@@ -34,19 +34,24 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final vm = ref.watch(forgotPasswordViewModelProvider);
+    // Observar el STATE del notifier (no el notifier en sí): el provider
+    // derivado forgotPasswordViewModelProvider devuelve siempre la misma
+    // instancia del notifier, así que ref.watch sobre él NUNCA dispara un
+    // rebuild cuando cambia resetSent/isLoading (Riverpod compara con ==).
+    // Sin esto, la vista de confirmación tras enviar el enlace nunca aparecía.
+    final state = ref.watch(forgotPasswordViewModelNotifierProvider);
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.auth_forgot_password_title)),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
-          child: vm.resetSent
+          child: state.resetSent
               ? _ConfirmationView(l10n: l10n)
               : _FormView(
                   formKey: _formKey,
                   emailCtrl: _emailCtrl,
-                  loading: vm.isLoading,
+                  loading: state.isLoading,
                   onSend: _send,
                   l10n: l10n,
                   emailRegex: _emailRegex,

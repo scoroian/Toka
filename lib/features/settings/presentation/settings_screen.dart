@@ -128,6 +128,26 @@ class SettingsScreen extends ConsumerWidget {
               final authState = ref.read(authProvider);
               final email = authState.whenOrNull(authenticated: (u) => u.email);
               if (email == null) return;
+              // Confirmar antes de disparar el email de restablecimiento: el
+              // tap directo enviaba el correo sin aviso, lo que confunde.
+              final confirmed = await showDialog<bool>(
+                context: context,
+                builder: (ctx) => AlertDialog(
+                  title: Text(l10n.settings_change_password_confirm_title),
+                  content: Text(l10n.settings_change_password_confirm_body),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(ctx).pop(false),
+                      child: Text(l10n.cancel),
+                    ),
+                    FilledButton(
+                      onPressed: () => Navigator.of(ctx).pop(true),
+                      child: Text(l10n.confirm),
+                    ),
+                  ],
+                ),
+              );
+              if (confirmed != true || !context.mounted) return;
               await ref.read(authProvider.notifier).sendPasswordReset(email);
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -273,16 +293,21 @@ class SettingsScreen extends ConsumerWidget {
             onTap: () async {
               if (homeId.isEmpty || uid.isEmpty) return;
 
-              // Lectura one-shot de miembros para clasificar el caso
+              // El owner se determina por home.ownerUid (expuesto por el view
+              // model desde el listener vivo del hogar), NO por members.first:
+              // ese `.first` puede devolver un snapshot de la caché local stale
+              // de Firestore y hacer que un ex-owner que se re-unió como admin
+              // vea por error el flujo de "transferir propiedad" (bug QA 🟠-2).
+              final isOwner = vm.viewData.ownerUid == uid;
+
+              // Lectura one-shot de miembros para los candidatos a recibir la
+              // propiedad (Caso B) y para detectar miembros congelados.
               final members = await ref
                   .read(membersRepositoryProvider)
                   .watchHomeMembers(homeId)
                   .first;
               if (!context.mounted) return;
 
-              final isOwner = members.any(
-                (m) => m.uid == uid && m.role == MemberRole.owner,
-              );
               final activeOthers = members
                   .where((m) => m.uid != uid && m.status == MemberStatus.active)
                   .toList();

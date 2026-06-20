@@ -853,7 +853,14 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String history_time_days_ago(int days) {
-    return 'acum $days zile';
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days de zile',
+      few: '$days zile',
+      one: '$days zi',
+    );
+    return 'acum $_temp0';
   }
 
   @override
@@ -928,7 +935,14 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String rescue_banner_text(int days) {
-    return 'Premium expiră în $days zile';
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days de zile',
+      few: '$days zile',
+      one: '$days zi',
+    );
+    return 'Premium expiră în $_temp0';
   }
 
   @override
@@ -936,7 +950,14 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String rescue_banner_title(int days) {
-    return 'Premium expiră în $days zile — reînnoiește pentru a nu pierde funcțiile';
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days de zile',
+      few: '$days zile',
+      one: '$days zi',
+    );
+    return 'Premium expiră în $_temp0 — reînnoiește pentru a nu pierde funcțiile';
   }
 
   @override
@@ -1250,6 +1271,13 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get settings_change_password => 'Schimbă parola';
+
+  @override
+  String get settings_change_password_confirm_title => 'Schimbi parola?';
+
+  @override
+  String get settings_change_password_confirm_body =>
+      'Îți vom trimite un link pe email pentru a-ți reseta parola.';
 
   @override
   String get settings_delete_account => 'Șterge contul';
@@ -1598,7 +1626,12 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String history_rate_score_label(String score) {
-    return 'Scor: $score';
+    return 'Scor: $score / 10';
+  }
+
+  @override
+  String review_score_value(String score) {
+    return '$score / 10';
   }
 
   @override

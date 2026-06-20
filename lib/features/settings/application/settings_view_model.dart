@@ -14,11 +14,17 @@ class SettingsViewData {
     required this.isPremium,
     required this.homeId,
     required this.uid,
+    this.ownerUid = '',
     this.appVersion,
   });
   final bool isPremium;
   final String homeId;
   final String uid;
+
+  /// uid del propietario del hogar actual (fuente de verdad del owner). Se usa
+  /// para clasificar el flujo de "Abandonar hogar" sin depender de la caché
+  /// stale de la lista de miembros.
+  final String ownerUid;
   final String? appVersion;
 }
 
@@ -53,14 +59,15 @@ SettingsViewModel settingsViewModel(SettingsViewModelRef ref) {
   final subState = ref.watch(subscriptionStateProvider);
   final auth = ref.watch(authProvider);
   final uid = auth.whenOrNull(authenticated: (u) => u.uid) ?? '';
-  final homeId = ref.watch(currentHomeProvider).valueOrNull?.id ?? '';
+  final home = ref.watch(currentHomeProvider).valueOrNull;
   final versionAsync = ref.watch(appVersionProvider);
 
   return _SettingsViewModelImpl(
     viewData: SettingsViewData(
       isPremium: _computeIsPremium(subState),
-      homeId: homeId,
+      homeId: home?.id ?? '',
       uid: uid,
+      ownerUid: home?.ownerUid ?? '',
       appVersion: versionAsync.valueOrNull,
     ),
   );

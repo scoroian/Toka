@@ -856,7 +856,13 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String history_time_days_ago(int days) {
-    return 'hace $days días';
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days días',
+      one: '$days día',
+    );
+    return 'hace $_temp0';
   }
 
   @override
@@ -931,7 +937,13 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String rescue_banner_text(int days) {
-    return 'Premium expira en $days días';
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days días',
+      one: '$days día',
+    );
+    return 'Premium expira en $_temp0';
   }
 
   @override
@@ -939,7 +951,13 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String rescue_banner_title(int days) {
-    return 'Tu Premium vence en $days días — renueva para no perder features';
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days días',
+      one: '$days día',
+    );
+    return 'Tu Premium vence en $_temp0 — renueva para no perder features';
   }
 
   @override
@@ -1254,6 +1272,13 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get settings_change_password => 'Cambiar contraseña';
+
+  @override
+  String get settings_change_password_confirm_title => '¿Cambiar contraseña?';
+
+  @override
+  String get settings_change_password_confirm_body =>
+      'Te enviaremos un enlace a tu correo electrónico para restablecer tu contraseña.';
 
   @override
   String get settings_delete_account => 'Eliminar cuenta';
@@ -1601,7 +1626,12 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String history_rate_score_label(String score) {
-    return 'Puntuación: $score';
+    return 'Puntuación: $score / 10';
+  }
+
+  @override
+  String review_score_value(String score) {
+    return '$score / 10';
   }
 
   @override

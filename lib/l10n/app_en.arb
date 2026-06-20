@@ -582,7 +582,7 @@
     "description": "Relative time: N hours ago",
     "placeholders": { "hours": { "type": "int" } }
   },
-  "history_time_days_ago": "{days} days ago",
+  "history_time_days_ago": "{days, plural, one{{days} day ago} other{{days} days ago}}",
   "@history_time_days_ago": {
     "description": "Relative time: N days ago",
     "placeholders": { "days": { "type": "int" } }
@@ -633,14 +633,14 @@
   "@paywall_feature_history": { "description": "Premium feature: 90-day history" },
   "paywall_feature_no_ads": "No ads",
   "@paywall_feature_no_ads": { "description": "Premium feature: no ads" },
-  "rescue_banner_text": "Premium expires in {days} days",
+  "rescue_banner_text": "Premium expires in {days, plural, one{{days} day} other{{days} days}}",
   "@rescue_banner_text": {
     "description": "Rescue banner text with days remaining",
     "placeholders": { "days": { "type": "int" } }
   },
   "rescue_banner_renew": "Renew",
   "@rescue_banner_renew": { "description": "Rescue banner renew button" },
-  "rescue_banner_title": "Your Premium expires in {days} days — renew to keep your features",
+  "rescue_banner_title": "Your Premium expires in {days, plural, one{{days} day} other{{days} days}} — renew to keep your features",
   "@rescue_banner_title": {
     "description": "Rescue banner title when >=1 day left",
     "placeholders": { "days": { "type": "int" } }
@@ -880,6 +880,10 @@
   "@settings_edit_profile": { "description": "Edit profile option" },
   "settings_change_password": "Change password",
   "@settings_change_password": { "description": "Change password option" },
+  "settings_change_password_confirm_title": "Change password?",
+  "@settings_change_password_confirm_title": { "description": "Change password confirm dialog title" },
+  "settings_change_password_confirm_body": "We'll send a link to your email to reset your password.",
+  "@settings_change_password_confirm_body": { "description": "Change password confirm dialog body" },
   "settings_delete_account": "Delete account",
   "@settings_delete_account": { "description": "Delete account option" },
   "settings_section_language": "Language",
@@ -1027,8 +1031,13 @@
   "tasks_bulk_delete_confirm_body": "This action cannot be undone.",
   "history_rate_button": "Rate",
   "history_rate_sheet_title": "Rate task",
-  "history_rate_score_label": "Score: {score}",
+  "history_rate_score_label": "Score: {score} / 10",
   "@history_rate_score_label": {
+    "placeholders": { "score": { "type": "String" } }
+  },
+  "review_score_value": "{score} / 10",
+  "@review_score_value": {
+    "description": "Score shown next to the star rating, with the 1-10 scale",
     "placeholders": { "score": { "type": "String" } }
   },
   "history_rate_note_hint": "Private note (optional)",

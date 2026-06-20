@@ -133,6 +133,9 @@ void main() {
       expect(find.byKey(const Key('private_note_container')), findsNothing);
       expect(find.text(_privateNote), findsNothing);
       expect(find.byKey(const Key('review_stars')), findsOneWidget);
+      // El número de puntuación muestra la escala (/10) para que "9.0" no
+      // parezca máximo de 5 junto a las 4,5 estrellas (⚠️-3).
+      expect(find.text('9.0 / 10'), findsOneWidget);
     });
 
     testWidgets('evento sin reviews muestra mensaje vacío', (tester) async {

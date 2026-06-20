@@ -1627,7 +1627,7 @@ abstract class AppLocalizations {
   /// Relative time: N days ago
   ///
   /// In es, this message translates to:
-  /// **'hace {days} días'**
+  /// **'hace {days, plural, one{{days} día} other{{days} días}}'**
   String history_time_days_ago(int days);
 
   /// Load more button
@@ -1771,7 +1771,7 @@ abstract class AppLocalizations {
   /// Rescue banner text with days remaining
   ///
   /// In es, this message translates to:
-  /// **'Premium expira en {days} días'**
+  /// **'Premium expira en {days, plural, one{{days} día} other{{days} días}}'**
   String rescue_banner_text(int days);
 
   /// Rescue banner renew button
@@ -1783,7 +1783,7 @@ abstract class AppLocalizations {
   /// Rescue banner title when >=1 day left
   ///
   /// In es, this message translates to:
-  /// **'Tu Premium vence en {days} días — renueva para no perder features'**
+  /// **'Tu Premium vence en {days, plural, one{{days} día} other{{days} días}} — renueva para no perder features'**
   String rescue_banner_title(int days);
 
   /// Rescue banner title when <1 day left
@@ -2319,6 +2319,18 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Cambiar contraseña'**
   String get settings_change_password;
+
+  /// Change password confirm dialog title
+  ///
+  /// In es, this message translates to:
+  /// **'¿Cambiar contraseña?'**
+  String get settings_change_password_confirm_title;
+
+  /// Change password confirm dialog body
+  ///
+  /// In es, this message translates to:
+  /// **'Te enviaremos un enlace a tu correo electrónico para restablecer tu contraseña.'**
+  String get settings_change_password_confirm_body;
 
   /// Delete account option
   ///
@@ -2995,8 +3007,14 @@ abstract class AppLocalizations {
   /// No description provided for @history_rate_score_label.
   ///
   /// In es, this message translates to:
-  /// **'Puntuación: {score}'**
+  /// **'Puntuación: {score} / 10'**
   String history_rate_score_label(String score);
+
+  /// Score shown next to the star rating, with the 1-10 scale
+  ///
+  /// In es, this message translates to:
+  /// **'{score} / 10'**
+  String review_score_value(String score);
 
   /// No description provided for @history_rate_note_hint.
   ///

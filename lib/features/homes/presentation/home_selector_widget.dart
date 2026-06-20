@@ -1,3 +1,4 @@
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -5,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../../../core/constants/routes.dart';
+import '../../../core/errors/exceptions.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/bottom_sheet_padding.dart';
 import '../../auth/application/auth_provider.dart';
@@ -53,6 +55,14 @@ class HomeSelectorWidget extends ConsumerWidget {
     final currentHome = currentHomeAsync.valueOrNull;
     final currentHomeId = currentHome?.id ?? '';
 
+    // El título del selector distingue tres estados para no mostrar
+    // "Cargando…" de forma persistente: con hogar → su nombre; sin hogar
+    // pero aún resolviendo → "Cargando…"; sin hogar ya resuelto (pantalla
+    // "Sin hogar") → el nombre de la app.
+    final titleText = currentHome != null
+        ? currentHome.name
+        : (currentHomeAsync.isLoading ? l10n.loading : l10n.appName);
+
     final membershipsAsync =
         uid != null ? ref.watch(userMembershipsProvider(uid)) : null;
     final memberships = membershipsAsync?.valueOrNull ?? [];
@@ -91,7 +101,7 @@ class HomeSelectorWidget extends ConsumerWidget {
           ],
           Flexible(
             child: Text(
-              currentHome?.name ?? l10n.loading,
+              titleText,
               overflow: TextOverflow.ellipsis,
               style: Theme.of(context).appBarTheme.titleTextStyle ??
                   Theme.of(context).textTheme.titleLarge,
@@ -499,22 +509,28 @@ class _AddHomeSheetState extends ConsumerState<_AddHomeSheet> {
       final repo = ref.read(homesRepositoryProvider);
       await repo.joinHome(code);
       if (mounted) Navigator.of(context).pop();
-    } on Exception catch (e) {
+    } catch (e) {
       if (!mounted) return;
       final l10n = AppLocalizations.of(context);
       setState(() {
         _isLoading = false;
-        final msg = e.toString();
-        _error = msg.contains('invalid')
-            ? l10n.homes_error_invalid_code
-            : msg.contains('expired')
-                ? l10n.homes_error_expired_code
-                : (msg.contains('too-many') ||
-                        msg.contains('resource-exhausted'))
-                    ? l10n.error_too_many_attempts
-                    : l10n.error_generic;
+        _error = _joinErrorMessage(e, l10n);
       });
     }
+  }
+
+  /// Mapea la excepción del join a un mensaje concreto. Usa tipos de dominio
+  /// (no `toString().contains`, que fallaba con "InvalidInviteCodeException")
+  /// para que el usuario vea el motivo real (código inválido/caducado, hogar
+  /// lleno en plan Free, demasiados intentos) en vez del genérico.
+  String _joinErrorMessage(Object e, AppLocalizations l10n) {
+    if (e is InvalidInviteCodeException) return l10n.homes_error_invalid_code;
+    if (e is ExpiredInviteCodeException) return l10n.homes_error_expired_code;
+    if (e is MaxMembersReachedException) return l10n.free_limit_members_reached;
+    if (e is FirebaseFunctionsException && e.code == 'resource-exhausted') {
+      return l10n.error_too_many_attempts;
+    }
+    return l10n.error_generic;
   }
 
   @override

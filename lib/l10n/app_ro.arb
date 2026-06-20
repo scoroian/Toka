@@ -582,7 +582,7 @@
     "description": "Relative time: N hours ago",
     "placeholders": { "hours": { "type": "int" } }
   },
-  "history_time_days_ago": "acum {days} zile",
+  "history_time_days_ago": "acum {days, plural, one{{days} zi} few{{days} zile} other{{days} de zile}}",
   "@history_time_days_ago": {
     "description": "Relative time: N days ago",
     "placeholders": { "days": { "type": "int" } }
@@ -633,14 +633,14 @@
   "@paywall_feature_history": { "description": "Premium feature: 90-day history" },
   "paywall_feature_no_ads": "Fără reclame",
   "@paywall_feature_no_ads": { "description": "Premium feature: no ads" },
-  "rescue_banner_text": "Premium expiră în {days} zile",
+  "rescue_banner_text": "Premium expiră în {days, plural, one{{days} zi} few{{days} zile} other{{days} de zile}}",
   "@rescue_banner_text": {
     "description": "Rescue banner text with days remaining",
     "placeholders": { "days": { "type": "int" } }
   },
   "rescue_banner_renew": "Reînnoiește",
   "@rescue_banner_renew": { "description": "Rescue banner renew button" },
-  "rescue_banner_title": "Premium expiră în {days} zile — reînnoiește pentru a nu pierde funcțiile",
+  "rescue_banner_title": "Premium expiră în {days, plural, one{{days} zi} few{{days} zile} other{{days} de zile}} — reînnoiește pentru a nu pierde funcțiile",
   "@rescue_banner_title": {
     "description": "Rescue banner title when >=1 day left",
     "placeholders": { "days": { "type": "int" } }
@@ -880,6 +880,10 @@
   "@settings_edit_profile": { "description": "Edit profile option" },
   "settings_change_password": "Schimbă parola",
   "@settings_change_password": { "description": "Change password option" },
+  "settings_change_password_confirm_title": "Schimbi parola?",
+  "@settings_change_password_confirm_title": { "description": "Change password confirm dialog title" },
+  "settings_change_password_confirm_body": "Îți vom trimite un link pe email pentru a-ți reseta parola.",
+  "@settings_change_password_confirm_body": { "description": "Change password confirm dialog body" },
   "settings_delete_account": "Șterge contul",
   "@settings_delete_account": { "description": "Delete account option" },
   "settings_section_language": "Limbă",
@@ -1027,8 +1031,13 @@
   "tasks_bulk_delete_confirm_body": "Această acțiune nu poate fi anulată.",
   "history_rate_button": "Evaluează",
   "history_rate_sheet_title": "Evaluează sarcina",
-  "history_rate_score_label": "Scor: {score}",
+  "history_rate_score_label": "Scor: {score} / 10",
   "@history_rate_score_label": {
+    "placeholders": { "score": { "type": "String" } }
+  },
+  "review_score_value": "{score} / 10",
+  "@review_score_value": {
+    "description": "Score shown next to the star rating, with the 1-10 scale",
     "placeholders": { "score": { "type": "String" } }
   },
   "history_rate_note_hint": "Notă privată (opțional)",

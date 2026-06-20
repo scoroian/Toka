@@ -117,7 +117,15 @@ class RouterNotifier extends _$RouterNotifier implements Listenable {
 
     return authState.when(
       initial: () => location == AppRoutes.splash ? null : AppRoutes.splash,
-      loading: () => location == AppRoutes.splash ? null : AppRoutes.splash,
+      // loading aparece tanto en la carga inicial (mostrar splash) como DURANTE
+      // un intento de login/registro. Si estamos en una pantalla de auth hay que
+      // QUEDARSE (la pantalla muestra su propio spinner); redirigir a splash
+      // perdería la location /register y el siguiente estado `error` acabaría en
+      // /login. Solo la carga inicial (fuera de auth) va a splash.
+      loading: () {
+        if (authScreens.contains(location)) return null;
+        return location == AppRoutes.splash ? null : AppRoutes.splash;
+      },
       authenticated: (_) {
         if (authScreens.contains(location) || location == AppRoutes.splash) {
           final homeAsync = ref.read(currentHomeProvider);
@@ -151,7 +159,13 @@ class RouterNotifier extends _$RouterNotifier implements Listenable {
         return AppRoutes.login;
       },
       error: (_) {
-        if (location == AppRoutes.login) return null;
+        // Un AuthState.error suele venir de un intento fallido de login/registro
+        // (credenciales inválidas, email ya en uso, etc.). En ese caso hay que
+        // QUEDARSE en la pantalla de auth actual para que su view-model muestre
+        // el error inline; redirigir a /login expulsaría de /register y se
+        // perdería el formulario y el mensaje. Solo redirigimos a login si el
+        // error ocurre fuera de una pantalla de auth.
+        if (authScreens.contains(location)) return null;
         return AppRoutes.login;
       },
     );

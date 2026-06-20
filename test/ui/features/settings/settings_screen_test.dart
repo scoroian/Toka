@@ -87,12 +87,16 @@ Widget _wrapWithHome({
   required String uid,
   required _MockMembersRepository membersRepo,
   _MockHomesRepository? homesRepo,
+  // Por defecto el usuario es el owner (ownerUid == uid). El Caso A (no-owner)
+  // lo sobreescribe con el uid del propietario real.
+  String? ownerUid,
 }) {
   final vm = _FakeSettingsViewModel(
     viewData: SettingsViewData(
       isPremium: false,
       homeId: homeId,
       uid: uid,
+      ownerUid: ownerUid ?? uid,
     ),
   );
   return ProviderScope(
@@ -198,6 +202,7 @@ void main() {
     await tester.pumpWidget(_wrapWithHome(
       homeId: 'home1',
       uid: 'user1',
+      ownerUid: 'owner1',
       membersRepo: membersRepo,
     ));
     await tester.pumpAndSettle();
@@ -329,5 +334,45 @@ void main() {
     expect(find.byKey(const Key('frozen_delete_btn')), findsOneWidget);
     expect(find.byKey(const Key('frozen_transfer_btn')), findsOneWidget);
     expect(find.text('Bob'), findsOneWidget);
+  });
+
+  // Regresión 🟠-2 (QA 2026-06-19): un ex-owner re-unido como admin puede
+  // tener la caché local de miembros diciendo aún que es owner. El flujo de
+  // "Abandonar hogar" debe clasificarse por home.ownerUid (vía el view model),
+  // NO por la lista de miembros, así que NO debe ofrecer "Transferir
+  // propiedad" cuando ya no es el propietario real.
+  testWidgets(
+      'Regresión: members stale lo marca owner pero ownerUid != uid → flujo no-owner',
+      (tester) async {
+    final membersRepo = _MockMembersRepository();
+    when(() => membersRepo.watchHomeMembers('home1')).thenAnswer(
+      (_) => Stream.value([
+        // Caché stale: el usuario aún aparece como owner…
+        _makeMember(uid: 'user1', role: MemberRole.owner),
+        _makeMember(uid: 'realowner', nickname: 'Real', role: MemberRole.member),
+      ]),
+    );
+
+    await tester.pumpWidget(_wrapWithHome(
+      homeId: 'home1',
+      uid: 'user1',
+      ownerUid: 'realowner', // …pero el propietario real es otro
+      membersRepo: membersRepo,
+    ));
+    await tester.pumpAndSettle();
+
+    final leaveTile = find.text('Abandonar hogar');
+    await tester.scrollUntilVisible(
+      leaveTile,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.ensureVisible(leaveTile);
+    await tester.pumpAndSettle();
+    await tester.tap(leaveTile);
+    await tester.pumpAndSettle();
+
+    expect(find.text('¿Abandonar hogar?'), findsOneWidget);
+    expect(find.text('Transferir propiedad del hogar'), findsNothing);
   });
 }

@@ -582,7 +582,7 @@
     "description": "Relative time: N hours ago",
     "placeholders": { "hours": { "type": "int" } }
   },
-  "history_time_days_ago": "hace {days} días",
+  "history_time_days_ago": "hace {days, plural, one{{days} día} other{{days} días}}",
   "@history_time_days_ago": {
     "description": "Relative time: N days ago",
     "placeholders": { "days": { "type": "int" } }
@@ -633,14 +633,14 @@
   "@paywall_feature_history": { "description": "Premium feature: 90-day history" },
   "paywall_feature_no_ads": "Sin publicidad",
   "@paywall_feature_no_ads": { "description": "Premium feature: no ads" },
-  "rescue_banner_text": "Premium expira en {days} días",
+  "rescue_banner_text": "Premium expira en {days, plural, one{{days} día} other{{days} días}}",
   "@rescue_banner_text": {
     "description": "Rescue banner text with days remaining",
     "placeholders": { "days": { "type": "int" } }
   },
   "rescue_banner_renew": "Renovar",
   "@rescue_banner_renew": { "description": "Rescue banner renew button" },
-  "rescue_banner_title": "Tu Premium vence en {days} días — renueva para no perder features",
+  "rescue_banner_title": "Tu Premium vence en {days, plural, one{{days} día} other{{days} días}} — renueva para no perder features",
   "@rescue_banner_title": {
     "description": "Rescue banner title when >=1 day left",
     "placeholders": { "days": { "type": "int" } }
@@ -880,6 +880,10 @@
   "@settings_edit_profile": { "description": "Edit profile option" },
   "settings_change_password": "Cambiar contraseña",
   "@settings_change_password": { "description": "Change password option" },
+  "settings_change_password_confirm_title": "¿Cambiar contraseña?",
+  "@settings_change_password_confirm_title": { "description": "Change password confirm dialog title" },
+  "settings_change_password_confirm_body": "Te enviaremos un enlace a tu correo electrónico para restablecer tu contraseña.",
+  "@settings_change_password_confirm_body": { "description": "Change password confirm dialog body" },
   "settings_delete_account": "Eliminar cuenta",
   "@settings_delete_account": { "description": "Delete account option" },
   "settings_section_language": "Idioma",
@@ -1027,8 +1031,13 @@
   "tasks_bulk_delete_confirm_body": "Esta acción no se puede deshacer.",
   "history_rate_button": "Valorar",
   "history_rate_sheet_title": "Valorar tarea",
-  "history_rate_score_label": "Puntuación: {score}",
+  "history_rate_score_label": "Puntuación: {score} / 10",
   "@history_rate_score_label": {
+    "placeholders": { "score": { "type": "String" } }
+  },
+  "review_score_value": "{score} / 10",
+  "@review_score_value": {
+    "description": "Score shown next to the star rating, with the 1-10 scale",
     "placeholders": { "score": { "type": "String" } }
   },
   "history_rate_note_hint": "Nota privada (opcional)",

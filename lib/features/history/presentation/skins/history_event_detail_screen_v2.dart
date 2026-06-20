@@ -260,7 +260,9 @@ class _ScoreStars extends StatelessWidget {
         for (var i = 0; i < empty; i++)
           const Icon(Icons.star_border, color: Colors.amber, size: 20),
         const SizedBox(width: 6),
-        Text(score.toStringAsFixed(1),
+        Text(
+            AppLocalizations.of(context)
+                .review_score_value(score.toStringAsFixed(1)),
             style: const TextStyle(fontWeight: FontWeight.w600)),
       ],
     );

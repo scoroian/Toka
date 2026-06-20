@@ -60,7 +60,10 @@ class _MemberProfileScreenV2State extends ConsumerState<MemberProfileScreenV2> {
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(l10n.member_profile_remove_member),
+            // Botón corto (la acción la describe el título) para que quepa en
+            // una fila con "Cancelar" y no fuerce el apilado vertical de
+            // Material cuando el texto es largo.
+            child: Text(l10n.confirm),
           ),
         ],
       ),
@@ -116,7 +119,9 @@ class _MemberProfileScreenV2State extends ConsumerState<MemberProfileScreenV2> {
               child: Text(l10n.cancel)),
           FilledButton(
               onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: Text(action)),
+              // Botón corto: el título del diálogo ya indica la acción
+              // (hacer/quitar admin). Evita el overflow apilado de Material.
+              child: Text(l10n.confirm)),
         ],
       ),
     );

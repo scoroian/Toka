@@ -3,6 +3,7 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:toka/core/errors/exceptions.dart';
 import 'package:toka/features/homes/data/homes_repository_impl.dart';
 import 'package:toka/features/homes/domain/homes_repository.dart';
 
@@ -79,6 +80,49 @@ void main() {
       await expectLater(
         () => repo.createHome('Casa'),
         throwsA(isA<NoAvailableSlotsException>()),
+      );
+    });
+  });
+
+  group('joinHome integration (mapeo de errores)', () {
+    test('not-found → InvalidInviteCodeException', () async {
+      when(() => mockCallable.call<void>(any())).thenThrow(
+        FirebaseFunctionsException(message: 'invalid', code: 'not-found'),
+      );
+      final repo = HomesRepositoryImpl(
+          firestore: fakeFirestore, functions: mockFunctions);
+      await expectLater(
+        () => repo.joinHome('ABC123'),
+        throwsA(isA<InvalidInviteCodeException>()),
+      );
+    });
+
+    test('deadline-exceeded → ExpiredInviteCodeException', () async {
+      when(() => mockCallable.call<void>(any())).thenThrow(
+        FirebaseFunctionsException(message: 'expired', code: 'deadline-exceeded'),
+      );
+      final repo = HomesRepositoryImpl(
+          firestore: fakeFirestore, functions: mockFunctions);
+      await expectLater(
+        () => repo.joinHome('ABC123'),
+        throwsA(isA<ExpiredInviteCodeException>()),
+      );
+    });
+
+    test('failed-precondition (límite Free) → MaxMembersReachedException',
+        () async {
+      // Regresión ⚠️-b (QA 2026-06-19): el backend devuelve failed-precondition
+      // cuando el hogar Free ya tiene el máximo de miembros; antes caía en el
+      // genérico "Algo salió mal".
+      when(() => mockCallable.call<void>(any())).thenThrow(
+        FirebaseFunctionsException(
+            message: 'free_limit_members', code: 'failed-precondition'),
+      );
+      final repo = HomesRepositoryImpl(
+          firestore: fakeFirestore, functions: mockFunctions);
+      await expectLater(
+        () => repo.joinHome('ABC123'),
+        throwsA(isA<MaxMembersReachedException>()),
       );
     });
   });

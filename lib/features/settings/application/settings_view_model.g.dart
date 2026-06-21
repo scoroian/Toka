@@ -22,7 +22,7 @@ final appVersionProvider = AutoDisposeFutureProvider<String>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef AppVersionRef = AutoDisposeFutureProviderRef<String>;
-String _$settingsViewModelHash() => r'9b8c675e336d9eb026cc47fb4c04381b4211e1a6';
+String _$settingsViewModelHash() => r'6262d65b6fb908b66a4b9f2e8eca622e4f158f75';
 
 /// See also [settingsViewModel].
 @ProviderFor(settingsViewModel)

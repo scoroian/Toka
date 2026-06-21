@@ -22,7 +22,7 @@ final appRouterProvider = Provider<GoRouter>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef AppRouterRef = ProviderRef<GoRouter>;
-String _$routerNotifierHash() => r'fa485e1761ae04e5ae052eb0c964cff486ceffd3';
+String _$routerNotifierHash() => r'79f333151897c561bd34cccc960cd2f99dcbd5ee';
 
 /// See also [RouterNotifier].
 @ProviderFor(RouterNotifier)

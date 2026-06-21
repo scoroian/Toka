@@ -1,0 +1,27 @@
+# Normaliza todos los ficheros de texto a LF (almacenamiento y checkout),
+# para que Windows/WSL/OneDrive/CI dejen de generar ruido CRLF<->LF.
+* text=auto eol=lf
+
+# Scripts de Windows que SÍ requieren CRLF
+*.bat  text eol=crlf
+*.cmd  text eol=crlf
+*.ps1  text eol=crlf
+
+# Binarios: git no debe tocarlos
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.webp  binary
+*.gif   binary
+*.ico   binary
+*.ttf   binary
+*.otf   binary
+*.woff  binary
+*.woff2 binary
+*.jar   binary
+*.keystore binary
+*.jks   binary
+*.so    binary
+*.apk   binary
+*.aab   binary
+*.zip   binary

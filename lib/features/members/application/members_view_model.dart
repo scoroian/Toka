@@ -76,17 +76,27 @@ MembersViewModel membersViewModel(MembersViewModelRef ref) {
     final frozenMembers =
         allMembers.where((m) => m.status == MemberStatus.frozen).toList();
     // Antiguos miembros (status='left') para reincorporación — provider aparte
-    // (la lista principal los excluye a propósito).
+    // (la lista principal los excluye a propósito). Excluimos las cuentas
+    // ELIMINADAS (accountDeleted): el usuario Auth ya no existe, no se pueden
+    // reincorporar y mostraban su uid crudo + un botón "Reincorporar" inválido.
     final leftMembers =
-        ref.watch(leftMembersProvider(home.id)).valueOrNull ?? const [];
+        (ref.watch(leftMembersProvider(home.id)).valueOrNull ?? const [])
+            .where((m) => !m.accountDeleted)
+            .toList();
 
-    // Free plan gating: obtenemos premium/counters del dashboard. Fallback
-    // conservador: asumimos Premium hasta que llegue el dashboard (el backend
-    // siempre es el backstop).
+    // Free plan gating: el flag premium se lee del dashboard (fallback
+    // conservador: asumimos Premium hasta que llegue el dashboard; el backend
+    // siempre es el backstop real de la validación).
     final dashboard = ref.watch(dashboardProvider).valueOrNull;
     final isPremium = dashboard?.premiumFlags.isPremium ?? true;
-    final activeMembersCount =
-        dashboard?.planCounters.activeMembers ?? activeMembers.length;
+    // El conteo de miembros activos se toma del stream EN VIVO de miembros
+    // (homeMembersProvider excluye status='left'), NO de
+    // dashboard.planCounters.activeMembers: ese contador agregado se regenera de
+    // forma perezosa en backend y queda stale tras expulsar/abandonar, lo que
+    // bloqueaba indebidamente invitar a un reemplazo en hogares Free (mostraba
+    // "3/3 lleno" con solo 2 activos). El conteo en vivo siempre es coherente
+    // con la propia lista de miembros que ve el usuario.
+    final activeMembersCount = activeMembers.length;
     const maxMembersFree = FreeLimits.maxActiveMembers;
     final freeLimitReached =
         !isPremium && activeMembersCount >= maxMembersFree;

@@ -503,6 +503,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recurrenceYearly => 'Year';
 
   @override
+  String get recurrenceOneTime => 'One-off';
+
+  @override
   String get today_screen_title => 'Today';
 
   @override
@@ -1103,7 +1106,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String subscription_rescue_warning(int days) {
-    return 'Your Premium expires in $days days — renew to keep your features';
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days',
+      one: '$days day',
+    );
+    return 'Your Premium expires in $_temp0 — renew to keep your features';
   }
 
   @override
@@ -1180,6 +1189,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get vacation_toggle_label => 'I\'m on vacation / absent';
+
+  @override
+  String get members_on_vacation => 'On vacation';
 
   @override
   String get vacation_start_date => 'Start date (optional)';

@@ -21,6 +21,13 @@ class Member with _$Member {
     required double complianceRate,
     required int currentStreak,
     required double averageScore,
+    /// True si la cuenta del usuario fue eliminada (member doc con
+    /// accountDeleted=true). Se usa para NO ofrecer reincorporar una cuenta
+    /// inexistente ni mostrar su uid crudo en "Antiguos miembros".
+    @Default(false) bool accountDeleted,
+    /// True si el miembro se marcó de vacaciones/ausente (vacation.isActive).
+    /// Alimenta el indicador en la lista de miembros.
+    @Default(false) bool vacationActive,
   }) = _Member;
 }
 

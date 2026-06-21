@@ -319,6 +319,8 @@
   "@recurrenceMonthly": { "description": "Recurrence type: monthly" },
   "recurrenceYearly": "Year",
   "@recurrenceYearly": { "description": "Recurrence type: yearly" },
+  "recurrenceOneTime": "One-off",
+  "@recurrenceOneTime": { "description": "Recurrence type: one-time / puntual" },
   "today_screen_title": "Today",
   "@today_screen_title": { "description": "Title of the Today screen" },
   "today_tasks_due": "{count} tasks due today",
@@ -775,7 +777,7 @@
     "description": "Restorable premium with days left",
     "placeholders": { "date": { "type": "String" }, "days": { "type": "int" } }
   },
-  "subscription_rescue_warning": "Your Premium expires in {days} days — renew to keep your features",
+  "subscription_rescue_warning": "Your Premium expires in {days, plural, one{{days} day} other{{days} days}} — renew to keep your features",
   "@subscription_rescue_warning": {
     "description": "Rescue warning message",
     "placeholders": { "days": { "type": "int" } }
@@ -829,6 +831,8 @@
   "@vacation_title": { "description": "Vacation screen title" },
   "vacation_toggle_label": "I'm on vacation / absent",
   "@vacation_toggle_label": { "description": "Vacation toggle label" },
+  "members_on_vacation": "On vacation",
+  "@members_on_vacation": { "description": "Badge next to a member who is on vacation" },
   "vacation_start_date": "Start date (optional)",
   "@vacation_start_date": { "description": "Vacation start date label" },
   "vacation_end_date": "End date (optional)",

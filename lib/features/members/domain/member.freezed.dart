@@ -32,6 +32,15 @@ mixin _$Member {
   int get currentStreak => throw _privateConstructorUsedError;
   double get averageScore => throw _privateConstructorUsedError;
 
+  /// True si la cuenta del usuario fue eliminada (member doc con
+  /// accountDeleted=true). Se usa para NO ofrecer reincorporar una cuenta
+  /// inexistente ni mostrar su uid crudo en "Antiguos miembros".
+  bool get accountDeleted => throw _privateConstructorUsedError;
+
+  /// True si el miembro se marcó de vacaciones/ausente (vacation.isActive).
+  /// Alimenta el indicador en la lista de miembros.
+  bool get vacationActive => throw _privateConstructorUsedError;
+
   /// Create a copy of Member
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -58,7 +67,9 @@ abstract class $MemberCopyWith<$Res> {
       int passedCount,
       double complianceRate,
       int currentStreak,
-      double averageScore});
+      double averageScore,
+      bool accountDeleted,
+      bool vacationActive});
 }
 
 /// @nodoc
@@ -91,6 +102,8 @@ class _$MemberCopyWithImpl<$Res, $Val extends Member>
     Object? complianceRate = null,
     Object? currentStreak = null,
     Object? averageScore = null,
+    Object? accountDeleted = null,
+    Object? vacationActive = null,
   }) {
     return _then(_value.copyWith(
       uid: null == uid
@@ -153,6 +166,14 @@ class _$MemberCopyWithImpl<$Res, $Val extends Member>
           ? _value.averageScore
           : averageScore // ignore: cast_nullable_to_non_nullable
               as double,
+      accountDeleted: null == accountDeleted
+          ? _value.accountDeleted
+          : accountDeleted // ignore: cast_nullable_to_non_nullable
+              as bool,
+      vacationActive: null == vacationActive
+          ? _value.vacationActive
+          : vacationActive // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 }
@@ -179,7 +200,9 @@ abstract class _$$MemberImplCopyWith<$Res> implements $MemberCopyWith<$Res> {
       int passedCount,
       double complianceRate,
       int currentStreak,
-      double averageScore});
+      double averageScore,
+      bool accountDeleted,
+      bool vacationActive});
 }
 
 /// @nodoc
@@ -210,6 +233,8 @@ class __$$MemberImplCopyWithImpl<$Res>
     Object? complianceRate = null,
     Object? currentStreak = null,
     Object? averageScore = null,
+    Object? accountDeleted = null,
+    Object? vacationActive = null,
   }) {
     return _then(_$MemberImpl(
       uid: null == uid
@@ -272,6 +297,14 @@ class __$$MemberImplCopyWithImpl<$Res>
           ? _value.averageScore
           : averageScore // ignore: cast_nullable_to_non_nullable
               as double,
+      accountDeleted: null == accountDeleted
+          ? _value.accountDeleted
+          : accountDeleted // ignore: cast_nullable_to_non_nullable
+              as bool,
+      vacationActive: null == vacationActive
+          ? _value.vacationActive
+          : vacationActive // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -294,7 +327,9 @@ class _$MemberImpl implements _Member {
       required this.passedCount,
       required this.complianceRate,
       required this.currentStreak,
-      required this.averageScore});
+      required this.averageScore,
+      this.accountDeleted = false,
+      this.vacationActive = false});
 
   @override
   final String uid;
@@ -327,9 +362,22 @@ class _$MemberImpl implements _Member {
   @override
   final double averageScore;
 
+  /// True si la cuenta del usuario fue eliminada (member doc con
+  /// accountDeleted=true). Se usa para NO ofrecer reincorporar una cuenta
+  /// inexistente ni mostrar su uid crudo en "Antiguos miembros".
+  @override
+  @JsonKey()
+  final bool accountDeleted;
+
+  /// True si el miembro se marcó de vacaciones/ausente (vacation.isActive).
+  /// Alimenta el indicador en la lista de miembros.
+  @override
+  @JsonKey()
+  final bool vacationActive;
+
   @override
   String toString() {
-    return 'Member(uid: $uid, homeId: $homeId, nickname: $nickname, photoUrl: $photoUrl, bio: $bio, phone: $phone, phoneVisibility: $phoneVisibility, role: $role, status: $status, joinedAt: $joinedAt, tasksCompleted: $tasksCompleted, passedCount: $passedCount, complianceRate: $complianceRate, currentStreak: $currentStreak, averageScore: $averageScore)';
+    return 'Member(uid: $uid, homeId: $homeId, nickname: $nickname, photoUrl: $photoUrl, bio: $bio, phone: $phone, phoneVisibility: $phoneVisibility, role: $role, status: $status, joinedAt: $joinedAt, tasksCompleted: $tasksCompleted, passedCount: $passedCount, complianceRate: $complianceRate, currentStreak: $currentStreak, averageScore: $averageScore, accountDeleted: $accountDeleted, vacationActive: $vacationActive)';
   }
 
   @override
@@ -360,7 +408,11 @@ class _$MemberImpl implements _Member {
             (identical(other.currentStreak, currentStreak) ||
                 other.currentStreak == currentStreak) &&
             (identical(other.averageScore, averageScore) ||
-                other.averageScore == averageScore));
+                other.averageScore == averageScore) &&
+            (identical(other.accountDeleted, accountDeleted) ||
+                other.accountDeleted == accountDeleted) &&
+            (identical(other.vacationActive, vacationActive) ||
+                other.vacationActive == vacationActive));
   }
 
   @override
@@ -380,7 +432,9 @@ class _$MemberImpl implements _Member {
       passedCount,
       complianceRate,
       currentStreak,
-      averageScore);
+      averageScore,
+      accountDeleted,
+      vacationActive);
 
   /// Create a copy of Member
   /// with the given fields replaced by the non-null parameter values.
@@ -407,7 +461,9 @@ abstract class _Member implements Member {
       required final int passedCount,
       required final double complianceRate,
       required final int currentStreak,
-      required final double averageScore}) = _$MemberImpl;
+      required final double averageScore,
+      final bool accountDeleted,
+      final bool vacationActive}) = _$MemberImpl;
 
   @override
   String get uid;
@@ -439,6 +495,17 @@ abstract class _Member implements Member {
   int get currentStreak;
   @override
   double get averageScore;
+
+  /// True si la cuenta del usuario fue eliminada (member doc con
+  /// accountDeleted=true). Se usa para NO ofrecer reincorporar una cuenta
+  /// inexistente ni mostrar su uid crudo en "Antiguos miembros".
+  @override
+  bool get accountDeleted;
+
+  /// True si el miembro se marcó de vacaciones/ausente (vacation.isActive).
+  /// Alimenta el indicador en la lista de miembros.
+  @override
+  bool get vacationActive;
 
   /// Create a copy of Member
   /// with the given fields replaced by the non-null parameter values.

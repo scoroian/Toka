@@ -319,6 +319,8 @@
   "@recurrenceMonthly": { "description": "Recurrence type: monthly" },
   "recurrenceYearly": "Año",
   "@recurrenceYearly": { "description": "Recurrence type: yearly" },
+  "recurrenceOneTime": "Puntual",
+  "@recurrenceOneTime": { "description": "Recurrence type: one-time / puntual" },
   "today_screen_title": "Hoy",
   "@today_screen_title": { "description": "Title of the Today screen" },
   "today_tasks_due": "{count} tareas para hoy",
@@ -775,7 +777,7 @@
     "description": "Restorable premium with days left",
     "placeholders": { "date": { "type": "String" }, "days": { "type": "int" } }
   },
-  "subscription_rescue_warning": "Tu Premium vence en {days} días — renueva para no perder capacidades",
+  "subscription_rescue_warning": "Tu Premium vence en {days, plural, one{{days} día} other{{days} días}} — renueva para no perder capacidades",
   "@subscription_rescue_warning": {
     "description": "Rescue warning message",
     "placeholders": { "days": { "type": "int" } }
@@ -829,6 +831,8 @@
   "@vacation_title": { "description": "Vacation screen title" },
   "vacation_toggle_label": "Estoy de vacaciones / ausente",
   "@vacation_toggle_label": { "description": "Vacation toggle label" },
+  "members_on_vacation": "De vacaciones",
+  "@members_on_vacation": { "description": "Badge next to a member who is on vacation" },
   "vacation_start_date": "Fecha de inicio (opcional)",
   "@vacation_start_date": { "description": "Vacation start date label" },
   "vacation_end_date": "Fecha de fin (opcional)",

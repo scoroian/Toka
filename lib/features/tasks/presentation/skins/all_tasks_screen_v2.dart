@@ -15,6 +15,7 @@ import '../../../homes/application/dashboard_provider.dart';
 import '../../application/all_tasks_view_model.dart';
 import '../../domain/task.dart';
 import '../../domain/task_status.dart';
+import '../utils/task_visual_utils.dart';
 import '../widgets/task_card.dart';
 import '../widgets/unfreeze_blocked_dialog.dart';
 
@@ -147,10 +148,9 @@ class _AllTasksScreenV2State extends ConsumerState<AllTasksScreenV2>
                                 style: GoogleFonts.plusJakartaSans(
                                     fontWeight: FontWeight.w700),
                               ),
-                              secondary: task.visualKind == 'emoji'
-                                  ? Text(task.visualValue,
-                                      style: const TextStyle(fontSize: 24))
-                                  : const Icon(Icons.task_alt),
+                              secondary: taskVisualWidget(
+                                  task.visualKind, task.visualValue,
+                                  size: 24),
                               controlAffinity:
                                   ListTileControlAffinity.leading,
                             );

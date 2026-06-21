@@ -52,6 +52,23 @@ class MemberCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(l10n.members_compliance(compliancePercent)),
+          if (member.vacationActive)
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.beach_access,
+                    size: 14, color: Colors.orange.shade700),
+                const SizedBox(width: 4),
+                Text(
+                  l10n.members_on_vacation,
+                  style: TextStyle(
+                    color: Colors.orange.shade700,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
           if (pendingTasksCount > 0)
             Text(
               l10n.members_pending_tasks(pendingTasksCount),

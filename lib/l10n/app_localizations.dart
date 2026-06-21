@@ -1030,6 +1030,12 @@ abstract class AppLocalizations {
   /// **'Año'**
   String get recurrenceYearly;
 
+  /// Recurrence type: one-time / puntual
+  ///
+  /// In es, this message translates to:
+  /// **'Puntual'**
+  String get recurrenceOneTime;
+
   /// Title of the Today screen
   ///
   /// In es, this message translates to:
@@ -2017,7 +2023,7 @@ abstract class AppLocalizations {
   /// Rescue warning message
   ///
   /// In es, this message translates to:
-  /// **'Tu Premium vence en {days} días — renueva para no perder capacidades'**
+  /// **'Tu Premium vence en {days, plural, one{{days} día} other{{days} días}} — renueva para no perder capacidades'**
   String subscription_rescue_warning(int days);
 
   /// Manage billing button
@@ -2157,6 +2163,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Estoy de vacaciones / ausente'**
   String get vacation_toggle_label;
+
+  /// Badge next to a member who is on vacation
+  ///
+  /// In es, this message translates to:
+  /// **'De vacaciones'**
+  String get members_on_vacation;
 
   /// Vacation start date label
   ///

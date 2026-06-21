@@ -26,16 +26,37 @@ class HomeSettingsScreenV2 extends ConsumerStatefulWidget {
 
 class _HomeSettingsScreenV2State extends ConsumerState<HomeSettingsScreenV2> {
   late TextEditingController _nameController;
+  late FocusNode _nameFocus;
   bool _nameInitialized = false;
+  String _savedName = '';
+  HomeSettingsViewModel? _vm;
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController();
+    _nameFocus = FocusNode();
+    // Persistir el nombre del hogar también al PERDER el foco (pulsar Atrás,
+    // tocar fuera, navegar). Antes solo guardaba con "Done"/Enter del teclado,
+    // por lo que el cambio se perdía en silencio si el usuario volvía atrás.
+    _nameFocus.addListener(_onNameFocusChange);
+  }
+
+  void _onNameFocusChange() {
+    if (!_nameFocus.hasFocus) _persistNameIfChanged();
+  }
+
+  void _persistNameIfChanged() {
+    final value = _nameController.text.trim();
+    if (value.isEmpty || value == _savedName) return;
+    _savedName = value;
+    _vm?.updateHomeName(value);
   }
 
   @override
   void dispose() {
+    _nameFocus.removeListener(_onNameFocusChange);
+    _nameFocus.dispose();
     _nameController.dispose();
     super.dispose();
   }
@@ -192,6 +213,7 @@ class _HomeSettingsScreenV2State extends ConsumerState<HomeSettingsScreenV2> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final vm = ref.watch(homeSettingsViewModelProvider(l10n));
+    _vm = vm;
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.homes_settings_title)),
@@ -203,6 +225,7 @@ class _HomeSettingsScreenV2State extends ConsumerState<HomeSettingsScreenV2> {
 
           if (!_nameInitialized) {
             _nameController.text = data.homeName;
+            _savedName = data.homeName;
             _nameInitialized = true;
           }
 
@@ -255,11 +278,15 @@ class _HomeSettingsScreenV2State extends ConsumerState<HomeSettingsScreenV2> {
                     ? TextField(
                         key: const Key('home_name_field'),
                         controller: _nameController,
+                        focusNode: _nameFocus,
                         decoration: InputDecoration(
                           labelText: l10n.homes_name_label,
                           border: const OutlineInputBorder(),
                         ),
-                        onSubmitted: (v) => vm.updateHomeName(v),
+                        onSubmitted: (v) {
+                          _savedName = v.trim();
+                          vm.updateHomeName(v);
+                        },
                       )
                     : ListTile(
                         title: Text(l10n.homes_name_label),

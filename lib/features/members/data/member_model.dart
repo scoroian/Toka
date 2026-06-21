@@ -36,6 +36,10 @@ class MemberModel {
       currentStreak: (data['currentStreak'] as int?) ?? 0,
       averageScore:
           ((data['averageScore'] as num?) ?? 0.0).toDouble(),
+      accountDeleted: (data['accountDeleted'] as bool?) ?? false,
+      vacationActive:
+          ((data['vacation'] as Map<String, dynamic>?)?['isActive'] as bool?) ??
+              false,
     );
   }
 }

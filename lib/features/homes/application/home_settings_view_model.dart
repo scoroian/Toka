@@ -1,4 +1,5 @@
 // lib/features/homes/application/home_settings_view_model.dart
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -180,9 +181,11 @@ HomeSettingsViewModel homeSettingsViewModel(
       isPayer: isCurrentPayer,
       isOwner: isOwner,
       uid: uid,
-      // DEBUG PREMIUM — REMOVE BEFORE PRODUCTION
+      // DEBUG PREMIUM — solo en builds debug. En release (kDebugMode==false)
+      // el toggle queda oculto para no exponer un control de estado premium en
+      // producción, aunque seas owner.
       premiumStatusCode: home.premiumStatus.name,
-      showDebugPremiumToggle: isOwner,
+      showDebugPremiumToggle: isOwner && kDebugMode,
       // END DEBUG PREMIUM
     );
   });

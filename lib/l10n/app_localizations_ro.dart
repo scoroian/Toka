@@ -508,6 +508,9 @@ class AppLocalizationsRo extends AppLocalizations {
   String get recurrenceYearly => 'Anual';
 
   @override
+  String get recurrenceOneTime => 'Unic';
+
+  @override
   String get today_screen_title => 'Azi';
 
   @override
@@ -1115,7 +1118,14 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String subscription_rescue_warning(int days) {
-    return 'Premium-ul tău expiră în $days zile — reînnoiește pentru a-l păstra';
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days de zile',
+      few: '$days zile',
+      one: '$days zi',
+    );
+    return 'Premium-ul tău expiră în $_temp0 — reînnoiește pentru a-l păstra';
   }
 
   @override
@@ -1191,6 +1201,9 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get vacation_toggle_label => 'Sunt în concediu / absent';
+
+  @override
+  String get members_on_vacation => 'În concediu';
 
   @override
   String get vacation_start_date => 'Data de început (opțional)';

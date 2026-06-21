@@ -7,6 +7,7 @@ import '../../../../core/utils/toka_dates.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../profile/application/profile_provider.dart';
 import '../../domain/home_dashboard.dart';
+import '../utils/task_visual_utils.dart';
 
 class TodayTaskCardTodo extends ConsumerWidget {
   final TaskPreview task;
@@ -82,10 +83,19 @@ class TodayTaskCardTodo extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        '${task.visualValue} ${task.title}',
-                        style: Theme.of(context).textTheme.bodyMedium,
-                        overflow: TextOverflow.ellipsis,
+                      Row(
+                        children: [
+                          taskVisualWidget(task.visualKind, task.visualValue,
+                              size: 16),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              task.title,
+                              style: Theme.of(context).textTheme.bodyMedium,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
                       ),
                       if (displayName != null && displayName.isNotEmpty)
                         Text(

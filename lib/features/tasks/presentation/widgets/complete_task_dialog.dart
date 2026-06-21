@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/home_dashboard.dart';
+import '../utils/task_visual_utils.dart';
 
 class CompleteTaskDialog extends StatelessWidget {
   final TaskPreview task;
@@ -17,7 +18,15 @@ class CompleteTaskDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return AlertDialog(
-      title: Text('${task.visualValue} ${task.title}'),
+      // Renderiza emoji o icono Material en vez de concatenar el codepoint
+      // crudo (que mostraba "57622 <título>" en tareas con icono custom).
+      title: Row(
+        children: [
+          taskVisualWidget(task.visualKind, task.visualValue, size: 22),
+          const SizedBox(width: 8),
+          Expanded(child: Text(task.title)),
+        ],
+      ),
       content: Text(l10n.complete_task_dialog_body),
       actions: [
         TextButton(

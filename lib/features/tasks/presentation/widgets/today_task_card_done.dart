@@ -4,6 +4,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/toka_dates.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/home_dashboard.dart';
+import '../utils/task_visual_utils.dart';
 
 class TodayTaskCardDone extends StatelessWidget {
   final DoneTaskPreview task;
@@ -29,14 +30,27 @@ class TodayTaskCardDone extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    '${task.visualValue} ${task.title}',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          decoration: TextDecoration.lineThrough,
-                          decorationColor: AppColors.textSecondary,
-                          color: AppColors.textSecondary,
+                  Row(
+                    children: [
+                      // Renderiza emoji o icono Material (icon:<codepoint>).
+                      // Antes se concatenaba `visualValue` como texto, lo que
+                      // mostraba el codepoint crudo (p.ej. "57622") en iconos.
+                      taskVisualWidget(task.visualKind, task.visualValue,
+                          size: 16),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          task.title,
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    decoration: TextDecoration.lineThrough,
+                                    decorationColor: AppColors.textSecondary,
+                                    color: AppColors.textSecondary,
+                                  ),
+                          overflow: TextOverflow.ellipsis,
                         ),
-                    overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 2),
                   Text(

@@ -13,7 +13,7 @@ part 'subscription_dashboard_provider.g.dart';
 /// Combina dos snapshots de Firestore:
 ///   - `homes/{homeId}` — fuente de verdad de `premiumStatus`, `premiumPlan`,
 ///     `premiumEndsAt`, `restoreUntil`, `autoRenewEnabled`, `currentPayerUid`.
-///     Se actualiza desde `syncEntitlement`, `debugSetPremiumStatus` y los
+///     Se actualiza desde `syncEntitlement` y los
 ///     cron de rescate/downgrade.
 ///   - `homes/{homeId}/views/dashboard` — sólo se usa para extraer
 ///     `planCounters`.

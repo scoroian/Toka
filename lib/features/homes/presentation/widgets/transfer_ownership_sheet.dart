@@ -16,31 +16,47 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../core/constants/routes.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/bottom_sheet_padding.dart';
+import '../../../auth/application/auth_provider.dart';
 import '../../../members/application/member_actions_provider.dart';
 import '../../../members/application/members_provider.dart';
 import '../../../members/domain/member.dart';
 import '../../../members/presentation/widgets/member_role_badge.dart';
+import '../../application/homes_provider.dart';
 import '../../domain/home_membership.dart';
 
+/// Sheet para elegir nuevo propietario.
+///
+/// [leaveAfter] = true encadena "Transferir y salir" (Hallazgo #12): tras
+/// ceder la propiedad, el caller (ex-owner, ya degradado a admin) abandona el
+/// hogar. Es la salida limpia del owner, que NO puede usar "Abandonar"
+/// directamente.
 Future<void> showTransferOwnershipSheet(
   BuildContext context, {
   required String homeId,
+  bool leaveAfter = false,
 }) {
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    builder: (_) => _TransferOwnershipSheet(homeId: homeId),
+    builder: (_) =>
+        _TransferOwnershipSheet(homeId: homeId, leaveAfter: leaveAfter),
   );
 }
 
 class _TransferOwnershipSheet extends ConsumerWidget {
-  const _TransferOwnershipSheet({required this.homeId});
+  const _TransferOwnershipSheet({
+    required this.homeId,
+    this.leaveAfter = false,
+  });
 
   final String homeId;
+  final bool leaveAfter;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -62,12 +78,16 @@ class _TransferOwnershipSheet extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            l10n.homes_transfer_ownership_title,
+            leaveAfter
+                ? l10n.homes_transfer_and_leave_title
+                : l10n.homes_transfer_ownership_title,
             style: theme.textTheme.titleLarge,
           ),
           const SizedBox(height: 6),
           Text(
-            l10n.homes_transfer_ownership_body,
+            leaveAfter
+                ? l10n.homes_transfer_and_leave_body
+                : l10n.homes_transfer_ownership_body,
             style: theme.textTheme.bodyMedium?.copyWith(
               color: cs.onSurfaceVariant,
             ),
@@ -149,14 +169,19 @@ class _TransferOwnershipSheet extends ConsumerWidget {
     Member newOwner,
   ) async {
     final l10n = AppLocalizations.of(context);
+    final displayName = newOwner.nickname.isNotEmpty ? newOwner.nickname : '—';
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(l10n.homes_transfer_confirm_title),
+        title: Text(
+          leaveAfter
+              ? l10n.homes_transfer_and_leave_confirm_title
+              : l10n.homes_transfer_confirm_title,
+        ),
         content: Text(
-          l10n.homes_transfer_confirm_body(
-            newOwner.nickname.isNotEmpty ? newOwner.nickname : '—',
-          ),
+          leaveAfter
+              ? l10n.homes_transfer_and_leave_confirm_body(displayName)
+              : l10n.homes_transfer_confirm_body(displayName),
         ),
         actions: [
           TextButton(
@@ -166,18 +191,27 @@ class _TransferOwnershipSheet extends ConsumerWidget {
           TextButton(
             key: const Key('btn_transfer_confirm'),
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(l10n.homes_transfer_btn),
+            child: Text(
+              leaveAfter ? l10n.homes_transfer_and_leave : l10n.homes_transfer_btn,
+            ),
           ),
         ],
       ),
     );
     if (confirmed != true || !context.mounted) return;
 
-    // Capturamos messengers ANTES de los awaits para no usar context
-    // tras un await (regla de Flutter — el context puede haberse
+    // Capturamos messengers/navigator/router/uid ANTES de los awaits para no
+    // usar context tras un await (regla de Flutter — el context puede haberse
     // desmontado).
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
+    // GoRouter/authProvider solo son necesarios en el flujo "transferir y salir".
+    // Los leemos condicionalmente para no exigir un GoRouter ancestro ni
+    // inicializar authProvider en el flujo de transferencia simple.
+    final router = leaveAfter ? GoRouter.of(context) : null;
+    final myUid = leaveAfter
+        ? (ref.read(authProvider).whenOrNull(authenticated: (u) => u.uid) ?? '')
+        : '';
     // IMPORTANTE: cerramos el sheet (maybePop) ANTES de mostrar el SnackBar en
     // TODOS los caminos. El SnackBar del ScaffoldMessenger se pinta al fondo de
     // la pantalla; si el bottom sheet sigue abierto queda tapado por él y el
@@ -187,14 +221,24 @@ class _TransferOwnershipSheet extends ConsumerWidget {
       await ref
           .read(memberActionsProvider.notifier)
           .transferOwnership(homeId, newOwner.uid);
+      if (leaveAfter) {
+        // Transferir y salir: ya degradado a admin, ahora sí puede abandonar.
+        // Si la transferencia pasó el payer-lock, leaveHome tampoco lo gatea
+        // (el ex-owner ya no es el pagador con Premium vigente).
+        await ref
+            .read(homesRepositoryProvider)
+            .leaveHome(homeId, uid: myUid);
+        navigator.maybePop();
+        router!.go(AppRoutes.home);
+        messenger.showSnackBar(
+          SnackBar(content: Text(l10n.homes_transfer_and_left)),
+        );
+        return;
+      }
       navigator.maybePop();
       messenger.showSnackBar(
         SnackBar(
-          content: Text(
-            l10n.homes_transfer_success(
-              newOwner.nickname.isNotEmpty ? newOwner.nickname : '—',
-            ),
-          ),
+          content: Text(l10n.homes_transfer_success(displayName)),
         ),
       );
     } on PayerLockedException {

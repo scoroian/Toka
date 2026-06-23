@@ -54,11 +54,4 @@ abstract interface class HomesRepository {
   /// el blob no existía.
   Future<void> removeHomePhoto(String homeId);
 
-  // DEBUG PREMIUM — REMOVE BEFORE PRODUCTION
-  /// Cambia el estado premium del hogar a [status] invocando la Cloud
-  /// Function `debugSetPremiumStatus`. Solo el owner puede usarlo.
-  /// [status] debe ser uno de: free, active, cancelledPendingEnd, rescue,
-  /// expiredFree, restorable.
-  Future<void> debugSetPremiumStatus(String homeId, String status);
-  // END DEBUG PREMIUM
 }

@@ -14,6 +14,7 @@ import 'core/theme/app_skin.dart';
 import 'core/theme/app_theme_v2.dart';
 import 'core/theme/skin_provider.dart';
 import 'core/theme/theme_mode_provider.dart';
+import 'core/utils/text_scaling.dart';
 import 'features/auth/application/auth_provider.dart';
 import 'features/auth/application/auth_state.dart';
 import 'features/homes/application/current_home_provider.dart';
@@ -42,6 +43,7 @@ import 'features/notifications/application/notification_service.dart';
 import 'features/notifications/application/notification_tap_handler.dart';
 import 'features/notifications/presentation/skins/notification_settings_screen.dart';
 import 'features/settings/presentation/settings_screen.dart';
+import 'features/support/presentation/support_diagnostics_screen.dart';
 import 'l10n/app_localizations.dart';
 import 'features/tasks/presentation/skins/all_tasks_screen.dart';
 import 'features/tasks/presentation/skins/today_screen.dart';
@@ -49,6 +51,7 @@ import 'features/tasks/presentation/skins/task_detail_screen.dart';
 import 'features/tasks/presentation/skins/create_edit_task_screen.dart';
 import 'features/history/presentation/skins/history_event_detail_screen.dart';
 import 'features/history/presentation/skins/history_screen.dart';
+import 'features/tasks/application/pending_completions_provider.dart';
 import 'shared/widgets/keyboard_visible_provider.dart';
 import 'shared/widgets/skins/main_shell_root.dart';
 
@@ -350,6 +353,10 @@ GoRouter appRouter(AppRouterRef ref) {
           );
         },
       ),
+      GoRoute(
+        path: AppRoutes.supportDiagnostics,
+        builder: (_, __) => const SupportDiagnosticsScreen(),
+      ),
     ],
   );
 }
@@ -397,6 +404,12 @@ class _TokaAppState extends ConsumerState<TokaApp>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       _syncSystemAuthorized();
+    } else if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.detached) {
+      // Patrón Gmail: una tarea recién marcada como Hecha puede seguir en su
+      // ventana de "Deshacer" (commit diferido). Si la app pasa a segundo plano
+      // o se cierra, confirmamos lo pendiente para no perder el completado.
+      ref.read(pendingCompletionsProvider.notifier).flush();
     }
   }
 
@@ -467,6 +480,16 @@ class _TokaAppState extends ConsumerState<TokaApp>
           darkTheme: darkTheme,
           themeMode: themeMode,
           routerConfig: router,
+          // Accesibilidad (H-019): respetamos el tamaño de fuente del sistema
+          // pero con un clamp razonable [0.8, 1.3] para que la UI siga siendo
+          // legible con fuente grande sin desbordar las tarjetas.
+          builder: (context, child) {
+            final mq = MediaQuery.of(context);
+            return MediaQuery(
+              data: mq.copyWith(textScaler: clampedTextScaler(mq.textScaler)),
+              child: child ?? const SizedBox.shrink(),
+            );
+          },
         );
       },
     );

@@ -1,4 +1,5 @@
 // test/unit/features/tasks/task_form_provider_test.dart
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -10,6 +11,14 @@ import 'package:toka/features/tasks/domain/task_status.dart';
 import 'package:toka/features/tasks/domain/tasks_repository.dart';
 
 class _MockTasksRepository extends Mock implements TasksRepository {}
+
+/// Réplica del error que lanza la callable `createTask` al superar el límite
+/// Free: `HttpsError("failed-precondition", code)` llega al cliente como
+/// FirebaseFunctionsException con `message == code`.
+class _LimitException extends FirebaseFunctionsException {
+  _LimitException(String code)
+      : super(message: code, code: 'failed-precondition');
+}
 
 const _dailyRule =
     RecurrenceRule.daily(every: 1, time: '09:00', timezone: 'UTC');
@@ -226,6 +235,56 @@ void main() {
       notifier.setAssignmentOrder(['u1']);
       final result = await notifier.save('h1', 'u1');
       expect(result, isNull);
+      expect(c.read(taskFormNotifierProvider).globalError, 'tasks_save_error');
+    });
+
+    test(
+        'save mapea el límite Free server-side (free_limit_tasks) a globalError específico',
+        () async {
+      final repo = _MockTasksRepository();
+      when(() => repo.createTask(any(), any(), any()))
+          .thenThrow(_LimitException(kFreeLimitTasksCode));
+      final c = _makeContainer(repo);
+      addTearDown(c.dispose);
+      final notifier = c.read(taskFormNotifierProvider.notifier);
+      notifier.initCreate();
+      notifier.setTitle('Tarea');
+      notifier.setRecurrenceRule(_dailyRule);
+      notifier.setAssignmentOrder(['u1']);
+      final result = await notifier.save('h1', 'u1');
+      expect(result, isNull);
+      expect(c.read(taskFormNotifierProvider).globalError, kFreeLimitTasksCode);
+    });
+
+    test('save mapea free_limit_recurring a globalError específico', () async {
+      final repo = _MockTasksRepository();
+      when(() => repo.createTask(any(), any(), any()))
+          .thenThrow(_LimitException(kFreeLimitRecurringCode));
+      final c = _makeContainer(repo);
+      addTearDown(c.dispose);
+      final notifier = c.read(taskFormNotifierProvider.notifier);
+      notifier.initCreate();
+      notifier.setTitle('Tarea');
+      notifier.setRecurrenceRule(_dailyRule);
+      notifier.setAssignmentOrder(['u1']);
+      await notifier.save('h1', 'u1');
+      expect(c.read(taskFormNotifierProvider).globalError,
+          kFreeLimitRecurringCode);
+    });
+
+    test('save mapea otros FirebaseFunctionsException a tasks_save_error',
+        () async {
+      final repo = _MockTasksRepository();
+      when(() => repo.createTask(any(), any(), any()))
+          .thenThrow(_LimitException('internal'));
+      final c = _makeContainer(repo);
+      addTearDown(c.dispose);
+      final notifier = c.read(taskFormNotifierProvider.notifier);
+      notifier.initCreate();
+      notifier.setTitle('Tarea');
+      notifier.setRecurrenceRule(_dailyRule);
+      notifier.setAssignmentOrder(['u1']);
+      await notifier.save('h1', 'u1');
       expect(c.read(taskFormNotifierProvider).globalError, 'tasks_save_error');
     });
   });

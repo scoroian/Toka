@@ -74,19 +74,6 @@ class MembersRepositoryImpl implements MembersRepository {
   }
 
   @override
-  Future<void> inviteMember(String homeId, String? email) async {
-    try {
-      await _functions.httpsCallable('inviteMember').call({
-        'homeId': homeId,
-        if (email != null) 'email': email,
-      });
-    } on FirebaseFunctionsException catch (e) {
-      if (e.code == 'resource-exhausted') throw const MaxMembersReachedException();
-      rethrow;
-    }
-  }
-
-  @override
   Future<({String code, DateTime expiresAt})> generateInviteCode(
       String homeId) async {
     final result = await _functions

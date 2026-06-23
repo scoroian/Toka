@@ -70,7 +70,7 @@ export async function addMemberToHome(
   homeId: string,
   uid: string,
   role: 'owner' | 'admin' | 'member',
-  status: 'active' | 'frozen' | 'absent' = 'active',
+  status: 'active' | 'frozen' | 'absent' | 'left' = 'active',
   overrides: Record<string, unknown> = {}
 ): Promise<void> {
   const db = getDb();

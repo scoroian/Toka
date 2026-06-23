@@ -12,6 +12,7 @@ const OWNER = 'owner-reassign';
 const ADMIN = 'admin-reassign';
 const MEMBER = 'member-reassign';
 const FROZEN = 'frozen-reassign';
+const LEFT = 'left-reassign';
 
 beforeAll(async () => {
   await cleanAll();
@@ -19,10 +20,12 @@ beforeAll(async () => {
   await createUser(ADMIN);
   await createUser(MEMBER);
   await createUser(FROZEN);
+  await createUser(LEFT);
   await createHome(HOME, OWNER);
   await addMemberToHome(HOME, ADMIN, 'admin', 'active');
   await addMemberToHome(HOME, MEMBER, 'member', 'active');
   await addMemberToHome(HOME, FROZEN, 'member', 'frozen');
+  await addMemberToHome(HOME, LEFT, 'member', 'left');
   await createTask(HOME, 'task1', MEMBER);
 });
 
@@ -87,5 +90,12 @@ describe('manualReassign — errores', () => {
     await expect(
       wrapped(makeCallableRequest(ADMIN, { homeId: HOME, taskId: 'task1', newAssigneeUid: '' }))
     ).rejects.toMatchObject({ code: 'invalid-argument' });
+  });
+
+  // Hallazgo #08: no se puede reasignar manualmente a un ex-miembro ('left').
+  it('reasignar a un miembro left → failed-precondition', async () => {
+    await expect(
+      wrapped(makeCallableRequest(ADMIN, { homeId: HOME, taskId: 'task1', newAssigneeUid: LEFT }))
+    ).rejects.toMatchObject({ code: 'failed-precondition' });
   });
 });

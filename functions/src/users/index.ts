@@ -11,6 +11,9 @@
 import * as functionsV1 from "firebase-functions/v1";
 import { cleanupDeletedUser } from "./cleanup_user";
 
+// Callable de exportación de datos personales (GDPR Art. 15/20, Hallazgo #04).
+export { exportUserData } from "./export_user_data";
+
 export const onAuthUserDeleted = functionsV1.auth
   .user()
   .onDelete(async (user) => {

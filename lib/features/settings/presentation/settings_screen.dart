@@ -1,8 +1,14 @@
 // lib/features/settings/presentation/settings_screen.dart
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/constants/routes.dart';
@@ -17,8 +23,39 @@ import '../../members/domain/member.dart';
 import '../../homes/domain/home_membership.dart';
 import '../../../shared/widgets/ad_aware_bottom_padding.dart';
 import '../application/settings_view_model.dart';
+import '../../support/application/support_providers.dart';
 import '../../../core/theme/theme_mode_provider.dart';
 import 'widgets/appearance_picker.dart';
+
+/// GDPR (Art. 15/20) — exporta los datos personales del usuario a un JSON y
+/// abre el share sheet para que pueda guardarlo/enviarlo. Llama a la callable
+/// `exportUserData` (que solo lee, nunca escribe).
+Future<void> _exportUserData(
+  BuildContext context,
+  AppLocalizations l10n,
+) async {
+  final messenger = ScaffoldMessenger.of(context);
+  messenger.showSnackBar(
+    SnackBar(content: Text(l10n.settings_export_data_progress)),
+  );
+  try {
+    final result =
+        await FirebaseFunctions.instance.httpsCallable('exportUserData').call();
+    final jsonStr = const JsonEncoder.withIndent('  ').convert(result.data);
+    final dir = await getTemporaryDirectory();
+    final uid = FirebaseAuth.instance.currentUser?.uid ?? 'user';
+    final file = File('${dir.path}/toka_export_$uid.json');
+    await file.writeAsString(jsonStr);
+    await Share.shareXFiles(
+      [XFile(file.path, mimeType: 'application/json')],
+      subject: l10n.settings_export_data,
+    );
+  } catch (_) {
+    messenger.showSnackBar(
+      SnackBar(content: Text(l10n.settings_export_data_error)),
+    );
+  }
+}
 
 /// Caso B/D — transfiere ownership y luego abandona el hogar.
 Future<void> _transferAndLeave(
@@ -110,6 +147,10 @@ class SettingsScreen extends ConsumerWidget {
     final homeId = vm.viewData.homeId;
     final uid = vm.viewData.uid;
     final appVersion = vm.viewData.appVersion;
+    // Hallazgo #17: la entrada de diagnóstico solo aparece para cuentas de
+    // soporte (custom claim `support`). El backend vuelve a exigir el claim.
+    final isSupportAgent =
+        ref.watch(isSupportAgentProvider).asData?.value ?? false;
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.settings_title)),
@@ -269,6 +310,20 @@ class SettingsScreen extends ConsumerWidget {
             title: Text(l10n.settings_phone_visibility),
             onTap: () => context.push(AppRoutes.editProfile),
           ),
+          ListTile(
+            key: const Key('settings_export_data'),
+            leading: const Icon(Icons.download_outlined),
+            title: Text(l10n.settings_export_data),
+            subtitle: Text(l10n.settings_export_data_subtitle),
+            onTap: () => _exportUserData(context, l10n),
+          ),
+          if (isSupportAgent)
+            ListTile(
+              key: const Key('settings_support_diagnostics'),
+              leading: const Icon(Icons.support_agent_outlined),
+              title: Text(l10n.support_title),
+              onTap: () => context.push(AppRoutes.supportDiagnostics),
+            ),
           const Divider(),
 
           // ── Suscripción ───────────────────────────────────────────────

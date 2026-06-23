@@ -5,9 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/ad_aware_bottom_padding.dart';
 import '../../../subscription/presentation/widgets/premium_state_banner.dart';
+import '../../application/pending_completions_provider.dart';
 import '../../application/today_view_model.dart';
 import '../../domain/home_dashboard.dart';
-import '../widgets/complete_task_dialog.dart';
 import '../../../../features/homes/presentation/home_selector_widget.dart';
 import '../widgets/pass_turn_dialog.dart';
 import '../widgets/today_empty_state.dart';
@@ -18,12 +18,39 @@ import 'widgets/today_task_section_v2.dart';
 class TodayScreenV2 extends ConsumerWidget {
   const TodayScreenV2({super.key});
 
-  Future<void> _onDone(BuildContext ctx, TodayViewModel vm, TaskPreview task) async {
-    final confirmed = await showDialog<bool>(
-      context: ctx,
-      builder: (_) => CompleteTaskDialog(task: task, onConfirm: () {}),
-    );
-    if (confirmed == true && ctx.mounted) await vm.completeTask(task.taskId);
+  /// Completar SIN diálogo de confirmación (patrón Gmail). La animación+confetti
+  /// de la tarjeta ya dio el feedback de éxito; aquí se programa el commit
+  /// diferido (la tarea se oculta de "Por hacer") y se ofrece "Deshacer" durante
+  /// [kUndoWindow]. Si no se deshace, el commit real al backend se confirma al
+  /// expirar la ventana. Las acciones consecuentes (pasar turno, borrar, expulsar,
+  /// abandonar) conservan su propia confirmación.
+  void _onDone(
+    BuildContext ctx,
+    WidgetRef ref,
+    AppLocalizations l10n,
+    TaskPreview task,
+    String homeId,
+  ) {
+    ref
+        .read(pendingCompletionsProvider.notifier)
+        .schedule(homeId: homeId, taskId: task.taskId);
+    ScaffoldMessenger.of(ctx)
+      ..clearSnackBars()
+      ..showSnackBar(SnackBar(
+        content: Text(l10n.today_task_completed_undoable),
+        duration: kUndoWindow,
+        behavior: SnackBarBehavior.floating,
+        // persist por defecto es `action != null` (Flutter 3.44): un SnackBar
+        // con acción NO se auto-cierra. Forzamos persist:false para que
+        // desaparezca al expirar la ventana de Deshacer, en sync con el commit.
+        persist: false,
+        action: SnackBarAction(
+          label: l10n.undo,
+          onPressed: () => ref
+              .read(pendingCompletionsProvider.notifier)
+              .undo(task.taskId),
+        ),
+      ));
   }
 
   Future<void> _onPass(BuildContext ctx, TodayViewModel vm, TaskPreview task, String? uid) async {
@@ -80,7 +107,8 @@ class TodayScreenV2 extends ConsumerWidget {
                     dones: data.grouped[recType]!.dones,
                     currentUid: data.currentUid,
                     onDone: data.homeId.isNotEmpty
-                        ? (t) => _onDone(context, vm, t) : null,
+                        ? (t) => _onDone(context, ref, l10n, t, data.homeId)
+                        : null,
                     onPass: data.homeId.isNotEmpty
                         ? (t) => _onPass(context, vm, t, data.currentUid) : null,
                   ),

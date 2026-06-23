@@ -5,7 +5,10 @@ import {
   assertFails,
   RulesTestEnvironment,
 } from '@firebase/rules-unit-testing';
-import { doc, getDoc, setDoc, updateDoc, deleteDoc } from 'firebase/firestore';
+import {
+  doc, getDoc, setDoc, updateDoc, deleteDoc,
+  collection, collectionGroup, query, where, getDocs,
+} from 'firebase/firestore';
 import { readFileSync } from 'fs';
 import * as path from 'path';
 
@@ -77,15 +80,19 @@ describe('invitations — read por admin/owner', () => {
   });
 });
 
-describe('invitations — read público por code', () => {
-  it('member activo puede leer invitación que tiene code', async () => {
+describe('invitations — lectura pública por code DESHABILITADA (Hallazgo #01)', () => {
+  // Antes: cualquier autenticado podía leer una invitación con `code` (lectura
+  // pública) y enumerar todos los códigos vía collectionGroup. La unión ahora va
+  // por la callable joinHomeByCode (server-side), así que el cliente NO necesita
+  // leer invitations de otros hogares.
+  it('member raso NO puede leer invitación aunque tenga code', async () => {
     const ctx = testEnv.authenticatedContext(MEMBER_UID);
-    await assertSucceeds(getDoc(doc(ctx.firestore(), `homes/${HOME1}/invitations/inv1`)));
+    await assertFails(getDoc(doc(ctx.firestore(), `homes/${HOME1}/invitations/inv1`)));
   });
 
-  it('outsider autenticado puede leer invitación que tiene code', async () => {
+  it('outsider autenticado NO puede leer invitación con code', async () => {
     const ctx = testEnv.authenticatedContext(OUTSIDER_UID);
-    await assertSucceeds(getDoc(doc(ctx.firestore(), `homes/${HOME1}/invitations/inv1`)));
+    await assertFails(getDoc(doc(ctx.firestore(), `homes/${HOME1}/invitations/inv1`)));
   });
 
   it('outsider autenticado NO puede leer invitación sin code', async () => {
@@ -96,6 +103,44 @@ describe('invitations — read público por code', () => {
   it('no autenticado NO puede leer invitación', async () => {
     const ctx = testEnv.unauthenticatedContext();
     await assertFails(getDoc(doc(ctx.firestore(), `homes/${HOME1}/invitations/inv1`)));
+  });
+});
+
+describe('invitations — collectionGroup PROHIBIDO (Hallazgo #01)', () => {
+  it('un autenticado NO puede enumerar invitaciones por código (collectionGroup)', async () => {
+    const ctx = testEnv.authenticatedContext(OUTSIDER_UID);
+    const q = query(
+      collectionGroup(ctx.firestore(), 'invitations'),
+      where('code', '==', 'ABC123'),
+    );
+    await assertFails(getDocs(q));
+  });
+
+  it('ni siquiera owner/admin pueden enumerar invitaciones vía collectionGroup', async () => {
+    // El owner lee SUS invitaciones por consulta scoped al hogar (allow read:
+    // isAdminOrOwner), nunca por collectionGroup global.
+    const ctx = testEnv.authenticatedContext(OWNER_UID);
+    const q = query(
+      collectionGroup(ctx.firestore(), 'invitations'),
+      where('code', '==', 'ABC123'),
+    );
+    await assertFails(getDocs(q));
+  });
+});
+
+describe('invitations — owner/admin SÍ pueden listar las de su hogar (scoped)', () => {
+  it('owner puede listar las invitaciones de su propio hogar', async () => {
+    const ctx = testEnv.authenticatedContext(OWNER_UID);
+    await assertSucceeds(
+      getDocs(collection(ctx.firestore(), `homes/${HOME1}/invitations`)),
+    );
+  });
+
+  it('member raso NO puede listar las invitaciones del hogar', async () => {
+    const ctx = testEnv.authenticatedContext(MEMBER_UID);
+    await assertFails(
+      getDocs(collection(ctx.firestore(), `homes/${HOME1}/invitations`)),
+    );
   });
 });
 

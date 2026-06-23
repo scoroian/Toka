@@ -2,12 +2,16 @@
 import * as admin from "firebase-admin";
 import * as logger from "firebase-functions/logger";
 import { onSchedule } from "firebase-functions/v2/scheduler";
-import { autoSelectForDowngrade } from "./downgrade_helpers";
-import { DEFAULT_BANNER_UNIT_ID } from "../shared/ad_constants";
+import {
+  autoSelectForDowngrade,
+  DOWNGRADE_ELIGIBLE_STATUSES,
+} from "./downgrade_helpers";
+import { buildBannerAdFlags } from "../shared/ad_constants";
 
 /**
- * Cron cada 30 minutos. Aplica downgrade a hogares cuyo premiumEndsAt <= now
- * y que estén en estado rescue o cancelled_pending_end.
+ * Cron cada 30 minutos. Aplica downgrade a hogares cuyo premiumEndsAt <= now y
+ * que estén en un estado elegible (ver DOWNGRADE_ELIGIBLE_STATUSES): rescue,
+ * cancelled_pending_end/cancelledPendingEnd y `active` vencido sin renovación.
  */
 export const applyDowngradeJob = onSchedule("*/30 * * * *", async () => {
   const db = admin.firestore();
@@ -16,15 +20,11 @@ export const applyDowngradeJob = onSchedule("*/30 * * * *", async () => {
 
   const snapshot = await db
     .collection("homes")
-    // Aceptar tanto el valor canónico camelCase persistido por syncEntitlement
-    // (`cancelledPendingEnd`) como la variante legacy snake_case. Si solo se
-    // filtrara el snake_case, los hogares cancelados por el flujo real nunca se
-    // degradarían y quedarían en Premium efectivo perpetuo.
-    .where("premiumStatus", "in", [
-      "rescue",
-      "cancelled_pending_end",
-      "cancelledPendingEnd",
-    ])
+    // Incluye el valor canónico camelCase persistido por syncEntitlement
+    // (`cancelledPendingEnd`), la variante legacy snake_case, y `active`: un
+    // hogar cuyo periodo venció sin renovación se quedaría en Premium efectivo
+    // perpetuo si no se captura aquí (Hallazgo #06).
+    .where("premiumStatus", "in", [...DOWNGRADE_ELIGIBLE_STATUSES])
     .where("premiumEndsAt", "<=", now)
     .get();
 
@@ -169,10 +169,7 @@ export const applyDowngradeJob = onSchedule("*/30 * * * *", async () => {
             canUseVacations: false,
             canUseReviews: false,
           },
-          adFlags: {
-            showBanner: true,
-            bannerUnit: DEFAULT_BANNER_UNIT_ID,
-          },
+          adFlags: buildBannerAdFlags(true),
           rescueFlags: { isInRescue: false, daysLeft: null },
           updatedAt: FieldValue.serverTimestamp(),
         },

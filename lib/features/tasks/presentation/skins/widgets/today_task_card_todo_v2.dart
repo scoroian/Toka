@@ -169,6 +169,8 @@ class _TodayTaskCardTodoV2State extends ConsumerState<TodayTaskCardTodoV2>
                   ]),
                   if (name != null && name.isNotEmpty)
                     Text(name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.plusJakartaSans(
                           fontSize: 10, fontWeight: FontWeight.w600,
                           color: isDark ? AppColorsV2.textSecondaryDark : AppColorsV2.textSecondaryLight),
@@ -313,30 +315,44 @@ class _DoneButtonV2 extends StatelessWidget {
         ? (isDark ? AppColorsV2.backgroundDark : AppColorsV2.onPrimary)
         : (isDark ? const Color(0xFF777777) : const Color(0xFFAAAAAA));
 
-    return GestureDetector(
+    // Accesibilidad (H-019): botón real con semántica (no GestureDetector).
+    // El glifo se mueve a un Icon y el lector de pantalla anuncia "Hecho, botón"
+    // (no el carácter ✓). minHeight 44 = objetivo táctil recomendado.
+    return Semantics(
+      button: true,
+      enabled: true,
+      label: label,
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(10)),
-        child: Center(
-          child: animating && isActive
-              ? ScaleTransition(
-                  scale: checkAnim,
-                  child: Icon(Icons.check_circle, color: fg, size: 18),
-                )
-              : Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (!isActive)
-                      Padding(
-                        padding: const EdgeInsets.only(right: 4),
-                        child: Icon(Icons.lock_clock, size: 12, color: fg),
+      excludeSemantics: true,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10),
+        child: Container(
+          constraints: const BoxConstraints(minHeight: 44),
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+          decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(10)),
+          child: Center(
+            child: animating && isActive
+                ? ScaleTransition(
+                    scale: checkAnim,
+                    child: Icon(Icons.check_circle, color: fg, size: 18),
+                  )
+                : Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(isActive ? Icons.check : Icons.lock_clock,
+                          size: isActive ? 16 : 12, color: fg),
+                      const SizedBox(width: 4),
+                      Flexible(
+                        child: Text(label,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.plusJakartaSans(
+                                fontSize: 12, fontWeight: FontWeight.w800, color: fg)),
                       ),
-                    Text('✓ $label',
-                        style: GoogleFonts.plusJakartaSans(
-                            fontSize: 12, fontWeight: FontWeight.w800, color: fg)),
-                  ],
-                ),
+                    ],
+                  ),
+          ),
         ),
       ),
     );
@@ -354,18 +370,40 @@ class _PassButtonV2 extends StatelessWidget {
   Widget build(BuildContext context) {
     final bd    = isDark ? AppColorsV2.borderDark  : AppColorsV2.borderLight;
     final color = isDark ? AppColorsV2.textSecondaryDark : AppColorsV2.textSecondaryLight;
-    return GestureDetector(
+    // Accesibilidad (H-019): botón real con semántica. El glifo ↻ pasa a Icon
+    // y el lector anuncia "Pasar, botón".
+    return Semantics(
+      button: true,
+      enabled: onTap != null,
+      label: label,
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        decoration: BoxDecoration(
-          border: Border.all(color: bd, width: 1.5),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Center(
-          child: Text('↻ $label',
-              style: GoogleFonts.plusJakartaSans(
-                  fontSize: 12, fontWeight: FontWeight.w700, color: color)),
+      excludeSemantics: true,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10),
+        child: Container(
+          constraints: const BoxConstraints(minHeight: 44),
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+          decoration: BoxDecoration(
+            border: Border.all(color: bd, width: 1.5),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Center(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.refresh, size: 16, color: color),
+                const SizedBox(width: 4),
+                Flexible(
+                  child: Text(label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.plusJakartaSans(
+                          fontSize: 12, fontWeight: FontWeight.w700, color: color)),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );

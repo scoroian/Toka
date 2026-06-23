@@ -2,11 +2,14 @@ import 'purchase_result.dart';
 
 abstract interface class SubscriptionRepository {
   /// Llama a la Cloud Function syncEntitlement.
+  ///
+  /// El `chargeId` de idempotencia lo deriva el backend server-side del recibo
+  /// verificado (purchaseToken / originalTransactionId), no el cliente — por eso
+  /// no se envía aquí (`purchase.purchaseID` puede ser nulo en iOS restored).
   Future<void> syncEntitlement({
     required String homeId,
     required String receiptData,
     required String platform,
-    required String chargeId,
   });
 
   /// Inicia una compra in-app.

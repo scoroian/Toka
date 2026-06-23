@@ -18,18 +18,10 @@ class InviteMemberSheet extends ConsumerStatefulWidget {
 }
 
 class _InviteMemberSheetState extends ConsumerState<InviteMemberSheet> {
-  bool _showEmail = false;
-  final _emailController = TextEditingController();
   String? _generatedCode;
   DateTime? _expiresAt;
   bool _isLoadingCode = false;
   String? _codeError;
-
-  @override
-  void dispose() {
-    _emailController.dispose();
-    super.dispose();
-  }
 
   bool _isExpiringSoon(DateTime expiresAt) {
     return expiresAt.difference(DateTime.now()).inHours < 24;
@@ -62,15 +54,6 @@ class _InviteMemberSheetState extends ConsumerState<InviteMemberSheet> {
     }
   }
 
-  Future<void> _sendEmailInvite() async {
-    final email = _emailController.text.trim();
-    if (email.isEmpty) return;
-    await ref
-        .read(memberActionsProvider.notifier)
-        .inviteMember(widget.homeId, email);
-    if (mounted) Navigator.of(context).pop();
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -91,31 +74,14 @@ class _InviteMemberSheetState extends ConsumerState<InviteMemberSheet> {
           Text(l10n.invite_sheet_title,
               style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  key: const Key('btn_share_code'),
-                  onPressed: _isLoadingCode
-                      ? null
-                      : () {
-                          setState(() => _showEmail = false);
-                          _generateCode();
-                        },
-                  icon: const Icon(Icons.qr_code),
-                  label: Text(l10n.invite_sheet_share_code),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: OutlinedButton.icon(
-                  key: const Key('btn_invite_email'),
-                  onPressed: () => setState(() => _showEmail = true),
-                  icon: const Icon(Icons.email_outlined),
-                  label: Text(l10n.invite_sheet_by_email),
-                ),
-              ),
-            ],
+          // Solo código/QR: la invitación por email se retiró (Hallazgo #12) —
+          // no había callable que la enviara y el botón cerraba el sheet sin
+          // efecto ni feedback. El código/QR es el camino que sí funciona.
+          OutlinedButton.icon(
+            key: const Key('btn_share_code'),
+            onPressed: _isLoadingCode ? null : _generateCode,
+            icon: const Icon(Icons.qr_code),
+            label: Text(l10n.invite_sheet_share_code),
           ),
           const SizedBox(height: 16),
           if (_isLoadingCode)
@@ -126,7 +92,7 @@ class _InviteMemberSheetState extends ConsumerState<InviteMemberSheet> {
               style: TextStyle(color: Theme.of(context).colorScheme.error),
               key: const Key('invite_code_error'),
             ),
-          if (_generatedCode != null && !_showEmail && !_isLoadingCode) ...[
+          if (_generatedCode != null && !_isLoadingCode) ...[
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -205,28 +171,6 @@ class _InviteMemberSheetState extends ConsumerState<InviteMemberSheet> {
                   ),
                 ],
               ),
-            ),
-          ],
-          if (_showEmail) ...[
-            TextField(
-              key: const Key('email_field'),
-              controller: _emailController,
-              decoration: InputDecoration(
-                hintText: l10n.invite_sheet_email_hint,
-                border: const OutlineInputBorder(),
-              ),
-              keyboardType: TextInputType.emailAddress,
-              // BUG-01: neutralizar autocorrector del teclado (MIUI/Gboard).
-              autocorrect: false,
-              enableSuggestions: false,
-              textCapitalization: TextCapitalization.none,
-              autofillHints: const [AutofillHints.email],
-            ),
-            const SizedBox(height: 12),
-            ElevatedButton(
-              key: const Key('btn_send_invite'),
-              onPressed: _sendEmailInvite,
-              child: Text(l10n.invite_sheet_send),
             ),
           ],
         ],

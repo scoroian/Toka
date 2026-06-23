@@ -8,36 +8,52 @@
     "serve": "npm run build && firebase emulators:start --only functions",
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
-    "deploy": "firebase deploy --only functions",
-    "check:release-safety": "node scripts/check-debug-premium.js",
+    "deploy": "npm run check:release-safety && npm run build && firebase deploy --only functions",
+    "check:release-safety": "node scripts/check-debug-premium.js && node scripts/check-ad-units.js",
     "deploy:release": "npm run check:release-safety && npm run build && firebase deploy --only functions",
     "logs": "firebase functions:log"
   },
-  "engines": { "node": "20" },
+  "engines": {
+    "node": "20"
+  },
   "main": "lib/index.js",
   "jest": {
     "preset": "ts-jest",
     "testEnvironment": "node",
-    "testMatch": ["**/*.test.ts"],
-    "moduleFileExtensions": ["ts", "js"],
+    "testMatch": [
+      "**/*.test.ts"
+    ],
+    "moduleFileExtensions": [
+      "ts",
+      "js"
+    ],
     "testTimeout": 30000,
     "transform": {
-      "^.+\\.ts$": ["ts-jest", { "tsconfig": "tsconfig.test.json" }]
+      "^.+\\.ts$": [
+        "ts-jest",
+        {
+          "tsconfig": "tsconfig.test.json"
+        }
+      ]
     }
   },
   "dependencies": {
     "firebase-admin": "^12.0.0",
-    "firebase-functions": "^6.0.0"
+    "firebase-functions": "^6.0.0",
+    "google-auth-library": "^9.15.1",
+    "jose": "^4.15.9",
+    "luxon": "^3.7.2"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0",
     "@firebase/rules-unit-testing": "^3.0.0",
+    "@types/jest": "^29.0.0",
+    "@types/luxon": "^3.7.2",
+    "@types/node": "^20.0.0",
     "firebase": "^10.0.0",
-    "typescript": "^5.0.0",
+    "firebase-functions-test": "^3.3.0",
     "jest": "^29.0.0",
     "ts-jest": "^29.0.0",
-    "@types/jest": "^29.0.0",
-    "firebase-functions-test": "^3.3.0"
+    "typescript": "^5.0.0"
   },
   "private": true
 }

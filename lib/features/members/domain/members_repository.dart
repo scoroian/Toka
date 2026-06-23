@@ -22,10 +22,6 @@ abstract interface class MembersRepository {
   /// Obtiene un miembro concreto por su uid.
   Future<Member> fetchMember(String homeId, String uid);
 
-  /// Invita un miembro por email (nullable = solo genera código).
-  /// Lanza [MaxMembersReachedException] si el hogar está al límite.
-  Future<void> inviteMember(String homeId, String? email);
-
   /// Genera código de invitación de 6 chars con TTL de 7 días.
   /// Revoca los códigos activos previos del hogar.
   /// Retorna el código y su fecha de expiración.
@@ -52,7 +48,8 @@ abstract interface class MembersRepository {
   Future<void> reinstateMember(String homeId, String uid);
 
   /// Promueve a un miembro a admin (vía CF).
-  /// Lanza [MaxAdminsReachedException] en plan Free si ya hay 1 admin.
+  /// Lanza [MaxAdminsReachedException] al alcanzar el tope de admins del hogar
+  /// (Hallazgo #12). En plan Free la promoción se bloquea aparte (free_limit).
   Future<void> promoteToAdmin(String homeId, String uid);
 
   /// Degrada un admin a miembro (vía CF).

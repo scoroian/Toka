@@ -35,10 +35,14 @@ class NotificationPrefsRepositoryImpl implements NotificationPrefsRepository {
 
   @override
   Future<void> updateFcmToken(String homeId, String uid, String token) async {
-    // Usa notación de punto para actualizar solo el campo fcmToken
-    // sin sobrescribir otros campos de notificationPrefs.
-    await _memberRef(homeId, uid).update(
-      {'notificationPrefs.fcmToken': token},
+    // PRIVACIDAD (Hallazgo #01): el token FCM es un secreto de dispositivo, no
+    // un dato del hogar. Antes se escribía en homes/{homeId}/members/{uid}
+    // (legible por todo el hogar). Ahora se guarda en el doc privado
+    // users/{uid}.fcmToken (allow read: if isUser(uid)). El homeId se ignora: el
+    // token es por usuario, no por hogar (y así sirve para todos sus hogares).
+    await _firestore.collection('users').doc(uid).set(
+      {'fcmToken': token},
+      SetOptions(merge: true),
     );
   }
 }

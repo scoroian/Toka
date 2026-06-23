@@ -57,7 +57,7 @@ Future<void> _openDialog(
 }
 
 void main() {
-  testWidgets('muestra los dos valores de compliance cuando diff >= 1%',
+  testWidgets('muestra los dos valores de compliance cuando hay caída visible',
       (tester) async {
     await _openDialog(tester, compliance: 0.87, estimated: 0.81);
 
@@ -65,19 +65,38 @@ void main() {
     expect(find.textContaining('81'), findsOneWidget);
   });
 
-  testWidgets('NO muestra banner rojo cuando diff < 1% (solo 1 miembro)',
+  // Hallazgo #11(a): la penalización debe avisarse SIEMPRE (regla de producto
+  // #7), también cuando un usuario consolidado pasa turno y la caída redondea a
+  // 0 pp. Antes el umbral `diff >= 1%` la ocultaba (penalización silenciosa).
+  testWidgets(
+      'avisa de impacto mínimo cuando la caída redondea a 0 pp (consolidado)',
       (tester) async {
-    // 100% → ~99.0%: diff = 0.99 < 1 punto porcentual
-    await _openDialog(tester, compliance: 1.0, estimated: 100 / 101);
+    // 1000 completadas, 0 pasadas → 100% → 1000/1001 ≈ 99.9% → ambos redondean
+    // a 100%, pero la penalización (passedCount++) se aplica igual.
+    await _openDialog(tester, compliance: 1.0, estimated: 1000 / 1001);
 
-    // El texto de advertencia no debe aparecer
     expect(
-      find.textContaining('bajará'),
-      findsNothing,
+      find.text('El impacto en tu cumplimiento será mínimo.'),
+      findsOneWidget,
     );
+    // No debe mostrar un delta numérico engañoso "100% → 100%".
+    expect(find.textContaining('bajará'), findsNothing);
   });
 
-  testWidgets('muestra banner rojo cuando diff >= 1%', (tester) async {
+  // El escenario exacto del bug: 100 completadas → 100% → ~99.0%. Antes el diff
+  // sin redondear (0.99) caía por debajo del umbral y NO se avisaba; ahora la
+  // caída redondeada (100→99) SÍ es perceptible y se muestra.
+  testWidgets('avisa con números cuando la caída redondeada es 1 pp',
+      (tester) async {
+    await _openDialog(tester, compliance: 1.0, estimated: 100 / 101);
+
+    expect(find.textContaining('bajará'), findsOneWidget);
+    expect(find.textContaining('100'), findsOneWidget);
+    expect(find.textContaining('99'), findsOneWidget);
+  });
+
+  testWidgets('muestra banner con números cuando hay caída clara',
+      (tester) async {
     await _openDialog(tester, compliance: 0.90, estimated: 0.80);
 
     expect(find.textContaining('90'), findsOneWidget);
@@ -129,6 +148,17 @@ void main() {
     await expectLater(
       find.byType(MaterialApp),
       matchesGoldenFile('goldens/pass_turn_dialog.png'),
+    );
+  });
+
+  testWidgets('golden: aviso de penalización con delta pequeño (consolidado)',
+      (tester) async {
+    await _openDialog(tester,
+        compliance: 1.0, estimated: 1000 / 1001, nextName: 'Carlos');
+
+    await expectLater(
+      find.byType(MaterialApp),
+      matchesGoldenFile('goldens/pass_turn_dialog_minimal.png'),
     );
   });
 }

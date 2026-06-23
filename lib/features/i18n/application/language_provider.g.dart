@@ -26,12 +26,12 @@ final languageRepositoryProvider =
 // ignore: unused_element
 typedef LanguageRepositoryRef = AutoDisposeProviderRef<LanguageRepository>;
 String _$availableLanguagesHash() =>
-    r'4e22c5a06f714a2855d613b7676902c2c45af3d8';
+    r'5f67512133263ea94ef892c2fb15af8a6b69f6df';
 
 /// See also [availableLanguages].
 @ProviderFor(availableLanguages)
 final availableLanguagesProvider =
-    AutoDisposeFutureProvider<List<Language>>.internal(
+    AutoDisposeFutureProvider<LanguagesResult>.internal(
   availableLanguages,
   name: r'availableLanguagesProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
@@ -43,6 +43,6 @@ final availableLanguagesProvider =
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-typedef AvailableLanguagesRef = AutoDisposeFutureProviderRef<List<Language>>;
+typedef AvailableLanguagesRef = AutoDisposeFutureProviderRef<LanguagesResult>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

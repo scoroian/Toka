@@ -135,6 +135,12 @@ class _MemberProfileScreenV2State extends ConsumerState<MemberProfileScreenV2> {
       } else {
         await vm.promoteToAdmin(widget.homeId, widget.memberUid);
       }
+    } on MaxAdminsReachedException {
+      // Tope de admins del hogar (Hallazgo #12).
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.homes_admins_max_reached)));
+      }
     } catch (_) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

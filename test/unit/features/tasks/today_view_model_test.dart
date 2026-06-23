@@ -174,6 +174,38 @@ void main() {
     });
   });
 
+  group('excludePendingCompletions', () {
+    TaskPreview task(String id) => TaskPreview(
+          taskId: id,
+          title: 'T $id',
+          visualKind: 'emoji',
+          visualValue: '🧹',
+          recurrenceType: 'daily',
+          currentAssigneeUid: 'u1',
+          currentAssigneeName: null,
+          currentAssigneePhoto: null,
+          nextDueAt: DateTime(2026, 4, 7),
+          isOverdue: false,
+          status: 'active',
+        );
+
+    test('sin pendientes devuelve la lista intacta', () {
+      final tasks = [task('a'), task('b')];
+      expect(excludePendingCompletions(tasks, const {}), tasks);
+    });
+
+    test('oculta las tareas con completación pendiente (optimista)', () {
+      final result =
+          excludePendingCompletions([task('a'), task('b')], const {'a'});
+      expect(result.map((t) => t.taskId), ['b']);
+    });
+
+    test('un taskId pendiente que no está en la lista no afecta', () {
+      final tasks = [task('a')];
+      expect(excludePendingCompletions(tasks, const {'zzz'}), tasks);
+    });
+  });
+
   group('TodayViewModel.homes — HomeDropdownItem', () {
     test('hasPendingToday true cuando membresía lo indica', () {
       final membership = HomeMembership(

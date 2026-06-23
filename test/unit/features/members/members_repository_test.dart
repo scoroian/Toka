@@ -37,16 +37,7 @@ void main() {
     expect(repo.watchHomeMembers('home1'), emits([fakeMember]));
   });
 
-  test('inviteMember lanza MaxMembersReachedException si home está lleno', () {
-    when(() => repo.inviteMember('home1', null))
-        .thenThrow(const MaxMembersReachedException());
-    expect(
-      () => repo.inviteMember('home1', null),
-      throwsA(isA<MaxMembersReachedException>()),
-    );
-  });
-
-  test('promoteToAdmin lanza MaxAdminsReachedException en plan Free', () {
+  test('promoteToAdmin lanza MaxAdminsReachedException al superar el tope', () {
     when(() => repo.promoteToAdmin('home1', 'uid2'))
         .thenThrow(const MaxAdminsReachedException());
     expect(

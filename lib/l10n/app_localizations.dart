@@ -130,6 +130,12 @@ abstract class AppLocalizations {
   /// **'Reintentar'**
   String get retry;
 
+  /// Shown in onboarding language step when the remote language list could not be loaded and defaults are used
+  ///
+  /// In es, this message translates to:
+  /// **'Sin conexión. Mostrando los idiomas básicos; puedes continuar o reintentar.'**
+  String get language_offline_notice;
+
   /// Cancel button label
   ///
   /// In es, this message translates to:
@@ -1180,6 +1186,18 @@ abstract class AppLocalizations {
   /// **'Sí, hecha ✓'**
   String get complete_task_confirm_btn;
 
+  /// SnackBar shown after marking a task done, with an Undo action
+  ///
+  /// In es, this message translates to:
+  /// **'Tarea completada'**
+  String get today_task_completed_undoable;
+
+  /// Undo action label (SnackBar)
+  ///
+  /// In es, this message translates to:
+  /// **'Deshacer'**
+  String get undo;
+
   /// Pass turn dialog title
   ///
   /// In es, this message translates to:
@@ -1749,6 +1767,24 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Plan mensual'**
   String get paywall_cta_monthly;
+
+  /// Free trial badge on the annual plan chip
+  ///
+  /// In es, this message translates to:
+  /// **'{days} días gratis'**
+  String paywall_trial_badge(int days);
+
+  /// Annual CTA when a free trial is available
+  ///
+  /// In es, this message translates to:
+  /// **'Empezar {days} días gratis'**
+  String paywall_cta_start_trial(int days);
+
+  /// Reassurance note shown when a trial is offered
+  ///
+  /// In es, this message translates to:
+  /// **'Después se renueva automáticamente. Cancela cuando quieras.'**
+  String get paywall_trial_note;
 
   /// Restore purchases link
   ///
@@ -2421,6 +2457,30 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Visibilidad del teléfono'**
   String get settings_phone_visibility;
+
+  /// Export personal data (GDPR) option
+  ///
+  /// In es, this message translates to:
+  /// **'Exportar mis datos'**
+  String get settings_export_data;
+
+  /// Export data subtitle
+  ///
+  /// In es, this message translates to:
+  /// **'Descarga un archivo JSON con tus datos personales'**
+  String get settings_export_data_subtitle;
+
+  /// Export data progress message
+  ///
+  /// In es, this message translates to:
+  /// **'Preparando la exportación…'**
+  String get settings_export_data_progress;
+
+  /// Export data error message
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo exportar tus datos. Inténtalo de nuevo.'**
+  String get settings_export_data_error;
 
   /// Subscription section
   ///
@@ -4120,6 +4180,42 @@ abstract class AppLocalizations {
   /// **'No puedes transferir la propiedad mientras pagues el Premium del hogar. Cancela la renovación o transfiere al final del periodo.'**
   String get homes_transfer_error_payer_locked;
 
+  /// Owner-only tile: transfer ownership and then leave the home
+  ///
+  /// In es, this message translates to:
+  /// **'Transferir y salir'**
+  String get homes_transfer_and_leave;
+
+  /// Transfer-and-leave sheet title
+  ///
+  /// In es, this message translates to:
+  /// **'Transferir propiedad y salir'**
+  String get homes_transfer_and_leave_title;
+
+  /// Transfer-and-leave sheet body
+  ///
+  /// In es, this message translates to:
+  /// **'Elige quién será el nuevo propietario. Cuando aceptes, le cederás la propiedad y saldrás del hogar.'**
+  String get homes_transfer_and_leave_body;
+
+  /// Confirm dialog title before transferring ownership and leaving
+  ///
+  /// In es, this message translates to:
+  /// **'¿Transferir y salir?'**
+  String get homes_transfer_and_leave_confirm_title;
+
+  /// Confirm dialog body for transfer-and-leave, named after the new owner
+  ///
+  /// In es, this message translates to:
+  /// **'{name} pasará a ser el propietario y tú saldrás del hogar.'**
+  String homes_transfer_and_leave_confirm_body(String name);
+
+  /// Snackbar after successfully transferring ownership and leaving the home
+  ///
+  /// In es, this message translates to:
+  /// **'Has cedido la propiedad y salido del hogar.'**
+  String get homes_transfer_and_left;
+
   /// Pluralized admin count shown as the value of the admins row
   ///
   /// In es, this message translates to:
@@ -4155,6 +4251,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Sólo Premium puede tener varios administradores.'**
   String get homes_admins_promote_blocked_free;
+
+  /// Snackbar when promoting would exceed the admin cap
+  ///
+  /// In es, this message translates to:
+  /// **'Has alcanzado el máximo de administradores del hogar.'**
+  String get homes_admins_max_reached;
 
   /// Pluralized pending invitation count shown as the value of the invitations row
   ///
@@ -4227,6 +4329,150 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Foto del hogar actualizada.'**
   String get homes_avatar_updated;
+
+  /// Support diagnostics screen title
+  ///
+  /// In es, this message translates to:
+  /// **'Diagnóstico de soporte'**
+  String get support_title;
+
+  /// Shown when the account lacks the support claim
+  ///
+  /// In es, this message translates to:
+  /// **'No tienes permiso de soporte.'**
+  String get support_unauthorized;
+
+  /// Privacy banner on the support diagnostics screen
+  ///
+  /// In es, this message translates to:
+  /// **'Datos redactados: sin teléfonos, tokens ni notas privadas.'**
+  String get support_privacy_notice;
+
+  /// Home ID input label
+  ///
+  /// In es, this message translates to:
+  /// **'ID del hogar'**
+  String get support_homeid_label;
+
+  /// Run diagnostics button
+  ///
+  /// In es, this message translates to:
+  /// **'Diagnosticar'**
+  String get support_diagnose_button;
+
+  /// Empty state before a home is queried
+  ///
+  /// In es, this message translates to:
+  /// **'Introduce un ID de hogar para ver su diagnóstico.'**
+  String get support_empty_prompt;
+
+  /// Empty section placeholder
+  ///
+  /// In es, this message translates to:
+  /// **'Sin datos.'**
+  String get support_no_results;
+
+  /// Home section title
+  ///
+  /// In es, this message translates to:
+  /// **'Hogar'**
+  String get support_section_home;
+
+  /// Members section title with count
+  ///
+  /// In es, this message translates to:
+  /// **'Miembros ({count})'**
+  String support_section_members(int count);
+
+  /// Upcoming tasks section title
+  ///
+  /// In es, this message translates to:
+  /// **'Próximas tareas'**
+  String get support_section_tasks;
+
+  /// Recent events section title
+  ///
+  /// In es, this message translates to:
+  /// **'Eventos recientes'**
+  String get support_section_events;
+
+  /// Home name field label
+  ///
+  /// In es, this message translates to:
+  /// **'Nombre'**
+  String get support_name;
+
+  /// Premium plan field label
+  ///
+  /// In es, this message translates to:
+  /// **'Plan'**
+  String get support_plan;
+
+  /// Premium end date field label
+  ///
+  /// In es, this message translates to:
+  /// **'Premium hasta'**
+  String get support_premium_ends;
+
+  /// Owner field label
+  ///
+  /// In es, this message translates to:
+  /// **'Propietario'**
+  String get support_owner;
+
+  /// Current payer field label
+  ///
+  /// In es, this message translates to:
+  /// **'Pagador'**
+  String get support_payer;
+
+  /// Timezone field label
+  ///
+  /// In es, this message translates to:
+  /// **'Zona horaria'**
+  String get support_timezone;
+
+  /// Phone presence chip label (no value shown)
+  ///
+  /// In es, this message translates to:
+  /// **'Teléfono'**
+  String get support_has_phone;
+
+  /// FCM token presence chip label (no value shown)
+  ///
+  /// In es, this message translates to:
+  /// **'Push'**
+  String get support_has_token;
+
+  /// Per-member stats line
+  ///
+  /// In es, this message translates to:
+  /// **'Hechas: {completed} · Media: {avg} · Racha: {streak}'**
+  String support_member_stats(int completed, String avg, int streak);
+
+  /// Diagnostics generation timestamp
+  ///
+  /// In es, this message translates to:
+  /// **'Generado: {ts}'**
+  String support_generated_at(String ts);
+
+  /// Permission denied error
+  ///
+  /// In es, this message translates to:
+  /// **'Acceso denegado (requiere permiso de soporte).'**
+  String get support_error_permission;
+
+  /// Home not found error
+  ///
+  /// In es, this message translates to:
+  /// **'Hogar no encontrado.'**
+  String get support_error_notfound;
+
+  /// Generic diagnostics error
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo obtener el diagnóstico.'**
+  String get support_error_generic;
 }
 
 class _AppLocalizationsDelegate

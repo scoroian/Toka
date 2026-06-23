@@ -41,6 +41,8 @@ class MemberCard extends StatelessWidget {
           Expanded(
             child: Text(
               member.nickname,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: const TextStyle(fontWeight: FontWeight.w600),
             ),
           ),

@@ -3,18 +3,21 @@ import { onDocumentUpdated } from "firebase-functions/v2/firestore";
 import * as admin from "firebase-admin";
 import * as logger from "firebase-functions/logger";
 import { randomInt } from "crypto";
-import { buildNewMemberDoc, readMemberProfileFields } from "./member_factory";
-import { FREE_LIMITS, FREE_LIMIT_CODES, isPremium } from "../shared/free_limits";
 import {
-  parseDebugPremiumAllowedUids,
-  isDebugPremiumAllowed,
-} from "./debug_premium_allowlist";
+  buildNewMemberDoc,
+  readMemberProfileFields,
+  sanitizeMemberPhone,
+} from "./member_factory";
 import {
-  DEBUG_VALID_STATUSES,
-  DebugPremiumStatus,
-  buildDebugDashboardFlags,
-} from "./debug_premium_flags";
+  FREE_LIMITS,
+  FREE_LIMIT_CODES,
+  PREMIUM_LIMITS,
+  isPremium,
+} from "../shared/free_limits";
+import { buildBannerAdFlags } from "../shared/ad_constants";
 import { normalizeTimeZone } from "../tasks/today_window";
+import { reassignTasksFromDeletedUser } from "../users/cleanup_user";
+import { updateHomeDashboard } from "../tasks/update_dashboard";
 
 const db = admin.firestore();
 const FieldValue = admin.firestore.FieldValue;
@@ -167,10 +170,7 @@ export const createHome = onCall(async (request) => {
         canUseVacations: false,
         canUseReviews: false,
       },
-      adFlags: {
-        showBanner: true,
-        bannerUnit: "ca-app-pub-3940256099942544/6300978111",
-      },
+      adFlags: buildBannerAdFlags(true),
       rescueFlags: {
         isInRescue: false,
         daysLeft: null,
@@ -273,7 +273,7 @@ export const joinHome = onCall(async (request) => {
       tx.update(memberRef, {
         nickname: profile.nickname,
         photoUrl: profile.photoUrl,
-        phone: profile.phone,
+        phone: sanitizeMemberPhone(profile.phone, profile.phoneVisibility),
         phoneVisibility: profile.phoneVisibility,
         status: "active",
         rejoinedAt: now,
@@ -414,7 +414,7 @@ export const joinHomeByCode = onCall(async (request) => {
       tx.update(memberRef, {
         nickname: profile.nickname,
         photoUrl: profile.photoUrl,
-        phone: profile.phone,
+        phone: sanitizeMemberPhone(profile.phone, profile.phoneVisibility),
         phoneVisibility: profile.phoneVisibility,
         status: "active",
         rejoinedAt: now,
@@ -433,6 +433,10 @@ export const joinHomeByCode = onCall(async (request) => {
       );
     }
   });
+
+  // Devolver el homeId para que el cliente (onboarding) navegue al hogar sin
+  // tener que consultar invitations por su cuenta (Hallazgo #01).
+  return { homeId: homeRef.id };
 });
 
 // ---------------------------------------------------------------------------
@@ -502,12 +506,28 @@ export const leaveHome = onCall(async (request) => {
       tx.update(memberRef, { status: "left", leftAt: now });
     }
   });
+
+  // Hallazgo #08: reasignar las tareas del que se va y reconstruir el dashboard,
+  // igual que el borrado de cuenta (cleanupUserInHome). Sin esto, sus tareas
+  // quedan "pegadas" (currentAssigneeUid + assignmentOrder) a un ex-miembro y la
+  // rotación seguiría seleccionándolo. Best-effort: la salida ya está confirmada
+  // en la transacción; un fallo aquí solo se registra (las exclusiones de
+  // 'left' en pasar turno/completar/expirar evitan que se le seleccione igual).
+  try {
+    await reassignTasksFromDeletedUser(uid, homeId);
+    await updateHomeDashboard(homeId);
+  } catch (err) {
+    logger.error(
+      `leaveHome: reasignación de tareas falló home=${homeId} uid=${uid}`,
+      err
+    );
+  }
 });
 
 // ---------------------------------------------------------------------------
 // removeMember
-// Owner/admin expulsa a un miembro del hogar. Marca status="left" en ambos
-// documentos (homes/{homeId}/members/{targetUid} y
+// SOLO el owner expulsa a un miembro del hogar (Hallazgo #12). Marca
+// status="left" en ambos documentos (homes/{homeId}/members/{targetUid} y
 // users/{targetUid}/memberships/{homeId}).
 // Input:  { homeId: string, targetUid: string }
 // ---------------------------------------------------------------------------
@@ -564,11 +584,14 @@ export const removeMember = onCall(async (request) => {
     if (targetRole === "owner") {
       throw new HttpsError("failed-precondition", "cannot-remove-owner");
     }
-    if (callerRole !== "owner" && callerRole !== "admin") {
-      throw new HttpsError("permission-denied", "insufficient-role");
-    }
-    if (callerRole === "admin" && targetRole === "admin") {
-      throw new HttpsError("permission-denied", "admin-cannot-remove-admin");
+    // Hallazgo #12: SOLO el owner puede expulsar. Antes un admin podía expulsar
+    // unilateralmente a cualquier member (y la matriz permitía admin→member sin
+    // confirmación del owner). La UI ya ocultaba el botón a los no-owners, pero
+    // la callable lo aceptaba → un admin podía escalar llamándola directamente.
+    // Alineamos el backend con la UI: expulsar es prerrogativa exclusiva del
+    // owner. Los admins gestionan tareas, no echan gente.
+    if (callerRole !== "owner") {
+      throw new HttpsError("permission-denied", "only-owner-can-remove");
     }
 
     // Payer protection — misma regla que leaveHome.
@@ -601,6 +624,23 @@ export const removeMember = onCall(async (request) => {
       { merge: true }
     );
   });
+
+  // Hallazgo #08: reasignar las tareas del expulsado y reconstruir el dashboard,
+  // igual que el borrado de cuenta (cleanupUserInHome). Sin esto, sus tareas
+  // quedan "pegadas" (currentAssigneeUid + assignmentOrder) a un ex-miembro y la
+  // rotación seguiría seleccionándolo. Best-effort: la expulsión ya está
+  // confirmada en la transacción; un fallo aquí solo se registra (las
+  // exclusiones de 'left' en pasar turno/completar/expirar son la red de
+  // seguridad).
+  try {
+    await reassignTasksFromDeletedUser(targetUid, homeId);
+    await updateHomeDashboard(homeId);
+  } catch (err) {
+    logger.error(
+      `removeMember: reasignación de tareas falló home=${homeId} target=${targetUid}`,
+      err
+    );
+  }
 
   logger.info(
     `removeMember: target=${targetUid} in home=${homeId} by caller=${callerUid}`
@@ -868,7 +908,7 @@ export const repairMemberDocument = onCall(async (request) => {
     nickname,
     photoUrl,
     bio: null,
-    phone,
+    phone: sanitizeMemberPhone(phone, phoneVisibility),
     phoneVisibility,
     role,
     status,
@@ -928,6 +968,21 @@ export const promoteToAdmin = onCall(async (request) => {
     const premiumStatus = homeDoc.data()!["premiumStatus"] as string | undefined;
     if (!isPremium(premiumStatus)) {
       throw new HttpsError("failed-precondition", FREE_LIMIT_CODES.admins);
+    }
+
+    // Hallazgo #12: tope de administradores. Antes no había ninguno → un hogar
+    // podía acumular admins ilimitados. Contamos los admins ACTIVOS (un admin
+    // expulsado conserva role:'admin' con status:'left' hasta su reasignación,
+    // así que debe excluirse). La query va dentro de la transacción y antes de
+    // cualquier escritura (regla de Firestore: lecturas primero).
+    const adminsSnap = await tx.get(
+      homeRef.collection("members").where("role", "==", "admin")
+    );
+    const activeAdmins = adminsSnap.docs.filter(
+      (d) => d.data()["status"] !== "left"
+    ).length;
+    if (activeAdmins >= PREMIUM_LIMITS.maxAdminsBesidesOwner) {
+      throw new HttpsError("resource-exhausted", "max_admins_reached");
     }
 
     // Actualizar rol en ambos documentos para que las reglas Firestore
@@ -1048,7 +1103,7 @@ export const syncMemberProfile = onDocumentUpdated(
       batch.update(memberRef, {
         nickname: profileAfter.nickname,
         photoUrl: profileAfter.photoUrl,
-        phone: profileAfter.phone,
+        phone: sanitizeMemberPhone(profileAfter.phone, profileAfter.phoneVisibility),
         phoneVisibility: profileAfter.phoneVisibility,
       });
     }
@@ -1236,150 +1291,8 @@ export const transferOwnership = onCall(async (request) => {
   );
 });
 
-// @DEBUG_PREMIUM_REMOVE_BEFORE_PRODUCTION_RELEASE
-// ===========================================================================
-// ⚠️  CÓDIGO DE DEBUG — ELIMINAR ANTES DEL RELEASE A PRODUCCIÓN ⚠️
-// ---------------------------------------------------------------------------
-// TODO(release): Cuando exista un proyecto Firebase de producción separado de
-// `toka-dd241`, eliminar ESTA FUNCIÓN COMPLETA (hasta `// END DEBUG PREMIUM`)
-// junto con:
-//   - `functions/.env.<projectId>` con DEBUG_PREMIUM_ALLOWED_UIDS
-//   - `functions/scripts/check-debug-premium.js`
-//   - El botón de debug premium en lib/features/homes/presentation/home_settings_screen.dart
-//   - El método debugSetPremiumStatus en HomesRepositoryImpl y el ViewModel
-// El script `functions/scripts/check-debug-premium.js` detecta este marker y
-// se ejecuta en `npm run deploy:release` para fallar si sigue presente.
-// ---------------------------------------------------------------------------
-// debugSetPremiumStatus
-// Cambia `premiumStatus` de un hogar a uno de 6 valores válidos y propaga el
-// cambio a `homes/{homeId}/views/dashboard.premiumFlags` de forma coherente.
-// Solo el owner puede llamarla. Pensado exclusivamente para QA/desarrollo.
-// Gate: permitido si (FUNCTIONS_EMULATOR==="true") O el uid del caller está
-// en la env var DEBUG_PREMIUM_ALLOWED_UIDS (CSV de UIDs). Si la env var no
-// está definida o está vacía, la función solo funciona en emulador.
-// Input:  { homeId: string, status: "free" | "active" | "cancelledPendingEnd"
-//          | "rescue" | "expiredFree" | "restorable" }
-// Output: { ok: true }
-// ===========================================================================
+// Hallazgo #17: callable READ-ONLY de diagnóstico de soporte (App Check + claim
+// `support`). Definida en su propio módulo; se re-exporta aquí para que el
+// barrel `export * from "./homes"` del index raíz la despliegue.
+export { supportDiagnoseHome } from "./support_diagnostics";
 
-export const debugSetPremiumStatus = onCall(async (request) => {
-  const allowedUids = parseDebugPremiumAllowedUids(
-    process.env.DEBUG_PREMIUM_ALLOWED_UIDS
-  );
-  const allowed = isDebugPremiumAllowed(
-    process.env.FUNCTIONS_EMULATOR,
-    request.auth?.uid,
-    allowedUids
-  );
-  if (!allowed) {
-    throw new HttpsError(
-      "permission-denied",
-      "Debug operations only available in emulator or for allowed users"
-    );
-  }
-
-  if (!request.auth) {
-    throw new HttpsError("unauthenticated", "Must be authenticated");
-  }
-
-  const uid = request.auth.uid;
-  const data = request.data as { homeId?: string; status?: string };
-  const homeId = data.homeId?.trim();
-  const status = data.status?.trim();
-
-  if (!homeId) {
-    throw new HttpsError("invalid-argument", "homeId is required");
-  }
-  if (!status || !DEBUG_VALID_STATUSES.includes(status as DebugPremiumStatus)) {
-    throw new HttpsError(
-      "invalid-argument",
-      `status must be one of: ${DEBUG_VALID_STATUSES.join(", ")}`
-    );
-  }
-
-  const homeRef = db.collection("homes").doc(homeId);
-  const dashboardRef = homeRef.collection("views").doc("dashboard");
-  const homeDoc = await homeRef.get();
-
-  if (!homeDoc.exists) {
-    throw new HttpsError("not-found", "Home not found");
-  }
-  if (homeDoc.data()!["ownerUid"] !== uid) {
-    throw new HttpsError(
-      "permission-denied",
-      "Only the owner can use the debug premium toggle"
-    );
-  }
-
-  const now = Date.now();
-  const day = 24 * 60 * 60 * 1000;
-  const typed = status as DebugPremiumStatus;
-
-  let premiumEndsAt: admin.firestore.Timestamp | null = null;
-  let restoreUntil: admin.firestore.Timestamp | null = null;
-  let autoRenewEnabled = false;
-  let premiumPlan: string | null = null;
-
-  switch (typed) {
-    case "free":
-      break;
-    case "active":
-      premiumEndsAt = admin.firestore.Timestamp.fromMillis(now + 30 * day);
-      autoRenewEnabled = true;
-      premiumPlan = "debug";
-      break;
-    case "cancelledPendingEnd":
-      premiumEndsAt = admin.firestore.Timestamp.fromMillis(now + 10 * day);
-      premiumPlan = "debug";
-      break;
-    case "rescue":
-      premiumEndsAt = admin.firestore.Timestamp.fromMillis(now + 2 * day);
-      premiumPlan = "debug";
-      break;
-    case "expiredFree":
-      premiumEndsAt = admin.firestore.Timestamp.fromMillis(now - 1 * day);
-      break;
-    case "restorable":
-      premiumEndsAt = admin.firestore.Timestamp.fromMillis(now - 2 * day);
-      restoreUntil = admin.firestore.Timestamp.fromMillis(now + 20 * day);
-      break;
-  }
-
-  const flags = buildDebugDashboardFlags(typed);
-  const isPremium = flags.isPremium;
-
-  // En prod syncEntitlement setea currentPayerUid al uid comprador. En QA lo
-  // alineamos con el owner para que los guards de payer-lock funcionen igual.
-  const currentPayerUid = isPremium ? uid : null;
-
-  const batch = db.batch();
-  batch.update(homeRef, {
-    premiumStatus: typed,
-    premiumEndsAt,
-    restoreUntil,
-    autoRenewEnabled,
-    premiumPlan,
-    currentPayerUid,
-    updatedAt: FieldValue.serverTimestamp(),
-  });
-  batch.set(
-    dashboardRef,
-    {
-      premiumFlags: flags.premiumFlags,
-      // `adFlags` debe quedar coherente con `premiumFlags`: si no, un hogar
-      // premium conserva `showBanner:true` stale y la UI sigue pintando banner
-      // hasta el siguiente recompute completo del dashboard.
-      adFlags: flags.adFlags,
-      rescueFlags: flags.rescueFlags,
-      updatedAt: FieldValue.serverTimestamp(),
-    },
-    { merge: true }
-  );
-  await batch.commit();
-
-  logger.info(
-    `debugSetPremiumStatus: home=${homeId} status=${typed} by owner=${uid}`
-  );
-  return { ok: true };
-});
-// END DEBUG PREMIUM

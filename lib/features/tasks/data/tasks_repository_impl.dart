@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
-import 'package:uuid/uuid.dart';
 
 import '../../../core/utils/recurrence_calculator.dart';
 import '../domain/task.dart';
@@ -16,15 +15,13 @@ class TasksRepositoryImpl implements TasksRepository {
 
   final FirebaseFirestore _db;
   final FirebaseFunctions _functions;
-  final _uuid = const Uuid();
 
-  Future<void> _refreshDashboard(String homeId) async {
-    try {
-      await _functions.httpsCallable('refreshDashboard').call({'homeId': homeId});
-    } catch (_) {
-      // El dashboard se actualizará en el próximo cron si la llamada falla
-    }
-  }
+  // El dashboard (homes/{homeId}/views/dashboard) lo reconstruye SIEMPRE el
+  // trigger Firestore server-side `onTaskWriteUpdateDashboard` ante cualquier
+  // alta/edición/borrado de tarea. El cliente ya NO es responsable de pedir la
+  // reconstrucción: antes llamaba a la callable `refreshDashboard` con un catch
+  // silencioso y, si esa llamada fallaba (sin red), la pantalla "Hoy" quedaba
+  // desfasada hasta el cron de medianoche (Hallazgo #07).
 
   CollectionReference<Map<String, dynamic>> _col(String homeId) =>
       _db.collection('homes').doc(homeId).collection('tasks');
@@ -51,14 +48,20 @@ class TasksRepositoryImpl implements TasksRepository {
   @override
   Future<String> createTask(
       String homeId, TaskInput input, String createdByUid) async {
-    final id = _uuid.v4();
+    // El ALTA pasa por la callable `createTask` (Hallazgo #14): el límite Free
+    // se aplica server-side de forma transaccional, contando las tareas activas
+    // reales en el momento. Así una ráfaga de altas no puede eludir el tope
+    // leyendo un contador denormalizado. `createdByUid` lo fija el backend desde
+    // la auth del request (no se envía).
     final nextDue = RecurrenceCalculator.nextDue(
         input.recurrenceRule, DateTime.now(),
         preferToday: input.applyToday);
-    final data = TaskModel.toFirestore(input, homeId, createdByUid, nextDue);
-    await _col(homeId).doc(id).set(data);
-    await _refreshDashboard(homeId);
-    return id;
+    final callable = _functions.httpsCallable('createTask');
+    final result = await callable.call<Map<String, dynamic>>({
+      'homeId': homeId,
+      'task': TaskModel.toCallablePayload(input, nextDue),
+    });
+    return result.data['taskId'] as String;
   }
 
   @override
@@ -67,9 +70,23 @@ class TasksRepositoryImpl implements TasksRepository {
     final nextDue = RecurrenceCalculator.nextDue(
         input.recurrenceRule, DateTime.now(),
         preferToday: input.applyToday);
-    final data = TaskModel.toUpdateMap(input, nextDue);
-    await _col(homeId).doc(taskId).update(data);
-    await _refreshDashboard(homeId);
+    final ref = _col(homeId).doc(taskId);
+    // Leemos el estado guardado (no el del formulario) para decidir si la
+    // rotación cambió: si otro miembro pasó turno mientras se editaba, el
+    // responsable vigente está en Firestore, no en el TaskInput. Así editar un
+    // campo no-asignación nunca reinicia la rotación (Hallazgo #11b).
+    final snap = await ref.get();
+    final prev = snap.data();
+    final previousOrder =
+        List<String>.from(prev?['assignmentOrder'] as List? ?? const []);
+    final currentAssigneeUid = prev?['currentAssigneeUid'] as String?;
+    final data = TaskModel.toUpdateMap(
+      input,
+      nextDue,
+      previousOrder: previousOrder,
+      currentAssigneeUid: currentAssigneeUid,
+    );
+    await ref.update(data);
   }
 
   @override
@@ -78,7 +95,6 @@ class TasksRepositoryImpl implements TasksRepository {
       'status': 'frozen',
       'updatedAt': FieldValue.serverTimestamp(),
     });
-    await _refreshDashboard(homeId);
   }
 
   @override
@@ -87,7 +103,6 @@ class TasksRepositoryImpl implements TasksRepository {
       'status': 'active',
       'updatedAt': FieldValue.serverTimestamp(),
     });
-    await _refreshDashboard(homeId);
   }
 
   @override
@@ -101,7 +116,6 @@ class TasksRepositoryImpl implements TasksRepository {
       'deletedAt': FieldValue.serverTimestamp(),
       'updatedAt': FieldValue.serverTimestamp(),
     });
-    await _refreshDashboard(homeId);
   }
 
   @override

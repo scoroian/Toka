@@ -23,6 +23,7 @@ const OWNER_UID = 'owner1';
 const ADMIN_UID = 'admin1';
 const MEMBER_UID = 'member1';
 const FROZEN_UID = 'frozen1';
+const LEFT_UID = 'left1';
 const OUTSIDER_UID = 'outsider1';
 
 function validTask(homeId = HOME1, createdByUid = OWNER_UID, overrides: Record<string, unknown> = {}) {
@@ -87,6 +88,8 @@ beforeEach(async () => {
     await setDoc(doc(db, `users/${ADMIN_UID}/memberships/${HOME1}`), { status: 'active', role: 'admin' });
     await setDoc(doc(db, `users/${MEMBER_UID}/memberships/${HOME1}`), { status: 'active', role: 'member' });
     await setDoc(doc(db, `users/${FROZEN_UID}/memberships/${HOME1}`), { status: 'frozen', role: 'admin' });
+    // Ex-miembro: membership conservada con status:'left'.
+    await setDoc(doc(db, `users/${LEFT_UID}/memberships/${HOME1}`), { status: 'left', role: 'member' });
     // OUTSIDER_UID sin membresía
   });
 });
@@ -114,6 +117,11 @@ describe('tasks — read', () => {
     await assertSucceeds(getDoc(doc(ctx.firestore(), `homes/${HOME1}/tasks/task1`)));
   });
 
+  it('member LEFT (status:left) NO puede leer tarea (Hallazgo #01)', async () => {
+    const ctx = testEnv.authenticatedContext(LEFT_UID);
+    await assertFails(getDoc(doc(ctx.firestore(), `homes/${HOME1}/tasks/task1`)));
+  });
+
   it('outsider autenticado NO puede leer tarea', async () => {
     const ctx = testEnv.authenticatedContext(OUTSIDER_UID);
     await assertFails(getDoc(doc(ctx.firestore(), `homes/${HOME1}/tasks/task1`)));
@@ -127,25 +135,25 @@ describe('tasks — read', () => {
 
 // ─── CREATE ────────────────────────────────────────────────────────────────────
 
-describe('tasks — create', () => {
-  it('owner activo puede crear tarea válida', async () => {
+// El ALTA de tareas pasó a ser EXCLUSIVAMENTE server-side vía la callable
+// `createTask` (Hallazgo #14): el límite Free no eludible necesita contar
+// documentos, algo imposible en reglas. Por eso `allow create: if false` para
+// CUALQUIER cliente, incluido owner/admin. El enforcement de límites, rol y
+// smartDistribution se prueba en test/integration/create_task.test.ts.
+describe('tasks — create (siempre denegado en cliente — solo vía callable createTask)', () => {
+  it('owner NO puede crear tarea directamente', async () => {
     const ctx = testEnv.authenticatedContext(OWNER_UID);
-    await assertSucceeds(setDoc(doc(ctx.firestore(), `homes/${HOME1}/tasks/task2`), validTask(HOME1, OWNER_UID)));
+    await assertFails(setDoc(doc(ctx.firestore(), `homes/${HOME1}/tasks/task2`), validTask(HOME1, OWNER_UID)));
   });
 
-  it('admin activo puede crear tarea válida', async () => {
+  it('admin NO puede crear tarea directamente', async () => {
     const ctx = testEnv.authenticatedContext(ADMIN_UID);
-    await assertSucceeds(setDoc(doc(ctx.firestore(), `homes/${HOME1}/tasks/task3`), validTask(HOME1, ADMIN_UID)));
+    await assertFails(setDoc(doc(ctx.firestore(), `homes/${HOME1}/tasks/task3`), validTask(HOME1, ADMIN_UID)));
   });
 
   it('member raso activo NO puede crear tarea', async () => {
     const ctx = testEnv.authenticatedContext(MEMBER_UID);
     await assertFails(setDoc(doc(ctx.firestore(), `homes/${HOME1}/tasks/task4`), validTask(HOME1, MEMBER_UID)));
-  });
-
-  it('admin frozen NO puede crear tarea', async () => {
-    const ctx = testEnv.authenticatedContext(FROZEN_UID);
-    await assertFails(setDoc(doc(ctx.firestore(), `homes/${HOME1}/tasks/task5`), validTask(HOME1, FROZEN_UID)));
   });
 
   it('outsider autenticado NO puede crear tarea', async () => {
@@ -156,24 +164,6 @@ describe('tasks — create', () => {
   it('no autenticado NO puede crear tarea', async () => {
     const ctx = testEnv.unauthenticatedContext();
     await assertFails(setDoc(doc(ctx.firestore(), `homes/${HOME1}/tasks/task7`), validTask(HOME1, OWNER_UID)));
-  });
-
-  it('admin NO puede crear tarea con completedCount90d distinto de cero', async () => {
-    const ctx = testEnv.authenticatedContext(ADMIN_UID);
-    await assertFails(setDoc(doc(ctx.firestore(), `homes/${HOME1}/tasks/task_bad_counter`),
-      validTask(HOME1, ADMIN_UID, { completedCount90d: 10 })));
-  });
-
-  it('admin NO puede crear tarea con homeId distinto al path', async () => {
-    const ctx = testEnv.authenticatedContext(ADMIN_UID);
-    await assertFails(setDoc(doc(ctx.firestore(), `homes/${HOME1}/tasks/task_bad_home`),
-      validTask('other-home', ADMIN_UID)));
-  });
-
-  it('admin NO puede crear tarea declarando otro createdByUid', async () => {
-    const ctx = testEnv.authenticatedContext(ADMIN_UID);
-    await assertFails(setDoc(doc(ctx.firestore(), `homes/${HOME1}/tasks/task_bad_creator`),
-      validTask(HOME1, OWNER_UID)));
   });
 });
 
@@ -288,125 +278,6 @@ describe('tasks — delete (siempre denegado — soft delete via update)', () =>
   });
 });
 
-// ─── FREE LIMITS ───────────────────────────────────────────────────────────────
-
-describe('tasks — create (Free plan limits)', () => {
-  const FREE_HOME = 'home_free';
-
-  beforeEach(async () => {
-    await testEnv.withSecurityRulesDisabled(async (ctx) => {
-      const db = ctx.firestore();
-      await setDoc(doc(db, `homes/${FREE_HOME}`), {
-        ownerUid: OWNER_UID,
-        name: 'Free Home',
-        premiumStatus: 'free',
-      });
-      await setDoc(
-        doc(db, `users/${OWNER_UID}/memberships/${FREE_HOME}`),
-        { status: 'active', role: 'owner' },
-      );
-    });
-  });
-
-  it('Free: permite crear puntual cuando activeTasks=3 y oneTime', async () => {
-    await testEnv.withSecurityRulesDisabled(async (ctx) => {
-      await setDoc(
-        doc(ctx.firestore(), `homes/${FREE_HOME}/views/dashboard`),
-        {
-          planCounters: {
-            activeTasks: 3,
-            automaticRecurringTasks: 3,
-            activeMembers: 1,
-            totalAdmins: 1,
-          },
-        },
-      );
-    });
-    const ctx = testEnv.authenticatedContext(OWNER_UID);
-    await assertSucceeds(
-      setDoc(doc(ctx.firestore(), `homes/${FREE_HOME}/tasks/t_ot`),
-        validTask(FREE_HOME, OWNER_UID, {
-          recurrenceType: 'oneTime',
-          recurrenceRule: { kind: 'oneTime', date: '2026-04-28', time: '09:00', timezone: 'Europe/Madrid' },
-        })),
-    );
-  });
-
-  it('Free: bloquea crear cuando activeTasks ya es 4', async () => {
-    await testEnv.withSecurityRulesDisabled(async (ctx) => {
-      await setDoc(
-        doc(ctx.firestore(), `homes/${FREE_HOME}/views/dashboard`),
-        {
-          planCounters: {
-            activeTasks: 4,
-            automaticRecurringTasks: 1,
-            activeMembers: 1,
-            totalAdmins: 1,
-          },
-        },
-      );
-    });
-    const ctx = testEnv.authenticatedContext(OWNER_UID);
-    await assertFails(
-      setDoc(doc(ctx.firestore(), `homes/${FREE_HOME}/tasks/t_fail`),
-        validTask(FREE_HOME, OWNER_UID, {
-          recurrenceType: 'oneTime',
-          recurrenceRule: { kind: 'oneTime', date: '2026-04-28', time: '09:00', timezone: 'Europe/Madrid' },
-        })),
-    );
-  });
-
-  it('Free: bloquea crear recurrente cuando automaticRecurringTasks=3', async () => {
-    await testEnv.withSecurityRulesDisabled(async (ctx) => {
-      await setDoc(
-        doc(ctx.firestore(), `homes/${FREE_HOME}/views/dashboard`),
-        {
-          planCounters: {
-            activeTasks: 3,
-            automaticRecurringTasks: 3,
-            activeMembers: 1,
-            totalAdmins: 1,
-          },
-        },
-      );
-    });
-    const ctx = testEnv.authenticatedContext(OWNER_UID);
-    await assertFails(
-      setDoc(doc(ctx.firestore(), `homes/${FREE_HOME}/tasks/t_rec`),
-        validTask(FREE_HOME, OWNER_UID, {
-          recurrenceRule: { kind: 'daily', every: 1, time: '09:00', timezone: 'Europe/Madrid' },
-        })),
-    );
-  });
-
-  it('Premium: ignora los contadores aunque estén al tope', async () => {
-    await testEnv.withSecurityRulesDisabled(async (ctx) => {
-      const db = ctx.firestore();
-      await setDoc(doc(db, `homes/${FREE_HOME}`), {
-        ownerUid: OWNER_UID,
-        name: 'Premium Home',
-        premiumStatus: 'active',
-      });
-      await setDoc(doc(db, `homes/${FREE_HOME}/views/dashboard`), {
-        planCounters: {
-          activeTasks: 99,
-          automaticRecurringTasks: 99,
-          activeMembers: 1,
-          totalAdmins: 1,
-        },
-      });
-    });
-    const ctx = testEnv.authenticatedContext(OWNER_UID);
-    await assertSucceeds(
-      setDoc(doc(ctx.firestore(), `homes/${FREE_HOME}/tasks/t_premium`),
-        validTask(FREE_HOME, OWNER_UID, {
-          recurrenceType: 'weekly',
-          recurrenceRule: { kind: 'weekly', weekdays: ['MON'], time: '09:00', timezone: 'Europe/Madrid' },
-        })),
-    );
-  });
-});
-
 // ─── SMART DISTRIBUTION (gate Premium) ───────────────────────────────────────
 
 describe('tasks — smart distribution (gate Premium)', () => {
@@ -440,24 +311,10 @@ describe('tasks — smart distribution (gate Premium)', () => {
     });
   });
 
-  it('Free NO puede CREAR tarea con smartDistribution', async () => {
-    const ctx = testEnv.authenticatedContext(OWNER_UID);
-    await assertFails(setDoc(doc(ctx.firestore(), `homes/${FREE}/tasks/new_smart`),
-      validTask(FREE, OWNER_UID, { assignmentMode: 'smartDistribution' })));
-  });
-
-  it('Free SÍ puede CREAR tarea con basicRotation', async () => {
-    const ctx = testEnv.authenticatedContext(OWNER_UID);
-    await assertSucceeds(setDoc(doc(ctx.firestore(), `homes/${FREE}/tasks/new_basic`),
-      validTask(FREE, OWNER_UID, { assignmentMode: 'basicRotation' })));
-  });
-
-  it('Premium SÍ puede CREAR tarea con smartDistribution', async () => {
-    const ctx = testEnv.authenticatedContext(OWNER_UID);
-    await assertSucceeds(setDoc(doc(ctx.firestore(), `homes/${PREM}/tasks/new_smart`),
-      validTask(PREM, OWNER_UID, { assignmentMode: 'smartDistribution' })));
-  });
-
+  // El gate de smartDistribution en CREATE vive ahora en la callable
+  // `createTask` (Hallazgo #14: create es server-side, ver
+  // test/integration/create_task.test.ts). Aquí solo quedan los gates de
+  // UPDATE, que siguen en reglas (`taskUpdateSmartAllowed`).
   it('Free NO puede CAMBIAR una tarea de básica a smart', async () => {
     const ctx = testEnv.authenticatedContext(OWNER_UID);
     await assertFails(updateDoc(doc(ctx.firestore(), `homes/${FREE}/tasks/basic_existing`), {

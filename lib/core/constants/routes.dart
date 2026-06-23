@@ -27,6 +27,11 @@ abstract class AppRoutes {
   static const String historyEventDetail = '/history/:homeId/:eventId';
   static const String notificationSettings = '/notification-settings';
 
+  /// Pantalla interna de diagnóstico de soporte (Hallazgo #17). Solo accesible
+  /// para cuentas con el custom claim `support`; gateada también en el backend
+  /// (callable supportDiagnoseHome con App Check + claim).
+  static const String supportDiagnostics = '/support-diagnostics';
+
   static const List<String> all = [
     splash,
     login,
@@ -52,5 +57,6 @@ abstract class AppRoutes {
     history,
     historyEventDetail,
     notificationSettings,
+    supportDiagnostics,
   ];
 }

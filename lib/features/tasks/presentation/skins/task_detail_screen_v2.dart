@@ -216,19 +216,28 @@ class TaskDetailScreenV2 extends ConsumerWidget {
                 ...data.upcomingOccurrences.map((o) => Padding(
                       padding: const EdgeInsets.only(bottom: 4),
                       child: Row(children: [
-                        Text(
-                          '${TokaDates.dateMediumWithWeekday(o.date, Localizations.localeOf(context))} '
-                          '${TokaDates.timeShort(o.date, Localizations.localeOf(context))}',
-                          style: GoogleFonts.plusJakartaSans(
-                              fontWeight: FontWeight.w700),
+                        Expanded(
+                          child: Text(
+                            '${TokaDates.dateMediumWithWeekday(o.date, Localizations.localeOf(context))} '
+                            '${TokaDates.timeShort(o.date, Localizations.localeOf(context))}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.plusJakartaSans(
+                                fontWeight: FontWeight.w700),
+                          ),
                         ),
                         const SizedBox(width: 8),
-                        Text(
-                          o.assigneeName ?? '—',
-                          style: GoogleFonts.plusJakartaSans(
-                              color: isDark
-                                  ? AppColorsV2.textSecondaryDark
-                                  : AppColorsV2.textSecondaryLight),
+                        Flexible(
+                          child: Text(
+                            o.assigneeName ?? '—',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.end,
+                            style: GoogleFonts.plusJakartaSans(
+                                color: isDark
+                                    ? AppColorsV2.textSecondaryDark
+                                    : AppColorsV2.textSecondaryLight),
+                          ),
                         ),
                       ]),
                     )),
@@ -262,13 +271,19 @@ class _InfoRow extends StatelessWidget {
                       color: isDark
                           ? AppColorsV2.textSecondaryDark
                           : AppColorsV2.textSecondaryLight))),
-          Text(value,
-              style: GoogleFonts.plusJakartaSans(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: isDark
-                      ? AppColorsV2.textPrimaryDark
-                      : AppColorsV2.textPrimaryLight)),
+          const SizedBox(width: 12),
+          Flexible(
+            child: Text(value,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.end,
+                style: GoogleFonts.plusJakartaSans(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: isDark
+                        ? AppColorsV2.textPrimaryDark
+                        : AppColorsV2.textPrimaryLight)),
+          ),
         ]),
       );
 }

@@ -58,3 +58,6 @@ functions/.env.*
 
 # Firebase Admin SDK service-account keys para QA/scripts locales. NUNCA commitear.
 secrets/
+
+# Flutter golden test failure output (diff/master/test images) — nunca commitear
+**/test/**/failures/

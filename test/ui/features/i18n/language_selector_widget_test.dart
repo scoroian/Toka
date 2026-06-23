@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:toka/features/i18n/application/language_provider.dart';
 import 'package:toka/features/i18n/domain/language.dart';
 import 'package:toka/features/i18n/domain/language_repository.dart';
+import 'package:toka/features/i18n/domain/languages_result.dart';
 import 'package:toka/features/i18n/presentation/language_selector_widget.dart';
 import 'package:toka/l10n/app_localizations.dart';
 
@@ -25,7 +26,8 @@ const _testLanguages = [
 
 class _FakeLanguageRepository implements LanguageRepository {
   @override
-  Future<List<Language>> fetchAvailableLanguages() async => _testLanguages;
+  Future<LanguagesResult> fetchAvailableLanguages() async =>
+      const LanguagesResult(languages: _testLanguages);
 }
 
 Widget _wrap(Widget child) {

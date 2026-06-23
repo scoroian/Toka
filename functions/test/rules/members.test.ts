@@ -15,6 +15,7 @@ const OWNER_UID = 'owner1';
 const ADMIN_UID = 'admin1';
 const MEMBER_UID = 'member1';
 const FROZEN_UID = 'frozen1';
+const LEFT_UID = 'left1';
 const OUTSIDER_UID = 'outsider1';
 
 beforeAll(async () => {
@@ -55,11 +56,18 @@ beforeEach(async () => {
       uid: FROZEN_UID, role: 'member', status: 'frozen',
       notificationPrefs: { taskReminders: false }, vacation: null,
     });
+    // Miembro que salió/fue expulsado: su doc y su membership se conservan con
+    // status:'left' (para poder reincorporarlo), pero NO debe seguir leyendo.
+    await setDoc(doc(db, `homes/${HOME1}/members/${LEFT_UID}`), {
+      uid: LEFT_UID, role: 'member', status: 'left',
+      notificationPrefs: { taskReminders: true }, vacation: null,
+    });
 
     await setDoc(doc(db, `users/${OWNER_UID}/memberships/${HOME1}`), { status: 'active', role: 'owner' });
     await setDoc(doc(db, `users/${ADMIN_UID}/memberships/${HOME1}`), { status: 'active', role: 'admin' });
     await setDoc(doc(db, `users/${MEMBER_UID}/memberships/${HOME1}`), { status: 'active', role: 'member' });
     await setDoc(doc(db, `users/${FROZEN_UID}/memberships/${HOME1}`), { status: 'frozen', role: 'member' });
+    await setDoc(doc(db, `users/${LEFT_UID}/memberships/${HOME1}`), { status: 'left', role: 'member' });
   });
 });
 
@@ -84,6 +92,16 @@ describe('members — read', () => {
   it('member frozen puede leer cualquier member', async () => {
     const ctx = testEnv.authenticatedContext(FROZEN_UID);
     await assertSucceeds(getDoc(doc(ctx.firestore(), `homes/${HOME1}/members/${OWNER_UID}`)));
+  });
+
+  it('member LEFT (status:left) NO puede leer members (Hallazgo #01)', async () => {
+    const ctx = testEnv.authenticatedContext(LEFT_UID);
+    await assertFails(getDoc(doc(ctx.firestore(), `homes/${HOME1}/members/${OWNER_UID}`)));
+  });
+
+  it('member LEFT NO puede leer su propio doc de miembro', async () => {
+    const ctx = testEnv.authenticatedContext(LEFT_UID);
+    await assertFails(getDoc(doc(ctx.firestore(), `homes/${HOME1}/members/${LEFT_UID}`)));
   });
 
   it('outsider autenticado NO puede leer members', async () => {
@@ -124,6 +142,15 @@ describe('members — update propio (campos permitidos)', () => {
       updateDoc(doc(ctx.firestore(), `homes/${HOME1}/members/${MEMBER_UID}`), {
         notificationPrefs: { taskReminders: false },
         vacation: { start: '2026-06-01', end: '2026-06-10' },
+      })
+    );
+  });
+
+  it('member LEFT NO puede actualizar ni sus propias notificationPrefs (Hallazgo #01)', async () => {
+    const ctx = testEnv.authenticatedContext(LEFT_UID);
+    await assertFails(
+      updateDoc(doc(ctx.firestore(), `homes/${HOME1}/members/${LEFT_UID}`), {
+        notificationPrefs: { taskReminders: false },
       })
     );
   });

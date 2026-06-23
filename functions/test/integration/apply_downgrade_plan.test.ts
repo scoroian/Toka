@@ -12,6 +12,7 @@ const HOME_AUTO = 'home-downgrade-auto';    // sin plan manual
 const HOME_MANUAL = 'home-downgrade-manual'; // con plan manual
 const HOME_FREE = 'home-downgrade-free';     // ya es free
 const HOME_ACTIVE = 'home-downgrade-active'; // periodo aún vigente
+const HOME_ACTIVE_EXPIRED = 'home-downgrade-active-expired'; // active VENCIDO (#06)
 const OWNER = 'owner-downgrade';
 const MEMBER_A = 'member-downgrade-a';
 const MEMBER_B = 'member-downgrade-b';
@@ -51,6 +52,12 @@ beforeAll(async () => {
 
   // HOME_ACTIVE: premiumEndsAt en el futuro (no debe procesarse)
   await createHome(HOME_ACTIVE, OWNER, { premiumStatus: 'rescue', premiumEndsAt: futureDate(5) });
+
+  // HOME_ACTIVE_EXPIRED: status 'active' pero periodo VENCIDO (renovación
+  // perdida / cobro fallido sin RTDN). Antes del #06 nunca se degradaba.
+  await createHome(HOME_ACTIVE_EXPIRED, OWNER, { premiumStatus: 'active', premiumEndsAt: pastDate(1) });
+  await addMemberToHome(HOME_ACTIVE_EXPIRED, MEMBER_A, 'member', 'active');
+  await addMemberToHome(HOME_ACTIVE_EXPIRED, MEMBER_B, 'member', 'active');
 });
 
 
@@ -77,6 +84,20 @@ describe('applyDowngradeJob — downgrade automático', () => {
   it('hogar con plan manual → respeta selectedTaskIds', async () => {
     const taskM1 = await getDb().collection('homes').doc(HOME_MANUAL).collection('tasks').doc('task-m1').get();
     expect(taskM1.data()!['status']).toBe('active'); // task-m1 está en el plan → no se congela
+  });
+});
+
+describe('applyDowngradeJob — active vencido (Hallazgo #06)', () => {
+  it('hogar active con periodo vencido → premiumStatus = restorable', async () => {
+    const homeDoc = await getDb().collection('homes').doc(HOME_ACTIVE_EXPIRED).get();
+    expect(homeDoc.data()!['premiumStatus']).toBe('restorable');
+  });
+
+  it('dashboard del hogar active vencido → ads ON tras el downgrade', async () => {
+    const dash = await getDb().collection('homes').doc(HOME_ACTIVE_EXPIRED)
+      .collection('views').doc('dashboard').get();
+    expect(dash.data()!['premiumFlags']['isPremium']).toBe(false);
+    expect(dash.data()!['premiumFlags']['showAds']).toBe(true);
   });
 });
 

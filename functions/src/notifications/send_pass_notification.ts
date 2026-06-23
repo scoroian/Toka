@@ -1,6 +1,11 @@
 // functions/src/notifications/send_pass_notification.ts
 import * as admin from "firebase-admin";
-import * as logger from "firebase-functions/logger";
+import {
+  getUserFcmToken,
+  clearFcmTokenIfMatches,
+  isUnregisteredTokenError,
+} from "./fcm_tokens";
+import { logEvent, newCorrelationId } from "../shared/log";
 
 const db = admin.firestore();
 const messaging = admin.messaging();
@@ -12,17 +17,19 @@ export async function sendPassNotification(
   toUid: string,
   fromUid: string
 ): Promise<void> {
+  // Solo notificamos a miembros del hogar.
   const memberRef = db.collection("homes").doc(homeId).collection("members").doc(toUid);
   const memberSnap = await memberRef.get();
   if (!memberSnap.exists) return;
 
-  const memberData = memberSnap.data()!;
-  const notifPrefs = memberData["notificationPrefs"] as Record<string, unknown> | undefined;
-  const fcmToken = notifPrefs?.["fcmToken"] as string | undefined;
+  // El token FCM ya NO está en el doc de miembro (Hallazgo #01): se lee del doc
+  // privado users/{uid}.
+  const fcmToken = await getUserFcmToken(toUid);
   if (!fcmToken) return;
 
   const homeSnap = await db.collection("homes").doc(homeId).get();
   const homeName: string = homeSnap.data()?.["name"] ?? "Hogar";
+  const correlationId = newCorrelationId();
 
   try {
     await messaging.send({
@@ -38,9 +45,32 @@ export async function sendPassNotification(
         fromUid,
       },
     });
-    logger.info(`sendPassNotification: sent to ${toUid} for task ${taskId}`);
+    logEvent("info", "pass_notification_sent", {
+      homeId,
+      uid: toUid,
+      correlationId,
+      taskId,
+    });
   } catch (err) {
     // No loguear el fcmToken (secreto). Identificamos por toUid + taskId.
-    logger.warn("sendPassNotification failed", { homeId, toUid, taskId, err });
+    logEvent("warn", "pass_notification_failed", {
+      homeId,
+      uid: toUid,
+      correlationId,
+      taskId,
+      errorCode: (err as { code?: string } | null)?.code ?? null,
+    });
+    // Hallazgo #17: purgar el token si el dispositivo ya no está registrado.
+    if (isUnregisteredTokenError(err)) {
+      const removed = await clearFcmTokenIfMatches(toUid, fcmToken);
+      if (removed) {
+        logEvent("info", "fcm_token_purged", {
+          homeId,
+          uid: toUid,
+          correlationId,
+          source: "sendPassNotification",
+        });
+      }
+    }
   }
 }

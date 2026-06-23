@@ -4,6 +4,11 @@ import {
   getDb, makeCallableRequest,
 } from './helpers/setup';
 import { syncEntitlement } from '../../src/entitlement/sync_entitlement';
+import {
+  __setReceiptVerifiersForTesting,
+  type ReceiptVerifiers,
+} from '../../src/entitlement/sync_entitlement_helpers';
+import type { VerifiedReceipt } from '../../src/entitlement/store_verifiers';
 
 const wrapped = (req: any): Promise<any> => (syncEntitlement as any).run(req);
 
@@ -11,22 +16,38 @@ const HOME = 'home-sync';
 const OWNER = 'owner-sync';
 const MEMBER = 'member-sync';
 
-// El helper parseReceiptData en sync_entitlement_helpers.ts parsea un JSON
-// con campos { status, plan, endsAt, autoRenewEnabled }
-const validActiveReceipt = JSON.stringify({
-  status: 'active',
-  plan: 'monthly',
-  endsAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-  autoRenewEnabled: true,
-});
-const expiredReceipt = JSON.stringify({
-  status: 'expired',
-  plan: 'monthly',
-  endsAt: new Date(Date.now() - 1000).toISOString(),
-  autoRenewEnabled: false,
+// El cliente ahora envía SOLO datos firmables por la store (productId,
+// purchaseToken, transactionId, source); el backend deriva el estado del recibo
+// verificado server-to-store (aquí mockeado).
+const androidReceipt = JSON.stringify({
+  productId: 'toka_premium_monthly',
+  purchaseToken: 'gp-token-sync-1',
+  transactionId: 'GPA.SYNC.1',
+  source: 'google_play',
 });
 
+function verified(over: Partial<VerifiedReceipt>): VerifiedReceipt {
+  return {
+    status: 'active',
+    plan: 'monthly',
+    endsAt: new Date('2027-06-01T00:00:00.000Z'),
+    autoRenewEnabled: true,
+    storeVerified: true,
+    chargeId: 'gp-token-sync-1',
+    productId: 'toka_premium_monthly',
+    ...over,
+  };
+}
+
+function installVerifier(impl: () => Promise<VerifiedReceipt>) {
+  const verifiers: ReceiptVerifiers = { verifyGooglePlay: impl };
+  __setReceiptVerifiersForTesting(verifiers);
+}
+
+let prevFunctionsEmulator: string | undefined;
 beforeAll(async () => {
+  prevFunctionsEmulator = process.env.FUNCTIONS_EMULATOR;
+  process.env.FUNCTIONS_EMULATOR = 'true';
   await cleanAll();
   await createUser(OWNER);
   await createUser(MEMBER);
@@ -34,14 +55,18 @@ beforeAll(async () => {
   await addMemberToHome(HOME, MEMBER, 'member', 'active');
 });
 
+afterAll(() => {
+  __setReceiptVerifiersForTesting(undefined);
+  if (prevFunctionsEmulator === undefined) delete process.env.FUNCTIONS_EMULATOR;
+  else process.env.FUNCTIONS_EMULATOR = prevFunctionsEmulator;
+});
 
-describe('syncEntitlement — happy path', () => {
-  it('receipt válido activa premium en el hogar', async () => {
+describe('syncEntitlement — happy path (recibo verificado)', () => {
+  beforeEach(() => installVerifier(async () => verified({})));
+
+  it('recibo válido verificado activa premium en el hogar', async () => {
     const result = await wrapped(makeCallableRequest(OWNER, {
-      homeId: HOME,
-      receiptData: validActiveReceipt,
-      platform: 'ios',
-      chargeId: 'charge-test-001',
+      homeId: HOME, receiptData: androidReceipt, platform: 'android',
     }));
 
     expect(result.success).toBe(true);
@@ -52,43 +77,45 @@ describe('syncEntitlement — happy path', () => {
     expect(homeDoc.data()!['currentPayerUid']).toBe(OWNER);
   });
 
-  it('receipt válido crea doc en subscriptions/history/charges', async () => {
+  it('crea doc en subscriptions/history/charges con chargeId derivado server-side', async () => {
+    // chargeId = purchaseToken verificado, no el purchaseID del cliente.
     const chargeDoc = await getDb()
       .collection('homes').doc(HOME)
       .collection('subscriptions').doc('history')
-      .collection('charges').doc('charge-test-001')
+      .collection('charges').doc('gp-token-sync-1')
       .get();
     expect(chargeDoc.exists).toBe(true);
     expect(chargeDoc.data()!['status']).toBe('active');
+    expect(chargeDoc.data()!['storeVerified']).toBe(true);
   });
 
-  it('receipt válido actualiza premiumFlags en dashboard', async () => {
+  it('actualiza premiumFlags en dashboard', async () => {
     const dashDoc = await getDb().collection('homes').doc(HOME).collection('views').doc('dashboard').get();
     expect(dashDoc.data()?.['premiumFlags']?.['isPremium']).toBe(true);
+    expect(dashDoc.data()?.['premiumFlags']?.['showAds']).toBe(false);
   });
 
-  it('llamada idempotente con mismo chargeId no duplica slot unlock', async () => {
-    // Segunda llamada con mismo chargeId → validForUnlock = false
-    await wrapped(makeCallableRequest(OWNER, {
-      homeId: HOME,
-      receiptData: validActiveReceipt,
-      platform: 'ios',
-      chargeId: 'charge-test-001',
+  it('marca billingState=currentPayer en la membership del pagador', async () => {
+    const membership = await getDb()
+      .collection('users').doc(OWNER)
+      .collection('memberships').doc(HOME).get();
+    expect(membership.data()?.['billingState']).toBe('currentPayer');
+  });
+
+  it('recibo verificado expirado deja premiumStatus = expired', async () => {
+    installVerifier(async () => verified({
+      status: 'expired',
+      chargeId: 'gp-token-sync-2',
+      endsAt: new Date('2020-01-01T00:00:00.000Z'),
     }));
-    const chargeDoc = await getDb()
-      .collection('homes').doc(HOME)
-      .collection('subscriptions').doc('history')
-      .collection('charges').doc('charge-test-001')
-      .get();
-    expect(chargeDoc.data()!['validForUnlock']).toBe(false);
-  });
-
-  it('receipt expirado deja premiumStatus = expired', async () => {
+    const receipt2 = JSON.stringify({
+      productId: 'toka_premium_monthly',
+      purchaseToken: 'gp-token-sync-2',
+      transactionId: 'GPA.SYNC.2',
+      source: 'google_play',
+    });
     const result = await wrapped(makeCallableRequest(OWNER, {
-      homeId: HOME,
-      receiptData: expiredReceipt,
-      platform: 'android',
-      chargeId: 'charge-test-002',
+      homeId: HOME, receiptData: receipt2, platform: 'android',
     }));
     expect(result.premiumStatus).toBe('expired');
     const homeDoc = await getDb().collection('homes').doc(HOME).get();
@@ -97,16 +124,18 @@ describe('syncEntitlement — happy path', () => {
 });
 
 describe('syncEntitlement — errores', () => {
+  beforeEach(() => installVerifier(async () => verified({})));
+
   it('sin autenticación → unauthenticated', async () => {
     await expect(
-      wrapped({ data: { homeId: HOME, receiptData: validActiveReceipt, platform: 'ios', chargeId: 'x' }, auth: null, rawRequest: {} })
+      wrapped({ data: { homeId: HOME, receiptData: androidReceipt, platform: 'android' }, auth: null, rawRequest: {} })
     ).rejects.toMatchObject({ code: 'unauthenticated' });
   });
 
   it('usuario no miembro del hogar → permission-denied', async () => {
     await expect(
       wrapped(makeCallableRequest('outsider-sync', {
-        homeId: HOME, receiptData: validActiveReceipt, platform: 'ios', chargeId: 'charge-x',
+        homeId: HOME, receiptData: androidReceipt, platform: 'android',
       }))
     ).rejects.toMatchObject({ code: 'permission-denied' });
   });
@@ -114,7 +143,7 @@ describe('syncEntitlement — errores', () => {
   it('campos requeridos vacíos → invalid-argument', async () => {
     await expect(
       wrapped(makeCallableRequest(OWNER, {
-        homeId: '', receiptData: '', platform: 'ios', chargeId: '',
+        homeId: '', receiptData: '', platform: 'android',
       }))
     ).rejects.toMatchObject({ code: 'invalid-argument' });
   });

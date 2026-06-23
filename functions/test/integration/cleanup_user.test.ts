@@ -155,6 +155,67 @@ describe("cleanupDeletedUser — owner único → hogar huérfano", () => {
 });
 
 // ---------------------------------------------------------------------------
+describe("cleanupDeletedUser — GDPR: scrub de PII en snapshot + borrado foto Storage", () => {
+  const HOME = "home-cleanup-gdpr";
+  const OWNER = "owner-gdpr";
+  const MEMBER = "member-gdpr";
+  const BUCKET = `${process.env.GCLOUD_PROJECT ?? "demo-toka-integration"}.appspot.com`;
+  const PHOTO_PATH = `users/${MEMBER}/profile.jpg`;
+
+  beforeAll(async () => {
+    await createUser(OWNER);
+    await createUser(MEMBER);
+    await createHome(HOME, OWNER, { premiumStatus: "free" });
+    // Miembro con TODA la PII de contacto en el snapshot (legible por el hogar).
+    await addMemberToHome(HOME, MEMBER, "member", "active", {
+      phone: "+34600111222",
+      photoUrl: `https://firebasestorage.googleapis.com/v0/b/${BUCKET}/o/${encodeURIComponent(PHOTO_PATH)}?alt=media&token=abc-123`,
+      notificationPrefs: {
+        taskReminders: true,
+        passNotifications: true,
+        fcmToken: "device-token-xyz",
+      },
+    });
+    // Foto real subida al emulador de Storage.
+    await admin
+      .storage()
+      .bucket(BUCKET)
+      .file(PHOTO_PATH)
+      .save(Buffer.from("fake-jpeg-bytes"), { contentType: "image/jpeg" });
+
+    await cleanupDeletedUser(MEMBER);
+  });
+
+  it("borra phone y photoUrl del snapshot de miembro conservado", async () => {
+    const d = (
+      await getDb().collection("homes").doc(HOME).collection("members").doc(MEMBER).get()
+    ).data()!;
+    expect(d["status"]).toBe("left");
+    expect(d["phone"]).toBeNull();
+    expect(d["photoUrl"]).toBeNull();
+  });
+
+  it("borra notificationPrefs.fcmToken pero conserva el resto de prefs", async () => {
+    const d = (
+      await getDb().collection("homes").doc(HOME).collection("members").doc(MEMBER).get()
+    ).data()!;
+    const prefs = d["notificationPrefs"] as Record<string, unknown>;
+    expect(prefs["fcmToken"]).toBeUndefined();
+    expect(prefs["taskReminders"]).toBe(true);
+    expect(prefs["passNotifications"]).toBe(true);
+  });
+
+  it("borra el objeto de la foto en Cloud Storage (la download URL queda 404)", async () => {
+    const [exists] = await admin.storage().bucket(BUCKET).file(PHOTO_PATH).exists();
+    expect(exists).toBe(false);
+  });
+
+  it("es idempotente sin foto: re-ejecutar no lanza aunque el objeto ya no exista", async () => {
+    await expect(cleanupDeletedUser(MEMBER)).resolves.toBeUndefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
 describe("cleanupDeletedUser — idempotente", () => {
   const HOME = "home-cleanup-idem";
   const OWNER = "owner-idem";

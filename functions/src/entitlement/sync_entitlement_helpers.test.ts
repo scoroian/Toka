@@ -1,5 +1,10 @@
 // functions/src/entitlement/sync_entitlement_helpers.test.ts
-import { parseReceiptData, validateReceipt } from "./sync_entitlement_helpers";
+import {
+  parseReceiptData,
+  validateReceipt,
+  type ReceiptVerifiers,
+} from "./sync_entitlement_helpers";
+import type { VerifiedReceipt } from "./store_verifiers";
 import { HttpsError } from "firebase-functions/v2/https";
 
 describe("parseReceiptData", () => {
@@ -109,5 +114,92 @@ describe("validateReceipt", () => {
     await expect(validateReceipt(baseReceipt, "android")).rejects.toThrow(
       HttpsError,
     );
+  });
+
+  it("modo dev: chargeId se deriva server-side del purchaseToken (no del cliente)", async () => {
+    process.env.STRICT_RECEIPT_VALIDATION = "false";
+    const result = await validateReceipt(baseReceipt, "android");
+    expect(result.chargeId).toBe("tok-1");
+  });
+});
+
+describe("validateReceipt — con verificador inyectado (server-to-store)", () => {
+  const androidReceipt = {
+    productId: "toka_premium_annual",
+    purchaseToken: "gp-token-xyz",
+    transactionId: "GPA.1",
+    source: "google_play",
+  };
+  const iosReceipt = {
+    productId: "toka_premium_monthly",
+    purchaseToken: "ios-blob",
+    transactionId: "2000000123",
+    source: "app_store",
+  };
+
+  function verified(over: Partial<VerifiedReceipt>): VerifiedReceipt {
+    return {
+      status: "active",
+      plan: "annual",
+      endsAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+      autoRenewEnabled: true,
+      storeVerified: true,
+      chargeId: "gp-token-xyz",
+      productId: "toka_premium_annual",
+      ...over,
+    };
+  }
+
+  afterEach(() => {
+    delete process.env.STRICT_RECEIPT_VALIDATION;
+  });
+
+  it("android: usa verifyGooglePlay y deriva estado del recibo verificado", async () => {
+    const verifiers: ReceiptVerifiers = {
+      verifyGooglePlay: jest.fn().mockResolvedValue(verified({})),
+    };
+    const result = await validateReceipt(androidReceipt, "android", verifiers);
+    expect(verifiers.verifyGooglePlay).toHaveBeenCalledTimes(1);
+    expect(result.storeVerified).toBe(true);
+    expect(result.status).toBe("active");
+    expect(result.plan).toBe("annual");
+    expect(result.chargeId).toBe("gp-token-xyz");
+  });
+
+  it("ios: usa verifyAppStore y deriva chargeId del originalTransactionId", async () => {
+    const verifiers: ReceiptVerifiers = {
+      verifyAppStore: jest.fn().mockResolvedValue(
+        verified({
+          plan: "monthly",
+          productId: "toka_premium_monthly",
+          chargeId: "1000000999",
+        }),
+      ),
+    };
+    const result = await validateReceipt(iosReceipt, "ios", verifiers);
+    expect(verifiers.verifyAppStore).toHaveBeenCalledTimes(1);
+    expect(result.chargeId).toBe("1000000999");
+    expect(result.storeVerified).toBe(true);
+  });
+
+  it("recibo verificado como expirado NO activa (status expired)", async () => {
+    const verifiers: ReceiptVerifiers = {
+      verifyGooglePlay: jest.fn().mockResolvedValue(
+        verified({ status: "expired", endsAt: new Date(Date.now() - 1000) }),
+      ),
+    };
+    const result = await validateReceipt(androidReceipt, "android", verifiers);
+    expect(result.status).toBe("expired");
+    expect(result.storeVerified).toBe(true);
+  });
+
+  it("si hay verificador configurado, se usa AUNQUE strict esté desactivado (no cae a inferencia)", async () => {
+    process.env.STRICT_RECEIPT_VALIDATION = "false";
+    const verifyGooglePlay = jest.fn().mockResolvedValue(verified({}));
+    const result = await validateReceipt(androidReceipt, "android", {
+      verifyGooglePlay,
+    });
+    expect(verifyGooglePlay).toHaveBeenCalledTimes(1);
+    expect(result.storeVerified).toBe(true);
   });
 });

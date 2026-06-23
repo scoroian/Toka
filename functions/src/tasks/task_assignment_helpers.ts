@@ -10,6 +10,36 @@ export function scoreOf(data: MemberLoadData): number {
   return data.completionsRecent * data.difficultyWeight + data.daysSinceLastExecution * -0.1;
 }
 
+/** Un evento `taskEvents` de tipo `completed`, reducido a lo que necesita la
+ * carga del reparto inteligente: quién completó y cuándo. */
+export interface CompletedLoadEvent {
+  performerUid: string;
+  completedAtMs: number;
+}
+
+/**
+ * Hallazgo #13: cuenta, por miembro, las tareas completadas dentro de una
+ * ventana real de `windowDays` días — la carga del reparto inteligente. Sustituye
+ * al contador `completions60d`, que solo se incrementaba y NUNCA decaía, de modo
+ * que un miembro muy cumplidor en el pasado quedaba excluido del reparto para
+ * siempre. El borde es inclusivo (`completedAtMs >= nowMs - windowDays`). Los
+ * eventos sin `performerUid` se ignoran.
+ */
+export function countCompletionsInWindow(
+  events: CompletedLoadEvent[],
+  nowMs: number,
+  windowDays: number
+): Map<string, number> {
+  const cutoffMs = nowMs - windowDays * 24 * 60 * 60 * 1000;
+  const counts = new Map<string, number>();
+  for (const ev of events) {
+    if (!ev.performerUid) continue;
+    if (ev.completedAtMs < cutoffMs) continue;
+    counts.set(ev.performerUid, (counts.get(ev.performerUid) ?? 0) + 1);
+  }
+  return counts;
+}
+
 export function getNextAssigneeRoundRobin(
   order: string[],
   currentUid: string,
@@ -38,20 +68,10 @@ export function getNextAssigneeSmart(
   });
 }
 
-export function addRecurrenceInterval(base: Date, recurrenceType: string): Date {
-  const d = new Date(base);
-  switch (recurrenceType) {
-    case "hourly":  d.setUTCHours(d.getUTCHours() + 1); break;
-    case "daily":   d.setUTCDate(d.getUTCDate() + 1); break;
-    case "weekly":  d.setUTCDate(d.getUTCDate() + 7); break;
-    case "monthly": d.setUTCMonth(d.getUTCMonth() + 1); break;
-    case "yearly":  d.setUTCFullYear(d.getUTCFullYear() + 1); break;
-    // oneTime: no hay siguiente ocurrencia. Devolvemos la base sin modificar;
-    // los callers deben tratar oneTime como terminal antes de llamar aquí.
-    case "oneTime": break;
-  }
-  return d;
-}
+// `addRecurrenceInterval` (suma de intervalo en UTC) se eliminó en el Hallazgo
+// #10: derivaba mal la 2ª ocurrencia (drift de DST + mensual/anual ignoraban la
+// regla). La siguiente ocurrencia se calcula ahora con `computeNextDueAt` en
+// `recurrence_calculator.ts` (tz-aware, paridad con el cliente).
 
 /**
  * `true` si la recurrencia no produce más ocurrencias tras la primera

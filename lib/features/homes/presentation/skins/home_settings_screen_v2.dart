@@ -132,83 +132,6 @@ class _HomeSettingsScreenV2State extends ConsumerState<HomeSettingsScreenV2> {
     if (context.mounted) Navigator.of(context).pop();
   }
 
-  // DEBUG PREMIUM — REMOVE BEFORE PRODUCTION
-  Future<void> _showDebugPremiumSheet(
-    BuildContext context,
-    HomeSettingsViewModel vm,
-    String currentStatus,
-  ) async {
-    const statuses = <String>[
-      'free',
-      'active',
-      'cancelledPendingEnd',
-      'rescue',
-      'expiredFree',
-      'restorable',
-    ];
-
-    final selected = await showModalBottomSheet<String>(
-      context: context,
-      isScrollControlled: true,
-      builder: (ctx) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16),
-                  child: Text(
-                    '🧪 Debug: cambiar estado premium',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                RadioGroup<String>(
-                  groupValue: currentStatus,
-                  onChanged: (v) => Navigator.of(ctx).pop(v),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: statuses
-                        .map((s) => RadioListTile<String>(
-                              key: Key('debug_premium_option_$s'),
-                              value: s,
-                              title: Text(s),
-                            ))
-                        .toList(),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-
-    if (selected == null || selected == currentStatus) return;
-
-    try {
-      await vm.debugSetPremiumStatus(selected);
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Estado premium: $selected')),
-        );
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
-      }
-    }
-  }
-  // END DEBUG PREMIUM
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -307,21 +230,6 @@ class _HomeSettingsScreenV2State extends ConsumerState<HomeSettingsScreenV2> {
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push(AppRoutes.subscription),
                 ),
-              // DEBUG PREMIUM — REMOVE BEFORE PRODUCTION
-              if (data.showDebugPremiumToggle)
-                ListTile(
-                  key: const Key('debug_premium_toggle_tile'),
-                  leading: const Icon(Icons.science, color: Colors.amber),
-                  title: const Text('🧪 DEBUG: Estado premium'),
-                  subtitle: Text('Actual: ${data.premiumStatusCode}'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => _showDebugPremiumSheet(
-                    context,
-                    vm,
-                    data.premiumStatusCode,
-                  ),
-                ),
-              // END DEBUG PREMIUM
               const Divider(),
               ListTile(
                 key: const Key('manage_members_tile'),
@@ -386,6 +294,29 @@ class _HomeSettingsScreenV2State extends ConsumerState<HomeSettingsScreenV2> {
                     homeId: data.homeId,
                   ),
                 ),
+              // Hallazgo #12: el owner no puede usar "Abandonar" (devolvía error
+              // y lo dejaba atrapado — SPOF). Su salida limpia es transferir la
+              // propiedad y salir en un solo flujo.
+              if (data.isOwner)
+                ListTile(
+                  key: const Key('transfer_and_leave_tile'),
+                  leading: Icon(
+                    Icons.logout,
+                    color: Theme.of(context).colorScheme.tertiary,
+                  ),
+                  title: Text(
+                    l10n.homes_transfer_and_leave,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.tertiary,
+                    ),
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => showTransferOwnershipSheet(
+                    context,
+                    homeId: data.homeId,
+                    leaveAfter: true,
+                  ),
+                ),
               if (data.isPayer)
                 ListTile(
                   key: const Key('cancel_renewal_tile'),
@@ -403,14 +334,18 @@ class _HomeSettingsScreenV2State extends ConsumerState<HomeSettingsScreenV2> {
                   onTap: () => context.push(AppRoutes.subscription),
                 ),
               const Divider(),
-              ListTile(
-                key: const Key('leave_home_tile'),
-                title: Text(
-                  l10n.homes_leave_home,
-                  style: TextStyle(color: Theme.of(context).colorScheme.tertiary),
+              // "Abandonar" solo para no-owners: el owner sale vía "Transferir y
+              // salir" (ver arriba). Mostrárselo solo producía un error.
+              if (!data.isOwner)
+                ListTile(
+                  key: const Key('leave_home_tile'),
+                  title: Text(
+                    l10n.homes_leave_home,
+                    style:
+                        TextStyle(color: Theme.of(context).colorScheme.tertiary),
+                  ),
+                  onTap: () => _confirmLeave(context, l10n, vm),
                 ),
-                onTap: () => _confirmLeave(context, l10n, vm),
-              ),
               if (data.isOwner)
                 ListTile(
                   key: const Key('close_home_tile'),

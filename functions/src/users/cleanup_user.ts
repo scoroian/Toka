@@ -20,6 +20,7 @@
 import * as admin from "firebase-admin";
 import * as logger from "firebase-functions/logger";
 import { updateHomeDashboard } from "../tasks/update_dashboard";
+import { chunked, MAX_BATCH_OPS } from "../shared/batch_utils";
 import {
   pickReplacementOwner,
   computeTaskReassignment,
@@ -39,6 +40,55 @@ export {
 
 function db(): admin.firestore.Firestore {
   return admin.firestore();
+}
+
+/**
+ * Resuelve el nombre del bucket de Storage por defecto.
+ *
+ * En el runtime de Functions desplegado, `FIREBASE_CONFIG` trae `storageBucket`
+ * y `admin.storage().bucket()` ya funciona; pero `index.ts` hace
+ * `initializeApp()` sin opciones y el harness de integración inicializa la app
+ * solo con `projectId`, así que resolvemos el nombre explícitamente para que el
+ * borrado de Storage funcione también contra el emulador.
+ */
+function defaultBucketName(): string | null {
+  const cfg = process.env.FIREBASE_CONFIG;
+  if (cfg) {
+    try {
+      const parsed = JSON.parse(cfg) as { storageBucket?: string };
+      if (parsed.storageBucket) return parsed.storageBucket;
+    } catch {
+      // FIREBASE_CONFIG mal formado: caemos al resto de heurísticas.
+    }
+  }
+  if (process.env.STORAGE_BUCKET) return process.env.STORAGE_BUCKET;
+  const project = process.env.GCLOUD_PROJECT ?? process.env.GCP_PROJECT;
+  return project ? `${project}.appspot.com` : null;
+}
+
+/**
+ * Borra la foto de perfil del usuario en Cloud Storage (todo el prefijo
+ * `users/{uid}/`, que cubre `profile.jpg` y cualquier otro objeto suyo).
+ *
+ * GDPR / derecho al olvido (Art. 17, Hallazgo #04): el `photoUrl` denormalizado
+ * en los snapshots de miembro es una download URL tokenizada que SALTA las
+ * Storage rules, por lo que limpiar Firestore no basta; hay que borrar el objeto
+ * real. Borrarlo invalida la URL (pasa a 404) = revocación efectiva del token.
+ * Best-effort: un fallo de Storage no aborta el resto de la limpieza.
+ */
+async function deleteUserStorage(uid: string): Promise<void> {
+  try {
+    const bucketName = defaultBucketName();
+    const bucket = bucketName
+      ? admin.storage().bucket(bucketName)
+      : admin.storage().bucket();
+    await bucket.deleteFiles({ prefix: `users/${uid}/` });
+  } catch (err) {
+    logger.error(
+      `cleanupDeletedUser: borrado de Storage users/${uid}/ falló`,
+      err
+    );
+  }
 }
 
 /**
@@ -73,14 +123,26 @@ async function cleanupUserInHome(uid: string, homeId: string): Promise<void> {
     const now = FieldValue.serverTimestamp();
     const targetExists = membersSnap.docs.some((d) => d.id === uid);
 
-    // a) Marcar el miembro como "left". Conservamos el documento (nickname,
-    //    foto, stats) como snapshot para no romper historial/valoraciones.
+    // a) Marcar el miembro como "left". Conservamos el documento (nickname y
+    //    stats) como snapshot pseudonimizado para no romper el historial/las
+    //    valoraciones de OTROS miembros, pero borramos la PII de contacto.
+    //
+    //    GDPR / derecho al olvido (Art. 17, Hallazgo #04): el snapshot es
+    //    legible por todo el hogar, así que al borrar la cuenta hay que eliminar
+    //    el teléfono y la foto del usuario. El `photoUrl` es una download URL
+    //    tokenizada que SALTA las Storage rules (cualquier co-miembro con la URL
+    //    veía la foto); ponerlo a null aquí + borrar el objeto de Storage
+    //    (deleteUserStorage) cierra la fuga. El fcmToken ya se migró a
+    //    users/{uid} en el #01; lo borramos por si quedan docs antiguos.
     if (targetExists) {
       tx.update(homeRef.collection("members").doc(uid), {
         status: "left",
         leftAt: now,
         accountDeleted: true,
         leftReason: "accountDeleted",
+        phone: null,
+        photoUrl: null,
+        "notificationPrefs.fcmToken": FieldValue.delete(),
       });
     }
 
@@ -137,9 +199,12 @@ async function cleanupUserInHome(uid: string, homeId: string): Promise<void> {
 }
 
 /**
- * Quita al usuario borrado de las tareas activas del hogar: lo elimina de
- * `assignmentOrder` y, si era el responsable actual, reasigna al siguiente
- * miembro elegible (o `null` si no queda ninguno).
+ * Quita a un miembro AUSENTE (cuenta borrada, expulsado o que abandonó) de las
+ * tareas activas del hogar: lo elimina de `assignmentOrder` y, si era el
+ * responsable actual, reasigna al siguiente miembro elegible (o `null` si no
+ * queda ninguno). Reutilizada por `leaveHome`/`removeMember` (Hallazgo #08)
+ * además del borrado de cuenta, para que ninguna tarea quede "pegada" a un
+ * ex-miembro (fantasma) ni este permanezca en la rotación.
  *
  * NO se emite ningún `taskEvent` de reasignación a propósito: el parser de
  * historial del cliente (`task_event.dart`) mapea cualquier `eventType`
@@ -147,7 +212,7 @@ async function cleanupUserInHome(uid: string, homeId: string): Promise<void> {
  * "completada" fantasma en el historial de otros miembros. La reasignación
  * (currentAssigneeUid + assignmentOrder) es suficiente y no rompe esa UI.
  */
-async function reassignTasksFromDeletedUser(
+export async function reassignTasksFromDeletedUser(
   uid: string,
   homeId: string
 ): Promise<void> {
@@ -170,13 +235,11 @@ async function reassignTasksFromDeletedUser(
     .where("status", "==", "active")
     .get();
 
-  // Cada tarea reasignada consume 1 op (update). El límite de 500 ops/batch da
-  // margen de sobra para un hogar normal; si algún hogar superase ~500 tareas
-  // asignadas al usuario, habría que partir en varios batches (no es el caso
-  // real esperado).
-  const batch = db().batch();
-  let ops = 0;
-
+  // Hallazgo #16: un hogar Premium grande puede tener >500 tareas asignadas al
+  // ex-miembro. Un único `batch` reventaría el límite DURO de 500 escrituras EN
+  // PRODUCCIÓN (el emulador NO lo aplica → falso verde). Troceamos en lotes
+  // ≤MAX_BATCH_OPS. Cada update es independiente e idempotente.
+  const updates: { ref: admin.firestore.DocumentReference; data: Record<string, unknown> }[] = [];
   for (const taskDoc of tasksSnap.docs) {
     const t = taskDoc.data();
     const order: string[] = (t["assignmentOrder"] as string[] | undefined) ?? [];
@@ -195,11 +258,14 @@ async function reassignTasksFromDeletedUser(
       updatedAt: FieldValue.serverTimestamp(),
     };
     if (current === uid) update["currentAssigneeUid"] = newAssignee;
-    batch.update(taskDoc.ref, update);
-    ops++;
+    updates.push({ ref: taskDoc.ref, data: update });
   }
 
-  if (ops > 0) await batch.commit();
+  for (const group of chunked(updates, MAX_BATCH_OPS)) {
+    const batch = db().batch();
+    for (const u of group) batch.update(u.ref, u.data);
+    await batch.commit();
+  }
 }
 
 /**
@@ -225,7 +291,12 @@ export async function cleanupDeletedUser(uid: string): Promise<void> {
     }
   }
 
-  // 3. Borrar el documento de usuario y sus subcolecciones (memberships,
+  // 3. Borrar la foto de perfil en Cloud Storage (Art. 17). Antes de borrar
+  //    users/{uid}: el objeto vive en users/{uid}/profile.jpg y su download URL
+  //    quedó copiada en snapshots de miembro (ya saneados arriba).
+  await deleteUserStorage(uid);
+
+  // 4. Borrar el documento de usuario y sus subcolecciones (memberships,
   //    rateLimits…). Las valoraciones/estadísticas viven bajo homes/ y se
   //    conservan como snapshot pseudonimizado (uid + nickname congelado).
   try {

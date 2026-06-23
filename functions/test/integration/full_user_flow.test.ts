@@ -59,7 +59,9 @@ describe('Full User Flow', () => {
     expect(result).toHaveProperty('eventId');
 
     const memberDoc = await getDb().collection('homes').doc(HOME).collection('members').doc(USER_A).get();
-    expect(memberDoc.data()!['completedCount']).toBe(1);
+    // Campo canónico tras el hardening del #08: `tasksCompleted` (el viejo
+    // `completedCount` se borra con FieldValue.delete()).
+    expect(memberDoc.data()!['tasksCompleted']).toBe(1);
   });
 
   it('Paso 7 — USER_A pasa turno de TASK_DAILY → penalización registrada', async () => {
@@ -97,7 +99,7 @@ describe('Full User Flow', () => {
     }));
 
     const memberB = await getDb().collection('homes').doc(HOME).collection('members').doc(USER_B).get();
-    expect(memberB.data()!['completedCount']).toBe(1);
+    expect(memberB.data()!['tasksCompleted']).toBe(1);
   });
 
   it('Paso 11 — historial de taskEvents refleja los 4 eventos', async () => {
@@ -113,11 +115,11 @@ describe('Full User Flow', () => {
 
   it('Paso 12 — stats finales: USER_A (1 completada, 1 passed), USER_B (1 completada)', async () => {
     const memberA = await getDb().collection('homes').doc(HOME).collection('members').doc(USER_A).get();
-    expect(memberA.data()!['completedCount']).toBe(1);
+    expect(memberA.data()!['tasksCompleted']).toBe(1);
     expect(memberA.data()!['passedCount']).toBe(1);
 
     const memberB = await getDb().collection('homes').doc(HOME).collection('members').doc(USER_B).get();
-    expect(memberB.data()!['completedCount']).toBe(1);
+    expect(memberB.data()!['tasksCompleted']).toBe(1);
     expect(memberB.data()!['passedCount']).toBe(0);
   });
 });

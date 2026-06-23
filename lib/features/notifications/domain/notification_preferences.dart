@@ -34,7 +34,11 @@ class NotificationPreferences with _$NotificationPreferences {
       dailySummary: map['dailySummary'] as bool? ?? false,
       dailySummaryTime: map['dailySummaryTime'] as String?,
       silencedTypes: (map['silencedTypes'] as List<dynamic>?)?.cast<String>() ?? [],
-      fcmToken: map['fcmToken'] as String?,
+      // PRIVACIDAD (Hallazgo #01): el token FCM ya NO se lee/guarda en el doc de
+      // miembro (legible por todo el hogar). Vive en users/{uid}.fcmToken (doc
+      // privado) y lo gestiona FcmTokenService.updateFcmToken. El campo se
+      // mantiene en el modelo por compatibilidad pero no se persiste aquí.
+      fcmToken: null,
       systemAuthorized: map['systemAuthorized'] as bool?,
     );
   }
@@ -47,7 +51,7 @@ class NotificationPreferences with _$NotificationPreferences {
       'dailySummary': dailySummary,
       'silencedTypes': silencedTypes,
       if (dailySummaryTime != null) 'dailySummaryTime': dailySummaryTime!,
-      if (fcmToken != null) 'fcmToken': fcmToken!,
+      // No escribir fcmToken en el doc de miembro (Hallazgo #01).
       if (systemAuthorized != null) 'systemAuthorized': systemAuthorized!,
     };
   }

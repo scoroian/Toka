@@ -56,7 +56,15 @@ class TaskModel {
     };
   }
 
-  static Map<String, dynamic> toUpdateMap(
+  /// Payload JSON-safe para la callable `createTask` (Hallazgo #14: el alta de
+  /// tareas pasó a server-side para que el límite Free no sea eludible).
+  ///
+  /// A diferencia de [toFirestore], NO incluye `FieldValue`/`Timestamp` (no son
+  /// serializables a JSON de un callable): los timestamps de auditoría los pone
+  /// el servidor y `nextDueAt` viaja como ISO 8601 (lo calcula el cliente, igual
+  /// que antes). `status`, `completedCount90d`, `createdByUid` y
+  /// `currentAssigneeUid` los deriva el backend.
+  static Map<String, dynamic> toCallablePayload(
       TaskInput input, DateTime nextDueAt) {
     return {
       'title': input.title.trim(),
@@ -67,13 +75,69 @@ class TaskModel {
       'recurrenceRule': _ruleToMap(input.recurrenceRule),
       'assignmentMode': input.assignmentMode,
       'assignmentOrder': input.assignmentOrder,
-      'currentAssigneeUid':
-          input.assignmentOrder.isNotEmpty ? input.assignmentOrder.first : null,
+      'difficultyWeight': input.difficultyWeight,
+      'onMissAssign': input.onMissAssign,
+      'nextDueAt': nextDueAt.toUtc().toIso8601String(),
+    };
+  }
+
+  /// Mapa de actualización al EDITAR una tarea existente.
+  ///
+  /// Hallazgo #11(b): editar una tarea (p. ej. su título) NO debe reiniciar la
+  /// rotación. Por eso `currentAssigneeUid` solo se reescribe cuando el
+  /// `assignmentOrder` cambia respecto al guardado ([previousOrder]); si el
+  /// orden no cambia, la clave se OMITE del mapa para que el documento conserve
+  /// el responsable actual de Firestore.
+  ///
+  /// Si el orden cambia, se preserva al responsable actual
+  /// ([currentAssigneeUid]) cuando sigue presente en el nuevo orden; si ya no
+  /// está (lo quitaron de la rotación), cae al primero del nuevo orden.
+  static Map<String, dynamic> toUpdateMap(
+    TaskInput input,
+    DateTime nextDueAt, {
+    required List<String> previousOrder,
+    required String? currentAssigneeUid,
+  }) {
+    final map = <String, dynamic>{
+      'title': input.title.trim(),
+      'description': input.description?.trim(),
+      'visualKind': input.visualKind,
+      'visualValue': input.visualValue,
+      'recurrenceType': _recurrenceTypeFromRule(input.recurrenceRule),
+      'recurrenceRule': _ruleToMap(input.recurrenceRule),
+      'assignmentMode': input.assignmentMode,
+      'assignmentOrder': input.assignmentOrder,
       'nextDueAt': Timestamp.fromDate(nextDueAt),
       'difficultyWeight': input.difficultyWeight,
       'updatedAt': FieldValue.serverTimestamp(),
       'onMissAssign': input.onMissAssign,
     };
+
+    if (!_sameOrder(input.assignmentOrder, previousOrder)) {
+      map['currentAssigneeUid'] =
+          _resolveAssigneeOnReorder(input.assignmentOrder, currentAssigneeUid);
+    }
+
+    return map;
+  }
+
+  /// Resuelve el responsable cuando el orden de rotación cambia: conserva al
+  /// asignado actual si sigue en el orden; si no, el primero (o null si vacío).
+  static String? _resolveAssigneeOnReorder(
+      List<String> order, String? currentAssigneeUid) {
+    if (order.isEmpty) return null;
+    if (currentAssigneeUid != null && order.contains(currentAssigneeUid)) {
+      return currentAssigneeUid;
+    }
+    return order.first;
+  }
+
+  static bool _sameOrder(List<String> a, List<String> b) {
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
   }
 
   // ── serialización RecurrenceRule ────────────────────────────────────

@@ -176,7 +176,16 @@ MemberProfileViewModel memberProfileViewModel(
     return MemberProfileViewData(
         member: enriched,
         isSelf: isSelf,
-        visiblePhone: member.phoneForViewer(isSelf: isSelf),
+        // El doc de miembro ya NO guarda el teléfono cuando la visibilidad es
+        // 'hidden' (Hallazgo #01: antes se filtraba solo en cliente y cualquier
+        // co-miembro lo leía en claro). Para el PROPIO usuario lo tomamos de su
+        // perfil privado users/{uid} (profileFallback), de modo que siga viendo
+        // su número aunque esté oculto para el resto. Para otros miembros se usa
+        // el doc de miembro, que solo contiene el teléfono si se optó por
+        // compartirlo (sameHomeMembers).
+        visiblePhone: isSelf
+            ? (profileFallback?.phone ?? member.phoneForViewer(isSelf: true))
+            : member.phoneForViewer(isSelf: false),
         compliancePct: (member.complianceRate * 100).toStringAsFixed(1),
         radarEntries: visibleRadarEntries,
         canManageRoles: canManageRoles,

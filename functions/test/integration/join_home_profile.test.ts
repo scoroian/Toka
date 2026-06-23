@@ -163,7 +163,10 @@ describe('syncMemberProfile — re-sincroniza teléfono al editar el perfil', ()
     const member = await getDb()
       .collection('homes').doc(HOME).collection('members').doc(UID).get();
     expect(member.data()!['phoneVisibility']).toBe('hidden');
-    // El número se conserva, pero la visibilidad lo oculta (phoneForViewer).
-    expect(member.data()!['phone']).toBe('+34622333444');
+    // PRIVACIDAD (Hallazgo #01): el número se BORRA del doc de miembro (legible
+    // por todo el hogar) en cuanto se oculta. Antes se conservaba y solo se
+    // filtraba en cliente (phoneForViewer), por lo que cualquier co-miembro lo
+    // leía en claro. El usuario sigue viéndolo desde su perfil users/{uid}.
+    expect(member.data()!['phone']).toBeNull();
   });
 });

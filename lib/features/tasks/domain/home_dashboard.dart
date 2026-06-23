@@ -143,18 +143,40 @@ class PremiumFlags with _$PremiumFlags {
 
 @freezed
 class AdFlags with _$AdFlags {
+  const AdFlags._();
+
   const factory AdFlags({
     required bool showBanner,
+    // `bannerUnit` se mantiene por compatibilidad con clientes/documentos
+    // viejos (= unit de Android). Los nuevos clientes usan los campos por
+    // plataforma.
     required String bannerUnit,
+    required String bannerUnitAndroid,
+    required String bannerUnitIos,
   }) = _AdFlags;
 
-  factory AdFlags.fromMap(Map<String, dynamic> map) => AdFlags(
-        showBanner: map['showBanner'] as bool? ?? false,
-        bannerUnit: map['bannerUnit'] as String? ?? '',
+  factory AdFlags.fromMap(Map<String, dynamic> map) {
+    final legacy = map['bannerUnit'] as String? ?? '';
+    return AdFlags(
+      showBanner: map['showBanner'] as bool? ?? false,
+      bannerUnit: legacy,
+      // Fallback al campo legacy si el dashboard aún no trae los por-plataforma.
+      bannerUnitAndroid: map['bannerUnitAndroid'] as String? ?? legacy,
+      bannerUnitIos: map['bannerUnitIos'] as String? ?? legacy,
+    );
+  }
+
+  factory AdFlags.empty() => const AdFlags(
+        showBanner: false,
+        bannerUnit: '',
+        bannerUnitAndroid: '',
+        bannerUnitIos: '',
       );
 
-  factory AdFlags.empty() =>
-      const AdFlags(showBanner: false, bannerUnit: '');
+  /// Unit ID del banner para la plataforma actual. iOS → `bannerUnitIos`,
+  /// cualquier otra (Android) → `bannerUnitAndroid`.
+  String bannerUnitFor({required bool isIos}) =>
+      isIos ? bannerUnitIos : bannerUnitAndroid;
 }
 
 @freezed

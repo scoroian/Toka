@@ -7,7 +7,7 @@ part of 'member_profile_view_model.dart';
 // **************************************************************************
 
 String _$memberProfileViewModelHash() =>
-    r'1432f812b5bd9ec084764cc53b14f4564b173e6b';
+    r'c85b8e51bcac063183c09c02836cb5f37bd9b4e6';
 
 /// Copied from Dart SDK
 class _SystemHash {

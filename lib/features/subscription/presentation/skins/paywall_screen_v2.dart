@@ -6,12 +6,12 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../homes/application/current_home_provider.dart';
 import '../../../homes/domain/home.dart';
 import '../../application/days_left.dart';
+import '../../application/intro_offer_provider.dart';
 import '../../application/paywall_view_model.dart';
+import '../../domain/intro_offer.dart';
+import '../../domain/subscription_products.dart';
 import '../paywall_entry_context.dart';
 import '../widgets/plan_comparison_card.dart';
-
-const _kMonthlyId = 'toka_premium_monthly';
-const _kAnnualId = 'toka_premium_annual';
 
 class PaywallScreenV2 extends ConsumerWidget {
   const PaywallScreenV2({
@@ -26,6 +26,12 @@ class PaywallScreenV2 extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final vm = ref.watch(paywallViewModelProvider);
     final home = ref.watch(currentHomeProvider).valueOrNull;
+    // Oferta introductoria del plan anual leída de la store (Hallazgo #14). Si
+    // aún no ha cargado o la store no concede trial, asumimos "sin trial" para
+    // no prometer una prueba inexistente.
+    final annualOffer =
+        ref.watch(annualIntroOfferProvider).valueOrNull ?? IntroOffer.none;
+    final hasTrial = annualOffer.hasFreeTrial;
 
     ref.listen<PaywallViewModel>(paywallViewModelProvider, (_, next) {
       if (next.purchasedSuccessfully) {
@@ -71,7 +77,11 @@ class PaywallScreenV2 extends ConsumerWidget {
                     key: const Key('chip_annual'),
                     label: l10n.subscription_annual,
                     price: l10n.subscription_price_annual,
-                    badge: l10n.subscription_annual_saving,
+                    // Si hay prueba gratuita, el trial es el reclamo principal
+                    // del chip anual; si no, el ahorro frente al mensual.
+                    badge: hasTrial
+                        ? l10n.paywall_trial_badge(annualOffer.freeTrialDays)
+                        : l10n.subscription_annual_saving,
                   ),
                   const SizedBox(height: 8),
                   _PriceChip(
@@ -86,10 +96,24 @@ class PaywallScreenV2 extends ConsumerWidget {
                       key: const Key('btn_cta_annual'),
                       onPressed: vm.isLoading
                           ? null
-                          : () => vm.startPurchase(_kAnnualId),
-                      child: Text(header.ctaPrimary),
+                          : () => vm.startPurchase(kAnnualProductId),
+                      child: Text(hasTrial
+                          ? l10n.paywall_cta_start_trial(annualOffer.freeTrialDays)
+                          : header.ctaPrimary),
                     ),
                   ),
+                  if (hasTrial) ...[
+                    const SizedBox(height: 6),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Text(
+                        l10n.paywall_trial_note,
+                        key: const Key('paywall_trial_note'),
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 8),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -97,7 +121,7 @@ class PaywallScreenV2 extends ConsumerWidget {
                       key: const Key('btn_cta_monthly'),
                       onPressed: vm.isLoading
                           ? null
-                          : () => vm.startPurchase(_kMonthlyId),
+                          : () => vm.startPurchase(kMonthlyProductId),
                       child: Text(l10n.paywall_cta_monthly),
                     ),
                   ),

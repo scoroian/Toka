@@ -33,6 +33,24 @@ void main() {
       expect(prefs.fcmToken, isNull);
     });
 
+    test('toMap NUNCA incluye fcmToken (Hallazgo #01)', () {
+      // El token vive en users/{uid} (privado), no en el doc de miembro.
+      const prefs = NotificationPreferences(
+        homeId: 'h1',
+        uid: 'u1',
+        fcmToken: 'secret-token',
+      );
+      expect(prefs.toMap().containsKey('fcmToken'), false);
+    });
+
+    test('fromMap IGNORA un fcmToken presente en el mapa (Hallazgo #01)', () {
+      // Aunque un doc legacy aún tuviera el token, no lo cargamos en el modelo.
+      final prefs = NotificationPreferences.fromMap('h1', 'u1', {
+        'fcmToken': 'legacy-leaked-token',
+      });
+      expect(prefs.fcmToken, isNull);
+    });
+
     test('silencedTypes deserializa lista correctamente', () {
       final prefs = NotificationPreferences.fromMap('h1', 'u1', {
         'silencedTypes': ['task_due', 'task_reminder'],

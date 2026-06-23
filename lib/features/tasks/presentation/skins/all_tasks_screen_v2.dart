@@ -145,6 +145,8 @@ class _AllTasksScreenV2State extends ConsumerState<AllTasksScreenV2>
                               onChanged: (_) => vm.toggleSelection(task.id),
                               title: Text(
                                 task.title,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                                 style: GoogleFonts.plusJakartaSans(
                                     fontWeight: FontWeight.w700),
                               ),

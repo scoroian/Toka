@@ -177,7 +177,8 @@ class MembersScreenV2 extends ConsumerWidget {
                                 ? name[0].toUpperCase()
                                 : '?'),
                           ),
-                          title: Text(name),
+                          title: Text(name,
+                              maxLines: 1, overflow: TextOverflow.ellipsis),
                           trailing: OutlinedButton(
                             key: Key('reinstate_${m.uid}'),
                             onPressed: () => _reinstateMember(

@@ -1,4 +1,8 @@
-import { autoSelectForDowngrade } from "./downgrade_helpers";
+import {
+  autoSelectForDowngrade,
+  isDowngradeEligible,
+  DOWNGRADE_ELIGIBLE_STATUSES,
+} from "./downgrade_helpers";
 import type { Timestamp } from "firebase-admin/firestore";
 
 type MemberInput = {
@@ -84,5 +88,48 @@ describe("autoSelectForDowngrade – tareas", () => {
   it("retorna mode: 'auto'", () => {
     const result = autoSelectForDowngrade([], [], ownerId);
     expect(result.mode).toBe("auto");
+  });
+});
+
+describe("isDowngradeEligible (Hallazgo #06)", () => {
+  const now = Date.now();
+
+  it("active vencido → elegible [regresión: antes nunca se degradaba]", () => {
+    expect(isDowngradeEligible("active", now - 1000, now)).toBe(true);
+  });
+
+  it("active con periodo futuro → NO elegible", () => {
+    expect(isDowngradeEligible("active", now + 24 * 3600 * 1000, now)).toBe(false);
+  });
+
+  it("rescue vencido → elegible", () => {
+    expect(isDowngradeEligible("rescue", now - 1000, now)).toBe(true);
+  });
+
+  it("cancelledPendingEnd (camelCase) vencido → elegible", () => {
+    expect(isDowngradeEligible("cancelledPendingEnd", now - 1000, now)).toBe(true);
+  });
+
+  it("cancelled_pending_end (legacy) vencido → elegible", () => {
+    expect(isDowngradeEligible("cancelled_pending_end", now - 1000, now)).toBe(true);
+  });
+
+  it("free vencido → NO elegible (no es estado premium)", () => {
+    expect(isDowngradeEligible("free", now - 1000, now)).toBe(false);
+  });
+
+  it("restorable → NO elegible (ya degradado, en ventana de restauración)", () => {
+    expect(isDowngradeEligible("restorable", now - 1000, now)).toBe(false);
+  });
+
+  it("sin premiumEndsAt (null) → NO elegible", () => {
+    expect(isDowngradeEligible("active", null, now)).toBe(false);
+  });
+
+  it("DOWNGRADE_ELIGIBLE_STATUSES incluye 'active' y los 3 estados de cancelación/rescate", () => {
+    expect(DOWNGRADE_ELIGIBLE_STATUSES).toContain("active");
+    expect(DOWNGRADE_ELIGIBLE_STATUSES).toContain("rescue");
+    expect(DOWNGRADE_ELIGIBLE_STATUSES).toContain("cancelledPendingEnd");
+    expect(DOWNGRADE_ELIGIBLE_STATUSES).toContain("cancelled_pending_end");
   });
 });

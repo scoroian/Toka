@@ -2,7 +2,7 @@
 import * as admin from "firebase-admin";
 import * as logger from "firebase-functions/logger";
 import { onCall, HttpsError } from "firebase-functions/v2/https";
-import { updateHomeDashboard } from "./update_dashboard";
+import { updateHomeDashboard, applyDashboardDeltaTx } from "./update_dashboard";
 import { sendPassNotification } from "../notifications/send_pass_notification";
 import { getNextEligibleMember } from "./pass_turn_helpers";
 import { isMemberCurrentlyAbsent } from "../shared/vacation";
@@ -57,10 +57,17 @@ export const passTaskTurn = onCall(async (request) => {
     const membersSnap = await tx.get(
       db.collection("homes").doc(homeId).collection("members")
     );
+    // Excluidos del turno: congelados, ausentes (vacaciones) y ex-miembros
+    // ('left'). Incluir 'left' (Hallazgo #08) evita que una tarea zombi que
+    // conserve a un ex-miembro en assignmentOrder se le pueda pasar el turno.
     const frozenUids: string[] = [];
     for (const mDoc of membersSnap.docs) {
       const mData = mDoc.data();
-      if (mData["status"] === "frozen" || isMemberCurrentlyAbsent(mData)) {
+      if (
+        mData["status"] === "left" ||
+        mData["status"] === "frozen" ||
+        isMemberCurrentlyAbsent(mData)
+      ) {
         frozenUids.push(mDoc.id);
       }
     }
@@ -103,6 +110,9 @@ export const passTaskTurn = onCall(async (request) => {
     // 6. Actualizar tarea
     tx.update(taskRef, {
       currentAssigneeUid: toUid,
+      // Hallazgo #16: marca de delta aplicado para que el trigger onWrite no haga
+      // un rebuild redundante (el dashboard se actualiza con un delta abajo).
+      dashboardDeltaToken: FieldValue.increment(1),
       updatedAt: FieldValue.serverTimestamp(),
     });
 
@@ -118,14 +128,25 @@ export const passTaskTurn = onCall(async (request) => {
     return { toUid, noCandidate, complianceBefore, complianceAfter };
   });
 
-  // Reconstruir el dashboard ANTES de responder (mismo motivo que en
+  // Actualizar el dashboard ANTES de responder (mismo motivo que en
   // applyTaskCompletion: en gen2 el trabajo fire-and-forget tras la respuesta se
-  // estrangula y tardaba ~10s en reflejarse). Un fallo del rebuild no revierte el
-  // pase ya confirmado; el cron lo reconstruirá.
+  // estrangula y tardaba ~10s en reflejarse). Hallazgo #16: delta incremental
+  // (transacción de un doc, sin lost-update) con fallback al rebuild completo si
+  // hay deriva. Un fallo no revierte el pase ya confirmado; el cron reconcilia.
   try {
-    await updateHomeDashboard(homeId);
+    const applied = await applyDashboardDeltaTx(homeId, {
+      kind: "passed",
+      taskId,
+      newAssigneeUid: result.toUid,
+    });
+    if (!applied) await updateHomeDashboard(homeId);
   } catch (err) {
-    logger.error("Failed to update dashboard after pass", err);
+    logger.error("Failed to apply dashboard delta after pass; rebuilding", err);
+    try {
+      await updateHomeDashboard(homeId);
+    } catch (err2) {
+      logger.error("Fallback dashboard rebuild after pass also failed", err2);
+    }
   }
 
   if (!result.noCandidate) {

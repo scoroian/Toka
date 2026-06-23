@@ -47,8 +47,11 @@ void main() {
       await t.tap(find.text('open'));
       await t.pumpAndSettle();
 
+      // Solo queda "Compartir código" (Hallazgo #12: la rama email se retiró
+      // porque no había callable que la enviara y el botón cerraba el sheet sin
+      // efecto ni feedback).
       expect(find.byKey(const Key('btn_share_code')), findsOneWidget);
-      expect(find.byKey(const Key('btn_invite_email')), findsOneWidget);
+      expect(find.byKey(const Key('btn_invite_email')), findsNothing);
     },
   );
 }

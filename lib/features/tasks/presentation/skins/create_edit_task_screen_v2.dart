@@ -313,7 +313,21 @@ class _CreateEditTaskScreenV2State
             ),
           ],
 
-          if (formState.globalError != null)
+          if (formState.globalError == kFreeLimitTasksCode ||
+              formState.globalError == kFreeLimitRecurringCode)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: PremiumUpgradeBanner(
+                key: const Key('free_limit_server_banner'),
+                message: formState.globalError == kFreeLimitTasksCode
+                    ? l10n.free_limit_tasks_reached
+                    : l10n.free_limit_recurring_reached,
+                cta: l10n.free_go_premium_cta,
+                ctaKey: const Key('free_limit_server_banner_cta'),
+                onCta: () => context.push(AppRoutes.paywall),
+              ),
+            )
+          else if (formState.globalError != null)
             Padding(
               padding: const EdgeInsets.only(top: 8),
               child: Text(

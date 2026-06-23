@@ -4,6 +4,7 @@ import {
   computeComplianceAfterMiss,
   isExpired,
 } from "./process_expired_tasks";
+import { isDowngradeEligible } from "../entitlement/downgrade_helpers";
 
 describe("purgeExpiredFrozen — lógica de selección", () => {
   function shouldPurge(premiumStatus: string, restoreUntilMs: number, nowMs: number): boolean {
@@ -90,17 +91,8 @@ describe("openRescueWindow — ventana de rescate", () => {
 });
 
 describe("applyDowngradeJob — estados elegibles para downgrade", () => {
-  // El cron filtra premiumStatus IN [...] AND premiumEndsAt <= now.
-  // Debe incluir el valor canónico camelCase que persiste syncEntitlement.
-  const ELIGIBLE = ["rescue", "cancelled_pending_end", "cancelledPendingEnd"];
-  function isDowngradeEligible(
-    premiumStatus: string,
-    premiumEndsAtMs: number,
-    nowMs: number
-  ): boolean {
-    return ELIGIBLE.includes(premiumStatus) && premiumEndsAtMs <= nowMs;
-  }
-
+  // Usa la función REAL del cron (entitlement/downgrade_helpers). El cron filtra
+  // premiumStatus IN DOWNGRADE_ELIGIBLE_STATUSES AND premiumEndsAt <= now.
   it("cancelledPendingEnd (camelCase) vencido → degradar [regresión: antes nunca se degradaba]", () => {
     expect(isDowngradeEligible("cancelledPendingEnd", Date.now() - 1000, Date.now())).toBe(true);
   });
@@ -113,8 +105,11 @@ describe("applyDowngradeJob — estados elegibles para downgrade", () => {
   it("cancelledPendingEnd no vencido → no degradar todavía", () => {
     expect(isDowngradeEligible("cancelledPendingEnd", Date.now() + 1000, Date.now())).toBe(false);
   });
-  it("active → no degradar", () => {
-    expect(isDowngradeEligible("active", Date.now() - 1000, Date.now())).toBe(false);
+  it("active VENCIDO → degradar [Hallazgo #06: antes quedaba Premium perpetuo]", () => {
+    expect(isDowngradeEligible("active", Date.now() - 1000, Date.now())).toBe(true);
+  });
+  it("active con periodo vigente → no degradar", () => {
+    expect(isDowngradeEligible("active", Date.now() + 60_000, Date.now())).toBe(false);
   });
 });
 

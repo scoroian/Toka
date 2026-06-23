@@ -1364,8 +1364,13 @@ abstract class _PremiumFlags implements PremiumFlags {
 
 /// @nodoc
 mixin _$AdFlags {
-  bool get showBanner => throw _privateConstructorUsedError;
+  bool get showBanner =>
+      throw _privateConstructorUsedError; // `bannerUnit` se mantiene por compatibilidad con clientes/documentos
+// viejos (= unit de Android). Los nuevos clientes usan los campos por
+// plataforma.
   String get bannerUnit => throw _privateConstructorUsedError;
+  String get bannerUnitAndroid => throw _privateConstructorUsedError;
+  String get bannerUnitIos => throw _privateConstructorUsedError;
 
   /// Create a copy of AdFlags
   /// with the given fields replaced by the non-null parameter values.
@@ -1378,7 +1383,11 @@ abstract class $AdFlagsCopyWith<$Res> {
   factory $AdFlagsCopyWith(AdFlags value, $Res Function(AdFlags) then) =
       _$AdFlagsCopyWithImpl<$Res, AdFlags>;
   @useResult
-  $Res call({bool showBanner, String bannerUnit});
+  $Res call(
+      {bool showBanner,
+      String bannerUnit,
+      String bannerUnitAndroid,
+      String bannerUnitIos});
 }
 
 /// @nodoc
@@ -1398,6 +1407,8 @@ class _$AdFlagsCopyWithImpl<$Res, $Val extends AdFlags>
   $Res call({
     Object? showBanner = null,
     Object? bannerUnit = null,
+    Object? bannerUnitAndroid = null,
+    Object? bannerUnitIos = null,
   }) {
     return _then(_value.copyWith(
       showBanner: null == showBanner
@@ -1407,6 +1418,14 @@ class _$AdFlagsCopyWithImpl<$Res, $Val extends AdFlags>
       bannerUnit: null == bannerUnit
           ? _value.bannerUnit
           : bannerUnit // ignore: cast_nullable_to_non_nullable
+              as String,
+      bannerUnitAndroid: null == bannerUnitAndroid
+          ? _value.bannerUnitAndroid
+          : bannerUnitAndroid // ignore: cast_nullable_to_non_nullable
+              as String,
+      bannerUnitIos: null == bannerUnitIos
+          ? _value.bannerUnitIos
+          : bannerUnitIos // ignore: cast_nullable_to_non_nullable
               as String,
     ) as $Val);
   }
@@ -1419,7 +1438,11 @@ abstract class _$$AdFlagsImplCopyWith<$Res> implements $AdFlagsCopyWith<$Res> {
       __$$AdFlagsImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({bool showBanner, String bannerUnit});
+  $Res call(
+      {bool showBanner,
+      String bannerUnit,
+      String bannerUnitAndroid,
+      String bannerUnitIos});
 }
 
 /// @nodoc
@@ -1437,6 +1460,8 @@ class __$$AdFlagsImplCopyWithImpl<$Res>
   $Res call({
     Object? showBanner = null,
     Object? bannerUnit = null,
+    Object? bannerUnitAndroid = null,
+    Object? bannerUnitIos = null,
   }) {
     return _then(_$AdFlagsImpl(
       showBanner: null == showBanner
@@ -1447,23 +1472,43 @@ class __$$AdFlagsImplCopyWithImpl<$Res>
           ? _value.bannerUnit
           : bannerUnit // ignore: cast_nullable_to_non_nullable
               as String,
+      bannerUnitAndroid: null == bannerUnitAndroid
+          ? _value.bannerUnitAndroid
+          : bannerUnitAndroid // ignore: cast_nullable_to_non_nullable
+              as String,
+      bannerUnitIos: null == bannerUnitIos
+          ? _value.bannerUnitIos
+          : bannerUnitIos // ignore: cast_nullable_to_non_nullable
+              as String,
     ));
   }
 }
 
 /// @nodoc
 
-class _$AdFlagsImpl implements _AdFlags {
-  const _$AdFlagsImpl({required this.showBanner, required this.bannerUnit});
+class _$AdFlagsImpl extends _AdFlags {
+  const _$AdFlagsImpl(
+      {required this.showBanner,
+      required this.bannerUnit,
+      required this.bannerUnitAndroid,
+      required this.bannerUnitIos})
+      : super._();
 
   @override
   final bool showBanner;
+// `bannerUnit` se mantiene por compatibilidad con clientes/documentos
+// viejos (= unit de Android). Los nuevos clientes usan los campos por
+// plataforma.
   @override
   final String bannerUnit;
+  @override
+  final String bannerUnitAndroid;
+  @override
+  final String bannerUnitIos;
 
   @override
   String toString() {
-    return 'AdFlags(showBanner: $showBanner, bannerUnit: $bannerUnit)';
+    return 'AdFlags(showBanner: $showBanner, bannerUnit: $bannerUnit, bannerUnitAndroid: $bannerUnitAndroid, bannerUnitIos: $bannerUnitIos)';
   }
 
   @override
@@ -1474,11 +1519,16 @@ class _$AdFlagsImpl implements _AdFlags {
             (identical(other.showBanner, showBanner) ||
                 other.showBanner == showBanner) &&
             (identical(other.bannerUnit, bannerUnit) ||
-                other.bannerUnit == bannerUnit));
+                other.bannerUnit == bannerUnit) &&
+            (identical(other.bannerUnitAndroid, bannerUnitAndroid) ||
+                other.bannerUnitAndroid == bannerUnitAndroid) &&
+            (identical(other.bannerUnitIos, bannerUnitIos) ||
+                other.bannerUnitIos == bannerUnitIos));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, showBanner, bannerUnit);
+  int get hashCode => Object.hash(
+      runtimeType, showBanner, bannerUnit, bannerUnitAndroid, bannerUnitIos);
 
   /// Create a copy of AdFlags
   /// with the given fields replaced by the non-null parameter values.
@@ -1489,15 +1539,25 @@ class _$AdFlagsImpl implements _AdFlags {
       __$$AdFlagsImplCopyWithImpl<_$AdFlagsImpl>(this, _$identity);
 }
 
-abstract class _AdFlags implements AdFlags {
+abstract class _AdFlags extends AdFlags {
   const factory _AdFlags(
       {required final bool showBanner,
-      required final String bannerUnit}) = _$AdFlagsImpl;
+      required final String bannerUnit,
+      required final String bannerUnitAndroid,
+      required final String bannerUnitIos}) = _$AdFlagsImpl;
+  const _AdFlags._() : super._();
 
   @override
-  bool get showBanner;
+  bool
+      get showBanner; // `bannerUnit` se mantiene por compatibilidad con clientes/documentos
+// viejos (= unit de Android). Los nuevos clientes usan los campos por
+// plataforma.
   @override
   String get bannerUnit;
+  @override
+  String get bannerUnitAndroid;
+  @override
+  String get bannerUnitIos;
 
   /// Create a copy of AdFlags
   /// with the given fields replaced by the non-null parameter values.

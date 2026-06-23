@@ -28,15 +28,16 @@ void main() {
   });
 
   test('fetches all enabled languages ordered by sort_order', () async {
-    final langs = await repo.fetchAvailableLanguages();
-    expect(langs.length, 3);
-    expect(langs.map((l) => l.code).toList(), ['es', 'en', 'ro']);
+    final result = await repo.fetchAvailableLanguages();
+    expect(result.languages.length, 3);
+    expect(result.languages.map((l) => l.code).toList(), ['es', 'en', 'ro']);
+    expect(result.isFallback, isFalse);
   });
 
   test('collection is readable without authentication (fake bypasses rules)',
       () async {
-    final langs = await repo.fetchAvailableLanguages();
-    expect(langs, isNotEmpty);
+    final result = await repo.fetchAvailableLanguages();
+    expect(result.languages, isNotEmpty);
   });
 
   test('returns only enabled languages', () async {
@@ -44,8 +45,8 @@ void main() {
         .collection('languages')
         .doc('ro')
         .update({'enabled': false});
-    final langs = await repo.fetchAvailableLanguages();
-    expect(langs.length, 2);
-    expect(langs.any((l) => l.code == 'ro'), isFalse);
+    final result = await repo.fetchAvailableLanguages();
+    expect(result.languages.length, 2);
+    expect(result.languages.any((l) => l.code == 'ro'), isFalse);
   });
 }

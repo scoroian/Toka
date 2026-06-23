@@ -43,12 +43,30 @@ export function readMemberProfileFields(
   };
 }
 
+/**
+ * Decide qué teléfono se denormaliza en el doc de miembro
+ * (homes/{homeId}/members/{uid}), que es legible por todo el hogar.
+ *
+ * PRIVACIDAD (Hallazgo #01): el doc de miembro NUNCA debe contener el teléfono
+ * si la visibilidad es 'hidden'. El filtrado vivía solo en cliente
+ * (member.dart phoneForViewer), por lo que cualquier co-miembro podía leer el
+ * número en claro saltándose la UI. Aquí lo cortamos en el ORIGEN (servidor):
+ * si la visibilidad no es 'sameHomeMembers', el campo se escribe a null. El
+ * usuario sigue viendo su propio teléfono desde users/{uid} (doc privado).
+ */
+export function sanitizeMemberPhone(
+  phone: string | null | undefined,
+  phoneVisibility: string | null | undefined
+): string | null {
+  return phoneVisibility === "sameHomeMembers" ? phone ?? null : null;
+}
+
 export function buildNewMemberDoc(p: NewMemberParams): Record<string, unknown> {
   return {
     nickname: p.nickname,
     photoUrl: p.photoUrl ?? null,
     bio: p.bio ?? null,
-    phone: p.phone ?? null,
+    phone: sanitizeMemberPhone(p.phone, p.phoneVisibility),
     phoneVisibility: p.phoneVisibility ?? "hidden",
     role: p.role,
     status: "active",

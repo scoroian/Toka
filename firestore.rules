@@ -24,6 +24,18 @@ service cloud.firestore {
       return isMemberOfHome(homeId) && getMembership(homeId).status == 'active';
     }
 
+    // Acceso de lectura al hogar: cualquier membresía cuyo status NO sea 'left'.
+    // Admite 'active' y 'frozen' (y memberships legacy sin campo status, por
+    // compatibilidad), pero EXCLUYE a los miembros que salieron/fueron expulsados
+    // (status == 'left'), cuya membership se conserva para poder reincorporarlos
+    // (reinstateMember) pero NO debe seguir dando acceso a los datos del hogar.
+    // OJO: al congelar (apply_downgrade_plan) solo cambia el doc de miembro a
+    // 'frozen'; la membership de users/{uid} sigue 'active', así que los frozen
+    // conservan lectura por ambas vías.
+    function isCurrentMember(homeId) {
+      return isMemberOfHome(homeId) && getMembership(homeId).status != 'left';
+    }
+
     function isAdminOrOwner(homeId) {
       return isMemberOfHome(homeId) && getMembership(homeId).role in ['owner', 'admin'];
     }
@@ -51,54 +63,10 @@ service cloud.firestore {
       );
     }
 
-    function dashboardPlanCounters(homeId) {
-      return get(/databases/$(database)/documents/homes/$(homeId)/views/dashboard).data.planCounters;
-    }
-
-    function freeCanCreateTask(homeId) {
-      // 4 activas total + 3 recurrentes automáticas (oneTime no cuenta).
-      return dashboardPlanCounters(homeId).activeTasks < 4
-        && (
-          request.resource.data.recurrenceRule.kind == 'oneTime'
-          || request.resource.data.recurrenceRule.type == 'oneTime'
-          || dashboardPlanCounters(homeId).automaticRecurringTasks < 3
-        );
-    }
-
     // ─── Task write hardening ─────────────────────────────────────────────────
-
-    function taskCreateKeysAllowed() {
-      return request.resource.data.keys().hasOnly([
-        'homeId',
-        'title',
-        'description',
-        'visualKind',
-        'visualValue',
-        'status',
-        'recurrenceType',
-        'recurrenceRule',
-        'assignmentMode',
-        'assignmentOrder',
-        'currentAssigneeUid',
-        'nextDueAt',
-        'difficultyWeight',
-        'completedCount90d',
-        'createdByUid',
-        'createdAt',
-        'updatedAt',
-        'onMissAssign'
-      ]);
-    }
-
-    function taskCreateValuesAllowed(homeId) {
-      return request.resource.data.homeId == homeId
-        && request.resource.data.status == 'active'
-        && request.resource.data.createdByUid == request.auth.uid
-        && request.resource.data.completedCount90d == 0
-        && request.resource.data.title is string
-        && request.resource.data.assignmentOrder is list
-        && request.resource.data.difficultyWeight is number;
-    }
+    // El ALTA de tareas va exclusivamente por la callable `createTask`
+    // (límite Free no eludible, Hallazgo #14). Aquí solo se endurece el UPDATE
+    // que sigue siendo client-side (edición / freeze / soft-delete).
 
     function taskUpdateFieldsAllowed() {
       return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
@@ -127,12 +95,7 @@ service cloud.firestore {
     }
 
     // La distribución inteligente (assignmentMode == 'smartDistribution') es una
-    // feature Premium. En CREATE solo se permite si el hogar es Premium.
-    function taskCreateSmartAllowed(homeId) {
-      return request.resource.data.assignmentMode != 'smartDistribution'
-        || isHomePremium(homeId);
-    }
-
+    // feature Premium. En CREATE el gate vive en la callable `createTask`.
     // En UPDATE: cambiar a smart requiere Premium, pero conservar un smart ya
     // existente (o pasar a básico) siempre se permite, para no bloquear la
     // edición de una tarea tras un downgrade del hogar.
@@ -188,8 +151,9 @@ service cloud.firestore {
     // ─── Hogares ───────────────────────────────────────────────────────────────
 
     match /homes/{homeId} {
-      // Solo miembros pueden leer el hogar (incluyendo congelados)
-      allow read: if isMemberOfHome(homeId);
+      // Solo miembros vigentes pueden leer el hogar (incluyendo congelados,
+      // excluyendo a quienes salieron/fueron expulsados — status 'left').
+      allow read: if isCurrentMember(homeId);
       allow create: if false; // Solo via Functions
       allow update: if isAdminOrOwner(homeId) &&
                        !request.resource.data.diff(resource.data).affectedKeys()
@@ -197,17 +161,17 @@ service cloud.firestore {
                                 'lifetimeUnlockedHomeSlots']);
       allow delete: if false;
 
-      // Dashboard: lectura para todos los miembros, escritura solo Functions
+      // Dashboard: lectura para miembros vigentes, escritura solo Functions
       match /views/dashboard {
-        allow read: if isMemberOfHome(homeId);
+        allow read: if isCurrentMember(homeId);
         allow write: if false;
       }
 
       // Miembros del hogar
       match /members/{uid} {
-        allow read: if isMemberOfHome(homeId);
+        allow read: if isCurrentMember(homeId);
         // Members may only update their own notificationPrefs and vacation fields
-        allow update: if isUser(uid) && isMemberOfHome(homeId) &&
+        allow update: if isUser(uid) && isCurrentMember(homeId) &&
                          request.resource.data.diff(resource.data).affectedKeys()
                          .hasOnly(['notificationPrefs', 'vacation']);
         allow write: if false; // Solo via Functions
@@ -215,15 +179,13 @@ service cloud.firestore {
 
       // Tareas
       match /tasks/{taskId} {
-        allow read: if isMemberOfHome(homeId);
-        // Create: admin/owner activo Y (Premium O por debajo del límite Free).
-        // El "recurrenceRule.kind/type" en el payload decide si cuenta como
-        // recurrente automática o como puntual.
-        allow create: if isAdminOrOwner(homeId) && isActiveMember(homeId)
-                         && taskCreateKeysAllowed()
-                         && taskCreateValuesAllowed(homeId)
-                         && taskCreateSmartAllowed(homeId)
-                         && (isHomePremium(homeId) || freeCanCreateTask(homeId));
+        allow read: if isCurrentMember(homeId);
+        // Create: SOLO vía la callable `createTask` (Hallazgo #14). El límite
+        // del plan Free no puede vivir en reglas porque éstas no cuentan
+        // documentos: leían un contador denormalizado y eventual
+        // (`views/dashboard.planCounters`) que una ráfaga de altas eludía. La
+        // callable cuenta las tareas activas reales de forma transaccional.
+        allow create: if false;
         // Update cliente: solo configuración editable por admin/owner. Campos
         // derivados/auditoría (completedCount90d, createdByUid, createdAt,
         // homeId) quedan reservados a Cloud Functions/Admin SDK.
@@ -236,7 +198,7 @@ service cloud.firestore {
 
       // Eventos de tarea
       match /taskEvents/{eventId} {
-        allow read: if isMemberOfHome(homeId);
+        allow read: if isCurrentMember(homeId);
         allow write: if false; // Solo via Functions
 
         // Valoraciones — solo lectura restringida
@@ -252,7 +214,7 @@ service cloud.firestore {
 
       // Estadísticas por miembro y tarea
       match /memberTaskStats/{statId} {
-        allow read: if isMemberOfHome(homeId);
+        allow read: if isCurrentMember(homeId);
         allow write: if false; // Solo via Functions
       }
 
@@ -270,19 +232,23 @@ service cloud.firestore {
 
       // Historial de suscripciones
       match /subscriptions/{chargeId} {
-        allow read: if isMemberOfHome(homeId) && getMembership(homeId).billingState in ['currentPayer', 'formerPayer'];
+        allow read: if isCurrentMember(homeId) && getMembership(homeId).billingState in ['currentPayer', 'formerPayer'];
         allow write: if false;
 
         match /charges/{nestedChargeId} {
-          allow read: if isMemberOfHome(homeId) && getMembership(homeId).billingState in ['currentPayer', 'formerPayer'];
+          allow read: if isCurrentMember(homeId) && getMembership(homeId).billingState in ['currentPayer', 'formerPayer'];
           allow write: if false;
         }
       }
 
       // Invitaciones
       match /invitations/{inviteId} {
-        allow read: if isAdminOrOwner(homeId) ||
-                       (isAuth() && resource.data.code != null); // Lectura pública por código
+        // Solo admin/owner del propio hogar pueden leer/listar invitaciones.
+        // La unión por código va por la callable joinHomeByCode (Admin SDK,
+        // server-side), así que el cliente NUNCA necesita leer invitaciones de
+        // otros hogares. (Antes: lectura pública por código + collectionGroup
+        // list:isAuth permitían enumerar TODOS los códigos del sistema.)
+        allow read: if isAdminOrOwner(homeId);
         allow create: if isAdminOrOwner(homeId) && isActiveMember(homeId);
         allow update: if isAdminOrOwner(homeId) && isActiveMember(homeId);
         allow delete: if isAdminOrOwner(homeId) && isActiveMember(homeId);
@@ -290,15 +256,18 @@ service cloud.firestore {
 
       // Metadatos del sistema
       match /system/meta {
-        allow read: if isMemberOfHome(homeId);
+        allow read: if isCurrentMember(homeId);
         allow write: if false;
       }
     }
 
-    // Collection group query para buscar invitación por código (unirse a hogar)
-    // Permite a usuarios autenticados hacer collectionGroup queries sobre invitations
+    // Collection group sobre invitations: PROHIBIDO desde el cliente.
+    // Antes `allow list: if isAuth()` permitía a cualquier autenticado enumerar
+    // TODOS los códigos de invitación del sistema. La unión por código se hace
+    // exclusivamente por la callable joinHomeByCode (Admin SDK, con rate-limit),
+    // que resuelve el código server-side; el cliente no consulta invitations.
     match /{path=**}/invitations/{inviteId} {
-      allow list: if isAuth();
+      allow list: if false;
     }
 
     // Collection group para valoraciones (perfil de miembro + isRated).

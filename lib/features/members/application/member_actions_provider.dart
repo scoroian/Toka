@@ -9,12 +9,6 @@ class MemberActions extends _$MemberActions {
   @override
   AsyncValue<void> build() => const AsyncValue.data(null);
 
-  Future<void> inviteMember(String homeId, String? email) async {
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(
-        () => ref.read(membersRepositoryProvider).inviteMember(homeId, email));
-  }
-
   Future<({String code, DateTime expiresAt})> generateInviteCode(
       String homeId) async {
     state = const AsyncValue.loading();
@@ -37,9 +31,18 @@ class MemberActions extends _$MemberActions {
   }
 
   Future<void> promoteToAdmin(String homeId, String uid) async {
+    // NO usar AsyncValue.guard: igual que transferOwnership, guard captura la
+    // excepción y NO la relanza, por lo que la UI (admins_sheet) nunca veía el
+    // tope de admins (MaxAdminsReachedException) ni el bloqueo free y mostraba
+    // un falso "éxito". Guardamos el error en el estado y lo relanzamos.
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(
-        () => ref.read(membersRepositoryProvider).promoteToAdmin(homeId, uid));
+    try {
+      await ref.read(membersRepositoryProvider).promoteToAdmin(homeId, uid);
+      state = const AsyncValue.data(null);
+    } catch (e, s) {
+      state = AsyncValue.error(e, s);
+      rethrow;
+    }
   }
 
   Future<void> demoteFromAdmin(String homeId, String uid) async {

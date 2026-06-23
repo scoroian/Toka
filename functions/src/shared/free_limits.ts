@@ -10,6 +10,15 @@ export const FREE_LIMITS = {
   maxAutomaticRecurringTasks: 3,
 } as const;
 
+// Límites de hogares Premium. A diferencia de los free, no condicionan la
+// capacidad Premium global, solo acotan recursos que antes eran ilimitados.
+export const PREMIUM_LIMITS = {
+  // Hallazgo #12: tope de administradores ADEMÁS del owner. Antes no había
+  // ninguno (promoteToAdmin solo gateaba por rol owner + Premium), de modo que
+  // un hogar podía acumular admins sin control y diluir la gobernanza.
+  maxAdminsBesidesOwner: 5,
+} as const;
+
 /**
  * Conjunto de `premiumStatus` que se consideran "con Premium vigente":
  * el hogar disfruta de todas las capacidades Premium.

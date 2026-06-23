@@ -3,8 +3,12 @@ import {
   scoreOf,
   getNextAssigneeRoundRobin,
   getNextAssigneeSmart,
-  addRecurrenceInterval,
+  countCompletionsInWindow,
+  type CompletedLoadEvent,
 } from "./task_assignment_helpers";
+
+const DAY = 24 * 60 * 60 * 1000;
+const NOW = 1_700_000_000_000; // instante fijo de referencia para los tests
 
 describe("scoreOf", () => {
   it("calcula score básico correctamente", () => {
@@ -75,30 +79,90 @@ describe("getNextAssigneeSmart", () => {
   });
 });
 
-describe("addRecurrenceInterval", () => {
-  const base = new Date("2026-04-08T10:00:00Z");
-  it("hourly +1 hora", () => {
-    const r = addRecurrenceInterval(base, "hourly");
-    expect(r.getUTCHours()).toBe(11);
+// Hallazgo #13: la carga del reparto inteligente debe contar las
+// completaciones REALES de los últimos 60 días (eventos `taskEvents`), no un
+// acumulado de por vida. `countCompletionsInWindow` es el núcleo puro.
+describe("countCompletionsInWindow", () => {
+  const ev = (performerUid: string, ageDays: number): CompletedLoadEvent => ({
+    performerUid,
+    completedAtMs: NOW - ageDays * DAY,
   });
-  it("daily +1 día", () => {
-    const r = addRecurrenceInterval(base, "daily");
-    expect(r.getUTCDate()).toBe(9);
+
+  it("cuenta por miembro las completaciones dentro de la ventana", () => {
+    const counts = countCompletionsInWindow(
+      [ev("u1", 1), ev("u1", 10), ev("u2", 5)],
+      NOW,
+      60
+    );
+    expect(counts.get("u1")).toBe(2);
+    expect(counts.get("u2")).toBe(1);
   });
-  it("weekly +7 días", () => {
-    const r = addRecurrenceInterval(base, "weekly");
-    expect(r.getUTCDate()).toBe(15);
+
+  it("excluye eventos más antiguos que la ventana", () => {
+    const counts = countCompletionsInWindow(
+      [ev("u1", 30), ev("u1", 90), ev("u1", 120)],
+      NOW,
+      60
+    );
+    // solo el de hace 30 días entra; los de 90 y 120 quedan fuera
+    expect(counts.get("u1")).toBe(1);
   });
-  it("monthly +1 mes", () => {
-    const r = addRecurrenceInterval(base, "monthly");
-    expect(r.getUTCMonth()).toBe(4); // Mayo
+
+  it("incluye el evento justo en el borde de la ventana (>=)", () => {
+    const counts = countCompletionsInWindow([ev("u1", 60)], NOW, 60);
+    expect(counts.get("u1")).toBe(1);
   });
-  it("yearly +1 año", () => {
-    const r = addRecurrenceInterval(base, "yearly");
-    expect(r.getUTCFullYear()).toBe(2027);
+
+  it("un miembro sin eventos en la ventana no aparece en el mapa", () => {
+    const counts = countCompletionsInWindow([ev("u1", 90)], NOW, 60);
+    expect(counts.has("u1")).toBe(false);
   });
-  it("tipo desconocido no modifica la fecha", () => {
-    const r = addRecurrenceInterval(base, "unknown");
-    expect(r.getTime()).toBe(base.getTime());
+
+  it("ignora eventos sin performerUid", () => {
+    const counts = countCompletionsInWindow(
+      [ev("", 1), ev("u1", 1)],
+      NOW,
+      60
+    );
+    expect(counts.get("u1")).toBe(1);
+    expect(counts.has("")).toBe(false);
   });
 });
+
+// Hallazgo #13: el síntoma de negocio. Un miembro muy cumplidor en el pasado
+// (acumulado de por vida alto) pero SIN actividad reciente NO debe quedar
+// excluido del reparto inteligente para siempre. Con la carga por ventana real,
+// su carga reciente es 0 y vuelve a ser elegible.
+describe("reparto inteligente con carga por ventana (Hallazgo #13)", () => {
+  it("un miembro muy cumplidor histórico, sin actividad en 60 días, vuelve a ser elegible", () => {
+    const events: CompletedLoadEvent[] = [
+      // 'veteran' completó 5 tareas pero hace 70-100 días (fuera de la ventana)
+      { performerUid: "veteran", completedAtMs: NOW - 70 * DAY },
+      { performerUid: "veteran", completedAtMs: NOW - 80 * DAY },
+      { performerUid: "veteran", completedAtMs: NOW - 90 * DAY },
+      { performerUid: "veteran", completedAtMs: NOW - 95 * DAY },
+      { performerUid: "veteran", completedAtMs: NOW - 100 * DAY },
+      // 'rookie' completó 3 tareas esta última semana (dentro de la ventana)
+      { performerUid: "rookie", completedAtMs: NOW - 1 * DAY },
+      { performerUid: "rookie", completedAtMs: NOW - 2 * DAY },
+      { performerUid: "rookie", completedAtMs: NOW - 3 * DAY },
+    ];
+    const recent = countCompletionsInWindow(events, NOW, 60);
+
+    // veteran: 0 reciente; rookie: 3 reciente
+    expect(recent.get("veteran") ?? 0).toBe(0);
+    expect(recent.get("rookie")).toBe(3);
+
+    const loadData = new Map([
+      ["veteran", { completionsRecent: recent.get("veteran") ?? 0, difficultyWeight: 1.0, daysSinceLastExecution: 0 }],
+      ["rookie", { completionsRecent: recent.get("rookie") ?? 0, difficultyWeight: 1.0, daysSinceLastExecution: 0 }],
+    ]);
+
+    // El siguiente reparto recae en 'veteran' (carga reciente menor), no en
+    // 'rookie'. Con el acumulado de por vida (veteran=5) habría sido al revés.
+    expect(getNextAssigneeSmart(["veteran", "rookie"], "rookie", [], loadData)).toBe("veteran");
+  });
+});
+
+// `addRecurrenceInterval` se eliminó (Hallazgo #10). El cálculo de la siguiente
+// ocurrencia se prueba ahora en `recurrence_calculator.test.ts`.

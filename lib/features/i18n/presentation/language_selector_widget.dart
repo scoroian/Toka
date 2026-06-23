@@ -38,13 +38,20 @@ class LanguageSelectorWidget extends ConsumerWidget {
           const SizedBox(height: 16),
         ],
         languagesAsync.when(
-          data: (languages) => _LanguageList(
-            languages: languages,
+          data: (result) => _LanguageList(
+            languages: result.languages,
             currentLocale: currentLocale,
             onSelected: onSelected,
           ),
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (_, __) => Center(child: Text(l10n.error_generic)),
+          // El repositorio nunca lanza por fallo de red (devuelve los idiomas
+          // básicos como fallback), pero por robustez ante un error inesperado
+          // mostramos los defaults en vez de dejar Ajustes sin idiomas.
+          error: (_, __) => _LanguageList(
+            languages: Language.defaults,
+            currentLocale: currentLocale,
+            onSelected: onSelected,
+          ),
         ),
       ],
     );

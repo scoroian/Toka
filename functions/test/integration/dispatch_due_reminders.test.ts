@@ -25,25 +25,27 @@ function minutesFromNow(minutes: number): admin.firestore.Timestamp {
 
 beforeAll(async () => {
   await cleanAll();
+  // El token FCM vive en users/{uid}.fcmToken (doc privado), NO en el doc de
+  // miembro (Hallazgo #01). notifyOnDue sí permanece en el member doc.
   await createUser(OWNER);
-  await createUser(MEMBER);
-  await createUser(MEMBER_NO_TOKEN);
-  await createUser(MEMBER_NOTIF_OFF);
+  await createUser(MEMBER, { fcmToken: 'valid-token-abc' });
+  await createUser(MEMBER_NO_TOKEN); // sin fcmToken en users/{uid}
+  await createUser(MEMBER_NOTIF_OFF, { fcmToken: 'valid-token-xyz' });
   await createHome(HOME, OWNER);
 
   // MEMBER con FCM token y notifyOnDue=true → debe recibir reminder
   await addMemberToHome(HOME, MEMBER, 'member', 'active', {
-    notificationPrefs: { taskReminders: true, notifyOnDue: true, fcmToken: 'valid-token-abc' },
+    notificationPrefs: { taskReminders: true, notifyOnDue: true },
   });
 
   // MEMBER_NO_TOKEN sin FCM token → no debe recibir reminder
   await addMemberToHome(HOME, MEMBER_NO_TOKEN, 'member', 'active', {
-    notificationPrefs: { taskReminders: true, notifyOnDue: true, fcmToken: null },
+    notificationPrefs: { taskReminders: true, notifyOnDue: true },
   });
 
   // MEMBER_NOTIF_OFF con notifyOnDue=false → no debe recibir reminder
   await addMemberToHome(HOME, MEMBER_NOTIF_OFF, 'member', 'active', {
-    notificationPrefs: { taskReminders: false, notifyOnDue: false, fcmToken: 'valid-token-xyz' },
+    notificationPrefs: { taskReminders: false, notifyOnDue: false },
   });
 
   // Tarea venciendo en 5 minutos → dentro de la ventana de 15 min

@@ -25,6 +25,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get retry => 'Reintentar';
 
   @override
+  String get language_offline_notice =>
+      'Sin conexión. Mostrando los idiomas básicos; puedes continuar o reintentar.';
+
+  @override
   String get cancel => 'Cancelar';
 
   @override
@@ -601,6 +605,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get complete_task_confirm_btn => 'Sí, hecha ✓';
 
   @override
+  String get today_task_completed_undoable => 'Tarea completada';
+
+  @override
+  String get undo => 'Deshacer';
+
+  @override
   String get pass_turn_dialog_title => '¿Pasar turno?';
 
   @override
@@ -929,6 +939,20 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get paywall_cta_monthly => 'Plan mensual';
+
+  @override
+  String paywall_trial_badge(int days) {
+    return '$days días gratis';
+  }
+
+  @override
+  String paywall_cta_start_trial(int days) {
+    return 'Empezar $days días gratis';
+  }
+
+  @override
+  String get paywall_trial_note =>
+      'Después se renueva automáticamente. Cancela cuando quieras.';
 
   @override
   String get paywall_restore => 'Restaurar compras';
@@ -1334,6 +1358,20 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get settings_phone_visibility => 'Visibilidad del teléfono';
+
+  @override
+  String get settings_export_data => 'Exportar mis datos';
+
+  @override
+  String get settings_export_data_subtitle =>
+      'Descarga un archivo JSON con tus datos personales';
+
+  @override
+  String get settings_export_data_progress => 'Preparando la exportación…';
+
+  @override
+  String get settings_export_data_error =>
+      'No se pudo exportar tus datos. Inténtalo de nuevo.';
 
   @override
   String get settings_section_subscription => 'Suscripción';
@@ -2310,6 +2348,28 @@ class AppLocalizationsEs extends AppLocalizations {
       'No puedes transferir la propiedad mientras pagues el Premium del hogar. Cancela la renovación o transfiere al final del periodo.';
 
   @override
+  String get homes_transfer_and_leave => 'Transferir y salir';
+
+  @override
+  String get homes_transfer_and_leave_title => 'Transferir propiedad y salir';
+
+  @override
+  String get homes_transfer_and_leave_body =>
+      'Elige quién será el nuevo propietario. Cuando aceptes, le cederás la propiedad y saldrás del hogar.';
+
+  @override
+  String get homes_transfer_and_leave_confirm_title => '¿Transferir y salir?';
+
+  @override
+  String homes_transfer_and_leave_confirm_body(String name) {
+    return '$name pasará a ser el propietario y tú saldrás del hogar.';
+  }
+
+  @override
+  String get homes_transfer_and_left =>
+      'Has cedido la propiedad y salido del hogar.';
+
+  @override
   String homes_admins_count(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -2337,6 +2397,10 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get homes_admins_promote_blocked_free =>
       'Sólo Premium puede tener varios administradores.';
+
+  @override
+  String get homes_admins_max_reached =>
+      'Has alcanzado el máximo de administradores del hogar.';
 
   @override
   String homes_invitations_count(int count) {
@@ -2384,4 +2448,85 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get homes_avatar_updated => 'Foto del hogar actualizada.';
+
+  @override
+  String get support_title => 'Diagnóstico de soporte';
+
+  @override
+  String get support_unauthorized => 'No tienes permiso de soporte.';
+
+  @override
+  String get support_privacy_notice =>
+      'Datos redactados: sin teléfonos, tokens ni notas privadas.';
+
+  @override
+  String get support_homeid_label => 'ID del hogar';
+
+  @override
+  String get support_diagnose_button => 'Diagnosticar';
+
+  @override
+  String get support_empty_prompt =>
+      'Introduce un ID de hogar para ver su diagnóstico.';
+
+  @override
+  String get support_no_results => 'Sin datos.';
+
+  @override
+  String get support_section_home => 'Hogar';
+
+  @override
+  String support_section_members(int count) {
+    return 'Miembros ($count)';
+  }
+
+  @override
+  String get support_section_tasks => 'Próximas tareas';
+
+  @override
+  String get support_section_events => 'Eventos recientes';
+
+  @override
+  String get support_name => 'Nombre';
+
+  @override
+  String get support_plan => 'Plan';
+
+  @override
+  String get support_premium_ends => 'Premium hasta';
+
+  @override
+  String get support_owner => 'Propietario';
+
+  @override
+  String get support_payer => 'Pagador';
+
+  @override
+  String get support_timezone => 'Zona horaria';
+
+  @override
+  String get support_has_phone => 'Teléfono';
+
+  @override
+  String get support_has_token => 'Push';
+
+  @override
+  String support_member_stats(int completed, String avg, int streak) {
+    return 'Hechas: $completed · Media: $avg · Racha: $streak';
+  }
+
+  @override
+  String support_generated_at(String ts) {
+    return 'Generado: $ts';
+  }
+
+  @override
+  String get support_error_permission =>
+      'Acceso denegado (requiere permiso de soporte).';
+
+  @override
+  String get support_error_notfound => 'Hogar no encontrado.';
+
+  @override
+  String get support_error_generic => 'No se pudo obtener el diagnóstico.';
 }

@@ -17,6 +17,7 @@ import '../domain/recurrence_rule.dart';
 import '../domain/task.dart';
 import '../domain/task_status.dart';
 import '../presentation/widgets/pass_turn_dialog.dart';
+import 'pending_completions_provider.dart';
 import 'task_completion_provider.dart';
 import 'task_pass_provider.dart';
 import 'tasks_provider.dart';
@@ -83,11 +84,14 @@ Future<PassTurnInfo> fetchPassTurnInfo(
   for (final doc in membersSnap.docs) {
     final data = doc.data();
     final status = data['status'] as String?;
-    // El backend (isMemberCurrentlyAbsent) salta a los congelados y a quienes
-    // tienen una vacación ACTIVA hoy (campo `vacation`, no `status`). Replicamos
-    // esa lógica para que el preview "siguiente responsable" coincida con lo que
-    // hará realmente el backend al pasar turno.
-    if (status == 'frozen' || _isOnVacationNow(data['vacation'])) {
+    // Espejo EXACTO de la exclusión del backend (passTaskTurn): se saltan los
+    // ex-miembros ('left', Hallazgo #08), los congelados ('frozen') y quienes
+    // tienen una vacación ACTIVA hoy (campo `vacation`, no `status` —
+    // isMemberCurrentlyAbsent). Así el preview "siguiente responsable" coincide
+    // con quien realmente recibirá el turno (regla de producto #7).
+    if (status == 'left' ||
+        status == 'frozen' ||
+        _isOnVacationNow(data['vacation'])) {
       frozenUids.add(doc.id);
     }
     names[doc.id] = (data['nickname'] as String?) ?? '';
@@ -116,6 +120,19 @@ Future<PassTurnInfo> fetchPassTurnInfo(
     nextAssigneeName:
         (nextName != null && nextName.isNotEmpty) ? nextName : null,
   );
+}
+
+/// Filtra las tareas cuya completación está "pendiente" (commit diferido tras
+/// tocar Hecho, ver [PendingCompletions]): se ocultan de "Por hacer" de forma
+/// optimista mientras dura la ventana de Deshacer. La animación de la tarjeta ya
+/// dio el feedback de éxito; el backend aún no se ha tocado.
+@visibleForTesting
+List<TaskPreview> excludePendingCompletions(
+  List<TaskPreview> tasks,
+  Set<String> pendingTaskIds,
+) {
+  if (pendingTaskIds.isEmpty) return tasks;
+  return tasks.where((t) => !pendingTaskIds.contains(t.taskId)).toList();
 }
 
 @visibleForTesting
@@ -342,6 +359,9 @@ TodayViewModel todayViewModel(TodayViewModelRef ref) {
   final auth = ref.watch(authProvider);
   final currentUid = auth.whenOrNull(authenticated: (u) => u.uid);
   final homeId = ref.watch(currentHomeProvider).valueOrNull?.id ?? '';
+  // Completaciones "diferidas" en su ventana de Deshacer: se ocultan de la
+  // lista de "Por hacer" hasta que el commit se confirma (o se deshace).
+  final pending = ref.watch(pendingCompletionsProvider);
 
   // Build homes list for the dropdown
   final memberships = currentUid != null
@@ -359,7 +379,9 @@ TodayViewModel todayViewModel(TodayViewModelRef ref) {
     // Dashboard disponible → usarlo directamente
     if (data != null) {
       return TodayViewData(
-        grouped: groupByRecurrence(data.activeTasksPreview, data.doneTasksPreview),
+        grouped: groupByRecurrence(
+            excludePendingCompletions(data.activeTasksPreview, pending),
+            data.doneTasksPreview),
         counters: data.counters,
         showAdBanner: data.adFlags.showBanner,
         adBannerUnit: data.adFlags.bannerUnit,
@@ -383,9 +405,12 @@ TodayViewModel todayViewModel(TodayViewModelRef ref) {
     final memberNames = {for (final m in members) m.uid: m.nickname};
     final memberPhotos = {for (final m in members) m.uid: m.photoUrl};
 
-    final previews = activeTasks
-        .map((t) => _taskToPreview(t, memberNames, memberPhotos))
-        .toList();
+    final previews = excludePendingCompletions(
+      activeTasks
+          .map((t) => _taskToPreview(t, memberNames, memberPhotos))
+          .toList(),
+      pending,
+    );
 
     return TodayViewData(
       grouped: groupByRecurrence(previews, []),

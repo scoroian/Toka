@@ -44,6 +44,29 @@ void main() {
       final next = RecurrenceCalculator.nextDue(rule3, from);
       expect(toMadrid(next).day, 10);
     });
+
+    // Paridad con functions/src/tasks/recurrence_calculator.test.ts (Hallazgo #10):
+    // la hora de pared (09:00) debe mantenerse estable al cruzar los cambios DST.
+    test('DST spring-forward (31-mar-2024): 09:00 NO deriva a 10:00', () {
+      const rule = RecurrenceRule.daily(
+          every: 1, time: '09:00', timezone: 'Europe/Madrid');
+      final from = madridTime(2024, 3, 30, 10, 0); // 30-mar, pasó las 9h
+      final next = RecurrenceCalculator.nextDue(rule, from);
+      expect(toMadrid(next).day, 31);
+      expect(toMadrid(next).hour, 9);
+      // CEST (+02:00) ⇒ 07:00Z (el bug viejo de suma UTC daba 10:00 local).
+      expect(next.toUtc().toIso8601String(), '2024-03-31T07:00:00.000Z');
+    });
+
+    test('DST fall-back (27-oct-2024): 09:00 se mantiene a 09:00', () {
+      const rule = RecurrenceRule.daily(
+          every: 1, time: '09:00', timezone: 'Europe/Madrid');
+      final from = madridTime(2024, 10, 26, 10, 0);
+      final next = RecurrenceCalculator.nextDue(rule, from);
+      expect(toMadrid(next).day, 27);
+      expect(toMadrid(next).hour, 9);
+      expect(next.toUtc().toIso8601String(), '2024-10-27T08:00:00.000Z');
+    });
   });
 
   group('Weekly', () {

@@ -89,6 +89,20 @@ void main() {
     expect(info.nextAssigneeName, 'Carlos');
   });
 
+  test('ex-miembro (left) se salta como el backend (Hallazgo #11a)', () async {
+    // El preview debe coincidir con passTaskTurn, que excluye a los 'left'
+    // (Hallazgo #08). Antes el espejo cliente NO los excluía y mostraba a un
+    // ex-miembro como siguiente responsable.
+    await seedTask(['A', 'B', 'C'], 'A');
+    await seedMember('A', nickname: 'Ana', tasksCompleted: 4);
+    await seedMember('B', nickname: 'Bob', status: 'left');
+    await seedMember('C', nickname: 'Carlos');
+
+    final info = await fetchPassTurnInfo(db, homeId, taskId, 'A');
+
+    expect(info.nextAssigneeName, 'Carlos');
+  });
+
   test('miembro con vacación activa se salta como el backend', () async {
     await seedTask(['A', 'B', 'C'], 'A');
     await seedMember('A', nickname: 'Ana', tasksCompleted: 4);

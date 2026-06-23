@@ -1,5 +1,4 @@
 // lib/features/homes/application/home_settings_view_model.dart
-import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -24,10 +23,6 @@ class HomeSettingsViewData {
     required this.isPayer,
     required this.isOwner,
     required this.uid,
-    // DEBUG PREMIUM — REMOVE BEFORE PRODUCTION
-    required this.premiumStatusCode,
-    required this.showDebugPremiumToggle,
-    // END DEBUG PREMIUM
   });
 
   final String homeId;
@@ -38,10 +33,6 @@ class HomeSettingsViewData {
   final bool isPayer;
   final bool isOwner;
   final String uid;
-  // DEBUG PREMIUM — REMOVE BEFORE PRODUCTION
-  final String premiumStatusCode;
-  final bool showDebugPremiumToggle;
-  // END DEBUG PREMIUM
 }
 
 abstract class HomeSettingsViewModel {
@@ -58,9 +49,6 @@ abstract class HomeSettingsViewModel {
   Future<void> leaveHome();
   Future<void> closeHome();
   void clearError();
-  // DEBUG PREMIUM — REMOVE BEFORE PRODUCTION
-  Future<void> debugSetPremiumStatus(String status);
-  // END DEBUG PREMIUM
 }
 
 class _HomeSettingsViewModelImpl implements HomeSettingsViewModel {
@@ -121,16 +109,6 @@ class _HomeSettingsViewModelImpl implements HomeSettingsViewModel {
   @override
   void clearError() {}
 
-  // DEBUG PREMIUM — REMOVE BEFORE PRODUCTION
-  @override
-  Future<void> debugSetPremiumStatus(String status) async {
-    final homeId = viewData.valueOrNull?.homeId;
-    if (homeId == null) return;
-    await ref
-        .read(homesRepositoryProvider)
-        .debugSetPremiumStatus(homeId, status);
-  }
-  // END DEBUG PREMIUM
 }
 
 String _planLabel(Home home, AppLocalizations l10n) {
@@ -181,12 +159,6 @@ HomeSettingsViewModel homeSettingsViewModel(
       isPayer: isCurrentPayer,
       isOwner: isOwner,
       uid: uid,
-      // DEBUG PREMIUM — solo en builds debug. En release (kDebugMode==false)
-      // el toggle queda oculto para no exponer un control de estado premium en
-      // producción, aunque seas owner.
-      premiumStatusCode: home.premiumStatus.name,
-      showDebugPremiumToggle: isOwner && kDebugMode,
-      // END DEBUG PREMIUM
     );
   });
 

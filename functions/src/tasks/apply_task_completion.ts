@@ -2,18 +2,62 @@
 import * as admin from "firebase-admin";
 import * as logger from "firebase-functions/logger";
 import { onCall, HttpsError } from "firebase-functions/v2/https";
-import { updateHomeDashboard } from "./update_dashboard";
+import { updateHomeDashboard, applyDashboardDeltaTx } from "./update_dashboard";
+import type { DashboardChange } from "./dashboard_delta";
 import {
   MemberLoadData,
+  CompletedLoadEvent,
+  countCompletionsInWindow,
   getNextAssigneeRoundRobin,
   getNextAssigneeSmart,
-  addRecurrenceInterval,
   isTerminalRecurrence,
 } from "./task_assignment_helpers";
+import { computeNextDueAt } from "./recurrence_calculator";
 import { isMemberCurrentlyAbsent } from "../shared/vacation";
 
 const db = admin.firestore();
 const FieldValue = admin.firestore.FieldValue;
+
+// Hallazgo #13: ventana real de carga del reparto inteligente. Antes se usaba
+// `members/{uid}.completions60d`, un contador que SOLO se incrementaba y NUNCA
+// decaía → un miembro muy cumplidor en el pasado quedaba excluido del reparto
+// para siempre. Ahora la carga se cuenta desde los eventos `taskEvents`
+// 'completed' de los últimos LOAD_WINDOW_DAYS días (fuente fechada y
+// auto-limpiante; ningún job de barrido necesario).
+const LOAD_WINDOW_DAYS = 60;
+
+/**
+ * Cuenta, por miembro, las completaciones de los últimos `windowDays` días
+ * leyendo los eventos `taskEvents` de tipo 'completed'. Usa el índice compuesto
+ * (eventType, completedAt) ya declarado en `firestore.indexes.json`. Se ejecuta
+ * FUERA de la transacción de completación: el reparto inteligente es una
+ * heurística y no necesita consistencia transaccional; así evitamos añadir un
+ * range-read al conjunto de lectura de la transacción (menos contención).
+ */
+async function loadRecentCompletionCounts(
+  homeId: string,
+  windowDays: number
+): Promise<Map<string, number>> {
+  const cutoff = admin.firestore.Timestamp.fromMillis(
+    Date.now() - windowDays * 24 * 60 * 60 * 1000
+  );
+  const snap = await db
+    .collection("homes").doc(homeId).collection("taskEvents")
+    .where("eventType", "==", "completed")
+    .where("completedAt", ">=", cutoff)
+    .get();
+  const events: CompletedLoadEvent[] = snap.docs.map((d) => {
+    const e = d.data();
+    const completedAt = e["completedAt"] as admin.firestore.Timestamp | undefined;
+    return {
+      // `performerUid` es el canónico; `actorUid` como fallback para eventos
+      // antiguos. En las completaciones ambos son el mismo uid.
+      performerUid: (e["performerUid"] as string) ?? (e["actorUid"] as string) ?? "",
+      completedAtMs: completedAt ? completedAt.toMillis() : 0,
+    };
+  });
+  return countCompletionsInWindow(events, Date.now(), windowDays);
+}
 
 export const applyTaskCompletion = onCall(async (request) => {
   if (!request.auth) {
@@ -26,6 +70,21 @@ export const applyTaskCompletion = onCall(async (request) => {
   if (!homeId || !taskId) {
     throw new HttpsError("invalid-argument", "homeId and taskId are required");
   }
+
+  // Pre-lectura (fuera de la transacción) del modo de distribución: solo el
+  // reparto inteligente necesita la carga de 60 días, así que evitamos la query
+  // extra de eventos para las tareas en round-robin. Si la tarea no existe, la
+  // transacción de abajo lanzará not-found igualmente.
+  const preTaskSnap = await db
+    .collection("homes").doc(homeId).collection("tasks").doc(taskId).get();
+  const preMode: string =
+    (preTaskSnap.data()?.["distributionMode"] as string) ??
+    (preTaskSnap.data()?.["assignmentMode"] as string) ??
+    "round_robin";
+  const isSmart = preMode === "smart" || preMode === "smartDistribution";
+  const recentCompletionCounts = isSmart
+    ? await loadRecentCompletionCounts(homeId, LOAD_WINDOW_DAYS)
+    : new Map<string, number>();
 
   const result = await db.runTransaction(async (tx) => {
     const taskRef = db.collection("homes").doc(homeId).collection("tasks").doc(taskId);
@@ -49,16 +108,25 @@ export const applyTaskCompletion = onCall(async (request) => {
 
     for (const mDoc of membersSnap.docs) {
       const mData = mDoc.data();
-      if (mData["status"] === "frozen" || isMemberCurrentlyAbsent(mData)) {
+      // Excluir del siguiente reparto a congelados, ausentes (vacaciones) y
+      // ex-miembros ('left'). Incluir 'left' (Hallazgo #08) evita reasignar la
+      // tarea a un fantasma que siga en assignmentOrder.
+      if (
+        mData["status"] === "left" ||
+        mData["status"] === "frozen" ||
+        isMemberCurrentlyAbsent(mData)
+      ) {
         excludedUids.push(mDoc.id);
       }
-      const completions60d: number = (mData["completions60d"] as number) ?? 0;
       const lastCompletedAt: admin.firestore.Timestamp | undefined = mData["lastCompletedAt"];
       const daysSince = lastCompletedAt
         ? Math.floor((Date.now() - lastCompletedAt.toMillis()) / (1000 * 60 * 60 * 24))
         : 0;
       loadDataMap.set(mDoc.id, {
-        completionsRecent: completions60d,
+        // Carga REAL de los últimos 60 días (Hallazgo #13), no el acumulado de
+        // por vida `completions60d`. Si no hay datos (o la tarea no es smart),
+        // el conteo es 0.
+        completionsRecent: recentCompletionCounts.get(mDoc.id) ?? 0,
         difficultyWeight: 1.0,
         daysSinceLastExecution: daysSince,
       });
@@ -88,7 +156,10 @@ export const applyTaskCompletion = onCall(async (request) => {
       ?.toDate() ?? admin.firestore.Timestamp.now().toDate();
     const recurrenceType: string = task["recurrenceType"] ?? "daily";
     const isOneTime = isTerminalRecurrence(recurrenceType);
-    const nextDueAt = addRecurrenceInterval(currentDue, recurrenceType);
+    // Hallazgo #10: la siguiente ocurrencia se deriva de la RecurrenceRule en la
+    // zona del hogar (tz-aware), manteniendo la hora de pared estable a través
+    // de DST. Antes se sumaba el intervalo en UTC ignorando la regla.
+    const nextDueAt = computeNextDueAt(task, currentDue);
 
     const eventRef = db.collection("homes").doc(homeId).collection("taskEvents").doc();
     tx.set(eventRef, {
@@ -113,6 +184,9 @@ export const applyTaskCompletion = onCall(async (request) => {
       currentAssigneeUid: isOneTime ? null : nextAssigneeUid,
       nextDueAt: admin.firestore.Timestamp.fromDate(nextDueAt),
       completedCount90d: FieldValue.increment(1),
+      // Hallazgo #16: marca que esta escritura ya tiene su delta aplicado en la
+      // callable, para que el trigger onWrite no haga un rebuild redundante.
+      dashboardDeltaToken: FieldValue.increment(1),
       updatedAt: FieldValue.serverTimestamp(),
     };
     if (isOneTime) {
@@ -170,20 +244,46 @@ export const applyTaskCompletion = onCall(async (request) => {
       lastActiveAt: FieldValue.serverTimestamp(),
     });
 
-    return { eventId: eventRef.id, nextAssigneeUid };
+    return {
+      eventId: eventRef.id,
+      nextAssigneeUid,
+      isOneTime,
+      nextDueAtMillis: nextDueAt.getTime(),
+    };
   });
 
-  // Reconstruir el dashboard ANTES de responder al cliente. En Cloud Functions
+  // Actualizar el dashboard ANTES de responder al cliente. En Cloud Functions
   // gen2 (Cloud Run) el CPU se estrangula en cuanto se envía la respuesta, por lo
-  // que un rebuild fire-and-forget quedaba en segundo plano y tardaba ~10s en
+  // que un trabajo fire-and-forget quedaba en segundo plano y tardaba ~10s en
   // reflejarse en la pantalla Hoy. Hacerlo dentro del ciclo de la petición
-  // elimina ese desfase. Un fallo del rebuild NO revierte la completación (ya
-  // está confirmada en la transacción); el cron diario lo reconstruirá.
+  // elimina ese desfase.
+  //
+  // Hallazgo #16: en vez de reconstruir TODO el dashboard, aplicamos un DELTA
+  // incremental (transacción de un solo doc → sin lost-update bajo concurrencia,
+  // y O(preview) en memoria en vez de releer todas las tareas/eventos). Si el
+  // dashboard no existe o hay deriva, caemos al rebuild completo. Un fallo no
+  // revierte la completación (ya confirmada); el cron/trigger lo reconcilian.
   try {
-    await updateHomeDashboard(homeId);
+    const change: DashboardChange = {
+      kind: "completed",
+      taskId,
+      performedByUid: uid,
+      isOneTime: result.isOneTime,
+      newAssigneeUid: result.isOneTime ? null : result.nextAssigneeUid,
+      newNextDueAt: admin.firestore.Timestamp.fromMillis(result.nextDueAtMillis),
+      newNextDueAtMillis: result.isOneTime ? null : result.nextDueAtMillis,
+      completedAt: admin.firestore.Timestamp.now(),
+    };
+    const applied = await applyDashboardDeltaTx(homeId, change);
+    if (!applied) await updateHomeDashboard(homeId);
   } catch (err) {
-    logger.error("Failed to update dashboard after completion", err);
+    logger.error("Failed to apply dashboard delta after completion; rebuilding", err);
+    try {
+      await updateHomeDashboard(homeId);
+    } catch (err2) {
+      logger.error("Fallback dashboard rebuild after completion also failed", err2);
+    }
   }
 
-  return result;
+  return { eventId: result.eventId, nextAssigneeUid: result.nextAssigneeUid };
 });

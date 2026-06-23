@@ -59,7 +59,9 @@ class Paywall extends _$Paywall {
         homeId: homeId,
         receiptData: receiptData,
         platform: purchase.verificationData.source == 'app_store' ? 'ios' : 'android',
-        chargeId: purchase.purchaseID ?? purchase.verificationData.localVerificationData,
+        // chargeId NO se envía: el backend lo deriva del recibo verificado
+        // (purchaseToken / originalTransactionId), evitando depender de
+        // purchase.purchaseID (nulo en iOS restored).
       );
 
       await InAppPurchase.instance.completePurchase(purchase);

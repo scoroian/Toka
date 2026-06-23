@@ -61,6 +61,8 @@ class _CounterCard extends StatelessWidget {
                 fontSize: 24, fontWeight: FontWeight.w900, color: numberColor)),
         const SizedBox(height: 2),
         Text(label,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
             style: GoogleFonts.plusJakartaSans(
                 fontSize: 9, fontWeight: FontWeight.w700,
                 letterSpacing: 0.1,

@@ -17,6 +17,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/errors/exceptions.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/bottom_sheet_padding.dart';
 import '../../../homes/application/dashboard_provider.dart';
@@ -207,6 +208,12 @@ class _AdminRow extends ConsumerWidget {
     final messenger = ScaffoldMessenger.of(context);
     try {
       await action();
+    } on MaxAdminsReachedException {
+      // Tope de admins del hogar (Hallazgo #12): el repo mapea
+      // resource-exhausted a esta excepción del dominio.
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.homes_admins_max_reached)),
+      );
     } on Exception catch (e) {
       // free_limit_admins viene como FirebaseFunctionsException con
       // code='failed-precondition' y message contiene 'free_limit_admins'.

@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:toka/features/i18n/application/language_provider.dart';
 import 'package:toka/features/i18n/domain/language.dart';
+import 'package:toka/features/i18n/domain/languages_result.dart';
 import 'package:toka/features/onboarding/application/onboarding_provider.dart';
 import 'package:toka/features/onboarding/application/onboarding_state.dart';
 import 'package:toka/features/onboarding/application/onboarding_view_model.dart';
@@ -84,8 +85,8 @@ Widget _wrap({
           OnboardingState(currentStep: currentStep, totalSteps: totalSteps),
         ),
       ),
-      availableLanguagesProvider
-          .overrideWith((ref) => Future.value(languages)),
+      availableLanguagesProvider.overrideWith(
+          (ref) => Future.value(LanguagesResult(languages: languages))),
     ],
     child: MaterialApp.router(
       localizationsDelegates: const [

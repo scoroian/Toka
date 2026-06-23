@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 
 import '../domain/home_creation_repository.dart';
@@ -6,12 +5,9 @@ import '../domain/home_creation_repository.dart';
 class HomeCreationRepositoryImpl implements HomeCreationRepository {
   HomeCreationRepositoryImpl({
     required FirebaseFunctions functions,
-    required FirebaseFirestore firestore,
-  })  : _functions = functions,
-        _firestore = firestore;
+  }) : _functions = functions;
 
   final FirebaseFunctions _functions;
-  final FirebaseFirestore _firestore;
 
   @override
   Future<String> createHome({required String name, String? emoji}) async {
@@ -31,31 +27,25 @@ class HomeCreationRepositoryImpl implements HomeCreationRepository {
 
   @override
   Future<String> joinHome({required String code}) async {
-    // Find invitation across all homes
-    final query = await _firestore
-        .collectionGroup('invitations')
-        .where('code', isEqualTo: code)
-        .where('used', isEqualTo: false)
-        .limit(1)
-        .get();
-
-    if (query.docs.isEmpty) throw const InvalidInviteCodeException();
-
-    final doc = query.docs.first;
-    final data = doc.data();
-
-    final expiresAt = (data['expiresAt'] as Timestamp?)?.toDate();
-    if (expiresAt != null && DateTime.now().isAfter(expiresAt)) {
-      throw const ExpiredInviteCodeException();
+    // PRIVACIDAD (Hallazgo #01): la búsqueda de la invitación se hace
+    // SERVER-SIDE en la callable joinHomeByCode (Admin SDK, con rate-limit). El
+    // cliente ya NO consulta collectionGroup('invitations') — eso permitía a
+    // cualquier autenticado enumerar todos los códigos del sistema y por eso las
+    // reglas ahora lo prohíben (allow list: if false).
+    try {
+      final callable = _functions.httpsCallable('joinHomeByCode');
+      final result = await callable.call<Map<String, dynamic>>({'code': code});
+      return (result.data['homeId'] as String?) ?? '';
+    } on FirebaseFunctionsException catch (e) {
+      // Traducimos a las excepciones de dominio que ya maneja onboarding.
+      switch (e.code) {
+        case 'not-found':
+          throw const InvalidInviteCodeException();
+        case 'deadline-exceeded':
+          throw const ExpiredInviteCodeException();
+        default:
+          rethrow;
+      }
     }
-
-    // Extract homeId from document path: homes/{homeId}/invitations/{invId}
-    final homeId = doc.reference.parent.parent!.id;
-
-    // Mark invitation as used and create membership via callable
-    final callable = _functions.httpsCallable('joinHome');
-    await callable.call<void>({'homeId': homeId, 'invitationId': doc.id});
-
-    return homeId;
   }
 }

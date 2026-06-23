@@ -2,6 +2,8 @@
 import * as admin from "firebase-admin";
 import * as logger from "firebase-functions/logger";
 import { onCall, HttpsError } from "firebase-functions/v2/https";
+import { buildBannerAdFlags } from "../shared/ad_constants";
+import { chunked, MAX_BATCH_OPS } from "../shared/batch_utils";
 
 /**
  * Callable: restaura el estado Premium de un hogar si está dentro de la
@@ -53,28 +55,23 @@ export const restorePremiumState = onCall(async (request) => {
     .where("status", "==", "frozen")
     .get();
 
-  const batch = db.batch();
-
-  for (const memberDoc of frozenMembersSnap.docs) {
-    batch.update(memberDoc.ref, {
-      status: "active",
-      frozenAt: FieldValue.delete(),
-    });
+  // Hallazgo #16: un hogar Premium grande puede tener cientos/miles de tareas
+  // congeladas (Premium no tiene tope de tareas). Un único `batch` superaría el
+  // límite DURO de 500 escrituras y reventaría en producción (el emulador NO lo
+  // aplica → falso verde). Troceamos en lotes ≤MAX_BATCH_OPS las descongelaciones
+  // de miembros y tareas, y dejamos el flip del hogar + dashboard para el FINAL:
+  // si algo falla a mitad, el hogar sigue 'restorable' y reintentar es idempotente
+  // (volver a descongelar lo ya activo es un no-op).
+  const unfreezeData = { status: "active", frozenAt: FieldValue.delete() };
+  const refs: admin.firestore.DocumentReference[] = [
+    ...frozenMembersSnap.docs.map((d) => d.ref),
+    ...frozenTasksSnap.docs.map((d) => d.ref),
+  ];
+  for (const group of chunked(refs, MAX_BATCH_OPS)) {
+    const batch = db.batch();
+    for (const ref of group) batch.update(ref, unfreezeData);
+    await batch.commit();
   }
-
-  for (const taskDoc of frozenTasksSnap.docs) {
-    batch.update(taskDoc.ref, {
-      status: "active",
-      frozenAt: FieldValue.delete(),
-    });
-  }
-
-  batch.update(homeRef, {
-    premiumStatus: "active",
-    restoreUntil: FieldValue.delete(),
-    "limits.maxMembers": 10,
-    updatedAt: FieldValue.serverTimestamp(),
-  });
 
   const dashRef = db
     .collection("homes")
@@ -82,7 +79,14 @@ export const restorePremiumState = onCall(async (request) => {
     .collection("views")
     .doc("dashboard");
 
-  batch.set(
+  const finalBatch = db.batch();
+  finalBatch.update(homeRef, {
+    premiumStatus: "active",
+    restoreUntil: FieldValue.delete(),
+    "limits.maxMembers": 10,
+    updatedAt: FieldValue.serverTimestamp(),
+  });
+  finalBatch.set(
     dashRef,
     {
       premiumFlags: {
@@ -92,18 +96,17 @@ export const restorePremiumState = onCall(async (request) => {
         canUseVacations: true,
         canUseReviews: true,
       },
-      adFlags: {
-        showBanner: false,
-        bannerUnit: "",
-      },
+      adFlags: buildBannerAdFlags(false),
       rescueFlags: { isInRescue: false, daysLeft: null },
       updatedAt: FieldValue.serverTimestamp(),
     },
     { merge: true }
   );
-
-  await batch.commit();
-  logger.info(`restorePremiumState: home ${homeId} restored by ${uid}`);
+  await finalBatch.commit();
+  logger.info(
+    `restorePremiumState: home ${homeId} restored by ${uid} ` +
+      `(${frozenMembersSnap.size} members, ${frozenTasksSnap.size} tasks unfrozen)`
+  );
 
   return { success: true };
 });

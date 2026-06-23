@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../../../core/errors/exceptions.dart';
 import '../domain/language.dart';
 import '../domain/language_repository.dart';
+import '../domain/languages_result.dart';
 
 class LanguageRepositoryImpl implements LanguageRepository {
   LanguageRepositoryImpl({required FirebaseFirestore firestore})
@@ -10,14 +10,8 @@ class LanguageRepositoryImpl implements LanguageRepository {
 
   final FirebaseFirestore _firestore;
 
-  static const _defaults = [
-    {'code': 'es', 'name': 'Español', 'flag': '🇪🇸', 'arb_key': 'app_es', 'enabled': true, 'sort_order': 1},
-    {'code': 'en', 'name': 'English', 'flag': '🇬🇧', 'arb_key': 'app_en', 'enabled': true, 'sort_order': 2},
-    {'code': 'ro', 'name': 'Română',  'flag': '🇷🇴', 'arb_key': 'app_ro', 'enabled': true, 'sort_order': 3},
-  ];
-
   @override
-  Future<List<Language>> fetchAvailableLanguages() async {
+  Future<LanguagesResult> fetchAvailableLanguages() async {
     try {
       final snapshot = await _firestore
           .collection('languages')
@@ -26,18 +20,42 @@ class LanguageRepositoryImpl implements LanguageRepository {
           .get();
 
       if (snapshot.docs.isNotEmpty) {
-        return snapshot.docs
+        final languages = snapshot.docs
             .map((doc) => Language.fromFirestore(doc.data()))
             .toList();
+        return LanguagesResult(languages: languages);
       }
 
-      // Colección vacía: devolver los defaults en memoria (sin escribir en
-      // Firestore, ya que el cliente no tiene permiso de escritura).
-      return _defaults.map(Language.fromFirestore).toList();
+      // Snapshot vacío. Una query Firestore sin red y sin caché NO lanza:
+      // resuelve a un snapshot vacío con isFromCache=true. Hay que distinguirlo
+      // de una colección remota legítimamente vacía (respuesta del servidor):
+      //  - vacío DESDE CACHÉ → no pudimos contactar el servidor → fallback (retry).
+      //  - vacío DESDE SERVIDOR → despliegue inicial real → defaults sin retry.
+      if (snapshot.metadata.isFromCache) {
+        _logFallback('empty query from cache (offline)');
+        return const LanguagesResult(
+            languages: Language.defaults, isFallback: true);
+      }
+      return const LanguagesResult(languages: Language.defaults);
     } on FirebaseException catch (e) {
-      throw LanguagesFetchException(e.message ?? 'Firestore error');
+      // Fallo de red/permiso al leer: NO lanzar. El onboarding no puede
+      // quedarse sin idiomas, así que devolvemos los básicos en memoria y
+      // marcamos isFallback para que la UI ofrezca "Reintentar".
+      _logFallback(e.message ?? e.code);
+      return const LanguagesResult(languages: Language.defaults, isFallback: true);
     } catch (e) {
-      throw LanguagesFetchException(e.toString());
+      _logFallback(e.toString());
+      return const LanguagesResult(languages: Language.defaults, isFallback: true);
     }
+  }
+
+  void _logFallback(String reason) {
+    // El throw histórico (LanguagesFetchException) se sustituyó por un fallback
+    // silencioso; dejamos rastro en debug para diagnóstico sin romper el flujo.
+    assert(() {
+      // ignore: avoid_print
+      print('LanguageRepository: usando idiomas por defecto (fallback): $reason');
+      return true;
+    }());
   }
 }

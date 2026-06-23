@@ -97,4 +97,31 @@ describe('users security rules', () => {
       getDoc(doc(ctx.firestore(), `users/${USER2}/memberships/${HOME1}`))
     );
   });
+
+  // ─── fcmToken privado (Hallazgo #01) ──────────────────────────────────────
+  describe('fcmToken vive en users/{uid} (privado)', () => {
+    beforeEach(async () => {
+      await testEnv.withSecurityRulesDisabled(async (ctx) => {
+        await setDoc(
+          doc(ctx.firestore(), `users/${USER2}`),
+          { fcmToken: 'secreto-de-dispositivo-de-user2' },
+          { merge: true },
+        );
+      });
+    });
+
+    it('un usuario NO puede leer el fcmToken de otro (está en su doc privado)', async () => {
+      const ctx = testEnv.authenticatedContext(USER1);
+      await assertFails(getDoc(doc(ctx.firestore(), `users/${USER2}`)));
+    });
+
+    it('un usuario SÍ puede escribir su propio fcmToken', async () => {
+      const ctx = testEnv.authenticatedContext(USER1);
+      await assertSucceeds(
+        updateDoc(doc(ctx.firestore(), `users/${USER1}`), {
+          fcmToken: 'mi-token',
+        }),
+      );
+    });
+  });
 });

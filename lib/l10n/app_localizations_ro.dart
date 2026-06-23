@@ -25,6 +25,10 @@ class AppLocalizationsRo extends AppLocalizations {
   String get retry => 'Reîncearcă';
 
   @override
+  String get language_offline_notice =>
+      'Ești offline. Se afișează limbile de bază; poți continua sau reîncerca.';
+
+  @override
   String get cancel => 'Anulează';
 
   @override
@@ -600,6 +604,12 @@ class AppLocalizationsRo extends AppLocalizations {
   String get complete_task_confirm_btn => 'Da, gata ✓';
 
   @override
+  String get today_task_completed_undoable => 'Sarcină finalizată';
+
+  @override
+  String get undo => 'Anulează';
+
+  @override
   String get pass_turn_dialog_title => 'Pasezi rândul?';
 
   @override
@@ -927,6 +937,20 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get paywall_cta_monthly => 'Plan lunar';
+
+  @override
+  String paywall_trial_badge(int days) {
+    return '$days zile gratuite';
+  }
+
+  @override
+  String paywall_cta_start_trial(int days) {
+    return 'Începe $days zile gratuite';
+  }
+
+  @override
+  String get paywall_trial_note =>
+      'Se reînnoiește automat ulterior. Anulează oricând.';
 
   @override
   String get paywall_restore => 'Restaurează achizițiile';
@@ -1334,6 +1358,20 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get settings_phone_visibility => 'Vizibilitatea telefonului';
+
+  @override
+  String get settings_export_data => 'Exportă-mi datele';
+
+  @override
+  String get settings_export_data_subtitle =>
+      'Descarcă un fișier JSON cu datele tale personale';
+
+  @override
+  String get settings_export_data_progress => 'Se pregătește exportul…';
+
+  @override
+  String get settings_export_data_error =>
+      'Datele nu au putut fi exportate. Încearcă din nou.';
 
   @override
   String get settings_section_subscription => 'Abonament';
@@ -2317,6 +2355,28 @@ class AppLocalizationsRo extends AppLocalizations {
       'Nu poți transfera proprietatea cât plătești Premium-ul casei. Anulează reînnoirea sau transferă la sfârșitul perioadei.';
 
   @override
+  String get homes_transfer_and_leave => 'Transferă și ieși';
+
+  @override
+  String get homes_transfer_and_leave_title => 'Transferă proprietatea și ieși';
+
+  @override
+  String get homes_transfer_and_leave_body =>
+      'Alege cine va deveni noul proprietar. Când confirmi, proprietatea trece la el și tu ieși din casă.';
+
+  @override
+  String get homes_transfer_and_leave_confirm_title => 'Transferi și ieși?';
+
+  @override
+  String homes_transfer_and_leave_confirm_body(String name) {
+    return '$name va deveni proprietar, iar tu vei ieși din casă.';
+  }
+
+  @override
+  String get homes_transfer_and_left =>
+      'Ai transferat proprietatea și ai ieșit din casă.';
+
+  @override
   String homes_admins_count(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -2344,6 +2404,10 @@ class AppLocalizationsRo extends AppLocalizations {
   @override
   String get homes_admins_promote_blocked_free =>
       'Doar Premium poate avea mai mulți administratori.';
+
+  @override
+  String get homes_admins_max_reached =>
+      'Ai atins numărul maxim de administratori pentru această casă.';
 
   @override
   String homes_invitations_count(int count) {
@@ -2391,4 +2455,85 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get homes_avatar_updated => 'Poza casei actualizată.';
+
+  @override
+  String get support_title => 'Diagnostic asistență';
+
+  @override
+  String get support_unauthorized => 'Nu ai permisiune de asistență.';
+
+  @override
+  String get support_privacy_notice =>
+      'Date redactate: fără numere de telefon, token-uri sau note private.';
+
+  @override
+  String get support_homeid_label => 'ID casă';
+
+  @override
+  String get support_diagnose_button => 'Diagnostichează';
+
+  @override
+  String get support_empty_prompt =>
+      'Introdu un ID de casă pentru a vedea diagnosticul.';
+
+  @override
+  String get support_no_results => 'Fără date.';
+
+  @override
+  String get support_section_home => 'Casă';
+
+  @override
+  String support_section_members(int count) {
+    return 'Membri ($count)';
+  }
+
+  @override
+  String get support_section_tasks => 'Sarcini următoare';
+
+  @override
+  String get support_section_events => 'Evenimente recente';
+
+  @override
+  String get support_name => 'Nume';
+
+  @override
+  String get support_plan => 'Plan';
+
+  @override
+  String get support_premium_ends => 'Premium până la';
+
+  @override
+  String get support_owner => 'Proprietar';
+
+  @override
+  String get support_payer => 'Plătitor';
+
+  @override
+  String get support_timezone => 'Fus orar';
+
+  @override
+  String get support_has_phone => 'Telefon';
+
+  @override
+  String get support_has_token => 'Push';
+
+  @override
+  String support_member_stats(int completed, String avg, int streak) {
+    return 'Făcute: $completed · Medie: $avg · Serie: $streak';
+  }
+
+  @override
+  String support_generated_at(String ts) {
+    return 'Generat: $ts';
+  }
+
+  @override
+  String get support_error_permission =>
+      'Acces refuzat (necesită permisiune de asistență).';
+
+  @override
+  String get support_error_notfound => 'Casa nu a fost găsită.';
+
+  @override
+  String get support_error_generic => 'Nu s-a putut obține diagnosticul.';
 }

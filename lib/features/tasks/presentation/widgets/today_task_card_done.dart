@@ -55,6 +55,8 @@ class TodayTaskCardDone extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     l10n.today_done_by(task.completedByName, timeStr),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                         fontSize: 11, color: AppColors.textSecondary),
                     key: const Key('done_by_label'),

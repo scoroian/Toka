@@ -47,8 +47,13 @@ class _PassTurnDialogState extends State<PassTurnDialog> {
     final l10n = AppLocalizations.of(context);
     final before = (widget.currentComplianceRate * 100).round();
     final after = (widget.estimatedComplianceAfter * 100).round();
-    final diff =
-        (widget.currentComplianceRate - widget.estimatedComplianceAfter) * 100;
+    // Regla de producto #7 (Hallazgo #11a): pasar turno SIEMPRE penaliza
+    // (el backend marca `penaltyApplied=true` en todos los casos), así que el
+    // aviso debe mostrarse SIEMPRE, no solo cuando la caída supera un umbral.
+    // Si la caída es perceptible al redondeo mostramos el delta concreto; si el
+    // usuario está tan consolidado que redondea a 0 pp, avisamos del impacto
+    // mínimo (sin números engañosos del tipo "100% → 100%").
+    final hasVisibleDrop = after < before;
 
     return AlertDialog(
       title: Text(l10n.pass_turn_dialog_title),
@@ -57,24 +62,25 @@ class _PassTurnDialogState extends State<PassTurnDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (diff >= 1.0)
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: AppColors.error.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  l10n.pass_turn_compliance_warning(
-                    before.toString(),
-                    after.toString(),
-                  ),
-                  style: const TextStyle(
-                    color: AppColors.error,
-                    fontWeight: FontWeight.w600,
-                  ),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: AppColors.error.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                hasVisibleDrop
+                    ? l10n.pass_turn_compliance_warning(
+                        before.toString(),
+                        after.toString(),
+                      )
+                    : l10n.pass_turn_minimal_impact,
+                style: const TextStyle(
+                  color: AppColors.error,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
+            ),
             const SizedBox(height: 12),
             if (widget.nextAssigneeName != null)
               Text(l10n.pass_turn_next_assignee(widget.nextAssigneeName!))

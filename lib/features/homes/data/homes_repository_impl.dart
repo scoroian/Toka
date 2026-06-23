@@ -197,11 +197,4 @@ class HomesRepositoryImpl implements HomesRepository {
     });
   }
 
-  // DEBUG PREMIUM — REMOVE BEFORE PRODUCTION
-  @override
-  Future<void> debugSetPremiumStatus(String homeId, String status) async {
-    final callable = _functions.httpsCallable('debugSetPremiumStatus');
-    await callable.call<void>({'homeId': homeId, 'status': status});
-  }
-  // END DEBUG PREMIUM
 }

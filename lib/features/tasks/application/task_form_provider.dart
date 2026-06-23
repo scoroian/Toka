@@ -1,3 +1,4 @@
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -150,6 +151,20 @@ class TaskFormNotifier extends _$TaskFormNotifier {
       }
       state = state.copyWith(isLoading: false);
       return taskId;
+    } on FirebaseFunctionsException catch (e) {
+      // El límite Free lo aplica server-side la callable `createTask`
+      // (Hallazgo #14). Propagamos el código exacto para que la pantalla
+      // muestre el banner de upgrade con CTA al paywall en lugar de un error
+      // genérico. Esto cubre el caso en que el contador del dashboard iba por
+      // detrás y la UI no había bloqueado el botón proactivamente.
+      final code = e.message;
+      final isLimit =
+          code == kFreeLimitTasksCode || code == kFreeLimitRecurringCode;
+      state = state.copyWith(
+        isLoading: false,
+        globalError: isLimit ? code : 'tasks_save_error',
+      );
+      return null;
     } catch (e) {
       state =
           state.copyWith(isLoading: false, globalError: 'tasks_save_error');
@@ -158,3 +173,9 @@ class TaskFormNotifier extends _$TaskFormNotifier {
   }
 
 }
+
+/// Códigos de límite Free devueltos por la callable `createTask`
+/// (`HttpsError("failed-precondition", code)`). Espejo de
+/// `functions/src/shared/free_limits.ts FREE_LIMIT_CODES`.
+const String kFreeLimitTasksCode = 'free_limit_tasks';
+const String kFreeLimitRecurringCode = 'free_limit_recurring';

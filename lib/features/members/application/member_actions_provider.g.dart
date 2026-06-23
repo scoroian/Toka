@@ -6,7 +6,7 @@ part of 'member_actions_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$memberActionsHash() => r'856971ee3317e04f7f9e294d853c53792bdd5b70';
+String _$memberActionsHash() => r'9a4e2a78c7eb5500631fb12a56b925ddde590712';
 
 /// See also [MemberActions].
 @ProviderFor(MemberActions)

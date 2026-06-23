@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../data/language_repository_impl.dart';
-import '../domain/language.dart';
 import '../domain/language_repository.dart';
+import '../domain/languages_result.dart';
 
 part 'language_provider.g.dart';
 
@@ -14,6 +14,6 @@ LanguageRepository languageRepository(Ref ref) {
 }
 
 @riverpod
-Future<List<Language>> availableLanguages(Ref ref) {
+Future<LanguagesResult> availableLanguages(Ref ref) {
   return ref.watch(languageRepositoryProvider).fetchAvailableLanguages();
 }

@@ -22,12 +22,32 @@ class RemoteConfigService {
     try {
       await _remoteConfig.setConfigSettings(RemoteConfigSettings(
         fetchTimeout: const Duration(seconds: 10),
-        minimumFetchInterval: const Duration(hours: 1),
+        // Intervalo bajo para que un cambio en la consola se recoja casi al
+        // instante en el próximo fetch/arranque. Los cambios EN VIVO (app
+        // abierta) llegan por [onConfigUpdated] (Remote Config en tiempo real),
+        // que no depende de este intervalo.
+        minimumFetchInterval: const Duration(minutes: 1),
       ));
       await _remoteConfig.setDefaults(_defaults);
       await _remoteConfig.fetchAndActivate();
     } catch (e, st) {
       AppLogger.error('RemoteConfig init failed — using defaults', e, st);
+    }
+  }
+
+  /// Stream de actualizaciones en tiempo real de Remote Config: emite cuando se
+  /// publica un cambio en la consola y la app está en primer plano. Tras un
+  /// evento hay que llamar a [activate] para que los nuevos valores estén vivos.
+  Stream<RemoteConfigUpdate> get onConfigUpdated => _remoteConfig.onConfigUpdated;
+
+  /// Activa los últimos valores fetchados (incl. los traídos por el listener en
+  /// tiempo real). Best-effort: devuelve false si Firebase falla.
+  Future<bool> activate() async {
+    try {
+      return await _remoteConfig.activate();
+    } catch (e, st) {
+      AppLogger.error('RemoteConfig activate failed', e, st);
+      return false;
     }
   }
 

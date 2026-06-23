@@ -23,14 +23,12 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
     required String homeId,
     required String receiptData,
     required String platform,
-    required String chargeId,
   }) async {
     final callable = _functions.httpsCallable('syncEntitlement');
     await callable.call<Map<String, dynamic>>({
       'homeId': homeId,
       'receiptData': receiptData,
       'platform': platform,
-      'chargeId': chargeId,
     });
   }
 

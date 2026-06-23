@@ -1,6 +1,14 @@
 {
   "indexes": [
     {
+      "collectionGroup": "homes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "premiumStatus", "order": "ASCENDING" },
+        { "fieldPath": "premiumEndsAt", "order": "ASCENDING" }
+      ]
+    },
+    {
       "collectionGroup": "tasks",
       "queryScope": "COLLECTION",
       "fields": [
@@ -124,6 +132,24 @@
     }
   ],
   "fieldOverrides": [
+    {
+      "collectionGroup": "reviews",
+      "fieldPath": "reviewerUid",
+      "indexes": [
+        { "queryScope": "COLLECTION", "order": "ASCENDING" },
+        { "queryScope": "COLLECTION", "order": "DESCENDING" },
+        { "queryScope": "COLLECTION_GROUP", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "sentNotifications",
+      "fieldPath": "sentAt",
+      "indexes": [
+        { "queryScope": "COLLECTION", "order": "ASCENDING" },
+        { "queryScope": "COLLECTION", "order": "DESCENDING" },
+        { "queryScope": "COLLECTION_GROUP", "order": "ASCENDING" }
+      ]
+    },
     {
       "collectionGroup": "taskEvents",
       "fieldPath": "complianceBefore",

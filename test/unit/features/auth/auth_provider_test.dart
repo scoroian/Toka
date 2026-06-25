@@ -33,13 +33,16 @@ class _FakeRepo implements AuthRepository {
     Stream<AuthUser?> Function()? stateChanges,
     Future<AuthUser> Function(String, String)? register,
     Future<void> Function()? sendVerification,
+    Future<AuthUser> Function()? reload,
   })  : _stateChanges = stateChanges ?? (() => const Stream.empty()),
         _register = register,
-        _sendVerification = sendVerification;
+        _sendVerification = sendVerification,
+        _reload = reload;
 
   final Stream<AuthUser?> Function() _stateChanges;
   final Future<AuthUser> Function(String, String)? _register;
   final Future<void> Function()? _sendVerification;
+  final Future<AuthUser> Function()? _reload;
 
   @override
   Stream<AuthUser?> get authStateChanges => _stateChanges();
@@ -84,6 +87,10 @@ class _FakeRepo implements AuthRepository {
   @override
   Future<void> updatePassword(String c, String n) =>
       throw UnimplementedError();
+
+  @override
+  Future<AuthUser> reloadUser() =>
+      _reload != null ? _reload!() : throw UnimplementedError();
 }
 
 void main() {
@@ -227,5 +234,55 @@ void main() {
       container.read(authProvider),
       const AuthState.error(AuthFailure.emailAlreadyInUse()),
     );
+  });
+
+  test('refreshEmailVerified publica el usuario recargado y devuelve verified',
+      () async {
+    const verified = AuthUser(
+      uid: 'uid',
+      email: 'u@u.com',
+      displayName: 'U',
+      photoUrl: null,
+      emailVerified: true,
+      providers: ['password'],
+    );
+    container = ProviderContainer(
+      overrides: [
+        authStateChangesProvider.overrideWith((ref) => const Stream.empty()),
+        localeNotifierProvider.overrideWith(() => _FakeLocaleNotifier()),
+        authRepositoryProvider.overrideWithValue(
+          _FakeRepo(reload: () async => verified),
+        ),
+        currentHomeProvider.overrideWith(() => _FakeCurrentHome()),
+      ],
+    );
+
+    container.read(authProvider);
+    final result =
+        await container.read(authProvider.notifier).refreshEmailVerified();
+
+    expect(result, true);
+    expect(container.read(authProvider),
+        const AuthState.authenticated(verified));
+  });
+
+  test('refreshEmailVerified propaga AuthFailure y no cambia el estado',
+      () async {
+    container = ProviderContainer(
+      overrides: [
+        authStateChangesProvider.overrideWith((ref) => const Stream.empty()),
+        localeNotifierProvider.overrideWith(() => _FakeLocaleNotifier()),
+        authRepositoryProvider.overrideWithValue(
+          _FakeRepo(reload: () async => throw const AuthFailure.networkError()),
+        ),
+        currentHomeProvider.overrideWith(() => _FakeCurrentHome()),
+      ],
+    );
+    container.read(authProvider);
+    await expectLater(
+      () => container.read(authProvider.notifier).refreshEmailVerified(),
+      throwsA(const AuthFailure.networkError()),
+    );
+    expect(container.read(authProvider), const AuthState.initial());
   });
 }

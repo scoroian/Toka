@@ -10,6 +10,7 @@ abstract interface class AuthRepository {
   Future<AuthUser> registerWithEmailPassword(String email, String password);
   Future<void> sendPasswordResetEmail(String email);
   Future<void> sendEmailVerification();
+  Future<AuthUser> reloadUser();
   Future<void> linkWithGoogle();
   Future<void> linkWithApple();
   Future<void> linkWithEmailPassword(String email, String password);

@@ -430,6 +430,30 @@ abstract class AppLocalizations {
   /// **'Reenviar en {seconds}s'**
   String auth_resend_cooldown(int seconds);
 
+  /// Button: re-check email verification and continue
+  ///
+  /// In es, this message translates to:
+  /// **'Ya verifiqué, continuar'**
+  String get auth_verify_email_continue;
+
+  /// Button: leave verify-email screen (sign out)
+  ///
+  /// In es, this message translates to:
+  /// **'Volver'**
+  String get auth_verify_email_back;
+
+  /// SnackBar: email still not verified after manual check
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no detectamos la verificación. Revisa tu correo y vuelve a intentarlo.'**
+  String get auth_verify_email_not_yet;
+
+  /// Button label while re-checking verification
+  ///
+  /// In es, this message translates to:
+  /// **'Comprobando…'**
+  String get auth_verify_email_checking;
+
   /// Network auth error
   ///
   /// In es, this message translates to:
@@ -634,41 +658,59 @@ abstract class AppLocalizations {
   /// **'Unirme'**
   String get onboarding_join_home_button;
 
-  /// Invalid invite code error
-  ///
-  /// In es, this message translates to:
-  /// **'Código de invitación inválido'**
-  String get onboarding_error_invalid_invite;
-
-  /// Expired invite code error
-  ///
-  /// In es, this message translates to:
-  /// **'El código de invitación ha expirado'**
-  String get onboarding_error_expired_invite;
-
   /// No home slots error
   ///
   /// In es, this message translates to:
   /// **'No tienes plazas disponibles para crear más hogares'**
   String get onboarding_error_no_slots;
 
-  /// Network error joining a home
+  /// Join home error: invalid invite code (not-found). Single source of truth shared by the multi-home selector and onboarding (Hallazgo #04).
   ///
   /// In es, this message translates to:
-  /// **'Sin conexión a internet. Comprueba tu red e inténtalo de nuevo.'**
-  String get onboarding_error_network;
+  /// **'Código de invitación inválido'**
+  String get join_error_invalid_code;
 
-  /// Unexpected error joining a home
+  /// Join home error: expired or already-used invite code (deadline-exceeded)
   ///
   /// In es, this message translates to:
-  /// **'Ha ocurrido un error inesperado. Inténtalo de nuevo.'**
-  String get onboarding_error_unexpected;
+  /// **'El código de invitación ha expirado'**
+  String get join_error_expired_code;
 
-  /// Permission denied error joining a home
+  /// Join home error: destination home reached its tier member cap (failed-precondition + free_limit_members). Tier-neutral copy.
+  ///
+  /// In es, this message translates to:
+  /// **'Este hogar ya está completo. Pídele a un administrador que amplíe el plan o libere una plaza.'**
+  String get join_error_home_full;
+
+  /// Join home error: the invitee's account has no free home slots left (resource-exhausted + no-account-slots)
+  ///
+  /// In es, this message translates to:
+  /// **'Has alcanzado el límite de hogares de tu cuenta. Abandona uno o consigue más plazas para unirte a otro.'**
+  String get join_error_no_account_slots;
+
+  /// Join home error: brute-force rate limit (resource-exhausted + too-many-join-attempts)
+  ///
+  /// In es, this message translates to:
+  /// **'Demasiados intentos. Espera unos minutos e inténtalo de nuevo.'**
+  String get join_error_too_many_attempts;
+
+  /// Join home error: permission denied
   ///
   /// In es, this message translates to:
   /// **'No tienes permiso para unirte a este hogar.'**
-  String get onboarding_error_permission_denied;
+  String get join_error_permission_denied;
+
+  /// Join home error: no network connection
+  ///
+  /// In es, this message translates to:
+  /// **'Sin conexión a internet. Comprueba tu red e inténtalo de nuevo.'**
+  String get join_error_network;
+
+  /// Join home error: unknown/unexpected fallback
+  ///
+  /// In es, this message translates to:
+  /// **'Algo salió mal. Inténtalo de nuevo.'**
+  String get join_error_generic;
 
   /// Add photo button
   ///
@@ -994,18 +1036,6 @@ abstract class AppLocalizations {
   /// **'No tienes cupos disponibles'**
   String get homes_error_no_slots;
 
-  /// Invalid invite code error
-  ///
-  /// In es, this message translates to:
-  /// **'Código inválido'**
-  String get homes_error_invalid_code;
-
-  /// Expired invite code error
-  ///
-  /// In es, this message translates to:
-  /// **'El código ha expirado'**
-  String get homes_error_expired_code;
-
   /// Recurrence type: hourly
   ///
   /// In es, this message translates to:
@@ -1203,6 +1233,24 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Deshacer'**
   String get undo;
+
+  /// Error SnackBar when the deferred task-completion commit fails (transient/network). Offers Retry.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo completar «{task}».'**
+  String today_task_completion_failed(String task);
+
+  /// Informational SnackBar when completion fails because the task was already resolved by someone else (turn race).
+  ///
+  /// In es, this message translates to:
+  /// **'«{task}» ya fue completada o actualizada por otra persona.'**
+  String today_task_completion_conflict(String task);
+
+  /// Persistent badge on a task card whose completion failed to save
+  ///
+  /// In es, this message translates to:
+  /// **'No se guardó'**
+  String get today_completion_not_saved;
 
   /// Pass turn dialog title
   ///

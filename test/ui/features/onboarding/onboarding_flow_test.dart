@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:toka/features/homes/application/join_home_error.dart';
 import 'package:toka/features/i18n/application/language_provider.dart';
 import 'package:toka/features/i18n/domain/language.dart';
 import 'package:toka/features/i18n/domain/languages_result.dart';
@@ -319,20 +320,21 @@ void main() {
         ),
       );
 
-  testWidgets('HomeJoinForm muestra error genérico con unexpected_error',
+  testWidgets('HomeJoinForm muestra error genérico con motivo unexpected',
       (tester) async {
-    await tester.pumpWidget(wrapJoinForm(error: 'unexpected_error'));
+    await tester
+        .pumpWidget(wrapJoinForm(error: JoinHomeError.unexpected.name));
     await tester.pumpAndSettle();
 
     expect(
-      find.text('Ha ocurrido un error inesperado. Inténtalo de nuevo.'),
+      find.text('Algo salió mal. Inténtalo de nuevo.'),
       findsOneWidget,
     );
   });
 
-  testWidgets('HomeJoinForm muestra error de red con network_error',
+  testWidgets('HomeJoinForm muestra error de red con motivo network',
       (tester) async {
-    await tester.pumpWidget(wrapJoinForm(error: 'network_error'));
+    await tester.pumpWidget(wrapJoinForm(error: JoinHomeError.network.name));
     await tester.pumpAndSettle();
 
     expect(
@@ -342,9 +344,25 @@ void main() {
     );
   });
 
-  testWidgets('HomeJoinForm muestra error de código inválido con invalid_invite',
-      (tester) async {
-    await tester.pumpWidget(wrapJoinForm(error: 'invalid_invite'));
+  testWidgets('HomeJoinForm muestra "hogar lleno" con motivo homeFull '
+      '(Hallazgo #04: ya NO cae en "Algo salió mal")', (tester) async {
+    await tester.pumpWidget(wrapJoinForm(error: JoinHomeError.homeFull.name));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text(
+          'Este hogar ya está completo. Pídele a un administrador que amplíe '
+          'el plan o libere una plaza.'),
+      findsOneWidget,
+    );
+    // Y NO el genérico.
+    expect(find.text('Algo salió mal. Inténtalo de nuevo.'), findsNothing);
+  });
+
+  testWidgets('HomeJoinForm muestra error de código inválido con motivo '
+      'invalidCode', (tester) async {
+    await tester
+        .pumpWidget(wrapJoinForm(error: JoinHomeError.invalidCode.name));
     await tester.pumpAndSettle();
 
     expect(find.text('Código de invitación inválido'), findsOneWidget);
@@ -356,7 +374,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.text('Ha ocurrido un error inesperado. Inténtalo de nuevo.'),
+      find.text('Algo salió mal. Inténtalo de nuevo.'),
       findsNothing,
     );
     expect(find.text('Código de invitación inválido'), findsNothing);
@@ -409,8 +427,8 @@ void main() {
   testWidgets(
       'HomeJoinForm limpia el error de servidor al editar el código',
       (tester) async {
-    await tester
-        .pumpWidget(wrapJoinFormStateful(initialError: 'invalid_invite'));
+    await tester.pumpWidget(
+        wrapJoinFormStateful(initialError: JoinHomeError.invalidCode.name));
     await tester.pumpAndSettle();
     expect(find.text('Código de invitación inválido'), findsOneWidget);
 

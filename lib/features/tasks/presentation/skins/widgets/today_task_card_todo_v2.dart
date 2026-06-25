@@ -8,6 +8,8 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../../core/theme/app_colors_v2.dart';
 import '../../../../../core/utils/toka_dates.dart';
 import '../../../../../l10n/app_localizations.dart';
+import '../../../application/pending_completions_provider.dart';
+import '../../../domain/failed_completion.dart';
 import '../../../domain/home_dashboard.dart';
 import '../../../domain/task_actionability.dart';
 import '../../../presentation/utils/task_visual_utils.dart';
@@ -120,6 +122,13 @@ class _TodayTaskCardTodoV2State extends ConsumerState<TodayTaskCardTodoV2>
       now: widget.now,
       timezone: homeTz,
     );
+    // Hallazgo #02: si el commit de completación falló (transitorio), la tarjeta
+    // muestra una marca persistente "no se guardó" + Reintentar en lugar de los
+    // botones normales, para que el problema no quede en silencio.
+    final failed = ref.watch(pendingCompletionsProvider
+        .select((s) => s.failed[widget.task.taskId]));
+    final showFailedMarker =
+        failed != null && failed.kind == CompletionFailureKind.transient;
 
     // resolve name/photo
     String? name  = widget.task.currentAssigneeName;
@@ -189,26 +198,36 @@ class _TodayTaskCardTodoV2State extends ConsumerState<TodayTaskCardTodoV2>
               ]),
               if (isOwn) ...[
                 const SizedBox(height: 10),
-                Row(children: [
-                  Expanded(child: _DoneButtonV2(
-                    key: const Key('btn_done'),
-                    animating: _animating,
-                    checkAnim: _checkAnim,
-                    label: l10n.today_btn_done,
+                if (showFailedMarker)
+                  _CompletionFailedRowV2(
+                    label: l10n.today_completion_not_saved,
+                    retryLabel: l10n.retry,
                     isDark: isDark,
-                    isActive: actionable,
-                    onTap: actionable
-                        ? _handleDone
-                        : () => _handleDoneNotReady(context, l10n, homeTz),
-                  )),
-                  const SizedBox(width: 6),
-                  Expanded(child: _PassButtonV2(
-                    key: const Key('btn_pass'),
-                    label: l10n.today_btn_pass,
-                    isDark: isDark,
-                    onTap: widget.onPass,
-                  )),
-                ]),
+                    onRetry: () => ref
+                        .read(pendingCompletionsProvider.notifier)
+                        .retry(widget.task.taskId),
+                  )
+                else
+                  Row(children: [
+                    Expanded(child: _DoneButtonV2(
+                      key: const Key('btn_done'),
+                      animating: _animating,
+                      checkAnim: _checkAnim,
+                      label: l10n.today_btn_done,
+                      isDark: isDark,
+                      isActive: actionable,
+                      onTap: actionable
+                          ? _handleDone
+                          : () => _handleDoneNotReady(context, l10n, homeTz),
+                    )),
+                    const SizedBox(width: 6),
+                    Expanded(child: _PassButtonV2(
+                      key: const Key('btn_pass'),
+                      label: l10n.today_btn_pass,
+                      isDark: isDark,
+                      onTap: widget.onPass,
+                    )),
+                  ]),
               ],
             ]),
           ),
@@ -363,6 +382,77 @@ class _DoneButtonV2 extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Fila de error persistente cuando el commit de completación falló (Hallazgo
+/// #02): "No se guardó" + botón Reintentar. Sustituye a Hecho/Pasar hasta que el
+/// usuario reintente con éxito (o lo deshaga la lista en vivo).
+class _CompletionFailedRowV2 extends StatelessWidget {
+  const _CompletionFailedRowV2({
+    required this.label,
+    required this.retryLabel,
+    required this.isDark,
+    required this.onRetry,
+  });
+  final String label;
+  final String retryLabel;
+  final bool isDark;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final errColor = isDark ? AppColorsV2.errorDark : AppColorsV2.errorLight;
+    final bg = isDark ? const Color(0x26EF4444) : const Color(0x1AEF4444);
+    return Container(
+      key: const Key('completion_failed_row'),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(children: [
+        Icon(Icons.error_outline, size: 16, color: errColor),
+        const SizedBox(width: 6),
+        Expanded(
+          child: Text(label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.plusJakartaSans(
+                  fontSize: 12, fontWeight: FontWeight.w700, color: errColor)),
+        ),
+        const SizedBox(width: 6),
+        Semantics(
+          button: true,
+          enabled: true,
+          label: retryLabel,
+          onTap: onRetry,
+          excludeSemantics: true,
+          child: InkWell(
+            key: const Key('btn_retry_completion'),
+            onTap: onRetry,
+            borderRadius: BorderRadius.circular(8),
+            child: Container(
+              constraints: const BoxConstraints(minHeight: 36),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                border: Border.all(color: errColor, width: 1.5),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(mainAxisSize: MainAxisSize.min, children: [
+                Icon(Icons.refresh, size: 14, color: errColor),
+                const SizedBox(width: 4),
+                Text(retryLabel,
+                    style: GoogleFonts.plusJakartaSans(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800,
+                        color: errColor)),
+              ]),
+            ),
+          ),
+        ),
+      ]),
     );
   }
 }

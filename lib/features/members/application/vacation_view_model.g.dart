@@ -176,7 +176,7 @@ class _VacationViewModelProviderElement
 }
 
 String _$vacationViewModelNotifierHash() =>
-    r'1b89a603fdb32ec689b64f567ad73acf553a19e2';
+    r'68bb8793ddc17c097598cc0c62d002b1a08af1f4';
 
 abstract class _$VacationViewModelNotifier
     extends BuildlessAutoDisposeNotifier<_VacationVMState> {

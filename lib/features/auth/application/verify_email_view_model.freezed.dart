@@ -19,6 +19,7 @@ mixin _$VerifyEmailState {
   String get email => throw _privateConstructorUsedError;
   int get resendCooldownSeconds => throw _privateConstructorUsedError;
   bool get isSending => throw _privateConstructorUsedError;
+  bool get isChecking => throw _privateConstructorUsedError;
 
   /// Create a copy of _VerifyEmailState
   /// with the given fields replaced by the non-null parameter values.
@@ -33,7 +34,11 @@ abstract class _$VerifyEmailStateCopyWith<$Res> {
           _VerifyEmailState value, $Res Function(_VerifyEmailState) then) =
       __$VerifyEmailStateCopyWithImpl<$Res, _VerifyEmailState>;
   @useResult
-  $Res call({String email, int resendCooldownSeconds, bool isSending});
+  $Res call(
+      {String email,
+      int resendCooldownSeconds,
+      bool isSending,
+      bool isChecking});
 }
 
 /// @nodoc
@@ -54,6 +59,7 @@ class __$VerifyEmailStateCopyWithImpl<$Res, $Val extends _VerifyEmailState>
     Object? email = null,
     Object? resendCooldownSeconds = null,
     Object? isSending = null,
+    Object? isChecking = null,
   }) {
     return _then(_value.copyWith(
       email: null == email
@@ -68,6 +74,10 @@ class __$VerifyEmailStateCopyWithImpl<$Res, $Val extends _VerifyEmailState>
           ? _value.isSending
           : isSending // ignore: cast_nullable_to_non_nullable
               as bool,
+      isChecking: null == isChecking
+          ? _value.isChecking
+          : isChecking // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 }
@@ -80,7 +90,11 @@ abstract class _$$_VerifyEmailStateImplCopyWith<$Res>
       __$$_VerifyEmailStateImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String email, int resendCooldownSeconds, bool isSending});
+  $Res call(
+      {String email,
+      int resendCooldownSeconds,
+      bool isSending,
+      bool isChecking});
 }
 
 /// @nodoc
@@ -99,6 +113,7 @@ class __$$_VerifyEmailStateImplCopyWithImpl<$Res>
     Object? email = null,
     Object? resendCooldownSeconds = null,
     Object? isSending = null,
+    Object? isChecking = null,
   }) {
     return _then(_$_VerifyEmailStateImpl(
       email: null == email
@@ -113,6 +128,10 @@ class __$$_VerifyEmailStateImplCopyWithImpl<$Res>
           ? _value.isSending
           : isSending // ignore: cast_nullable_to_non_nullable
               as bool,
+      isChecking: null == isChecking
+          ? _value.isChecking
+          : isChecking // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -123,7 +142,8 @@ class _$_VerifyEmailStateImpl implements __VerifyEmailState {
   const _$_VerifyEmailStateImpl(
       {this.email = '',
       this.resendCooldownSeconds = 0,
-      this.isSending = false});
+      this.isSending = false,
+      this.isChecking = false});
 
   @override
   @JsonKey()
@@ -134,10 +154,13 @@ class _$_VerifyEmailStateImpl implements __VerifyEmailState {
   @override
   @JsonKey()
   final bool isSending;
+  @override
+  @JsonKey()
+  final bool isChecking;
 
   @override
   String toString() {
-    return '_VerifyEmailState(email: $email, resendCooldownSeconds: $resendCooldownSeconds, isSending: $isSending)';
+    return '_VerifyEmailState(email: $email, resendCooldownSeconds: $resendCooldownSeconds, isSending: $isSending, isChecking: $isChecking)';
   }
 
   @override
@@ -149,12 +172,14 @@ class _$_VerifyEmailStateImpl implements __VerifyEmailState {
             (identical(other.resendCooldownSeconds, resendCooldownSeconds) ||
                 other.resendCooldownSeconds == resendCooldownSeconds) &&
             (identical(other.isSending, isSending) ||
-                other.isSending == isSending));
+                other.isSending == isSending) &&
+            (identical(other.isChecking, isChecking) ||
+                other.isChecking == isChecking));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, email, resendCooldownSeconds, isSending);
+  int get hashCode => Object.hash(
+      runtimeType, email, resendCooldownSeconds, isSending, isChecking);
 
   /// Create a copy of _VerifyEmailState
   /// with the given fields replaced by the non-null parameter values.
@@ -170,7 +195,8 @@ abstract class __VerifyEmailState implements _VerifyEmailState {
   const factory __VerifyEmailState(
       {final String email,
       final int resendCooldownSeconds,
-      final bool isSending}) = _$_VerifyEmailStateImpl;
+      final bool isSending,
+      final bool isChecking}) = _$_VerifyEmailStateImpl;
 
   @override
   String get email;
@@ -178,6 +204,8 @@ abstract class __VerifyEmailState implements _VerifyEmailState {
   int get resendCooldownSeconds;
   @override
   bool get isSending;
+  @override
+  bool get isChecking;
 
   /// Create a copy of _VerifyEmailState
   /// with the given fields replaced by the non-null parameter values.

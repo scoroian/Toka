@@ -120,6 +120,14 @@ class RouterNotifier extends _$RouterNotifier implements Listenable {
       AppRoutes.forgotPassword,
       AppRoutes.verifyEmail,
     ];
+    // Pantallas válidas SIN sesión. /verify-email NO está: solo es legítima para
+    // un usuario autenticado-sin-verificar (lo coloca el gate de `authenticated`);
+    // sin sesión (p. ej. tras "Volver"→signOut) debe ir a /login, no quedarse.
+    const unauthScreens = [
+      AppRoutes.login,
+      AppRoutes.register,
+      AppRoutes.forgotPassword,
+    ];
 
     return authState.when(
       initial: () => location == AppRoutes.splash ? null : AppRoutes.splash,
@@ -132,7 +140,17 @@ class RouterNotifier extends _$RouterNotifier implements Listenable {
         if (authScreens.contains(location)) return null;
         return location == AppRoutes.splash ? null : AppRoutes.splash;
       },
-      authenticated: (_) {
+      authenticated: (user) {
+        // Enforcement de verificación de email (modelo A, spec-02 regla #5):
+        // solo afecta a cuentas email/contraseña; Google/Apple llegan
+        // verificadas. Sin verificar → retener en /verify-email hasta verificar.
+        final needsVerification =
+            user.providers.contains('password') && !user.emailVerified;
+        if (needsVerification) {
+          return location == AppRoutes.verifyEmail
+              ? null
+              : AppRoutes.verifyEmail;
+        }
         if (authScreens.contains(location) || location == AppRoutes.splash) {
           final homeAsync = ref.read(currentHomeProvider);
           // Todavía cargando → esperar en la splash para no mostrar onboarding
@@ -173,7 +191,7 @@ class RouterNotifier extends _$RouterNotifier implements Listenable {
         return null;
       },
       unauthenticated: () {
-        if (authScreens.contains(location)) return null;
+        if (unauthScreens.contains(location)) return null;
         return AppRoutes.login;
       },
       error: (_) {
@@ -182,8 +200,9 @@ class RouterNotifier extends _$RouterNotifier implements Listenable {
         // QUEDARSE en la pantalla de auth actual para que su view-model muestre
         // el error inline; redirigir a /login expulsaría de /register y se
         // perdería el formulario y el mensaje. Solo redirigimos a login si el
-        // error ocurre fuera de una pantalla de auth.
-        if (authScreens.contains(location)) return null;
+        // error ocurre fuera de una pantalla de auth (incluye /verify-email:
+        // solo es válida para autenticado-sin-verificar, no para estado error).
+        if (unauthScreens.contains(location)) return null;
         return AppRoutes.login;
       },
     );

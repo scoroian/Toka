@@ -183,6 +183,19 @@ class AppLocalizationsRo extends AppLocalizations {
   }
 
   @override
+  String get auth_verify_email_continue => 'Am verificat, continuă';
+
+  @override
+  String get auth_verify_email_back => 'Înapoi';
+
+  @override
+  String get auth_verify_email_not_yet =>
+      'Încă nu am detectat verificarea. Verifică-ți e-mailul și încearcă din nou.';
+
+  @override
+  String get auth_verify_email_checking => 'Se verifică…';
+
+  @override
   String get auth_error_network => 'Eroare de rețea. Verificați conexiunea.';
 
   @override
@@ -295,26 +308,37 @@ class AppLocalizationsRo extends AppLocalizations {
   String get onboarding_join_home_button => 'Alătură-te';
 
   @override
-  String get onboarding_error_invalid_invite => 'Cod de invitație invalid';
-
-  @override
-  String get onboarding_error_expired_invite => 'Codul de invitație a expirat';
-
-  @override
   String get onboarding_error_no_slots =>
       'Nu mai ai locuri disponibile pentru locuințe';
 
   @override
-  String get onboarding_error_network =>
+  String get join_error_invalid_code => 'Cod de invitație invalid';
+
+  @override
+  String get join_error_expired_code => 'Codul de invitație a expirat';
+
+  @override
+  String get join_error_home_full =>
+      'Această casă este deja plină. Roagă un administrator să extindă planul sau să elibereze un loc.';
+
+  @override
+  String get join_error_no_account_slots =>
+      'Ai atins limita de locuințe a contului tău. Părăsește una sau obține mai multe locuri pentru a te alătura alteia.';
+
+  @override
+  String get join_error_too_many_attempts =>
+      'Prea multe încercări. Așteaptă câteva minute și încearcă din nou.';
+
+  @override
+  String get join_error_permission_denied =>
+      'Nu ai permisiunea de a te alătura acestei case.';
+
+  @override
+  String get join_error_network =>
       'Nu există conexiune la internet. Verifică rețeaua și încearcă din nou.';
 
   @override
-  String get onboarding_error_unexpected =>
-      'A apărut o eroare neașteptată. Încearcă din nou.';
-
-  @override
-  String get onboarding_error_permission_denied =>
-      'Nu ai permisiunea de a te alătura acestei case.';
+  String get join_error_generic => 'Ceva a mers greșit. Încearcă din nou.';
 
   @override
   String get onboarding_add_photo => 'Adaugă fotografie';
@@ -491,12 +515,6 @@ class AppLocalizationsRo extends AppLocalizations {
   String get homes_error_no_slots => 'Nu există locuri disponibile';
 
   @override
-  String get homes_error_invalid_code => 'Cod invalid';
-
-  @override
-  String get homes_error_expired_code => 'Codul a expirat';
-
-  @override
   String get recurrenceHourly => 'Orar';
 
   @override
@@ -625,6 +643,19 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get undo => 'Anulează';
+
+  @override
+  String today_task_completion_failed(String task) {
+    return 'Nu s-a putut finaliza „$task”.';
+  }
+
+  @override
+  String today_task_completion_conflict(String task) {
+    return '„$task” a fost deja finalizată sau actualizată de altcineva.';
+  }
+
+  @override
+  String get today_completion_not_saved => 'Nesalvat';
 
   @override
   String get pass_turn_dialog_title => 'Pasezi rândul?';

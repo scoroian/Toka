@@ -58,6 +58,33 @@ class NoAvailableSlotsException implements Exception {
 /// Alias for [NoAvailableSlotsException] kept for backwards compatibility.
 typedef NoHomeSlotsException = NoAvailableSlotsException;
 
+/// Hallazgo #01 (lote UX 2026-06-25): el usuario que intenta UNIRSE a un hogar
+/// ya no tiene plazas de cuenta libres (su cap de hogares: 2 base + créditos
+/// permanentes, máx 5). Es distinto de [NoAvailableSlotsException] (no poder
+/// CREAR) y, sobre todo, de [MaxMembersReachedException] ("hogar lleno"): aquí
+/// el límite es de la CUENTA del invitado, no del hogar destino.
+class NoAccountSlotsException implements Exception {
+  const NoAccountSlotsException(
+      [this.message = 'No account home slots available to join']);
+  final String message;
+  @override
+  String toString() => 'NoAccountSlotsException: $message';
+}
+
+/// Hallazgo #04 (lote UX 2026-06-25): rate-limit antifuerza bruta de
+/// `joinHomeByCode` (>10 intentos/hora). El backend lo emite como
+/// `resource-exhausted` con mensaje `too-many-join-attempts` — el MISMO code que
+/// "sin plazas de cuenta" ([NoAccountSlotsException]), que se distingue por el
+/// mensaje. Antes viajaba en crudo como `FirebaseFunctionsException` y cada UI lo
+/// interceptaba a mano; ahora es una excepción tipada para unificar el mapeo.
+class TooManyAttemptsException implements Exception {
+  const TooManyAttemptsException(
+      [this.message = 'Too many join attempts, try again later']);
+  final String message;
+  @override
+  String toString() => 'TooManyAttemptsException: $message';
+}
+
 class CannotLeaveAsOwnerException implements Exception {
   const CannotLeaveAsOwnerException(
       [this.message = 'Owner must transfer ownership before leaving']);

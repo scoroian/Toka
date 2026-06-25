@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -8,6 +6,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/errors/exceptions.dart';
+import '../../homes/application/join_home_error.dart';
 import '../data/onboarding_repository_impl.dart';
 import '../domain/home_creation_repository.dart';
 import '../domain/onboarding_repository.dart';
@@ -229,26 +228,16 @@ class OnboardingNotifier extends _$OnboardingNotifier {
       await _markCompleted();
       state = state.copyWith(isLoading: false, error: null);
       return homeId;
-    } on InvalidInviteCodeException {
-      state = state.copyWith(isLoading: false, error: 'invalid_invite');
-      return null;
-    } on ExpiredInviteCodeException {
-      state = state.copyWith(isLoading: false, error: 'expired_invite');
-      return null;
-    } on FirebaseException catch (e) {
-      final errorCode = switch (e.code) {
-        'permission-denied' => 'permission_denied',
-        'not-found' => 'invalid_invite',
-        'resource-exhausted' => 'too_many_attempts',
-        _ => 'unexpected_error',
-      };
-      state = state.copyWith(isLoading: false, error: errorCode);
-      return null;
-    } on SocketException {
-      state = state.copyWith(isLoading: false, error: 'network_error');
-      return null;
-    } catch (_) {
-      state = state.copyWith(isLoading: false, error: 'unexpected_error');
+    } catch (e) {
+      // Hallazgo #04: clasificamos el error por su motivo canónico (la MISMA
+      // fuente de verdad que el selector multi-hogar) y guardamos el nombre del
+      // motivo. Así el onboarding deja de caer en "Algo salió mal" para motivos
+      // conocidos como "hogar lleno" (failed-precondition) y muestra el mismo
+      // mensaje que el selector para cada motivo.
+      state = state.copyWith(
+        isLoading: false,
+        error: classifyJoinHomeError(e).name,
+      );
       return null;
     }
   }

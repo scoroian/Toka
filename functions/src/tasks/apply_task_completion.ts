@@ -64,11 +64,29 @@ export const applyTaskCompletion = onCall(async (request) => {
     throw new HttpsError("unauthenticated", "Not authenticated");
   }
 
-  const { homeId, taskId } = request.data as { homeId: string; taskId: string };
+  const { homeId, taskId, completionId } = request.data as {
+    homeId: string;
+    taskId: string;
+    completionId?: string;
+  };
   const uid = request.auth.uid;
 
   if (!homeId || !taskId) {
     throw new HttpsError("invalid-argument", "homeId and taskId are required");
+  }
+  // Hallazgo #02: `completionId` es la clave de idempotencia generada por el
+  // cliente (uuid). Se usa como id determinista del taskEvent, así que debe ser
+  // un id de documento válido y acotado. Si es inválido, lo rechazamos en vez de
+  // caer silenciosamente a un id automático (lo que perdería la idempotencia).
+  if (
+    completionId !== undefined &&
+    (typeof completionId !== "string" ||
+      !/^[A-Za-z0-9_-]{1,128}$/.test(completionId))
+  ) {
+    throw new HttpsError(
+      "invalid-argument",
+      "completionId must be a token of [A-Za-z0-9_-]{1,128}"
+    );
   }
 
   // Pre-lectura (fuera de la transacción) del modo de distribución: solo el
@@ -87,6 +105,29 @@ export const applyTaskCompletion = onCall(async (request) => {
     : new Map<string, number>();
 
   const result = await db.runTransaction(async (tx) => {
+    // Id del evento: determinista (= completionId) cuando el cliente lo provee,
+    // para que un reintento de una escritura ya aplicada sea un no-op.
+    const eventRef = completionId
+      ? db.collection("homes").doc(homeId).collection("taskEvents").doc(completionId)
+      : db.collection("homes").doc(homeId).collection("taskEvents").doc();
+
+    // Idempotencia (Hallazgo #02): si este completionId ya tiene evento, la
+    // completación ya se aplicó (probablemente se perdió la respuesta). No
+    // re-aplicamos nada — ni evento, ni stats, ni dashboard.
+    if (completionId) {
+      const existing = await tx.get(eventRef);
+      if (existing.exists) {
+        return {
+          alreadyApplied: true,
+          eventId: eventRef.id,
+          nextAssigneeUid:
+            (existing.data()?.["nextAssigneeUid"] as string | null) ?? null,
+          isOneTime: false,
+          nextDueAtMillis: 0,
+        };
+      }
+    }
+
     const taskRef = db.collection("homes").doc(homeId).collection("tasks").doc(taskId);
     const taskSnap = await tx.get(taskRef);
     if (!taskSnap.exists) throw new HttpsError("not-found", "Task not found");
@@ -161,7 +202,6 @@ export const applyTaskCompletion = onCall(async (request) => {
     // de DST. Antes se sumaba el intervalo en UTC ignorando la regla.
     const nextDueAt = computeNextDueAt(task, currentDue);
 
-    const eventRef = db.collection("homes").doc(homeId).collection("taskEvents").doc();
     tx.set(eventRef, {
       eventType: "completed",
       taskId,
@@ -172,6 +212,8 @@ export const applyTaskCompletion = onCall(async (request) => {
       },
       actorUid: uid,
       performerUid: uid,
+      // Persistido para que un replay idempotente pueda devolverlo sin recalcular.
+      nextAssigneeUid: isOneTime ? null : nextAssigneeUid,
       completedAt: FieldValue.serverTimestamp(),
       createdAt: FieldValue.serverTimestamp(),
       penaltyApplied: false,
@@ -245,12 +287,23 @@ export const applyTaskCompletion = onCall(async (request) => {
     });
 
     return {
+      alreadyApplied: false,
       eventId: eventRef.id,
       nextAssigneeUid,
       isOneTime,
       nextDueAtMillis: nextDueAt.getTime(),
     };
   });
+
+  // Replay idempotente: la completación ya estaba aplicada → no tocamos el
+  // dashboard (evitaría doble conteo) y devolvemos éxito.
+  if (result.alreadyApplied) {
+    return {
+      eventId: result.eventId,
+      nextAssigneeUid: result.nextAssigneeUid,
+      deduped: true,
+    };
+  }
 
   // Actualizar el dashboard ANTES de responder al cliente. En Cloud Functions
   // gen2 (Cloud Run) el CPU se estrangula en cuanto se envía la respuesta, por lo

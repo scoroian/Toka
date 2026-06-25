@@ -26,7 +26,7 @@ final verifyEmailViewModelProvider =
 // ignore: unused_element
 typedef VerifyEmailViewModelRef = AutoDisposeProviderRef<VerifyEmailViewModel>;
 String _$verifyEmailViewModelNotifierHash() =>
-    r'4f75b631190a4aab3eff2c4ce951226f6df52372';
+    r'9aa0aad5130e691a0f4e8fd0b7f8bcc384cf32b3';
 
 /// See also [VerifyEmailViewModelNotifier].
 @ProviderFor(VerifyEmailViewModelNotifier)

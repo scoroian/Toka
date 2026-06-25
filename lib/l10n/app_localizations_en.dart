@@ -182,6 +182,19 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get auth_verify_email_continue => 'I\'ve verified, continue';
+
+  @override
+  String get auth_verify_email_back => 'Back';
+
+  @override
+  String get auth_verify_email_not_yet =>
+      'We haven\'t detected the verification yet. Check your email and try again.';
+
+  @override
+  String get auth_verify_email_checking => 'Checking…';
+
+  @override
   String get auth_error_network => 'Network error. Check your connection.';
 
   @override
@@ -292,25 +305,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboarding_join_home_button => 'Join';
 
   @override
-  String get onboarding_error_invalid_invite => 'Invalid invitation code';
-
-  @override
-  String get onboarding_error_expired_invite => 'Invitation code has expired';
-
-  @override
   String get onboarding_error_no_slots => 'No home slots available';
 
   @override
-  String get onboarding_error_network =>
+  String get join_error_invalid_code => 'Invalid invitation code';
+
+  @override
+  String get join_error_expired_code => 'Invitation code has expired';
+
+  @override
+  String get join_error_home_full =>
+      'This home is already full. Ask an admin to upgrade the plan or free up a spot.';
+
+  @override
+  String get join_error_no_account_slots =>
+      'You\'ve reached your account\'s home limit. Leave one or get more slots to join another.';
+
+  @override
+  String get join_error_too_many_attempts =>
+      'Too many attempts. Please wait a few minutes and try again.';
+
+  @override
+  String get join_error_permission_denied =>
+      'You don\'t have permission to join this home.';
+
+  @override
+  String get join_error_network =>
       'No internet connection. Check your network and try again.';
 
   @override
-  String get onboarding_error_unexpected =>
-      'An unexpected error occurred. Please try again.';
-
-  @override
-  String get onboarding_error_permission_denied =>
-      'You don\'t have permission to join this home.';
+  String get join_error_generic => 'Something went wrong. Please try again.';
 
   @override
   String get onboarding_add_photo => 'Add photo';
@@ -486,12 +510,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homes_error_no_slots => 'No available slots';
 
   @override
-  String get homes_error_invalid_code => 'Invalid code';
-
-  @override
-  String get homes_error_expired_code => 'The code has expired';
-
-  @override
   String get recurrenceHourly => 'Hour';
 
   @override
@@ -616,6 +634,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get undo => 'Undo';
+
+  @override
+  String today_task_completion_failed(String task) {
+    return 'Couldn’t complete “$task”.';
+  }
+
+  @override
+  String today_task_completion_conflict(String task) {
+    return '“$task” was already completed or updated by someone else.';
+  }
+
+  @override
+  String get today_completion_not_saved => 'Not saved';
 
   @override
   String get pass_turn_dialog_title => 'Pass turn?';

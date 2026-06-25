@@ -43,7 +43,8 @@ class _FakeTaskCompletion extends TaskCompletion {
   @override
   AsyncValue<void> build() => const AsyncValue<void>.data(null);
   @override
-  Future<void> completeTask(String homeId, String taskId) async {
+  Future<void> completeTask(String homeId, String taskId,
+      {String? completionId}) async {
     calls.add((homeId, taskId));
   }
 }
@@ -154,7 +155,7 @@ void main() {
         reason: 'el diálogo de confirmación se eliminó');
     expect(find.text('Tarea completada'), findsOneWidget);
     expect(find.text('Deshacer'), findsOneWidget);
-    expect(container.read(pendingCompletionsProvider), contains('t1'),
+    expect(container.read(pendingCompletionsProvider).pending, contains('t1'),
         reason: 'completación optimista pendiente');
     expect(calls, isEmpty, reason: 'el commit real está diferido');
 
@@ -190,7 +191,7 @@ void main() {
     await tester.tap(find.text('Deshacer'));
     await tester.pump();
 
-    expect(container.read(pendingCompletionsProvider), isNot(contains('t1')));
+    expect(container.read(pendingCompletionsProvider).pending, isNot(contains('t1')));
 
     await tester.pump(const Duration(seconds: 11));
     expect(calls, isEmpty, reason: 'deshacer = sin escritura en backend');
@@ -205,7 +206,7 @@ void main() {
     await tester.pump(const Duration(seconds: 11)); // supera kUndoWindow (10s)
 
     expect(calls, [('home1', 't1')]);
-    expect(container.read(pendingCompletionsProvider), isNot(contains('t1')));
+    expect(container.read(pendingCompletionsProvider).pending, isNot(contains('t1')));
     await tester.pumpAndSettle();
   });
 }

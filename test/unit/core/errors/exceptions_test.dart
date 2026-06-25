@@ -91,6 +91,36 @@ void main() {
     });
   });
 
+  group('NoAccountSlotsException', () {
+    test('has default message', () {
+      const e = NoAccountSlotsException();
+      expect(e.message, equals('No account home slots available to join'));
+    });
+    test('accepts custom message', () {
+      const e = NoAccountSlotsException('custom msg');
+      expect(e.message, equals('custom msg'));
+    });
+    test('toString includes name and message', () {
+      const e = NoAccountSlotsException('oops');
+      expect(e.toString(), equals('NoAccountSlotsException: oops'));
+    });
+  });
+
+  group('TooManyAttemptsException', () {
+    test('has default message', () {
+      const e = TooManyAttemptsException();
+      expect(e.message, equals('Too many join attempts, try again later'));
+    });
+    test('accepts custom message', () {
+      const e = TooManyAttemptsException('custom msg');
+      expect(e.message, equals('custom msg'));
+    });
+    test('toString includes name and message', () {
+      const e = TooManyAttemptsException('oops');
+      expect(e.toString(), equals('TooManyAttemptsException: oops'));
+    });
+  });
+
   group('CannotRemoveOwnerException', () {
     test('has default message', () {
       const e = CannotRemoveOwnerException();

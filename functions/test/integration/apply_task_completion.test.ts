@@ -152,6 +152,68 @@ describe('applyTaskCompletion — no reasigna a miembros left (Hallazgo #08)', (
   });
 });
 
+// Hallazgo #02: idempotencia exactamente-una-vez por `completionId`. El cliente
+// genera una clave por completación y la reutiliza al reintentar; el backend la
+// usa como id determinista del taskEvent y, si ya existe, NO re-aplica nada.
+// Esto evita el doble evento cuando una escritura sí se aplicó pero se perdió la
+// respuesta (caso peligroso: hogar de 1 persona + tarea recurrente).
+describe('applyTaskCompletion — idempotencia por completionId (Hallazgo #02)', () => {
+  const SOLO = 'solo-idem';
+
+  beforeAll(async () => {
+    await createUser(SOLO);
+    await addMemberToHome(HOME, SOLO, 'member', 'active');
+    // assignmentOrder = [SOLO]: tras completar, el turno vuelve a SOLO; sin
+    // dedup, un reintento con la misma id duplicaría el evento.
+    await createTask(HOME, 'task-idem', SOLO, {
+      assignmentOrder: [SOLO],
+      currentAssigneeUid: SOLO,
+      recurrenceType: 'daily',
+    });
+  });
+
+  it('repetir con la MISMA completionId no duplica evento ni stats', async () => {
+    const cid = 'cid-fixed-1';
+
+    const r1 = await wrapped(
+      makeCallableRequest(SOLO, { homeId: HOME, taskId: 'task-idem', completionId: cid })
+    );
+    expect(r1.eventId).toBe(cid);
+
+    const completedAfter1 = (
+      await getDb().collection('homes').doc(HOME).collection('members').doc(SOLO).get()
+    ).data()!['tasksCompleted'];
+
+    // Reintento con la MISMA clave → no-op idempotente.
+    const r2 = await wrapped(
+      makeCallableRequest(SOLO, { homeId: HOME, taskId: 'task-idem', completionId: cid })
+    );
+    expect(r2.eventId).toBe(cid);
+
+    // Un único evento para esa tarea, con id = completionId.
+    const byTask = await getDb()
+      .collection('homes').doc(HOME).collection('taskEvents')
+      .where('taskId', '==', 'task-idem')
+      .get();
+    expect(byTask.size).toBe(1);
+    expect(byTask.docs[0].id).toBe(cid);
+
+    // Stats sin doble incremento.
+    const completedAfter2 = (
+      await getDb().collection('homes').doc(HOME).collection('members').doc(SOLO).get()
+    ).data()!['tasksCompleted'];
+    expect(completedAfter2).toBe(completedAfter1);
+  });
+
+  it('completionId con caracteres inválidos → invalid-argument', async () => {
+    await expect(
+      wrapped(makeCallableRequest(SOLO, {
+        homeId: HOME, taskId: 'task-idem', completionId: 'bad/id',
+      }))
+    ).rejects.toMatchObject({ code: 'invalid-argument' });
+  });
+});
+
 // Hallazgo #10: al completar, la siguiente nextDueAt se deriva de la
 // RecurrenceRule en la zona del hogar (tz-aware), NO sumando intervalos en UTC.
 describe('applyTaskCompletion — recurrencia tz-aware (Hallazgo #10)', () => {

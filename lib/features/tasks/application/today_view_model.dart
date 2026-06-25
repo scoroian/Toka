@@ -380,8 +380,9 @@ TodayViewModel todayViewModel(TodayViewModelRef ref) {
   // que coincida con el label de hora (Hallazgo #2-QA).
   final homeTz = currentHome?.timezone;
   // Completaciones "diferidas" en su ventana de Deshacer: se ocultan de la
-  // lista de "Por hacer" hasta que el commit se confirma (o se deshace).
-  final pending = ref.watch(pendingCompletionsProvider);
+  // lista de "Por hacer" hasta que el commit se confirma (o se deshace). Las
+  // FALLIDAS (Hallazgo #02) NO se ocultan: vuelven a ser visibles con marca.
+  final pending = ref.watch(pendingCompletionsProvider).pending;
 
   // Build homes list for the dropdown
   final memberships = currentUid != null

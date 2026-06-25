@@ -7,6 +7,7 @@ import '../../../../shared/widgets/ad_aware_bottom_padding.dart';
 import '../../../subscription/presentation/widgets/premium_state_banner.dart';
 import '../../application/pending_completions_provider.dart';
 import '../../application/today_view_model.dart';
+import '../../domain/failed_completion.dart';
 import '../../domain/home_dashboard.dart';
 import '../../../../features/homes/presentation/home_selector_widget.dart';
 import '../widgets/pass_turn_dialog.dart';
@@ -33,7 +34,7 @@ class TodayScreenV2 extends ConsumerWidget {
   ) {
     ref
         .read(pendingCompletionsProvider.notifier)
-        .schedule(homeId: homeId, taskId: task.taskId);
+        .schedule(homeId: homeId, taskId: task.taskId, taskTitle: task.title);
     ScaffoldMessenger.of(ctx)
       ..clearSnackBars()
       ..showSnackBar(SnackBar(
@@ -51,6 +52,42 @@ class TodayScreenV2 extends ConsumerWidget {
               .undo(task.taskId),
         ),
       ));
+  }
+
+  /// Reacciona a un commit de completación que FALLÓ (Hallazgo #02): nunca en
+  /// silencio. Avisa al usuario con un SnackBar localizado.
+  ///   - transient (red): ofrece **Reintentar** (reusa la clave de idempotencia);
+  ///     la tarjeta ya muestra una marca persistente "No se guardó".
+  ///   - conflict (carrera de turno): mensaje informativo sin Reintentar y se
+  ///     descarta la marca (la lista en vivo refleja el estado real).
+  void _onCompletionFailed(
+    BuildContext ctx,
+    WidgetRef ref,
+    AppLocalizations l10n,
+    FailedCompletion f,
+  ) {
+    final messenger = ScaffoldMessenger.of(ctx)..clearSnackBars();
+    if (f.kind == CompletionFailureKind.conflict) {
+      ref.read(pendingCompletionsProvider.notifier).dismiss(f.taskId);
+      messenger.showSnackBar(SnackBar(
+        content: Text(l10n.today_task_completion_conflict(f.taskTitle)),
+        duration: const Duration(seconds: 6),
+        behavior: SnackBarBehavior.floating,
+        persist: false,
+      ));
+    } else {
+      messenger.showSnackBar(SnackBar(
+        content: Text(l10n.today_task_completion_failed(f.taskTitle)),
+        duration: const Duration(seconds: 8),
+        behavior: SnackBarBehavior.floating,
+        persist: false,
+        action: SnackBarAction(
+          label: l10n.retry,
+          onPressed: () =>
+              ref.read(pendingCompletionsProvider.notifier).retry(f.taskId),
+        ),
+      ));
+    }
   }
 
   Future<void> _onPass(BuildContext ctx, TodayViewModel vm, TaskPreview task, String? uid) async {
@@ -76,6 +113,19 @@ class TodayScreenV2 extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final TodayViewModel vm = ref.watch(todayViewModelProvider);
+
+    // Hallazgo #02: avisar de cualquier completación cuyo commit acabó fallando
+    // (incluye los fallos del flush al volver de segundo plano). Solo reacciona
+    // a los `taskId` recién añadidos a `failed` para no repetir el aviso.
+    ref.listen<PendingCompletionsState>(pendingCompletionsProvider,
+        (prev, next) {
+      final prevFailed = prev?.failed ?? const <String, FailedCompletion>{};
+      for (final f in next.failed.values) {
+        if (!prevFailed.containsKey(f.taskId)) {
+          _onCompletionFailed(context, ref, l10n, f);
+        }
+      }
+    });
 
     return Scaffold(
       appBar: AppBar(

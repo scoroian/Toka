@@ -1,4 +1,3 @@
-import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,6 +10,8 @@ import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/bottom_sheet_padding.dart';
 import '../../auth/application/auth_provider.dart';
 import '../application/current_home_provider.dart';
+import '../application/join_home_error.dart';
+import '../application/join_home_error_messages.dart';
 import '../application/home_slot_provider.dart';
 import '../application/homes_provider.dart';
 import '../domain/home_membership.dart';
@@ -525,18 +526,11 @@ class _AddHomeSheetState extends ConsumerState<_AddHomeSheet> {
     }
   }
 
-  /// Mapea la excepción del join a un mensaje concreto. Usa tipos de dominio
-  /// (no `toString().contains`, que fallaba con "InvalidInviteCodeException")
-  /// para que el usuario vea el motivo real (código inválido/caducado, hogar
-  /// lleno en plan Free, demasiados intentos) en vez del genérico.
+  /// Mapea la excepción del join a un mensaje concreto clasificando su motivo
+  /// canónico y resolviéndolo con la fuente de verdad ÚNICA que comparte con el
+  /// onboarding (Hallazgo #04): mismo motivo → mismo mensaje en ambas entradas.
   String _joinErrorMessage(Object e, AppLocalizations l10n) {
-    if (e is InvalidInviteCodeException) return l10n.homes_error_invalid_code;
-    if (e is ExpiredInviteCodeException) return l10n.homes_error_expired_code;
-    if (e is MaxMembersReachedException) return l10n.free_limit_members_reached;
-    if (e is FirebaseFunctionsException && e.code == 'resource-exhausted') {
-      return l10n.error_too_many_attempts;
-    }
-    return l10n.error_generic;
+    return joinHomeErrorMessage(classifyJoinHomeError(e), l10n);
   }
 
   @override

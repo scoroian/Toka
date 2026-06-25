@@ -7,12 +7,12 @@ part of 'pending_completions_provider.dart';
 // **************************************************************************
 
 String _$pendingCompletionsHash() =>
-    r'4b931aeaa41ae0a58c975c959fb52ef11ffb1705';
+    r'69a5b91feaa113bf3a90f126b6acbe2a3fbc1a02';
 
 /// Gestiona las completaciones "diferidas": al tocar Hecho se marca la tarea
 /// como pendiente (la pantalla la oculta) y se programa el commit real al
-/// backend tras [kUndoWindow]. Mantiene el conjunto de `taskId` pendientes como
-/// estado para que `todayViewModel` los filtre.
+/// backend tras [kUndoWindow]. Mantiene el conjunto de `taskId` pendientes y el
+/// mapa de fallos como estado para que `todayViewModel` y las tarjetas reaccionen.
 ///
 /// keepAlive: los temporizadores deben sobrevivir a reconstrucciones de la
 /// pantalla Hoy. El flush por ciclo de vida (app en background) lo dispara
@@ -22,7 +22,7 @@ String _$pendingCompletionsHash() =>
 /// Copied from [PendingCompletions].
 @ProviderFor(PendingCompletions)
 final pendingCompletionsProvider =
-    NotifierProvider<PendingCompletions, Set<String>>.internal(
+    NotifierProvider<PendingCompletions, PendingCompletionsState>.internal(
   PendingCompletions.new,
   name: r'pendingCompletionsProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
@@ -32,6 +32,6 @@ final pendingCompletionsProvider =
   allTransitiveDependencies: null,
 );
 
-typedef _$PendingCompletions = Notifier<Set<String>>;
+typedef _$PendingCompletions = Notifier<PendingCompletionsState>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

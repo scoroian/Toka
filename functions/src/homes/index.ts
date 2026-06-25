@@ -68,6 +68,55 @@ async function enforceMemberCapTx(
 }
 
 // ---------------------------------------------------------------------------
+// enforceAccountSlotsTx
+// Cap de PLAZAS DE CUENTA del que se une (Hallazgo #01, lote UX 2026-06-25).
+// createHome ya cuenta las memberships activas del usuario contra su cap de
+// cuenta (baseHomeSlots + lifetimeUnlockedHomeSlots, tope homeSlotCap = 5), pero
+// joinHome/joinHomeByCode solo aplicaban enforceMemberCapTx (tope del HOGAR
+// destino). Sin esto, un usuario ya en 5 hogares podía unirse a un 6º por
+// invitación y eludir el cap de cuenta (las plazas de hogar son el eje
+// monetizable y la spec dice que sin plazas no se puede "ni crear ni aceptar
+// invitaciones").
+//
+// Replica EL MISMO cómputo canónico que createHome (campos del slot_ledger +
+// fallback legacy) pero dentro de la transacción, leyendo las memberships
+// activas con tx.get para que la concurrencia (dos joins simultáneos que
+// cruzarían el cap) la resuelva el aislamiento serializable de Firestore.
+//
+// `isRejoin` exime volver a un hogar del que ya eras miembro: el rejoin (status
+// 'left' → 'active', o un re-join idempotente estando ya activo) no consume una
+// plaza NUEVA, así que no debe bloquearse aunque la cuenta esté al límite.
+// ---------------------------------------------------------------------------
+async function enforceAccountSlotsTx(
+  tx: admin.firestore.Transaction,
+  userRef: admin.firestore.DocumentReference,
+  userData: admin.firestore.DocumentData | undefined,
+  isRejoin: boolean,
+): Promise<void> {
+  if (isRejoin) return;
+  const data = userData ?? {};
+  const baseSlots =
+    (data["baseHomeSlots"] as number) ??
+    (data["baseSlots"] as number) ??
+    2;
+  const lifetimeUnlocked =
+    (data["lifetimeUnlockedHomeSlots"] as number) ??
+    (data["lifetimeUnlocked"] as number) ??
+    0;
+  const totalSlots =
+    (data["homeSlotCap"] as number) ?? baseSlots + lifetimeUnlocked;
+
+  const membershipsSnap = await tx.get(
+    userRef.collection("memberships").where("status", "==", "active"),
+  );
+  if (membershipsSnap.size >= totalSlots) {
+    throw new HttpsError("resource-exhausted", "no-account-slots", {
+      maxHomes: totalSlots,
+    });
+  }
+}
+
+// ---------------------------------------------------------------------------
 // createHome
 // Input:  { name: string, emoji?: string }
 // Output: { homeId: string }
@@ -304,6 +353,11 @@ export const joinHome = onCall(async (request) => {
       existingMember.data()?.["status"] === "active";
     await enforceMemberCapTx(tx, homeRef, homeDataTx, tiersEnabled, isAlreadyActiveMember, packsEnabled);
 
+    // Cap de plazas de cuenta del invitado (Hallazgo #01). Rejoin (ya existía un
+    // doc de miembro en este hogar, cualquier status) no consume plaza nueva.
+    const isRejoin = existingMember.exists;
+    await enforceAccountSlotsTx(tx, userRef, userDoc.data(), isRejoin);
+
     const homeName = homeDataTx["name"] as string;
     const profile = readMemberProfileFields(userDoc.data());
     const now = FieldValue.serverTimestamp();
@@ -444,6 +498,10 @@ export const joinHomeByCode = onCall(async (request) => {
     const isAlreadyActiveMember = existingMember.exists &&
       existingMember.data()?.["status"] === "active";
     await enforceMemberCapTx(tx, homeRef, homeDataTx, tiersEnabled, isAlreadyActiveMember, packsEnabled);
+
+    // Cap de plazas de cuenta del invitado (Hallazgo #01; ver joinHome).
+    const isRejoin = existingMember.exists;
+    await enforceAccountSlotsTx(tx, userRef, userDoc.data(), isRejoin);
 
     const homeName = homeDataTx["name"] as string;
     const profile = readMemberProfileFields(userDoc.data());

@@ -5,7 +5,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:toka/core/errors/exceptions.dart';
 import 'package:toka/features/homes/data/homes_repository_impl.dart';
-import 'package:toka/features/homes/domain/homes_repository.dart';
 
 class _MockFunctions extends Mock implements FirebaseFunctions {}
 
@@ -125,6 +124,56 @@ void main() {
         throwsA(isA<MaxMembersReachedException>()),
       );
     });
+
+    test(
+        'resource-exhausted + no-account-slots → NoAccountSlotsException '
+        '(Hallazgo #01: distinto de "hogar lleno")', () async {
+      when(() => mockCallable.call<void>(any())).thenThrow(
+        FirebaseFunctionsException(
+            message: 'no-account-slots', code: 'resource-exhausted'),
+      );
+      final repo = HomesRepositoryImpl(
+          firestore: fakeFirestore, functions: mockFunctions);
+      await expectLater(
+        () => repo.joinHome('ABC123'),
+        throwsA(isA<NoAccountSlotsException>()),
+      );
+    });
+
+    test(
+        'resource-exhausted + too-many-join-attempts (rate limit) → '
+        'TooManyAttemptsException (Hallazgo #04: NO se confunde con "sin plazas '
+        'de cuenta", el mismo code con otro mensaje)', () async {
+      // El rate-limit anti fuerza bruta también usa resource-exhausted: se
+      // distingue por el mensaje y ahora es una excepción de dominio tipada.
+      when(() => mockCallable.call<void>(any())).thenThrow(
+        FirebaseFunctionsException(
+            message: 'too-many-join-attempts', code: 'resource-exhausted'),
+      );
+      final repo = HomesRepositoryImpl(
+          firestore: fakeFirestore, functions: mockFunctions);
+      await expectLater(
+        () => repo.joinHome('ABC123'),
+        throwsA(isA<TooManyAttemptsException>()),
+      );
+    });
+
+    test(
+        'failed-precondition con mensaje desconocido NO se mapea a "hogar lleno" '
+        '(re-lanza el FFE crudo; Hallazgo #04: mapeo por motivo concreto, no por '
+        'categoría)', () async {
+      when(() => mockCallable.call<void>(any())).thenThrow(
+        FirebaseFunctionsException(
+            message: 'some-other-precondition', code: 'failed-precondition'),
+      );
+      final repo = HomesRepositoryImpl(
+          firestore: fakeFirestore, functions: mockFunctions);
+      await expectLater(
+        () => repo.joinHome('ABC123'),
+        throwsA(isA<FirebaseFunctionsException>()
+            .having((e) => e.code, 'code', 'failed-precondition')),
+      );
+    });
   });
 
   group('getAvailableSlots integration', () {
@@ -136,19 +185,22 @@ void main() {
         'lifetimeUnlocked': 2,
       });
 
-      // Añadir 2 membresías activas
+      // Añadir 2 membresías activas. `getAvailableSlots` cuenta solo las que
+      // están en estado active/frozen, así que el fixture debe incluir `status`
+      // (sin él, la query las excluía y el test contaba 0 → fallo preexistente
+      // del WIP, alineado aquí con el contrato de la query).
       await fakeFirestore
           .collection('users')
           .doc(uid)
           .collection('memberships')
           .doc('home-a')
-          .set({'homeId': 'home-a', 'role': 'member'});
+          .set({'homeId': 'home-a', 'role': 'member', 'status': 'active'});
       await fakeFirestore
           .collection('users')
           .doc(uid)
           .collection('memberships')
           .doc('home-b')
-          .set({'homeId': 'home-b', 'role': 'owner'});
+          .set({'homeId': 'home-b', 'role': 'owner', 'status': 'active'});
 
       final repo = HomesRepositoryImpl(
         firestore: fakeFirestore,

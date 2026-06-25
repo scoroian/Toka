@@ -1,5 +1,6 @@
 import 'package:cloud_functions/cloud_functions.dart';
 
+import '../../homes/application/join_home_error.dart';
 import '../domain/home_creation_repository.dart';
 
 class HomeCreationRepositoryImpl implements HomeCreationRepository {
@@ -37,15 +38,13 @@ class HomeCreationRepositoryImpl implements HomeCreationRepository {
       final result = await callable.call<Map<String, dynamic>>({'code': code});
       return (result.data['homeId'] as String?) ?? '';
     } on FirebaseFunctionsException catch (e) {
-      // Traducimos a las excepciones de dominio que ya maneja onboarding.
-      switch (e.code) {
-        case 'not-found':
-          throw const InvalidInviteCodeException();
-        case 'deadline-exceeded':
-          throw const ExpiredInviteCodeException();
-        default:
-          rethrow;
-      }
+      // Mapeo unificado código→excepción de dominio (Hallazgo #04): la MISMA
+      // fuente de verdad que usa el repo del selector multi-hogar, para que
+      // ambas entradas produzcan idénticas excepciones tipadas. Un code
+      // desconocido se re-lanza tal cual (identidad preservada).
+      final mapped = mapJoinHomeException(e);
+      if (identical(mapped, e)) rethrow;
+      throw mapped;
     }
   }
 }

@@ -1,10 +1,12 @@
 import 'dart:io';
 
-import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:toka/core/errors/exceptions.dart';
+import 'package:toka/features/homes/application/join_home_error.dart';
 import 'package:toka/features/onboarding/application/home_creation_provider.dart';
 import 'package:toka/features/onboarding/application/onboarding_provider.dart';
 import 'package:toka/features/onboarding/domain/home_creation_repository.dart';
@@ -164,7 +166,12 @@ void main() {
     expect(c.read(onboardingNotifierProvider).error, 'no_slots');
   });
 
-  test('joinHome sets invalid_invite on InvalidInviteCodeException', () async {
+  // Hallazgo #04: el repo real (HomeCreationRepositoryImpl) ya traduce el
+  // FirebaseFunctionsException a una excepción de dominio tipada; el provider
+  // solo clasifica el motivo canónico y guarda su nombre. Mismo eje que el
+  // selector multi-hogar → mismo mensaje en ambas entradas.
+
+  test('joinHome clasifica InvalidInviteCodeException → invalidCode', () async {
     final homeRepo = _MockHomeCreationRepo();
     when(() => homeRepo.joinHome(code: any(named: 'code')))
         .thenThrow(const InvalidInviteCodeException());
@@ -176,10 +183,11 @@ void main() {
         await c.read(onboardingNotifierProvider.notifier).joinHome('ABC123');
 
     expect(result, isNull);
-    expect(c.read(onboardingNotifierProvider).error, 'invalid_invite');
+    expect(c.read(onboardingNotifierProvider).error,
+        JoinHomeError.invalidCode.name);
   });
 
-  test('joinHome sets expired_invite on ExpiredInviteCodeException', () async {
+  test('joinHome clasifica ExpiredInviteCodeException → expiredCode', () async {
     final homeRepo = _MockHomeCreationRepo();
     when(() => homeRepo.joinHome(code: any(named: 'code')))
         .thenThrow(const ExpiredInviteCodeException());
@@ -191,14 +199,16 @@ void main() {
         await c.read(onboardingNotifierProvider.notifier).joinHome('XYZ789');
 
     expect(result, isNull);
-    expect(c.read(onboardingNotifierProvider).error, 'expired_invite');
+    expect(c.read(onboardingNotifierProvider).error,
+        JoinHomeError.expiredCode.name);
   });
 
-  test('joinHome sets invalid_invite on FirebaseException not-found', () async {
+  test(
+      'joinHome clasifica MaxMembersReachedException → homeFull '
+      '(Hallazgo #04: "hogar lleno" ya NO cae en "Algo salió mal")', () async {
     final homeRepo = _MockHomeCreationRepo();
-    when(() => homeRepo.joinHome(code: any(named: 'code'))).thenThrow(
-      FirebaseException(plugin: 'cloud_firestore', code: 'not-found'),
-    );
+    when(() => homeRepo.joinHome(code: any(named: 'code')))
+        .thenThrow(const MaxMembersReachedException());
 
     final c = _makeContainer(homeRepo: homeRepo);
     addTearDown(c.dispose);
@@ -207,10 +217,46 @@ void main() {
         await c.read(onboardingNotifierProvider.notifier).joinHome('ABC123');
 
     expect(result, isNull);
-    expect(c.read(onboardingNotifierProvider).error, 'invalid_invite');
+    expect(
+        c.read(onboardingNotifierProvider).error, JoinHomeError.homeFull.name);
   });
 
-  test('joinHome sets network_error on SocketException', () async {
+  test(
+      'joinHome clasifica NoAccountSlotsException → noAccountSlots '
+      '(Hallazgo #01)', () async {
+    final homeRepo = _MockHomeCreationRepo();
+    when(() => homeRepo.joinHome(code: any(named: 'code')))
+        .thenThrow(const NoAccountSlotsException());
+
+    final c = _makeContainer(homeRepo: homeRepo);
+    addTearDown(c.dispose);
+
+    final result =
+        await c.read(onboardingNotifierProvider.notifier).joinHome('ABC123');
+
+    expect(result, isNull);
+    expect(c.read(onboardingNotifierProvider).error,
+        JoinHomeError.noAccountSlots.name);
+  });
+
+  test('joinHome clasifica TooManyAttemptsException → tooManyAttempts',
+      () async {
+    final homeRepo = _MockHomeCreationRepo();
+    when(() => homeRepo.joinHome(code: any(named: 'code')))
+        .thenThrow(const TooManyAttemptsException());
+
+    final c = _makeContainer(homeRepo: homeRepo);
+    addTearDown(c.dispose);
+
+    final result =
+        await c.read(onboardingNotifierProvider.notifier).joinHome('ABC123');
+
+    expect(result, isNull);
+    expect(c.read(onboardingNotifierProvider).error,
+        JoinHomeError.tooManyAttempts.name);
+  });
+
+  test('joinHome clasifica SocketException → network', () async {
     final homeRepo = _MockHomeCreationRepo();
     when(() => homeRepo.joinHome(code: any(named: 'code')))
         .thenThrow(const SocketException('No internet'));
@@ -222,10 +268,28 @@ void main() {
         await c.read(onboardingNotifierProvider.notifier).joinHome('ABC123');
 
     expect(result, isNull);
-    expect(c.read(onboardingNotifierProvider).error, 'network_error');
+    expect(
+        c.read(onboardingNotifierProvider).error, JoinHomeError.network.name);
   });
 
-  test('joinHome sets unexpected_error on generic exception', () async {
+  test('joinHome clasifica FFE de code desconocido → unexpected', () async {
+    final homeRepo = _MockHomeCreationRepo();
+    when(() => homeRepo.joinHome(code: any(named: 'code'))).thenThrow(
+      FirebaseFunctionsException(code: 'internal', message: 'boom'),
+    );
+
+    final c = _makeContainer(homeRepo: homeRepo);
+    addTearDown(c.dispose);
+
+    final result =
+        await c.read(onboardingNotifierProvider.notifier).joinHome('ABC123');
+
+    expect(result, isNull);
+    expect(c.read(onboardingNotifierProvider).error,
+        JoinHomeError.unexpected.name);
+  });
+
+  test('joinHome clasifica excepción genérica → unexpected', () async {
     final homeRepo = _MockHomeCreationRepo();
     when(() => homeRepo.joinHome(code: any(named: 'code')))
         .thenThrow(Exception('Something went wrong'));
@@ -237,6 +301,7 @@ void main() {
         await c.read(onboardingNotifierProvider.notifier).joinHome('ABC123');
 
     expect(result, isNull);
-    expect(c.read(onboardingNotifierProvider).error, 'unexpected_error');
+    expect(c.read(onboardingNotifierProvider).error,
+        JoinHomeError.unexpected.name);
   });
 }

@@ -41,6 +41,20 @@ void main() {
         .called(1);
   });
 
+  test('completeTask reenvía completionId al callable cuando se provee', () async {
+    when(() => mockCallable.call(any()))
+        .thenAnswer((_) async => MockHttpsCallableResult());
+
+    final container = makeContainer();
+    await container
+        .read(taskCompletionProvider.notifier)
+        .completeTask('home1', 'task1', completionId: 'cid-123');
+
+    verify(() => mockCallable.call(
+            {'homeId': 'home1', 'taskId': 'task1', 'completionId': 'cid-123'}))
+        .called(1);
+  });
+
   test('estado loading → data en flujo exitoso', () async {
     when(() => mockCallable.call(any()))
         .thenAnswer((_) async => MockHttpsCallableResult());
@@ -57,31 +71,38 @@ void main() {
         container.read(taskCompletionProvider), const AsyncValue<void>.data(null));
   });
 
-  test('fallo permission-denied → estado error', () async {
+  test('fallo permission-denied → estado error y RELANZA (Hallazgo #02)',
+      () async {
     when(() => mockCallable.call(any())).thenThrow(
       FirebaseFunctionsException(
           message: 'Not your turn', code: 'permission-denied'),
     );
 
     final container = makeContainer();
-    await container
-        .read(taskCompletionProvider.notifier)
-        .completeTask('home1', 'task1');
+    final notifier = container.read(taskCompletionProvider.notifier);
 
+    // Regresión #02: el error ya NO se traga. Se relanza para que el llamante
+    // (PendingCompletions._commit) pueda avisar al usuario.
+    await expectLater(
+      () => notifier.completeTask('home1', 'task1'),
+      throwsA(isA<FirebaseFunctionsException>()),
+    );
     expect(container.read(taskCompletionProvider), isA<AsyncError<void>>());
   });
 
-  test('fallo not-found → estado error', () async {
+  test('fallo not-found → estado error y RELANZA', () async {
     when(() => mockCallable.call(any())).thenThrow(
       FirebaseFunctionsException(
           message: 'Task not found', code: 'not-found'),
     );
 
     final container = makeContainer();
-    await container
-        .read(taskCompletionProvider.notifier)
-        .completeTask('home1', 'task1');
+    final notifier = container.read(taskCompletionProvider.notifier);
 
+    await expectLater(
+      () => notifier.completeTask('home1', 'task1'),
+      throwsA(isA<FirebaseFunctionsException>()),
+    );
     expect(container.read(taskCompletionProvider), isA<AsyncError<void>>());
   });
 }

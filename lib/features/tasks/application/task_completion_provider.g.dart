@@ -24,7 +24,7 @@ final firebaseFunctionsProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef FirebaseFunctionsRef = AutoDisposeProviderRef<FirebaseFunctions>;
-String _$taskCompletionHash() => r'f2f247c228c8a9d3e3b8180af7bd0e49bf6a34f3';
+String _$taskCompletionHash() => r'bde4e34dfdf89cdfd5b96d9331d1d3b0d418eae8';
 
 /// See also [TaskCompletion].
 @ProviderFor(TaskCompletion)

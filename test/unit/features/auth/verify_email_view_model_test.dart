@@ -5,8 +5,14 @@ import 'package:toka/features/auth/application/auth_provider.dart';
 import 'package:toka/features/auth/application/verify_email_view_model.dart';
 import 'package:toka/features/auth/domain/auth_repository.dart';
 import 'package:toka/features/auth/domain/auth_user.dart';
+import 'package:toka/features/auth/domain/failures/auth_failure.dart';
 
 class _FakeRepo implements AuthRepository {
+  _FakeRepo({this.reloadResult, this.reloadError});
+  final AuthUser? reloadResult;
+  final Object? reloadError;
+  bool signedOut = false;
+
   @override
   Stream<AuthUser?> get authStateChanges => const Stream.empty();
 
@@ -21,7 +27,9 @@ class _FakeRepo implements AuthRepository {
       );
 
   @override
-  Future<void> signOut() async {}
+  Future<void> signOut() async {
+    signedOut = true;
+  }
 
   @override
   Future<AuthUser> signInWithGoogle() => throw UnimplementedError();
@@ -55,14 +63,21 @@ class _FakeRepo implements AuthRepository {
 
   @override
   Future<void> updatePassword(String c, String n) => throw UnimplementedError();
+
+  @override
+  Future<AuthUser> reloadUser() async {
+    if (reloadError != null) throw reloadError!;
+    return reloadResult ?? currentUser!;
+  }
 }
 
 void main() {
   late ProviderContainer container;
   tearDown(() => container.dispose());
 
-  ProviderContainer makeContainer() => ProviderContainer(overrides: [
-        authRepositoryProvider.overrideWithValue(_FakeRepo()),
+  ProviderContainer makeContainer({_FakeRepo? repo}) =>
+      ProviderContainer(overrides: [
+        authRepositoryProvider.overrideWithValue(repo ?? _FakeRepo()),
         authStateChangesProvider.overrideWith((ref) => const Stream.empty()),
       ]);
 
@@ -101,5 +116,56 @@ void main() {
     expect(container.read(verifyEmailViewModelProvider).resendCooldownSeconds,
         60);
     expect(container.read(verifyEmailViewModelProvider).isSending, false);
+  });
+
+  group('continueIfVerified', () {
+    test('verified cuando reloadUser devuelve emailVerified=true', () async {
+      const verified = AuthUser(
+        uid: 'u',
+        email: 'test@test.com',
+        displayName: 'U',
+        photoUrl: null,
+        emailVerified: true,
+        providers: ['password'],
+      );
+      container = ProviderContainer(overrides: [
+        authRepositoryProvider.overrideWithValue(
+            _FakeRepo(reloadResult: verified)),
+        authStateChangesProvider.overrideWith((ref) => const Stream.empty()),
+      ]);
+      final vm = container.read(verifyEmailViewModelProvider);
+      expect(await vm.continueIfVerified(), VerifyCheckOutcome.verified);
+    });
+
+    test('notVerified cuando sigue sin verificar', () async {
+      container = ProviderContainer(overrides: [
+        authRepositoryProvider.overrideWithValue(_FakeRepo()),
+        authStateChangesProvider.overrideWith((ref) => const Stream.empty()),
+      ]);
+      final vm = container.read(verifyEmailViewModelProvider);
+      expect(await vm.continueIfVerified(), VerifyCheckOutcome.notVerified);
+    });
+
+    test('networkError cuando reloadUser lanza AuthFailure.networkError',
+        () async {
+      container = ProviderContainer(overrides: [
+        authRepositoryProvider.overrideWithValue(
+            _FakeRepo(reloadError: const AuthFailure.networkError())),
+        authStateChangesProvider.overrideWith((ref) => const Stream.empty()),
+      ]);
+      final vm = container.read(verifyEmailViewModelProvider);
+      expect(await vm.continueIfVerified(), VerifyCheckOutcome.networkError);
+    });
+  });
+
+  test('cancelAndSignOut llama a signOut del repo', () async {
+    final repo = _FakeRepo();
+    container = ProviderContainer(overrides: [
+      authRepositoryProvider.overrideWithValue(repo),
+      authStateChangesProvider.overrideWith((ref) => const Stream.empty()),
+    ]);
+    final vm = container.read(verifyEmailViewModelProvider);
+    await vm.cancelAndSignOut();
+    expect(repo.signedOut, true);
   });
 }

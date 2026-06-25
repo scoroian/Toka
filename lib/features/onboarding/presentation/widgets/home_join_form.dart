@@ -3,6 +3,20 @@ import 'package:flutter/services.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../../../../l10n/app_localizations.dart';
+import '../../../homes/application/join_home_error.dart';
+import '../../../homes/application/join_home_error_messages.dart';
+
+/// Resuelve el código de error del view model (nombre de [JoinHomeError]) al
+/// mensaje localizado, usando la MISMA fuente de verdad que el selector
+/// multi-hogar (Hallazgo #04). Un código no reconocido —p. ej.
+/// `invite_code_length`, validación de longitud del cliente que el propio
+/// validador del campo ya muestra inline— cae al genérico.
+String _joinErrorText(String code, AppLocalizations l10n) {
+  final reason = JoinHomeError.values.asNameMap()[code];
+  return reason != null
+      ? joinHomeErrorMessage(reason, l10n)
+      : l10n.join_error_generic;
+}
 
 class HomeJoinForm extends StatefulWidget {
   const HomeJoinForm({
@@ -133,14 +147,7 @@ class _HomeJoinFormState extends State<HomeJoinForm> {
           ),
           if (widget.error != null)
             Text(
-              switch (widget.error!) {
-                'invalid_invite' => l10n.onboarding_error_invalid_invite,
-                'expired_invite' => l10n.onboarding_error_expired_invite,
-                'network_error' => l10n.onboarding_error_network,
-                'permission_denied' => l10n.onboarding_error_permission_denied,
-                'too_many_attempts' => l10n.error_too_many_attempts,
-                _ => l10n.onboarding_error_unexpected,
-              },
+              _joinErrorText(widget.error!, l10n),
               style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
           const SizedBox(height: 16),

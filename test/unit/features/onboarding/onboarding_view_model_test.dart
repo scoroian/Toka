@@ -138,9 +138,9 @@ void main() {
           container.read(onboardingViewModelNotifierProvider.notifier);
       // Construir el notifier interno antes de push() (inicializa su element).
       container.read(onboardingNotifierProvider);
-      fakeOnboarding.push(const OnboardingState(error: 'invalid_invite'));
+      fakeOnboarding.push(const OnboardingState(error: 'invalidCode'));
       expect(
-          container.read(onboardingNotifierProvider).error, 'invalid_invite');
+          container.read(onboardingNotifierProvider).error, 'invalidCode');
 
       notifier.clearError();
 

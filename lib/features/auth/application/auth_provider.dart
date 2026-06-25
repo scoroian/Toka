@@ -125,6 +125,15 @@ class Auth extends _$Auth {
     }
   }
 
+  /// Recarga el usuario desde Firebase y publica el estado para que el router
+  /// re-evalúe (modelo A de verificación de email). Devuelve si quedó
+  /// verificado. Propaga AuthFailure (p. ej. red) al llamante.
+  Future<bool> refreshEmailVerified() async {
+    final fresh = await _repo.reloadUser();
+    state = AuthState.authenticated(fresh);
+    return fresh.emailVerified;
+  }
+
   Future<void> signOut() async {
     // NOTA: No llamamos ref.invalidate(currentHomeProvider) aquí porque
     // currentHomeProvider ya depende de authProvider (ciclo directo →

@@ -15,7 +15,12 @@ _MockVerifyEmailViewModel _defaultMock() {
   when(() => m.email).thenReturn('user@example.com');
   when(() => m.resendCooldownSeconds).thenReturn(0);
   when(() => m.isSending).thenReturn(false);
+  when(() => m.isChecking).thenReturn(false);
   when(() => m.resendVerification()).thenAnswer((_) async {});
+  when(() => m.pollVerification()).thenAnswer((_) async {});
+  when(() => m.cancelAndSignOut()).thenAnswer((_) async {});
+  when(() => m.continueIfVerified())
+      .thenAnswer((_) async => VerifyCheckOutcome.notVerified);
   return m;
 }
 
@@ -31,49 +36,59 @@ Widget _wrap({_MockVerifyEmailViewModel? vm}) => ProviderScope(
           GlobalCupertinoLocalizations.delegate,
         ],
         supportedLocales: [Locale('es')],
-        home: VerifyEmailScreen(),
+        // Polling desactivado en tests: un Timer.periodic vivo cuelga pumpAndSettle.
+        home: VerifyEmailScreen(enablePolling: false),
       ),
     );
 
 void main() {
-  testWidgets('screen renders a Scaffold', (tester) async {
+  testWidgets('renders Scaffold + botón Continuar', (tester) async {
     await tester.pumpWidget(_wrap());
     await tester.pumpAndSettle();
     expect(find.byType(Scaffold), findsOneWidget);
+    expect(find.byKey(const Key('btn_continue_verification')), findsOneWidget);
   });
 
-  testWidgets('has at least one FilledButton when cooldown is zero',
-      (tester) async {
-    await tester.pumpWidget(_wrap());
-    await tester.pumpAndSettle();
-    expect(find.byType(FilledButton), findsOneWidget);
-  });
-
-  testWidgets('resend button is disabled while isSending=true', (tester) async {
-    final m = _MockVerifyEmailViewModel();
-    when(() => m.email).thenReturn('user@example.com');
-    when(() => m.resendCooldownSeconds).thenReturn(0);
-    when(() => m.isSending).thenReturn(true);
-    when(() => m.resendVerification()).thenAnswer((_) async {});
-
+  testWidgets('Reenviar deshabilitado durante cooldown', (tester) async {
+    final m = _defaultMock();
+    when(() => m.resendCooldownSeconds).thenReturn(45);
     await tester.pumpWidget(_wrap(vm: m));
     await tester.pumpAndSettle();
-
-    final button = tester.widget<FilledButton>(find.byType(FilledButton));
+    final button = tester.widget<OutlinedButton>(
+        find.byKey(const Key('btn_resend_verification')));
     expect(button.onPressed, isNull);
   });
 
-  testWidgets('resend button is disabled when cooldown > 0', (tester) async {
-    final m = _MockVerifyEmailViewModel();
-    when(() => m.email).thenReturn('user@example.com');
-    when(() => m.resendCooldownSeconds).thenReturn(45);
-    when(() => m.isSending).thenReturn(false);
-    when(() => m.resendVerification()).thenAnswer((_) async {});
-
+  testWidgets('Continuar con notVerified muestra SnackBar', (tester) async {
+    final m = _defaultMock();
+    when(() => m.continueIfVerified())
+        .thenAnswer((_) async => VerifyCheckOutcome.notVerified);
     await tester.pumpWidget(_wrap(vm: m));
     await tester.pumpAndSettle();
 
-    final button = tester.widget<FilledButton>(find.byType(FilledButton));
+    await tester.tap(find.byKey(const Key('btn_continue_verification')));
+    await tester.pump(); // resuelve el future de continueIfVerified()
+    await tester.pump(); // muestra el SnackBar
+    expect(find.byType(SnackBar), findsOneWidget);
+  });
+
+  testWidgets('Volver invoca cancelAndSignOut', (tester) async {
+    final m = _defaultMock();
+    await tester.pumpWidget(_wrap(vm: m));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('btn_back_verification')));
+    await tester.pump();
+    verify(() => m.cancelAndSignOut()).called(1);
+  });
+
+  testWidgets('isChecking deshabilita Continuar', (tester) async {
+    final m = _defaultMock();
+    when(() => m.isChecking).thenReturn(true);
+    await tester.pumpWidget(_wrap(vm: m));
+    await tester.pumpAndSettle();
+    final button = tester.widget<FilledButton>(
+        find.byKey(const Key('btn_continue_verification')));
     expect(button.onPressed, isNull);
   });
 }

@@ -21,8 +21,14 @@ class _FakeAuth extends Auth {
 }
 
 class _FakeCurrentHome extends CurrentHome {
+  // Fijar AsyncData(null) síncronamente antes de que el Future devuelva,
+  // para que redirect() lea el estado "data" sin necesidad de await.
   @override
-  Future<Home?> build() async => null;
+  Future<Home?> build() {
+    state = const AsyncData(null);
+    return Future.value(null);
+  }
+
   @override
   Future<void> switchHome(String homeId) async {}
 }
@@ -44,7 +50,9 @@ ProviderContainer _container(AuthState authState) => ProviderContainer(
       overrides: [
         authProvider.overrideWith(() => _FakeAuth(authState)),
         currentHomeProvider.overrideWith(() => _FakeCurrentHome()),
-        onboardingCompletedProvider.overrideWith((ref) async => false),
+        // Retorna bool síncrono (FutureOr<bool>) → Riverpod resuelve a
+        // AsyncData(false) en el mismo tick, sin necesidad de await.
+        onboardingCompletedProvider.overrideWith((ref) => false),
       ],
     );
 
@@ -77,6 +85,34 @@ void main() {
     expect(_redirectFor(errorState, AppRoutes.home), AppRoutes.login);
   });
 
+  test(
+      'error en /verify-email redirige a /login '
+      '(solo válida para autenticado-sin-verificar, no para estado error)', () {
+    expect(_redirectFor(errorState, AppRoutes.verifyEmail), AppRoutes.login);
+  });
+
+  group('unauthenticated redirige correctamente (Hallazgo #03 regresión)', () {
+    const unauthed = AuthState.unauthenticated();
+
+    test('unauthenticated en /login se queda (null)', () {
+      expect(_redirectFor(unauthed, AppRoutes.login), isNull);
+    });
+
+    test('unauthenticated en /register se queda (null)', () {
+      expect(_redirectFor(unauthed, AppRoutes.register), isNull);
+    });
+
+    test('unauthenticated en /home redirige a /login', () {
+      expect(_redirectFor(unauthed, AppRoutes.home), AppRoutes.login);
+    });
+
+    test(
+        'unauthenticated en /verify-email redirige a /login '
+        '(regresión: "Volver"→signOut dejaba atrapado en /verify-email)', () {
+      expect(_redirectFor(unauthed, AppRoutes.verifyEmail), AppRoutes.login);
+    });
+  });
+
   // loading ocurre durante un intento de login/registro. Si redirige a /splash,
   // al llegar el error siguiente la location ya no es /register y se acaba en
   // /login (perdiendo el formulario). En pantallas de auth, loading debe QUEDARSE.
@@ -97,6 +133,64 @@ void main() {
 
     test('loading en splash se queda en splash', () {
       expect(_redirectFor(loadingState, AppRoutes.splash), isNull);
+    });
+  });
+
+  group('enforcement de email verificado (modelo A, Hallazgo #03)', () {
+    AuthState unverifiedPassword() => const AuthState.authenticated(AuthUser(
+          uid: 'u',
+          email: 'a@b.c',
+          displayName: null,
+          photoUrl: null,
+          emailVerified: false,
+          providers: ['password'],
+        ));
+
+    AuthState verifiedPassword() => const AuthState.authenticated(AuthUser(
+          uid: 'u',
+          email: 'a@b.c',
+          displayName: null,
+          photoUrl: null,
+          emailVerified: true,
+          providers: ['password'],
+        ));
+
+    AuthState socialUser() => const AuthState.authenticated(AuthUser(
+          uid: 'g',
+          email: 'g@b.c',
+          displayName: null,
+          photoUrl: null,
+          emailVerified: true,
+          providers: ['google.com'],
+        ));
+
+    test('password sin verificar en /home redirige a /verify-email', () {
+      expect(_redirectFor(unverifiedPassword(), AppRoutes.home),
+          AppRoutes.verifyEmail);
+    });
+
+    test('password sin verificar en /onboarding redirige a /verify-email', () {
+      expect(_redirectFor(unverifiedPassword(), AppRoutes.onboarding),
+          AppRoutes.verifyEmail);
+    });
+
+    test('password sin verificar en /splash redirige a /verify-email', () {
+      expect(_redirectFor(unverifiedPassword(), AppRoutes.splash),
+          AppRoutes.verifyEmail);
+    });
+
+    test('password sin verificar YA en /verify-email se queda', () {
+      expect(_redirectFor(unverifiedPassword(), AppRoutes.verifyEmail), isNull);
+    });
+
+    test('password verificado en /verify-email avanza (no se queda)', () {
+      // currentHome=null + onboardingCompleted=false → /onboarding.
+      expect(_redirectFor(verifiedPassword(), AppRoutes.verifyEmail),
+          AppRoutes.onboarding);
+    });
+
+    test('cuenta social no se bloquea aunque pase por /home', () {
+      expect(_redirectFor(socialUser(), AppRoutes.home), isNull);
     });
   });
 

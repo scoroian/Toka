@@ -5,6 +5,7 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
 import '../../../core/errors/exceptions.dart';
+import '../application/join_home_error.dart';
 import '../domain/home.dart';
 import '../domain/home_membership.dart';
 import '../domain/homes_repository.dart';
@@ -68,15 +69,14 @@ class HomesRepositoryImpl implements HomesRepository {
       final callable = _functions.httpsCallable('joinHomeByCode');
       await callable.call<void>({'code': inviteCode});
     } on FirebaseFunctionsException catch (e) {
-      if (e.code == 'not-found') throw const InvalidInviteCodeException();
-      if (e.code == 'deadline-exceeded') throw const ExpiredInviteCodeException();
-      // El backend lanza failed-precondition cuando el hogar (plan Free) ya
-      // alcanzó el máximo de miembros activos. Lo mapeamos a una excepción de
-      // dominio para mostrar el motivo en vez del genérico "Algo salió mal".
-      if (e.code == 'failed-precondition') {
-        throw const MaxMembersReachedException();
-      }
-      rethrow;
+      // Mapeo unificado código→excepción de dominio (Hallazgo #04): cada motivo
+      // del backend se distingue por su `code` específico (y el `message` donde
+      // el backend reusa un code para dos motivos). La MISMA fuente de verdad
+      // que usa el onboarding, para que ambas entradas muestren el mismo
+      // mensaje. Un code desconocido se re-lanza tal cual.
+      final mapped = mapJoinHomeException(e);
+      if (identical(mapped, e)) rethrow;
+      throw mapped;
     }
   }
 

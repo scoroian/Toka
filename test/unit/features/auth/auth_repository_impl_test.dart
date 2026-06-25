@@ -164,4 +164,41 @@ void main() {
       verify(() => mockAuth.signOut()).called(1);
     });
   });
+
+  group('reloadUser', () {
+    test('returns refreshed AuthUser (emailVerified actualizado)', () async {
+      final mockUser = _MockUser();
+      _stubUser(mockUser, uid: 'reload-uid', emailVerified: true);
+      when(() => mockUser.reload()).thenAnswer((_) async {});
+      when(() => mockAuth.currentUser).thenReturn(mockUser);
+
+      final result = await repo.reloadUser();
+
+      expect(result.uid, 'reload-uid');
+      expect(result.emailVerified, true);
+      verify(() => mockUser.reload()).called(1);
+    });
+
+    test('throws AuthFailure.networkError if reload fails (network)', () async {
+      final mockUser = _MockUser();
+      _stubUser(mockUser);
+      when(() => mockUser.reload())
+          .thenThrow(FirebaseAuthException(code: 'network-request-failed'));
+      when(() => mockAuth.currentUser).thenReturn(mockUser);
+
+      await expectLater(
+        () => repo.reloadUser(),
+        throwsA(const AuthFailure.networkError()),
+      );
+    });
+
+    test('throws AuthFailure.unknown if there is no current user', () async {
+      when(() => mockAuth.currentUser).thenReturn(null);
+
+      await expectLater(
+        () => repo.reloadUser(),
+        throwsA(isA<AuthFailure>()),
+      );
+    });
+  });
 }

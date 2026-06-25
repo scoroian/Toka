@@ -119,6 +119,24 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<AuthUser> reloadUser() async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) {
+        throw const AuthFailure.unknown('No current user');
+      }
+      await user.reload();
+      final refreshed = _auth.currentUser;
+      if (refreshed == null) {
+        throw const AuthFailure.unknown('No current user after reload');
+      }
+      return AuthUser.fromFirebaseUser(refreshed);
+    } on FirebaseAuthException catch (e) {
+      throw _map(e);
+    }
+  }
+
+  @override
   Future<void> linkWithGoogle() async {
     try {
       final googleUser = await _googleSignIn.signIn();

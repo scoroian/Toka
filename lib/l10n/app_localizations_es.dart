@@ -183,6 +183,19 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get auth_verify_email_continue => 'Ya verifiqué, continuar';
+
+  @override
+  String get auth_verify_email_back => 'Volver';
+
+  @override
+  String get auth_verify_email_not_yet =>
+      'Aún no detectamos la verificación. Revisa tu correo y vuelve a intentarlo.';
+
+  @override
+  String get auth_verify_email_checking => 'Comprobando…';
+
+  @override
   String get auth_error_network => 'Error de red. Comprueba tu conexión.';
 
   @override
@@ -296,27 +309,37 @@ class AppLocalizationsEs extends AppLocalizations {
   String get onboarding_join_home_button => 'Unirme';
 
   @override
-  String get onboarding_error_invalid_invite => 'Código de invitación inválido';
-
-  @override
-  String get onboarding_error_expired_invite =>
-      'El código de invitación ha expirado';
-
-  @override
   String get onboarding_error_no_slots =>
       'No tienes plazas disponibles para crear más hogares';
 
   @override
-  String get onboarding_error_network =>
+  String get join_error_invalid_code => 'Código de invitación inválido';
+
+  @override
+  String get join_error_expired_code => 'El código de invitación ha expirado';
+
+  @override
+  String get join_error_home_full =>
+      'Este hogar ya está completo. Pídele a un administrador que amplíe el plan o libere una plaza.';
+
+  @override
+  String get join_error_no_account_slots =>
+      'Has alcanzado el límite de hogares de tu cuenta. Abandona uno o consigue más plazas para unirte a otro.';
+
+  @override
+  String get join_error_too_many_attempts =>
+      'Demasiados intentos. Espera unos minutos e inténtalo de nuevo.';
+
+  @override
+  String get join_error_permission_denied =>
+      'No tienes permiso para unirte a este hogar.';
+
+  @override
+  String get join_error_network =>
       'Sin conexión a internet. Comprueba tu red e inténtalo de nuevo.';
 
   @override
-  String get onboarding_error_unexpected =>
-      'Ha ocurrido un error inesperado. Inténtalo de nuevo.';
-
-  @override
-  String get onboarding_error_permission_denied =>
-      'No tienes permiso para unirte a este hogar.';
+  String get join_error_generic => 'Algo salió mal. Inténtalo de nuevo.';
 
   @override
   String get onboarding_add_photo => 'Añadir foto';
@@ -492,12 +515,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get homes_error_no_slots => 'No tienes cupos disponibles';
 
   @override
-  String get homes_error_invalid_code => 'Código inválido';
-
-  @override
-  String get homes_error_expired_code => 'El código ha expirado';
-
-  @override
   String get recurrenceHourly => 'Hora';
 
   @override
@@ -624,6 +641,19 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get undo => 'Deshacer';
+
+  @override
+  String today_task_completion_failed(String task) {
+    return 'No se pudo completar «$task».';
+  }
+
+  @override
+  String today_task_completion_conflict(String task) {
+    return '«$task» ya fue completada o actualizada por otra persona.';
+  }
+
+  @override
+  String get today_completion_not_saved => 'No se guardó';
 
   @override
   String get pass_turn_dialog_title => '¿Pasar turno?';

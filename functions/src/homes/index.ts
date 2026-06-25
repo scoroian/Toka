@@ -9,11 +9,17 @@ import {
   sanitizeMemberPhone,
 } from "./member_factory";
 import {
-  FREE_LIMITS,
   FREE_LIMIT_CODES,
   PREMIUM_LIMITS,
   isPremium,
 } from "../shared/free_limits";
+import {
+  resolveEntitlement,
+  type HomeTier,
+} from "../shared/tier_catalog";
+import { activePacksFromHome } from "../entitlement/pack_catalog";
+import { isHomeTiersEnabled, isMemberPacksEnabled } from "../shared/feature_flags";
+import { readPlusActive } from "../entitlement/plus_entitlement";
 import { buildBannerAdFlags } from "../shared/ad_constants";
 import { normalizeTimeZone } from "../tasks/today_window";
 import { reassignTasksFromDeletedUser } from "../users/cleanup_user";
@@ -21,6 +27,45 @@ import { updateHomeDashboard } from "../tasks/update_dashboard";
 
 const db = admin.firestore();
 const FieldValue = admin.firestore.FieldValue;
+
+// ---------------------------------------------------------------------------
+// enforceMemberCapTx
+// Tope de miembros server-side, derivado del tier (flag ON) o del binario 10/3
+// (flag OFF). Se aplica a TODOS los hogares (Free y premium): antes solo se
+// enforce el Free, así que un hogar premium no tenía tope real en el servidor.
+// Cuenta miembros activos dentro de la transacción (antes de cualquier
+// escritura) y rechaza si se alcanza el tope. `isAlreadyActiveMember` exime el
+// rejoin de alguien que ya cuenta como activo.
+// ---------------------------------------------------------------------------
+async function enforceMemberCapTx(
+  tx: admin.firestore.Transaction,
+  homeRef: admin.firestore.DocumentReference,
+  homeData: admin.firestore.DocumentData,
+  tiersEnabled: boolean,
+  isAlreadyActiveMember: boolean,
+  packsEnabled = false,
+): Promise<void> {
+  if (isAlreadyActiveMember) return;
+  // El tope efectivo incluye los packs de miembro activos del hogar (eje
+  // aditivo, solo sobre Grupo y gateado por `member_packs_enabled`). Es el gate
+  // del tope ABSOLUTO de 25.
+  const { maxMembers, tier } = resolveEntitlement({
+    premiumStatus: homeData["premiumStatus"] as string | undefined,
+    tier: (homeData["premiumTier"] as HomeTier | null | undefined) ?? null,
+    tiersEnabled,
+    packsEnabled,
+    packs: activePacksFromHome(homeData, Date.now()),
+  });
+  const activeMembersSnap = await tx.get(
+    homeRef.collection("members").where("status", "==", "active"),
+  );
+  if (activeMembersSnap.size >= maxMembers) {
+    throw new HttpsError("failed-precondition", FREE_LIMIT_CODES.members, {
+      maxMembers,
+      tier,
+    });
+  }
+}
 
 // ---------------------------------------------------------------------------
 // createHome
@@ -80,6 +125,12 @@ export const createHome = onCall(async (request) => {
   const homeRef = db.collection("homes").doc();
   const now = FieldValue.serverTimestamp();
 
+  // Hogar nuevo = Free. Tope efectivo derivado del flag (Free es 3 en ambos
+  // modos; el tier efectivo del dashboard es 'free' con flag ON, null con OFF).
+  // `premiumTier` se deja null: aún no se ha comprado ningún plan.
+  const tiersEnabled = await isHomeTiersEnabled();
+  const freeResolved = resolveEntitlement({ premiumStatus: "free", tiersEnabled });
+
   const homeData: Record<string, unknown> = {
     name,
     ownerUid: uid,
@@ -87,10 +138,11 @@ export const createHome = onCall(async (request) => {
     lastPayerUid: null,
     premiumStatus: "free",
     premiumPlan: null,
+    premiumTier: null,
     premiumEndsAt: null,
     restoreUntil: null,
     autoRenewEnabled: false,
-    limits: { maxMembers: 5 },
+    limits: { maxMembers: freeResolved.maxMembers },
     // Zona horaria del hogar: define qué cuenta como "hoy" en el dashboard.
     // El cliente puede enviarla; si no, o si es inválida, cae a Europe/Madrid.
     timezone: normalizeTimeZone(data.timezone),
@@ -117,6 +169,10 @@ export const createHome = onCall(async (request) => {
   const { nickname, photoUrl, phone, phoneVisibility } =
     readMemberProfileFields(userData2);
 
+  // Backfill de la proyección Plus: si el owner ya tenía Toka Plus, su doc de
+  // miembro en el nuevo hogar nace con plusActive=true.
+  const ownerPlusActive = await readPlusActive(db, uid);
+
   const memberData = buildNewMemberDoc({
     uid,
     nickname,
@@ -124,6 +180,7 @@ export const createHome = onCall(async (request) => {
     photoUrl,
     phone,
     phoneVisibility,
+    plusActive: ownerPlusActive,
   });
 
   const batch = db.batch();
@@ -169,6 +226,8 @@ export const createHome = onCall(async (request) => {
         canUseSmartDistribution: false,
         canUseVacations: false,
         canUseReviews: false,
+        tier: freeResolved.tier,
+        maxMembers: freeResolved.maxMembers,
       },
       adFlags: buildBannerAdFlags(true),
       rescueFlags: {
@@ -207,6 +266,12 @@ export const joinHome = onCall(async (request) => {
   const userRef = db.collection("users").doc(uid);
   const memberRef = homeRef.collection("members").doc(uid);
 
+  // Flags leídos fuera de la transacción (cacheados; no son dato tx).
+  const tiersEnabled = await isHomeTiersEnabled();
+  const packsEnabled = await isMemberPacksEnabled();
+  // Proyección Plus del que se une (backfill), leída fuera de la transacción.
+  const plusActive = await readPlusActive(db, uid);
+
   await db.runTransaction(async (tx) => {
     const [invDoc, homeDoc, userDoc, existingMember] = await Promise.all([
       tx.get(invRef),
@@ -232,21 +297,12 @@ export const joinHome = onCall(async (request) => {
       throw new HttpsError("deadline-exceeded", "Invitation expired");
     }
 
-    // Free-plan gate: max N active members per home. Solo contamos como nuevo
-    // si no existe doc previo o si estaba en estado distinto a "active"
-    // (rejoin). El owner siempre cuenta en el total.
+    // Tope de miembros del tier (server-side). Solo cuenta como nuevo si no
+    // existe doc previo o estaba en estado distinto a "active" (rejoin).
     const homeDataTx = homeDoc.data()!;
     const isAlreadyActiveMember = existingMember.exists &&
       existingMember.data()?.["status"] === "active";
-    if (!isPremium(homeDataTx["premiumStatus"] as string | undefined) &&
-        !isAlreadyActiveMember) {
-      const activeMembersSnap = await tx.get(
-        homeRef.collection("members").where("status", "==", "active")
-      );
-      if (activeMembersSnap.size >= FREE_LIMITS.maxActiveMembers) {
-        throw new HttpsError("failed-precondition", FREE_LIMIT_CODES.members);
-      }
-    }
+    await enforceMemberCapTx(tx, homeRef, homeDataTx, tiersEnabled, isAlreadyActiveMember, packsEnabled);
 
     const homeName = homeDataTx["name"] as string;
     const profile = readMemberProfileFields(userDoc.data());
@@ -276,6 +332,7 @@ export const joinHome = onCall(async (request) => {
         phone: sanitizeMemberPhone(profile.phone, profile.phoneVisibility),
         phoneVisibility: profile.phoneVisibility,
         status: "active",
+        plusActive,
         rejoinedAt: now,
       });
     } else {
@@ -288,6 +345,7 @@ export const joinHome = onCall(async (request) => {
           photoUrl: profile.photoUrl,
           phone: profile.phone,
           phoneVisibility: profile.phoneVisibility,
+          plusActive,
         })
       );
     }
@@ -362,6 +420,12 @@ export const joinHomeByCode = onCall(async (request) => {
   const userRef = db.collection("users").doc(uid);
   const memberRef = homeRef.collection("members").doc(uid);
 
+  // Flags leídos fuera de la transacción (cacheados; no son dato tx).
+  const tiersEnabled = await isHomeTiersEnabled();
+  const packsEnabled = await isMemberPacksEnabled();
+  // Proyección Plus del que se une (backfill), leída fuera de la transacción.
+  const plusActive = await readPlusActive(db, uid);
+
   await db.runTransaction(async (tx) => {
     const [homeDoc, freshInv, userDoc, existingMember] = await Promise.all([
       tx.get(homeRef),
@@ -375,19 +439,11 @@ export const joinHomeByCode = onCall(async (request) => {
       throw new HttpsError("deadline-exceeded", "Invite code already used");
     }
 
-    // Free-plan gate: max N active members per home (ver joinHome).
+    // Tope de miembros del tier (server-side; ver joinHome).
     const homeDataTx = homeDoc.data()!;
     const isAlreadyActiveMember = existingMember.exists &&
       existingMember.data()?.["status"] === "active";
-    if (!isPremium(homeDataTx["premiumStatus"] as string | undefined) &&
-        !isAlreadyActiveMember) {
-      const activeMembersSnap = await tx.get(
-        homeRef.collection("members").where("status", "==", "active")
-      );
-      if (activeMembersSnap.size >= FREE_LIMITS.maxActiveMembers) {
-        throw new HttpsError("failed-precondition", FREE_LIMIT_CODES.members);
-      }
-    }
+    await enforceMemberCapTx(tx, homeRef, homeDataTx, tiersEnabled, isAlreadyActiveMember, packsEnabled);
 
     const homeName = homeDataTx["name"] as string;
     const profile = readMemberProfileFields(userDoc.data());
@@ -417,6 +473,7 @@ export const joinHomeByCode = onCall(async (request) => {
         phone: sanitizeMemberPhone(profile.phone, profile.phoneVisibility),
         phoneVisibility: profile.phoneVisibility,
         status: "active",
+        plusActive,
         rejoinedAt: now,
       });
     } else {
@@ -429,6 +486,7 @@ export const joinHomeByCode = onCall(async (request) => {
           photoUrl: profile.photoUrl,
           phone: profile.phone,
           phoneVisibility: profile.phoneVisibility,
+          plusActive,
         })
       );
     }
@@ -682,6 +740,12 @@ export const reinstateMember = onCall(async (request) => {
     .collection("memberships")
     .doc(homeId);
 
+  // Flags leídos fuera de la transacción (cacheados; no son dato tx).
+  const tiersEnabled = await isHomeTiersEnabled();
+  const packsEnabled = await isMemberPacksEnabled();
+  // Proyección Plus del reincorporado (backfill), leída fuera de la transacción.
+  const targetPlusActive = await readPlusActive(db, targetUid);
+
   await db.runTransaction(async (tx) => {
     const [homeDoc, callerDoc, targetDoc] = await Promise.all([
       tx.get(homeRef),
@@ -710,20 +774,15 @@ export const reinstateMember = onCall(async (request) => {
       throw new HttpsError("failed-precondition", "target-not-left");
     }
 
-    // Límite de miembros del plan Free (el target está 'left', no cuenta aún).
-    if (!isPremium(homeDoc.data()?.["premiumStatus"] as string | undefined)) {
-      const activeMembersSnap = await tx.get(
-        homeRef.collection("members").where("status", "==", "active")
-      );
-      if (activeMembersSnap.size >= FREE_LIMITS.maxActiveMembers) {
-        throw new HttpsError("failed-precondition", FREE_LIMIT_CODES.members);
-      }
-    }
+    // Tope de miembros del tier (el target está 'left', no cuenta aún → siempre
+    // es una alta nueva).
+    await enforceMemberCapTx(tx, homeRef, homeDoc.data()!, tiersEnabled, false, packsEnabled);
 
     const now = FieldValue.serverTimestamp();
     tx.update(targetMemberRef, {
       status: "active",
       role: "member",
+      plusActive: targetPlusActive,
       rejoinedAt: now,
       leftAt: FieldValue.delete(),
     });

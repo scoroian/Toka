@@ -7,11 +7,14 @@ import 'package:mocktail/mocktail.dart';
 import 'package:toka/features/homes/application/current_home_provider.dart';
 import 'package:toka/features/homes/domain/home.dart';
 import 'package:toka/features/homes/domain/home_limits.dart';
+import 'package:toka/features/subscription/application/current_tier_provider.dart';
+import 'package:toka/features/subscription/application/home_tiers_provider.dart';
 import 'package:toka/features/subscription/application/paywall_provider.dart';
 import 'package:toka/features/subscription/application/subscription_provider.dart';
 import 'package:toka/features/subscription/domain/purchase_result.dart';
 import 'package:toka/features/subscription/domain/subscription_repository.dart';
 import 'package:toka/features/subscription/domain/subscription_state.dart';
+import 'package:toka/features/subscription/domain/tier_catalog.dart';
 import 'package:toka/features/subscription/presentation/skins/rescue_screen_v2.dart';
 import 'package:toka/l10n/app_localizations.dart';
 
@@ -26,6 +29,9 @@ class _FakeCurrentHome extends CurrentHome {
   Future<Home?> build() async => _home;
 }
 
+/// SKUs comprados durante un test (capturados por [_FakePaywall]).
+final List<String> _purchasedSkus = [];
+
 class _FakePaywall extends Paywall {
   @override
   AsyncValue<PurchaseResult?> build() {
@@ -37,7 +43,9 @@ class _FakePaywall extends Paywall {
   Future<void> startPurchase({
     required String homeId,
     required String productId,
-  }) async {}
+  }) async {
+    _purchasedSkus.add(productId);
+  }
 
   @override
   Future<void> saveDowngradePlan({
@@ -85,6 +93,7 @@ void main() {
   late List<Override> baseOverrides;
 
   setUp(() {
+    _purchasedSkus.clear();
     final mockRepo = _MockSubscriptionRepository();
     baseOverrides = [
       currentHomeProvider.overrideWith(() => _FakeCurrentHome(_rescueHome)),
@@ -97,6 +106,9 @@ void main() {
         ),
       ),
       paywallProvider.overrideWith(() => _FakePaywall()),
+      // Sin tiers (binario) y sin tier: la pantalla renueva el SKU legacy.
+      currentHomeTierProvider.overrideWithValue(null),
+      homeTiersEnabledProvider.overrideWithValue(false),
     ];
   });
 
@@ -148,5 +160,42 @@ void main() {
 
     final paywall = container.read(paywallProvider);
     expect(paywall.isLoading, isFalse);
+  });
+
+  testWidgets('RescueScreen: tiers OFF → renueva SKU legacy toka_premium_annual',
+      (tester) async {
+    await tester.pumpWidget(_wrap(const RescueScreenV2(), overrides: baseOverrides));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('btn_renew_annual')));
+    await tester.pump();
+
+    expect(_purchasedSkus, ['toka_premium_annual']);
+  });
+
+  testWidgets(
+      'RescueScreen: tiers ON + Pareja → renueva toka_pareja_annual (no sube a Grupo)',
+      (tester) async {
+    final overrides = [
+      currentHomeProvider.overrideWith(() => _FakeCurrentHome(_rescueHome)),
+      subscriptionRepositoryProvider
+          .overrideWithValue(_MockSubscriptionRepository()),
+      subscriptionStateProvider.overrideWith(
+        (_) => const SubscriptionState.rescue(
+            plan: 'monthly', endsAt: null, daysLeft: 2),
+      ),
+      paywallProvider.overrideWith(() => _FakePaywall()),
+      currentHomeTierProvider.overrideWithValue(HomeTier.pareja),
+      homeTiersEnabledProvider.overrideWithValue(true),
+    ];
+    await tester.pumpWidget(_wrap(const RescueScreenV2(), overrides: overrides));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('btn_renew_annual')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('btn_renew_monthly')));
+    await tester.pump();
+
+    expect(_purchasedSkus, ['toka_pareja_annual', 'toka_pareja_monthly']);
   });
 }

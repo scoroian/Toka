@@ -15,8 +15,12 @@ abstract class AppRoutes {
   static const String settings = '/settings';
   static const String subscription = '/subscription';
   static const String paywall = '/subscription/paywall';
+  static const String plusPaywall = '/subscription/plus';
   static const String rescueScreen = '/subscription/rescue';
   static const String downgradePlanner = '/subscription/downgrade-planner';
+
+  /// Métricas personales del usuario (gated por Toka Plus).
+  static const String personalMetrics = '/profile/metrics';
   static const String myHomes = '/my-homes';
   static const String homeSettings = '/home-settings';
   static const String editProfile = '/profile/edit';
@@ -46,8 +50,10 @@ abstract class AppRoutes {
     settings,
     subscription,
     paywall,
+    plusPaywall,
     rescueScreen,
     downgradePlanner,
+    personalMetrics,
     myHomes,
     homeSettings,
     editProfile,

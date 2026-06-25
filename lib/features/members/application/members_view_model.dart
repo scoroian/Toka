@@ -1,13 +1,13 @@
 // lib/features/members/application/members_view_model.dart
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../core/constants/free_limits.dart';
 import '../../auth/application/auth_provider.dart';
 import '../../homes/application/current_home_provider.dart';
 import '../../homes/application/dashboard_provider.dart';
 import '../../homes/application/homes_provider.dart';
 import '../../homes/domain/home_membership.dart';
 import '../domain/member.dart';
+import 'member_limit.dart';
 import 'members_provider.dart';
 
 part 'members_view_model.g.dart';
@@ -21,9 +21,10 @@ class MembersViewData {
     required this.canInvite,
     required this.homeId,
     required this.isPremium,
+    required this.tier,
     required this.activeMembersCount,
-    required this.maxMembersFree,
-    required this.freeLimitReached,
+    required this.effectiveMaxMembers,
+    required this.limitReached,
   });
   final List<Member> activeMembers;
   final List<Member> frozenMembers;
@@ -31,14 +32,19 @@ class MembersViewData {
   final List<Member> leftMembers;
   /// True si el usuario actual (owner/admin) puede reincorporar miembros.
   final bool canReinstate;
-  /// True cuando rol permite invitar Y no se ha alcanzado el límite Free.
+  /// True cuando rol permite invitar Y no se ha alcanzado el tope del plan.
   final bool canInvite;
   final String homeId;
   final bool isPremium;
+  /// Tier efectivo del hogar (`'pareja'|'familia'|'grupo'|'free'|null`),
+  /// denormalizado por el backend. `null` con el flag de tiers OFF.
+  final String? tier;
   final int activeMembersCount;
-  final int maxMembersFree;
-  /// True cuando el hogar es Free y `activeMembersCount >= maxMembersFree`.
-  final bool freeLimitReached;
+  /// Tope de miembros efectivo del plan, o `null` si no aplica tope en cliente.
+  final int? effectiveMaxMembers;
+  /// True cuando `activeMembersCount` alcanza el tope efectivo del plan (Free o
+  /// cualquier tier premium).
+  final bool limitReached;
 }
 
 abstract class MembersViewModel {
@@ -84,34 +90,44 @@ MembersViewModel membersViewModel(MembersViewModelRef ref) {
             .where((m) => !m.accountDeleted)
             .toList();
 
-    // Free plan gating: el flag premium se lee del dashboard (fallback
-    // conservador: asumimos Premium hasta que llegue el dashboard; el backend
-    // siempre es el backstop real de la validación).
-    final dashboard = ref.watch(dashboardProvider).valueOrNull;
-    final isPremium = dashboard?.premiumFlags.isPremium ?? true;
+    // Gating del tope de miembros: el tier y el tope efectivo se LEEN del
+    // entitlement denormalizado por el backend (`premiumFlags.tier/maxMembers`),
+    // nunca se recomputan en cliente. Fallback conservador: sin dashboard
+    // asumimos Premium sin tope hasta que llegue (el backend es el backstop
+    // real). Con el flag de tiers OFF, el backend escribe tope binario (10/3) y
+    // tier null → la UI cae sola al comportamiento anterior.
+    final dashboardAsync = ref.watch(dashboardProvider);
+    final dashboard = dashboardAsync.valueOrNull;
+    final flags = dashboard?.premiumFlags;
+    final isPremium = flags?.isPremium ?? true;
+    final tier = flags?.tier;
     // El conteo de miembros activos se toma del stream EN VIVO de miembros
     // (homeMembersProvider excluye status='left'), NO de
     // dashboard.planCounters.activeMembers: ese contador agregado se regenera de
     // forma perezosa en backend y queda stale tras expulsar/abandonar, lo que
-    // bloqueaba indebidamente invitar a un reemplazo en hogares Free (mostraba
-    // "3/3 lleno" con solo 2 activos). El conteo en vivo siempre es coherente
-    // con la propia lista de miembros que ve el usuario.
+    // bloqueaba indebidamente invitar a un reemplazo (mostraba "lleno" con menos
+    // activos). El conteo en vivo siempre es coherente con la lista que ve el
+    // usuario.
     final activeMembersCount = activeMembers.length;
-    const maxMembersFree = FreeLimits.maxActiveMembers;
-    final freeLimitReached =
-        !isPremium && activeMembersCount >= maxMembersFree;
+    final cap = resolveMemberCap(
+      hasDashboard: dashboard != null,
+      isPremium: isPremium,
+      maxMembers: flags?.maxMembers,
+      activeMembersCount: activeMembersCount,
+    );
 
     return MembersViewData(
       activeMembers: activeMembers,
       frozenMembers: frozenMembers,
       leftMembers: leftMembers,
       canReinstate: roleCanInvite,
-      canInvite: roleCanInvite && !freeLimitReached,
+      canInvite: roleCanInvite && !cap.limitReached,
       homeId: home.id,
       isPremium: isPremium,
+      tier: tier,
       activeMembersCount: activeMembersCount,
-      maxMembersFree: maxMembersFree,
-      freeLimitReached: freeLimitReached,
+      effectiveMaxMembers: cap.cap,
+      limitReached: cap.limitReached,
     );
   });
 

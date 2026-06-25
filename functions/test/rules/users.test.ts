@@ -4,7 +4,7 @@ import {
   assertFails,
   RulesTestEnvironment,
 } from '@firebase/rules-unit-testing';
-import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { readFileSync } from 'fs';
 import * as path from 'path';
 
@@ -121,6 +121,70 @@ describe('users security rules', () => {
         updateDoc(doc(ctx.firestore(), `users/${USER1}`), {
           fcmToken: 'mi-token',
         }),
+      );
+    });
+  });
+
+  // ─── Eje Toka Plus (users/{uid}/entitlements/plus) ────────────────────────
+  // Lectura: SOLO el propio usuario. Escritura: SOLO backend (write: if false).
+  // La proyección legible por co-miembros vive en homes/{homeId}/members/{uid}
+  // .plusActive (regla de members existente), NO en este doc crudo.
+  describe('entitlements/plus — lectura propia, escritura solo backend', () => {
+    beforeEach(async () => {
+      await testEnv.withSecurityRulesDisabled(async (ctx) => {
+        const db = ctx.firestore();
+        await setDoc(doc(db, `users/${USER1}/entitlements/plus`), {
+          status: 'active', active: true, cycle: 'monthly',
+        });
+        await setDoc(doc(db, `users/${USER2}/entitlements/plus`), {
+          status: 'active', active: true, cycle: 'annual',
+        });
+      });
+    });
+
+    it('el usuario puede leer su propio entitlement Plus', async () => {
+      const ctx = testEnv.authenticatedContext(USER1);
+      await assertSucceeds(
+        getDoc(doc(ctx.firestore(), `users/${USER1}/entitlements/plus`)),
+      );
+    });
+
+    it('un usuario NO puede leer el Plus de otro (doc crudo privado)', async () => {
+      const ctx = testEnv.authenticatedContext(USER1);
+      await assertFails(
+        getDoc(doc(ctx.firestore(), `users/${USER2}/entitlements/plus`)),
+      );
+    });
+
+    it('no autenticado NO puede leer el Plus', async () => {
+      const ctx = testEnv.unauthenticatedContext();
+      await assertFails(
+        getDoc(doc(ctx.firestore(), `users/${USER1}/entitlements/plus`)),
+      );
+    });
+
+    it('el cliente NO puede CREAR su Plus (write: if false)', async () => {
+      const ctx = testEnv.authenticatedContext(USER1);
+      await assertFails(
+        setDoc(doc(ctx.firestore(), `users/${USER1}/entitlements/nuevo`), {
+          active: true,
+        }),
+      );
+    });
+
+    it('el cliente NO puede ACTUALIZAR su Plus', async () => {
+      const ctx = testEnv.authenticatedContext(USER1);
+      await assertFails(
+        updateDoc(doc(ctx.firestore(), `users/${USER1}/entitlements/plus`), {
+          active: false,
+        }),
+      );
+    });
+
+    it('el cliente NO puede BORRAR su Plus', async () => {
+      const ctx = testEnv.authenticatedContext(USER1);
+      await assertFails(
+        deleteDoc(doc(ctx.firestore(), `users/${USER1}/entitlements/plus`)),
       );
     });
   });

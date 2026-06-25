@@ -71,6 +71,56 @@ describe("autoSelectForDowngrade – miembros", () => {
   });
 });
 
+describe("autoSelectForDowngrade – tope de miembros parametrizable (tiers)", () => {
+  function fiveMembers(): MemberInput[] {
+    return [
+      { uid: ownerId, status: "active", completions60d: 10, lastCompletedAt: null, joinedAt: makeTimestamp(-100) },
+      { uid: "m1", status: "active", completions60d: 8, lastCompletedAt: makeTimestamp(-10), joinedAt: makeTimestamp(-90) },
+      { uid: "m2", status: "active", completions60d: 5, lastCompletedAt: makeTimestamp(-20), joinedAt: makeTimestamp(-80) },
+      { uid: "m3", status: "active", completions60d: 3, lastCompletedAt: makeTimestamp(-30), joinedAt: makeTimestamp(-70) },
+      { uid: "m4", status: "active", completions60d: 1, lastCompletedAt: makeTimestamp(-40), joinedAt: makeTimestamp(-60) },
+    ];
+  }
+
+  it("maxMembers por defecto (3) = comportamiento actual: owner + 2", () => {
+    const result = autoSelectForDowngrade(fiveMembers(), [], ownerId);
+    expect(result.selectedMemberIds).toHaveLength(3);
+    expect(result.selectedMemberIds).toEqual([ownerId, "m1", "m2"]);
+  });
+
+  it("maxMembers=5 (Familia): owner + los 4 más activos", () => {
+    const result = autoSelectForDowngrade(fiveMembers(), [], ownerId, 5);
+    expect(result.selectedMemberIds).toHaveLength(5);
+    expect(result.selectedMemberIds).toEqual([ownerId, "m1", "m2", "m3", "m4"]);
+  });
+
+  it("maxMembers=2 (Pareja): owner + el más activo", () => {
+    const result = autoSelectForDowngrade(fiveMembers(), [], ownerId, 2);
+    expect(result.selectedMemberIds).toHaveLength(2);
+    expect(result.selectedMemberIds).toEqual([ownerId, "m1"]);
+  });
+
+  it("maxMembers=10 (Grupo) con pocos miembros: los mantiene todos", () => {
+    const result = autoSelectForDowngrade(fiveMembers(), [], ownerId, 10);
+    expect(result.selectedMemberIds).toHaveLength(5);
+    expect(result.selectedMemberIds).toContain(ownerId);
+  });
+
+  it("maxMembers=1: solo el owner", () => {
+    const result = autoSelectForDowngrade(fiveMembers(), [], ownerId, 1);
+    expect(result.selectedMemberIds).toEqual([ownerId]);
+  });
+
+  it("maxTasks parametrizable: respeta el tope de tareas pasado", () => {
+    const tasks: TaskInput[] = [
+      { id: "t1", status: "active", completedCount90d: 20, nextDueAt: makeTimestamp(1) },
+      { id: "t2", status: "active", completedCount90d: 15, nextDueAt: makeTimestamp(2) },
+      { id: "t3", status: "active", completedCount90d: 10, nextDueAt: makeTimestamp(3) },
+    ];
+    expect(autoSelectForDowngrade([], tasks, ownerId, 3, 2).selectedTaskIds).toEqual(["t1", "t2"]);
+  });
+});
+
 describe("autoSelectForDowngrade – tareas", () => {
   it("selecciona las 4 tareas con más completedCount90d de 6", () => {
     const tasks: TaskInput[] = [

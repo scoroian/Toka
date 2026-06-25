@@ -4,6 +4,9 @@ import * as logger from "firebase-functions/logger";
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { buildBannerAdFlags } from "../shared/ad_constants";
 import { chunked, MAX_BATCH_OPS } from "../shared/batch_utils";
+import { resolveEntitlement, type HomeTier } from "../shared/tier_catalog";
+import { activePacksFromHome } from "../entitlement/pack_catalog";
+import { isHomeTiersEnabled, isMemberPacksEnabled } from "../shared/feature_flags";
 
 /**
  * Callable: restaura el estado Premium de un hogar si está dentro de la
@@ -79,11 +82,32 @@ export const restorePremiumState = onCall(async (request) => {
     .collection("views")
     .doc("dashboard");
 
+  // El tope al restaurar se deriva del tier sticky del último plan + el flag, e
+  // INCLUYE los packs de miembro que sigan activos (eje aditivo): si el hogar
+  // expiró con packs aún pagados, al restaurar Grupo recupera sus plazas.
+  // (Flag OFF → binario 10; flag ON sin tier conocido → fail-safe Free 3.)
+  const tiersEnabled = await isHomeTiersEnabled();
+  const packsEnabled = await isMemberPacksEnabled();
+  const stickyTier = (home["premiumTier"] as HomeTier | null | undefined) ?? null;
+  const activePacks = activePacksFromHome(home, Date.now());
+  const resolved = resolveEntitlement({
+    premiumStatus: "active",
+    tier: stickyTier,
+    tiersEnabled,
+    packsEnabled,
+    packs: activePacks,
+  });
+  const effectivePacks =
+    resolved.tier === "grupo" && packsEnabled
+      ? { plus5: activePacks.plus5 === true, plus10: activePacks.plus10 === true }
+      : { plus5: false, plus10: false };
+
   const finalBatch = db.batch();
   finalBatch.update(homeRef, {
     premiumStatus: "active",
+    premiumTier: resolved.tier,
     restoreUntil: FieldValue.delete(),
-    "limits.maxMembers": 10,
+    "limits.maxMembers": resolved.maxMembers,
     updatedAt: FieldValue.serverTimestamp(),
   });
   finalBatch.set(
@@ -95,6 +119,9 @@ export const restorePremiumState = onCall(async (request) => {
         canUseSmartDistribution: true,
         canUseVacations: true,
         canUseReviews: true,
+        tier: resolved.tier,
+        maxMembers: resolved.maxMembers,
+        memberPacks: effectivePacks,
       },
       adFlags: buildBannerAdFlags(false),
       rescueFlags: { isInRescue: false, daysLeft: null },

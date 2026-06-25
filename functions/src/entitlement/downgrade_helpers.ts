@@ -53,10 +53,21 @@ export type DowngradeSelection = {
   mode: "auto";
 };
 
+/**
+ * Selecciona qué miembros y tareas se MANTIENEN activos en un downgrade,
+ * congelando el resto. El owner siempre se mantiene; entre los demás gana el
+ * más participativo (completions60d, desempate por lastCompletedAt y antigüedad).
+ *
+ * `maxMembers` / `maxTasks` parametrizan el tope objetivo: por defecto Free
+ * (3 miembros = owner + 2; 4 tareas), pero el downgrade entre tiers pasa el
+ * tope del tier destino para reutilizar exactamente este criterio de selección.
+ */
 export function autoSelectForDowngrade(
   members: Member[],
   tasks: Task[],
   ownerId: string,
+  maxMembers = 3,
+  maxTasks = 4,
 ): DowngradeSelection {
   const sortedMembers = members
     .filter((m) => m.uid !== ownerId && m.status === "active")
@@ -70,7 +81,12 @@ export function autoSelectForDowngrade(
       return a.joinedAt.seconds - b.joinedAt.seconds;
     });
 
-  const selectedMemberIds = [ownerId, ...sortedMembers.slice(0, 2).map((m) => m.uid)];
+  // Se conserva el owner + los (maxMembers-1) no-owner más activos.
+  const nonOwnerKeep = Math.max(0, maxMembers - 1);
+  const selectedMemberIds = [
+    ownerId,
+    ...sortedMembers.slice(0, nonOwnerKeep).map((m) => m.uid),
+  ];
 
   const sortedTasks = tasks
     .filter((t) => t.status === "active")
@@ -79,7 +95,7 @@ export function autoSelectForDowngrade(
       return a.nextDueAt.seconds - b.nextDueAt.seconds;
     });
 
-  const selectedTaskIds = sortedTasks.slice(0, 4).map((t) => t.id);
+  const selectedTaskIds = sortedTasks.slice(0, maxTasks).map((t) => t.id);
 
   return { selectedMemberIds, selectedTaskIds, mode: "auto" };
 }

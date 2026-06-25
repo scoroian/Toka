@@ -3,7 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../homes/application/current_home_provider.dart';
+import '../domain/renewal_product.dart';
+import '../domain/tier_catalog.dart';
+import 'current_tier_provider.dart';
 import 'days_left.dart';
+import 'home_tiers_provider.dart';
 import 'paywall_provider.dart';
 import 'subscription_provider.dart';
 
@@ -16,6 +20,14 @@ abstract class RescueViewModel {
   String? get lastBillingError;
   bool get isLoading;
   String get homeId;
+
+  /// SKU de renovación ANUAL resuelto según el modelo de tiers: con tiers ON
+  /// renueva el tier actual del hogar; con OFF (o tier desconocido) el legacy.
+  String get annualProductId;
+
+  /// SKU de renovación MENSUAL resuelto (ver [annualProductId]).
+  String get monthlyProductId;
+
   Future<void> startPurchase(String productId);
 }
 
@@ -27,6 +39,8 @@ class _RescueViewModelImpl implements RescueViewModel {
     required this.lastBillingError,
     required this.isLoading,
     required this.homeId,
+    required this.annualProductId,
+    required this.monthlyProductId,
     required this.ref,
   });
   @override
@@ -41,6 +55,10 @@ class _RescueViewModelImpl implements RescueViewModel {
   final bool isLoading;
   @override
   final String homeId;
+  @override
+  final String annualProductId;
+  @override
+  final String monthlyProductId;
   final Ref ref;
 
   @override
@@ -66,6 +84,10 @@ RescueViewModel rescueViewModel(RescueViewModelRef ref) {
   final lastBillingError = home?.lastBillingError;
   final isLoading = ref.watch(paywallProvider).isLoading;
 
+  // Renovar el TIER ACTUAL del hogar con el modelo de tiers ON; legacy con OFF.
+  final tiersEnabled = ref.watch(homeTiersEnabledProvider);
+  final tier = ref.watch(currentHomeTierProvider);
+
   return _RescueViewModelImpl(
     daysLeft: daysLeft,
     hoursLeft: hoursLeft,
@@ -73,6 +95,10 @@ RescueViewModel rescueViewModel(RescueViewModelRef ref) {
     lastBillingError: lastBillingError,
     isLoading: isLoading,
     homeId: homeId,
+    annualProductId: renewalProductId(
+        tiersEnabled: tiersEnabled, tier: tier, cycle: BillingCycle.annual),
+    monthlyProductId: renewalProductId(
+        tiersEnabled: tiersEnabled, tier: tier, cycle: BillingCycle.monthly),
     ref: ref,
   );
 }

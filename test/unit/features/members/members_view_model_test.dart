@@ -77,9 +77,10 @@ void main() {
         canInvite: false,
         homeId: 'home1',
         isPremium: true,
-        activeMembersCount: 0,
-        maxMembersFree: 3,
-        freeLimitReached: false,
+        tier: 'pareja',
+        activeMembersCount: 2,
+        effectiveMaxMembers: 2,
+        limitReached: true,
       );
       expect(data.homeId, 'home1');
       expect(data.canInvite, isFalse);
@@ -88,7 +89,10 @@ void main() {
       expect(data.leftMembers, isEmpty);
       expect(data.canReinstate, isFalse);
       expect(data.isPremium, isTrue);
-      expect(data.freeLimitReached, isFalse);
+      expect(data.tier, 'pareja');
+      expect(data.activeMembersCount, 2);
+      expect(data.effectiveMaxMembers, 2);
+      expect(data.limitReached, isTrue);
     });
   });
 }

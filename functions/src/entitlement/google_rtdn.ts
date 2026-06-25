@@ -25,6 +25,9 @@ import {
   reconcileVerifiedEntitlement,
   revokeEntitlement,
 } from "./reconcile_entitlement";
+import { reconcileVerifiedPlus, revokePlus } from "./plus_entitlement";
+import { reconcileVerifiedPack, revokePack } from "./pack_entitlement";
+import { packFromProductId } from "./pack_catalog";
 import type { RawReceipt } from "./sync_entitlement_helpers";
 
 const GOOGLE_PLAY_SA_JSON = defineSecret("GOOGLE_PLAY_SA_JSON");
@@ -118,13 +121,98 @@ export async function handleRtdnEvent(
     return;
   }
 
+  // ── Eje Toka Plus (per-usuario) ──────────────────────────────────────────
+  // Mismo criterio que el hogar: refund/void/revoke → revoca; resto → re-verifica
+  // contra Google Play y aplica el estado real. Nunca toca el hogar.
+  if (purchaseRef.kind === "plus") {
+    if (event.kind === "voided" || event.notificationType === RTDN_TYPE.REVOKED) {
+      await revokePlus(db, {
+        uid: purchaseRef.uid,
+        chargeId: event.purchaseToken,
+        reason: event.kind === "voided" ? "google_voided" : "google_revoked",
+      });
+      return;
+    }
+    if (!deps.verifyGooglePlay) {
+      logger.error("RTDN Plus sin verificador Google Play: no se puede reconciliar", {
+        notificationType: event.notificationType,
+      });
+      return;
+    }
+    const verifiedPlus = await deps.verifyGooglePlay({
+      productId: event.subscriptionId ?? purchaseRef.productId ?? "",
+      purchaseToken: event.purchaseToken,
+      transactionId: "",
+      source: "google_play_rtdn",
+    });
+    await reconcileVerifiedPlus(
+      db,
+      { uid: purchaseRef.uid, platform: purchaseRef.platform },
+      verifiedPlus,
+    );
+    return;
+  }
+
+  // ── Eje pack de miembro (ligado al hogar, aditivo) ─────────────────────────
+  // Mismo criterio que el hogar: refund/void/revoke → revoca el pack (congela
+  // excedentes); resto → re-verifica contra Google Play y reconcilia el pack.
+  // NO toca el estado premium/tier del hogar.
+  if (purchaseRef.kind === "pack") {
+    const packHomeId = purchaseRef.homeId;
+    if (!packHomeId) {
+      logger.warn("RTDN pack sin homeId en el índice de compras (ack)");
+      return;
+    }
+    if (event.kind === "voided" || event.notificationType === RTDN_TYPE.REVOKED) {
+      const kind = packFromProductId(event.subscriptionId ?? purchaseRef.productId);
+      if (!kind) {
+        logger.warn("RTDN pack: productId no catalogado (ack)", {
+          productId: purchaseRef.productId,
+        });
+        return;
+      }
+      await revokePack(db, {
+        homeId: packHomeId,
+        kind,
+        chargeId: event.purchaseToken,
+        reason: event.kind === "voided" ? "google_voided" : "google_revoked",
+      });
+      return;
+    }
+    if (!deps.verifyGooglePlay) {
+      logger.error("RTDN pack sin verificador Google Play: no se puede reconciliar", {
+        notificationType: event.notificationType,
+      });
+      return;
+    }
+    const verifiedPack = await deps.verifyGooglePlay({
+      productId: event.subscriptionId ?? purchaseRef.productId ?? "",
+      purchaseToken: event.purchaseToken,
+      transactionId: "",
+      source: "google_play_rtdn",
+    });
+    await reconcileVerifiedPack(
+      db,
+      { homeId: packHomeId, uid: purchaseRef.uid, platform: purchaseRef.platform },
+      verifiedPack,
+    );
+    return;
+  }
+
+  // ── Eje hogar ────────────────────────────────────────────────────────────
+  const homeId = purchaseRef.homeId;
+  if (!homeId) {
+    logger.warn("RTDN hogar sin homeId en el índice de compras (ack)");
+    return;
+  }
+
   // Reembolso a nivel de pedido o REVOKE de suscripción → revocar plaza.
   if (
     event.kind === "voided" ||
     event.notificationType === RTDN_TYPE.REVOKED
   ) {
     await revokeEntitlement(db, {
-      homeId: purchaseRef.homeId,
+      homeId,
       uid: purchaseRef.uid,
       chargeId: event.purchaseToken,
       reason: event.kind === "voided" ? "google_voided" : "google_revoked",

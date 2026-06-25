@@ -44,7 +44,11 @@ void main() {
     await tester.tap(find.text('open'));
     await tester.pumpAndSettle();
 
-    expect(find.text('🧹 Barrer'), findsOneWidget);
+    // El diálogo renderiza el visual (emoji/icono Material) como widget aparte
+    // del título — ya no concatena '🧹 Barrer' en un único Text (evitaba mostrar
+    // el codepoint crudo de iconos custom, ver CompleteTaskDialog).
+    expect(find.text('🧹'), findsOneWidget);
+    expect(find.text('Barrer'), findsOneWidget);
     expect(find.text('¿Confirmas que has completado esta tarea?'), findsOneWidget);
   });
 

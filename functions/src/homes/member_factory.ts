@@ -10,6 +10,13 @@ export interface NewMemberParams {
   phone?: string | null;
   phoneVisibility?: string | null;
   bio?: string | null;
+  /**
+   * Proyección del eje Toka Plus del usuario (`users/{uid}/entitlements/plus`
+   * .active), denormalizada en el doc de miembro para que los co-miembros
+   * vigentes puedan leerla. Por defecto false; el alta la backfillea leyendo el
+   * doc de Plus. Solo el backend la escribe.
+   */
+  plusActive?: boolean;
 }
 
 /**
@@ -70,6 +77,7 @@ export function buildNewMemberDoc(p: NewMemberParams): Record<string, unknown> {
     phoneVisibility: p.phoneVisibility ?? "hidden",
     role: p.role,
     status: "active",
+    plusActive: p.plusActive ?? false,
     joinedAt: FieldValue.serverTimestamp(),
     // Campos canónicos que lee el cliente (member_model.dart): tasksCompleted
     // y averageScore. No usar completedCount/avgReviewScore: el cliente no los

@@ -135,6 +135,43 @@ void main() {
       expect(flags.showAds, isTrue);
       expect(flags.canUseSmartDistribution, isFalse);
     });
+
+    test('free() expone tier "free" y tope 3 (modelo de tiers)', () {
+      final flags = PremiumFlags.free();
+      expect(flags.tier, 'free');
+      expect(flags.maxMembers, 3);
+    });
+
+    test('fromMap lee tier y maxMembers denormalizados por el backend', () {
+      final flags = PremiumFlags.fromMap({
+        'isPremium': true,
+        'showAds': false,
+        'canUseSmartDistribution': true,
+        'canUseVacations': true,
+        'canUseReviews': true,
+        'tier': 'familia',
+        'maxMembers': 5,
+      });
+      expect(flags.tier, 'familia');
+      expect(flags.maxMembers, 5);
+    });
+
+    test('fromMap sin tier/maxMembers (dashboard viejo) → null', () {
+      final flags = PremiumFlags.fromMap({'isPremium': true});
+      expect(flags.tier, isNull);
+      expect(flags.maxMembers, isNull);
+    });
+
+    test('fromMap con tier null (flag de tiers OFF) → tier null, tope binario',
+        () {
+      final flags = PremiumFlags.fromMap({
+        'isPremium': true,
+        'tier': null,
+        'maxMembers': 10,
+      });
+      expect(flags.tier, isNull);
+      expect(flags.maxMembers, 10);
+    });
   });
 
   group('HomeDashboard.fromFirestore', () {

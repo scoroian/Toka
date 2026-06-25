@@ -5,12 +5,16 @@ import 'package:mocktail/mocktail.dart';
 import 'package:toka/features/homes/application/current_home_provider.dart';
 import 'package:toka/features/homes/domain/home.dart';
 import 'package:toka/features/homes/domain/home_limits.dart';
+import 'package:toka/features/subscription/application/current_tier_provider.dart';
+import 'package:toka/features/subscription/application/home_tiers_provider.dart';
 import 'package:toka/features/subscription/application/paywall_provider.dart';
 import 'package:toka/features/subscription/application/rescue_view_model.dart';
 import 'package:toka/features/subscription/application/subscription_provider.dart';
 import 'package:toka/features/subscription/domain/purchase_result.dart';
+import 'package:toka/features/subscription/domain/subscription_products.dart';
 import 'package:toka/features/subscription/domain/subscription_repository.dart';
 import 'package:toka/features/subscription/domain/subscription_state.dart';
+import 'package:toka/features/subscription/domain/tier_catalog.dart';
 
 class _MockSubscriptionRepository extends Mock implements SubscriptionRepository {}
 
@@ -61,6 +65,8 @@ Home _makeHome(HomePremiumStatus status) => Home(
 ProviderContainer _makeContainer({
   required SubscriptionState subState,
   Home? home,
+  HomeTier? tier,
+  bool tiersEnabled = false,
 }) {
   final mockRepo = _MockSubscriptionRepository();
   return ProviderContainer(overrides: [
@@ -69,6 +75,10 @@ ProviderContainer _makeContainer({
     subscriptionRepositoryProvider.overrideWithValue(mockRepo),
     subscriptionStateProvider.overrideWith((_) => subState),
     paywallProvider.overrideWith(() => _FakePaywall()),
+    // El VM deriva el SKU de renovación del tier actual; en tests se inyecta
+    // directamente (sin construir un HomeDashboard ni inicializar Firebase).
+    currentHomeTierProvider.overrideWithValue(tier),
+    homeTiersEnabledProvider.overrideWithValue(tiersEnabled),
   ]);
 }
 
@@ -135,12 +145,59 @@ void main() {
         subscriptionRepositoryProvider.overrideWithValue(mockRepo),
         subscriptionStateProvider.overrideWith((_) => const SubscriptionState.free()),
         paywallProvider.overrideWith(() => _FakePaywall()),
+        currentHomeTierProvider.overrideWithValue(null),
+        homeTiersEnabledProvider.overrideWithValue(false),
       ]);
       addTearDown(container.dispose);
       // Await so the async notifier resolves to null before reading VM.
       await container.read(currentHomeProvider.future);
       final vm = container.read(rescueViewModelProvider);
       expect(vm.homeId, '');
+    });
+  });
+
+  group('RescueViewModel — productId de renovación (tier-aware)', () {
+    const rescue = SubscriptionState.rescue(
+      plan: 'monthly',
+      endsAt: null,
+      daysLeft: 2,
+    );
+
+    test('tiers OFF → SKUs legacy toka_premium_*', () {
+      final container =
+          _makeContainer(subState: rescue, tier: HomeTier.pareja, tiersEnabled: false);
+      addTearDown(container.dispose);
+      final vm = container.read(rescueViewModelProvider);
+      expect(vm.annualProductId, kAnnualProductId);
+      expect(vm.monthlyProductId, kMonthlyProductId);
+    });
+
+    test('tiers ON + Pareja → renueva Pareja, NUNCA el legacy (no sube a Grupo)', () {
+      final container =
+          _makeContainer(subState: rescue, tier: HomeTier.pareja, tiersEnabled: true);
+      addTearDown(container.dispose);
+      final vm = container.read(rescueViewModelProvider);
+      expect(vm.annualProductId, 'toka_pareja_annual');
+      expect(vm.monthlyProductId, 'toka_pareja_monthly');
+      expect(vm.annualProductId, isNot(kAnnualProductId));
+    });
+
+    test('tiers ON + Familia → renueva Familia', () {
+      final container =
+          _makeContainer(subState: rescue, tier: HomeTier.familia, tiersEnabled: true);
+      addTearDown(container.dispose);
+      final vm = container.read(rescueViewModelProvider);
+      expect(vm.annualProductId, 'toka_familia_annual');
+      expect(vm.monthlyProductId, 'toka_familia_monthly');
+    });
+
+    test('tiers ON pero tier desconocido → fallback legacy', () {
+      final container =
+          _makeContainer(subState: rescue, tier: null, tiersEnabled: true);
+      addTearDown(container.dispose);
+      final vm = container.read(rescueViewModelProvider);
+      expect(vm.annualProductId, kAnnualProductId);
+      expect(vm.monthlyProductId, kMonthlyProductId);
     });
   });
 

@@ -34,6 +34,9 @@ import {
   reconcileVerifiedEntitlement,
   revokeEntitlement,
 } from "./reconcile_entitlement";
+import { reconcileVerifiedPlus, revokePlus } from "./plus_entitlement";
+import { reconcileVerifiedPack, revokePack } from "./pack_entitlement";
+import { packFromProductId } from "./pack_catalog";
 import {
   type AppStoreTransactionInfo,
   type AppStoreRenewalInfo,
@@ -166,12 +169,72 @@ export async function handleAsnEvent(
   });
   const verifiedIsPremium = isPremium(normalizePremiumStatus(verified.status));
 
+  // ── Eje Toka Plus (per-usuario) ──────────────────────────────────────────
+  // Mismo criterio que el hogar pero sobre el doc per-usuario: refund confirmado
+  // por Apple → revoca; resto → reconcilia el estado verificado. Nunca toca el
+  // hogar.
+  if (purchaseRef.kind === "plus") {
+    if (ASN_REVOKE_TYPES.has(decoded.notificationType) && !verifiedIsPremium) {
+      await revokePlus(db, {
+        uid: purchaseRef.uid,
+        chargeId: txInfo.originalTransactionId,
+        reason: `apple_${decoded.notificationType.toLowerCase()}`,
+      });
+      return;
+    }
+    await reconcileVerifiedPlus(
+      db,
+      { uid: purchaseRef.uid, platform: purchaseRef.platform },
+      verified,
+    );
+    return;
+  }
+
+  // ── Eje pack de miembro (ligado al hogar, aditivo) ─────────────────────────
+  // Refund/revoke CONFIRMADO por Apple → revoca el pack (congela excedentes).
+  // Si Apple aún lo reporta activo (refund forjado), se reconcilia al estado real
+  // en vez de revocar. NO toca el estado premium/tier del hogar.
+  if (purchaseRef.kind === "pack") {
+    const packHomeId = purchaseRef.homeId;
+    if (!packHomeId) {
+      logger.warn("ASN pack sin homeId en el índice de compras (ack)");
+      return;
+    }
+    if (ASN_REVOKE_TYPES.has(decoded.notificationType) && !verifiedIsPremium) {
+      const kind = packFromProductId(verified.productId ?? txInfo.productId);
+      if (!kind) {
+        logger.warn("ASN pack: productId no catalogado (ack)");
+        return;
+      }
+      await revokePack(db, {
+        homeId: packHomeId,
+        kind,
+        chargeId: txInfo.originalTransactionId,
+        reason: `apple_${decoded.notificationType.toLowerCase()}`,
+      });
+      return;
+    }
+    await reconcileVerifiedPack(
+      db,
+      { homeId: packHomeId, uid: purchaseRef.uid, platform: purchaseRef.platform },
+      verified,
+    );
+    return;
+  }
+
+  // ── Eje hogar ────────────────────────────────────────────────────────────
+  const homeId = purchaseRef.homeId;
+  if (!homeId) {
+    logger.warn("ASN hogar sin homeId en el índice de compras (ack)");
+    return;
+  }
+
   // Refund/revoke CONFIRMADO por Apple (la suscripción ya no da acceso) → revoca
   // Premium + plaza. Si Apple aún la reporta activa (refund forjado/no aplicado),
   // se reconcilia al estado verdadero en vez de revocar (no hay griefing posible).
   if (ASN_REVOKE_TYPES.has(decoded.notificationType) && !verifiedIsPremium) {
     await revokeEntitlement(db, {
-      homeId: purchaseRef.homeId,
+      homeId,
       uid: purchaseRef.uid,
       chargeId: txInfo.originalTransactionId,
       reason: `apple_${decoded.notificationType.toLowerCase()}`,

@@ -23,6 +23,7 @@ import '../../members/domain/member.dart';
 import '../../homes/domain/home_membership.dart';
 import '../../../shared/widgets/ad_aware_bottom_padding.dart';
 import '../application/settings_view_model.dart';
+import '../../subscription/application/toka_plus_enabled_provider.dart';
 import '../../support/application/support_providers.dart';
 import '../../../core/theme/theme_mode_provider.dart';
 import 'widgets/appearance_picker.dart';
@@ -151,6 +152,8 @@ class SettingsScreen extends ConsumerWidget {
     // soporte (custom claim `support`). El backend vuelve a exigir el claim.
     final isSupportAgent =
         ref.watch(isSupportAgentProvider).asData?.value ?? false;
+    // Con el flag de Toka Plus OFF, no se muestran las entradas de Plus.
+    final plusEnabled = ref.watch(tokaPlusEnabledProvider);
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.settings_title)),
@@ -286,6 +289,28 @@ class SettingsScreen extends ConsumerWidget {
           const AppearancePicker(key: Key('settings_appearance_picker')),
           const _ThemeModeSelector(key: Key('settings_theme_mode')),
           const Divider(),
+
+          // ── Toka Plus (individual) ───────────────────────────────────
+          if (plusEnabled) ...[
+            _SectionHeader(
+                key: const Key('settings_section_plus'),
+                title: l10n.plusPaywallTitle),
+            ListTile(
+              key: const Key('settings_plus_entry'),
+              leading: const Icon(Icons.workspace_premium_outlined),
+              title: Text(l10n.plusPaywallTitle),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push(AppRoutes.plusPaywall),
+            ),
+            ListTile(
+              key: const Key('settings_metrics_entry'),
+              leading: const Icon(Icons.insights_outlined),
+              title: Text(l10n.personalMetricsTitle),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push(AppRoutes.personalMetrics),
+            ),
+            const Divider(),
+          ],
 
           // ── Notificaciones ───────────────────────────────────────────
           ListTile(

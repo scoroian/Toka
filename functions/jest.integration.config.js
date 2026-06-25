@@ -14,5 +14,8 @@ module.exports = {
   // garantizando que firebase-admin esté inicializado cuando los imports evalúan
   // archivos fuente que llaman admin.firestore() a nivel de módulo.
   setupFiles: ['./test/integration/helpers/setup_env.js'],
+  // setupFilesAfterEnv corre tras instalar el framework: fija el default del
+  // flag de tiers (OFF, sin red) para no pegar a Remote Config en cada test.
+  setupFilesAfterEnv: ['./test/integration/helpers/jest_setup.ts'],
   testTimeout: 30000,
 };

@@ -9,7 +9,8 @@
 /// mantiene intacta: para añadir una nueva skin basta con sumar un valor a este
 /// enum y su rama correspondiente en cada `switch (skin)`.
 enum AppSkin {
-  v2, // coral cálido, light default — única skin activa por ahora
+  v2, // coral cálido, light default — skin gratuita por defecto
+  oceano, // azul frío — skin COSMÉTICA de Toka Plus (gated, ver skin_catalog.dart)
 }
 
 extension AppSkinX on AppSkin {

@@ -49,6 +49,101 @@ void main() {
       when(() => mockRemoteConfig.getBool('ad_banner_enabled')).thenReturn(false);
       expect(service.adBannerEnabled, false);
     });
+
+    test('homeTiersEnabled devuelve false por defecto si Firebase no responde',
+        () {
+      when(() => mockRemoteConfig.getBool('home_tiers_enabled'))
+          .thenThrow(Exception('no internet'));
+      expect(service.homeTiersEnabled, false);
+    });
+
+    test('homeTiersEnabled delega a Firebase cuando funciona', () {
+      when(() => mockRemoteConfig.getBool('home_tiers_enabled'))
+          .thenReturn(true);
+      expect(service.homeTiersEnabled, true);
+    });
+
+    test('tokaPlusEnabled devuelve false por defecto si Firebase no responde',
+        () {
+      when(() => mockRemoteConfig.getBool('toka_plus_enabled'))
+          .thenThrow(Exception('no internet'));
+      expect(service.tokaPlusEnabled, false);
+    });
+
+    test('tokaPlusEnabled delega a Firebase cuando funciona', () {
+      when(() => mockRemoteConfig.getBool('toka_plus_enabled'))
+          .thenReturn(true);
+      expect(service.tokaPlusEnabled, true);
+    });
+
+    // ── Publicidad diferenciada (maestro) + intersticial ──────────────────
+    test('adDifferentiatedEnabled default false si Firebase no responde', () {
+      when(() => mockRemoteConfig.getBool('ad_differentiated_enabled'))
+          .thenThrow(Exception('no internet'));
+      expect(service.adDifferentiatedEnabled, false);
+    });
+
+    test('adDifferentiatedEnabled delega a Firebase cuando funciona', () {
+      when(() => mockRemoteConfig.getBool('ad_differentiated_enabled'))
+          .thenReturn(true);
+      expect(service.adDifferentiatedEnabled, true);
+    });
+
+    test('adInterstitialEnabled default false si Firebase no responde', () {
+      when(() => mockRemoteConfig.getBool('ad_interstitial_enabled'))
+          .thenThrow(Exception('no internet'));
+      expect(service.adInterstitialEnabled, false);
+    });
+
+    test('adInterstitialEnabled delega a Firebase cuando funciona', () {
+      when(() => mockRemoteConfig.getBool('ad_interstitial_enabled'))
+          .thenReturn(true);
+      expect(service.adInterstitialEnabled, true);
+    });
+
+    test('adInterstitialMinIntervalSeconds default 210 si Firebase no responde',
+        () {
+      when(() => mockRemoteConfig.getInt('ad_interstitial_min_interval_seconds'))
+          .thenThrow(Exception());
+      expect(service.adInterstitialMinIntervalSeconds, 210);
+    });
+
+    test('adInterstitialMinIntervalSeconds delega a Firebase cuando funciona',
+        () {
+      when(() => mockRemoteConfig.getInt('ad_interstitial_min_interval_seconds'))
+          .thenReturn(120);
+      expect(service.adInterstitialMinIntervalSeconds, 120);
+    });
+
+    test('adInterstitialMaxPerSession default 3 si Firebase no responde', () {
+      when(() => mockRemoteConfig.getInt('ad_interstitial_max_per_session'))
+          .thenThrow(Exception());
+      expect(service.adInterstitialMaxPerSession, 3);
+    });
+
+    test('adInterstitialMaxPerSession delega a Firebase cuando funciona', () {
+      when(() => mockRemoteConfig.getInt('ad_interstitial_max_per_session'))
+          .thenReturn(5);
+      expect(service.adInterstitialMaxPerSession, 5);
+    });
+
+    test('adInterstitialUnitAndroid default "" si Firebase no responde', () {
+      when(() => mockRemoteConfig.getString('ad_interstitial_unit_android'))
+          .thenThrow(Exception());
+      expect(service.adInterstitialUnitAndroid, '');
+    });
+
+    test('adInterstitialUnitIos default "" si Firebase no responde', () {
+      when(() => mockRemoteConfig.getString('ad_interstitial_unit_ios'))
+          .thenThrow(Exception());
+      expect(service.adInterstitialUnitIos, '');
+    });
+
+    test('adInterstitialUnitAndroid delega a Firebase cuando funciona', () {
+      when(() => mockRemoteConfig.getString('ad_interstitial_unit_android'))
+          .thenReturn('ca-app-pub-x/android');
+      expect(service.adInterstitialUnitAndroid, 'ca-app-pub-x/android');
+    });
   });
 
   group('RemoteConfigService tiempo real', () {

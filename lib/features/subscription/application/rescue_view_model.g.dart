@@ -6,7 +6,7 @@ part of 'rescue_view_model.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$rescueViewModelHash() => r'53ef7f1c22f298a1b34177f46ecbedeff8871c9e';
+String _$rescueViewModelHash() => r'939b4b80327f7a83720c032c3c814d577c7458af';
 
 /// See also [rescueViewModel].
 @ProviderFor(rescueViewModel)

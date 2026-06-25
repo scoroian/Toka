@@ -10,9 +10,21 @@ import {
   validateReceipt,
   hasConfiguredVerifier,
 } from "./sync_entitlement_helpers";
-import { writePurchaseIndexTx } from "./reconcile_entitlement";
+import { writePurchaseIndexTx, writePurchaseIndex } from "./reconcile_entitlement";
+import { applyPlusEntitlement } from "./plus_entitlement";
+import { isPlusProductId, plusCycleFromProductId } from "./plus_catalog";
+import { applyPackEntitlement } from "./pack_entitlement";
+import {
+  isPackProductId,
+  packFromProductId,
+  packCycleFromProductId,
+  activePacksFromHome,
+  type ActivePacks,
+} from "./pack_catalog";
 import { buildBannerAdFlags } from "../shared/ad_constants";
 import { isPremium, normalizePremiumStatus } from "../shared/free_limits";
+import { resolveEntitlement, type HomeTier } from "../shared/tier_catalog";
+import { isHomeTiersEnabled, isMemberPacksEnabled } from "../shared/feature_flags";
 
 const db = () => admin.firestore();
 
@@ -94,10 +106,11 @@ export const syncEntitlement = onCall(
     platform: "ios" | "android";
   };
 
-  if (!homeId || !receiptData || !platform) {
+  // `homeId` solo es obligatorio para el eje HOGAR; el eje Plus es per-usuario.
+  if (!receiptData || !platform) {
     throw new HttpsError(
       "invalid-argument",
-      "homeId, receiptData and platform are required",
+      "receiptData and platform are required",
     );
   }
   if (platform !== "ios" && platform !== "android") {
@@ -113,6 +126,51 @@ export const syncEntitlement = onCall(
 
   const firestore = db();
 
+  // Parsear el recibo: el cliente solo envía datos firmables por la store
+  // (productId, purchaseToken, transactionId), no el estado Premium.
+  const rawReceipt = parseReceiptData(receiptData);
+
+  // ── Mapa productId → efecto ──────────────────────────────────────────────
+  // Si el SKU es de Toka Plus, escribe el eje de entitlement INDIVIDUAL
+  // (users/{uid}/entitlements/plus) y NO toca el hogar. No exige homeId ni
+  // membresía: Plus es ortogonal al hogar.
+  if (isPlusProductId(rawReceipt.productId)) {
+    const validatedPlus = await validateReceipt(rawReceipt, platform);
+    const plusStatus = normalizePremiumStatus(validatedPlus.status);
+    const cycle = plusCycleFromProductId(rawReceipt.productId);
+    const { active } = await applyPlusEntitlement(firestore, {
+      uid,
+      status: plusStatus,
+      cycle,
+      endsAt: validatedPlus.endsAt,
+      autoRenewEnabled: validatedPlus.autoRenewEnabled,
+      productId: rawReceipt.productId,
+      platform,
+      chargeId: validatedPlus.chargeId,
+      source: "purchase",
+    });
+    // Índice de compras chargeId → usuario (kind 'plus') para que los handlers
+    // de notificaciones de store reconcilien renovaciones/refunds del Plus.
+    await writePurchaseIndex(firestore, validatedPlus.chargeId, {
+      uid,
+      platform,
+      productId: rawReceipt.productId,
+      kind: "plus",
+    });
+    logger.info("Toka Plus entitlement synced", {
+      uid,
+      status: plusStatus,
+      active,
+      chargeId: validatedPlus.chargeId,
+    });
+    return { success: true, plus: { status: plusStatus, active, cycle } };
+  }
+
+  // ── Eje HOGAR (tier) ─────────────────────────────────────────────────────
+  if (!homeId) {
+    throw new HttpsError("invalid-argument", "homeId is required");
+  }
+
   // Validar que el usuario es miembro activo del hogar
   const memberRef = firestore
     .collection("homes")
@@ -124,9 +182,70 @@ export const syncEntitlement = onCall(
     throw new HttpsError("permission-denied", "User is not an active member of this home");
   }
 
-  // Parsear el recibo: el cliente solo envía datos firmables por la store
-  // (productId, purchaseToken, transactionId), no el estado Premium.
-  const rawReceipt = parseReceiptData(receiptData);
+  // ── Eje PACK de miembro ────────────────────────────────────────────────────
+  // Un SKU de pack amplía el tope del hogar (eje aditivo) SIN tocar el estado
+  // premium/tier. Requiere que el hogar esté en tier Grupo: se rechaza
+  // server-side sobre Pareja/Familia/Free o en modo binario (no existe Grupo).
+  // El flag `member_packs_enabled` NO rechaza: con él OFF el pack se registra
+  // pero sus plazas quedan dormidas (lo decide `applyPackEntitlement`).
+  if (isPackProductId(rawReceipt.productId)) {
+    const validatedPack = await validateReceipt(rawReceipt, platform);
+    const packStatus = normalizePremiumStatus(validatedPack.status);
+    const kind = packFromProductId(rawReceipt.productId);
+    if (!kind) {
+      throw new HttpsError("invalid-argument", "unknown-pack-product");
+    }
+
+    const tiersEnabled = await isHomeTiersEnabled();
+    const homeData =
+      (await firestore.collection("homes").doc(homeId).get()).data() ?? {};
+    const tierResolved = resolveEntitlement({
+      premiumStatus: homeData["premiumStatus"] as string | undefined,
+      tier: (homeData["premiumTier"] as HomeTier | null | undefined) ?? null,
+      tiersEnabled,
+    });
+    if (tierResolved.tier !== "grupo") {
+      throw new HttpsError("failed-precondition", "pack-requires-grupo", {
+        tier: tierResolved.tier,
+      });
+    }
+
+    const packResult = await applyPackEntitlement(firestore, {
+      homeId,
+      kind,
+      status: packStatus,
+      cycle: packCycleFromProductId(rawReceipt.productId),
+      endsAt: validatedPack.endsAt,
+      autoRenewEnabled: validatedPack.autoRenewEnabled,
+      productId: rawReceipt.productId,
+      platform,
+      chargeId: validatedPack.chargeId,
+      source: "purchase",
+    });
+
+    // Índice chargeId → hogar (kind 'pack') para que RTDN/ASN reconcilien
+    // renovaciones/refunds del pack.
+    await writePurchaseIndex(firestore, validatedPack.chargeId, {
+      homeId,
+      uid,
+      platform,
+      productId: rawReceipt.productId,
+      kind: "pack",
+    });
+
+    logger.info("Member pack entitlement synced", {
+      uid,
+      homeId,
+      kind,
+      active: packResult.active,
+      maxMembers: packResult.maxMembers,
+    });
+    return {
+      success: true,
+      pack: { kind, active: packResult.active, maxMembers: packResult.maxMembers },
+    };
+  }
+
   // Validar contra la store (Google Play / App Store). Si hay verificador
   // configurado, deriva status/plan/fechas/chargeId del recibo verificado.
   // En dev (sin verificador y sin strict) infiere por productId con
@@ -138,6 +257,12 @@ export const syncEntitlement = onCall(
   // originalTransactionId), nunca del purchaseID del cliente.
   const chargeId = validated.chargeId;
   const endsAtTs = endsAt ? Timestamp.fromDate(endsAt) : null;
+
+  // Flags de Remote Config leídos fuera de la tx (cacheados). El tope se computa
+  // DENTRO de la tx para incluir los packs activos del hogar: un re-sync del
+  // recibo de Grupo en un hogar con packs NO debe bajar el tope a 10.
+  const tiersEnabled = await isHomeTiersEnabled();
+  const packsEnabled = await isMemberPacksEnabled();
 
   const homeRef = firestore.collection("homes").doc(homeId);
   const userRef = firestore.collection("users").doc(uid);
@@ -165,12 +290,45 @@ export const syncEntitlement = onCall(
       tx.get(userRef),
     ]);
 
+    // Packs activos del hogar (eje aditivo) para el tope efectivo.
+    const activePacks = activePacksFromHome(homeSnap.data(), Date.now());
+
     if (chargeSnap.exists) {
-      // Ya procesado — idempotencia total: no se reescribe el hogar.
+      // Ya procesado — idempotencia total: no se reescribe el hogar. El dashboard
+      // se reescribe (idempotente) reflejando el estado EXISTENTE + packs.
       const existingStatus = normalizePremiumStatus(
         homeSnap.data()?.["premiumStatus"] as string | undefined,
       );
-      return { status: existingStatus, unlocked: false, alreadyProcessed: true };
+      const existingResolved = resolveEntitlement({
+        premiumStatus: existingStatus,
+        tier: (homeSnap.data()?.["premiumTier"] as HomeTier | null | undefined) ?? null,
+        tiersEnabled,
+        packsEnabled,
+        packs: activePacks,
+      });
+      return {
+        status: existingStatus,
+        unlocked: false,
+        alreadyProcessed: true,
+        tier: existingResolved.tier,
+        maxMembers: existingResolved.maxMembers,
+        effectivePacks: effectivePacksFor(existingResolved.tier, packsEnabled, activePacks),
+      };
+    }
+
+    // Tier efectivo + tope (productId del recibo + packs + flags). Único punto.
+    const resolved = resolveEntitlement({
+      premiumStatus: status,
+      productId: rawReceipt.productId,
+      tiersEnabled,
+      packsEnabled,
+      packs: activePacks,
+    });
+    if (resolved.failSafe) {
+      logger.error("syncEntitlement: producto premium no catalogado, fail-safe a Free", {
+        homeId,
+        productId: rawReceipt.productId,
+      });
     }
 
     const prevPayerUid =
@@ -178,13 +336,15 @@ export const syncEntitlement = onCall(
       null;
     const validForUnlock = isValidForSlotUnlock(status, storeVerified);
 
-    // 1) Estado Premium del hogar.
+    // 1) Estado Premium del hogar + tier y tope efectivo de miembros.
     tx.update(homeRef, {
       premiumStatus: status,
       premiumPlan: plan,
+      premiumTier: resolved.tier,
       premiumEndsAt: endsAtTs,
       autoRenewEnabled: autoRenewEnabled,
       currentPayerUid: uid,
+      "limits.maxMembers": resolved.maxMembers,
       updatedAt: FieldValue.serverTimestamp(),
     });
 
@@ -231,7 +391,14 @@ export const syncEntitlement = onCall(
       unlocked = applySlotUnlockTx(tx, userRef, userSnap.data(), chargeId);
     }
 
-    return { status, unlocked, alreadyProcessed: false };
+    return {
+      status,
+      unlocked,
+      alreadyProcessed: false,
+      tier: resolved.tier,
+      maxMembers: resolved.maxMembers,
+      effectivePacks: effectivePacksFor(resolved.tier, packsEnabled, activePacks),
+    };
   });
 
   if (result.unlocked) {
@@ -246,15 +413,38 @@ export const syncEntitlement = onCall(
   }
 
   // Actualizar premiumFlags en dashboard (derivado/idempotente).
-  await updatePremiumFlagsInDashboard(firestore, homeId, result.status);
+  await updatePremiumFlagsInDashboard(
+    firestore,
+    homeId,
+    result.status,
+    result.tier,
+    result.maxMembers,
+    result.effectivePacks,
+  );
 
   return { success: true, premiumStatus: result.status };
 });
+
+/**
+ * Packs que CONTRIBUYEN plazas ahora mismo (efectivos): solo si el tier efectivo
+ * es Grupo y el flag está ON. Para el dashboard denormalizado de la Fase 7.
+ */
+function effectivePacksFor(
+  tier: string | null,
+  packsEnabled: boolean,
+  activePacks: ActivePacks,
+): ActivePacks {
+  if (tier !== "grupo" || !packsEnabled) return { plus5: false, plus10: false };
+  return { plus5: activePacks.plus5 === true, plus10: activePacks.plus10 === true };
+}
 
 async function updatePremiumFlagsInDashboard(
   firestore: admin.firestore.Firestore,
   homeId: string,
   premiumStatus: string,
+  tier: string | null,
+  maxMembers: number,
+  effectivePacks: ActivePacks = {},
 ): Promise<void> {
   const homeIsPremium = isPremium(premiumStatus);
   const dashRef = firestore
@@ -270,6 +460,13 @@ async function updatePremiumFlagsInDashboard(
         canUseSmartDistribution: homeIsPremium,
         canUseVacations: homeIsPremium,
         canUseReviews: homeIsPremium,
+        // Tier efectivo + tope denormalizados para que el cliente no recompute.
+        tier,
+        maxMembers,
+        memberPacks: {
+          plus5: effectivePacks.plus5 === true,
+          plus10: effectivePacks.plus10 === true,
+        },
       },
       adFlags: buildBannerAdFlags(!homeIsPremium),
       updatedAt: FieldValue.serverTimestamp(),

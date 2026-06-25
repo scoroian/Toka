@@ -11,7 +11,10 @@ import '../../../../shared/widgets/no_home_empty_state.dart';
 import '../../../../shared/widgets/premium_upgrade_banner.dart';
 import '../../../../shared/widgets/skins/main_shell_v2.dart';
 import '../../../profile/application/profile_provider.dart';
+import '../../../subscription/application/member_packs_enabled_provider.dart';
+import '../../../subscription/presentation/widgets/toka_business_dialog.dart';
 import '../../../profile/domain/user_profile.dart';
+import '../../application/member_limit.dart';
 import '../../application/members_provider.dart';
 import '../../application/members_view_model.dart';
 import '../../domain/member.dart';
@@ -98,21 +101,52 @@ class MembersScreenV2 extends ConsumerWidget {
                     bottom: adAwareBottomPadding(context, ref, extra: 16),
                   ),
                   children: [
-                    if (data.freeLimitReached)
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-                        child: PremiumUpgradeBanner(
-                          key: const Key('members_free_limit_banner'),
-                          message: l10n.free_limit_members_reached,
-                          highlight: l10n.free_members_counter(
-                            data.activeMembersCount,
-                            data.maxMembersFree,
+                    if (data.limitReached)
+                      Builder(builder: (context) {
+                        final packsEnabled =
+                            ref.watch(memberPacksEnabledProvider);
+                        final kind = memberLimitMessageFor(
+                          tier: data.tier,
+                          isPremium: data.isPremium,
+                          packsEnabled: packsEnabled,
+                          cap: data.effectiveMaxMembers,
+                        );
+                        final limit = data.effectiveMaxMembers ??
+                            data.activeMembersCount;
+                        final showsUpsell = memberLimitShowsUpsell(kind);
+                        final showsBusiness = memberLimitShowsBusiness(kind);
+                        String? ctaText;
+                        Key? ctaKey;
+                        VoidCallback? onCta;
+                        if (showsUpsell) {
+                          ctaText = switch (kind) {
+                            MemberLimitMessage.free => l10n.free_go_premium_cta,
+                            MemberLimitMessage.grupoPacks =>
+                              l10n.member_limit_add_pack_cta,
+                            _ => l10n.member_limit_upgrade_cta,
+                          };
+                          ctaKey = const Key('members_free_limit_banner_cta');
+                          onCta = () => context.push(AppRoutes.paywall);
+                        } else if (showsBusiness) {
+                          ctaText = l10n.member_limit_business_cta;
+                          ctaKey = const Key('members_business_cta');
+                          onCta = () => showTokaBusinessDialog(context);
+                        }
+                        return Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                          child: PremiumUpgradeBanner(
+                            key: const Key('members_free_limit_banner'),
+                            message: memberLimitMessageText(l10n, kind, limit),
+                            highlight: l10n.member_limit_counter(
+                              data.activeMembersCount,
+                              limit,
+                            ),
+                            cta: ctaText,
+                            ctaKey: ctaKey,
+                            onCta: onCta,
                           ),
-                          cta: l10n.free_go_premium_cta,
-                          ctaKey: const Key('members_free_limit_banner_cta'),
-                          onCta: () => context.push(AppRoutes.paywall),
-                        ),
-                      ),
+                        );
+                      }),
                     if (data.activeMembers.isNotEmpty)
                       Padding(
                         padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
@@ -196,6 +230,32 @@ class MembersScreenV2 extends ConsumerWidget {
   }
 }
 
+/// Resuelve el texto localizado del mensaje de límite de miembros para un
+/// [MemberLimitMessage] y el tope [limit]. Mantiene `member_limit.dart` puro
+/// (sin dependencia de l10n).
+String memberLimitMessageText(
+  AppLocalizations l10n,
+  MemberLimitMessage kind,
+  int limit,
+) {
+  switch (kind) {
+    case MemberLimitMessage.free:
+      return l10n.member_limit_free(limit);
+    case MemberLimitMessage.pareja:
+      return l10n.member_limit_pareja(limit);
+    case MemberLimitMessage.familia:
+      return l10n.member_limit_familia(limit);
+    case MemberLimitMessage.grupo:
+      return l10n.member_limit_grupo(limit);
+    case MemberLimitMessage.grupoPacks:
+      return l10n.member_limit_grupo_packs(limit);
+    case MemberLimitMessage.business:
+      return l10n.member_limit_business(limit);
+    case MemberLimitMessage.premiumMax:
+      return l10n.member_limit_premium_max(limit);
+  }
+}
+
 /// Reincorpora a un miembro 'left' (owner/admin) con confirmación y feedback.
 Future<void> _reinstateMember(
   BuildContext context,
@@ -229,8 +289,17 @@ Future<void> _reinstateMember(
     }
   } on MaxMembersReachedException {
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.free_limit_members_reached)));
+      final data = ref.read(membersViewModelProvider).viewData.valueOrNull;
+      final message = data == null
+          ? l10n.free_limit_members_reached
+          : memberLimitMessageText(
+              l10n,
+              memberLimitMessageFor(
+                  tier: data.tier, isPremium: data.isPremium),
+              data.effectiveMaxMembers ?? data.activeMembersCount,
+            );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(message)));
     }
   } catch (_) {
     if (context.mounted) {

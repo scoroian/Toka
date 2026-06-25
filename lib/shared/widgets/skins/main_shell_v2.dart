@@ -8,6 +8,7 @@ import '../../../core/theme/app_colors_v2.dart';
 import '../../../l10n/app_localizations.dart';
 import '../ad_banner.dart';
 import '../ad_banner_config_provider.dart';
+import '../ad_interstitial_trigger.dart';
 import '../keyboard_visible_provider.dart';
 import 'shell_metrics.dart';
 import 'shell_presence_marker.dart';
@@ -76,8 +77,11 @@ class MainShellV2 extends ConsumerWidget {
     final keyboardVisible = ref.watch(keyboardVisibleProvider);
     final location = _safeLocation(ctx);
     final metrics = ref.watch(shellMetricsProvider);
+    // El gate del banner es la decisión per-usuario `show` (calculada por
+    // `adBannerConfigProvider`). No gateamos por `unitId` vacío: en hogares
+    // Premium el unit del dashboard está vacío pero el miembro sin Plus SÍ debe
+    // ver banner; `AdBanner` resuelve el test ID/guardrail al renderizar.
     final bannerVisible = cfg.show
-        && cfg.unitId.isNotEmpty
         && !metrics.suppressBannerFor(location)
         && !keyboardVisible;
     final navBarSlot = keyboardVisible ? 0.0 : kNavBarHeight + kNavBarBottom;
@@ -101,8 +105,11 @@ class MainShellV2 extends ConsumerWidget {
     final keyboardVisible = ref.watch(keyboardVisibleProvider);
     final location = _safeLocation(ctx);
     final metrics = ref.watch(shellMetricsProvider);
+    // El gate del banner es la decisión per-usuario `show` (calculada por
+    // `adBannerConfigProvider`). No gateamos por `unitId` vacío: en hogares
+    // Premium el unit del dashboard está vacío pero el miembro sin Plus SÍ debe
+    // ver banner; `AdBanner` resuelve el test ID/guardrail al renderizar.
     final bannerVisible = cfg.show
-        && cfg.unitId.isNotEmpty
         && !metrics.suppressBannerFor(location)
         && !keyboardVisible;
     final navBarSlot = keyboardVisible ? 0.0 : kNavBarHeight + kNavBarBottom;
@@ -119,7 +126,6 @@ class MainShellV2 extends ConsumerWidget {
     final keyboardVisible = ref.watch(keyboardVisibleProvider);
     final metrics = ref.watch(shellMetricsProvider);
     final bannerVisible = adConfig.show
-        && adConfig.unitId.isNotEmpty
         && !metrics.suppressBannerFor(location)
         && !keyboardVisible;
     final bannerSlot = bannerSlotHeight(bannerVisible: bannerVisible);
@@ -150,6 +156,9 @@ class MainShellV2 extends ConsumerWidget {
         body: Stack(
           children: [
             ShellPresenceMarker(child: child),
+            // Observa el cambio de pestaña principal para evaluar el intersticial
+            // (sujeto a flags + cap de frecuencia). Tamaño cero, no afecta layout.
+            AdInterstitialTrigger(tabIndex: tabIndex),
             if (bannerVisible)
               Positioned(
                 left: 0,

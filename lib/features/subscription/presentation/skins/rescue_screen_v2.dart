@@ -53,7 +53,7 @@ class RescueScreenV2 extends ConsumerWidget {
               key: const Key('btn_renew_annual'),
               onPressed: vm.isLoading
                   ? null
-                  : () => vm.startPurchase('toka_premium_annual'),
+                  : () => vm.startPurchase(vm.annualProductId),
               child: Text(l10n.paywall_cta_annual),
             ),
             const SizedBox(height: 8),
@@ -61,7 +61,7 @@ class RescueScreenV2 extends ConsumerWidget {
               key: const Key('btn_renew_monthly'),
               onPressed: vm.isLoading
                   ? null
-                  : () => vm.startPurchase('toka_premium_monthly'),
+                  : () => vm.startPurchase(vm.monthlyProductId),
               child: Text(l10n.paywall_cta_monthly),
             ),
             const SizedBox(height: 16),

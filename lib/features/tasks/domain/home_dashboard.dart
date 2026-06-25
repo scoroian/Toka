@@ -113,6 +113,34 @@ class MemberPreview with _$MemberPreview {
       );
 }
 
+/// Packs de miembro vigentes del hogar (eje aditivo sobre el tier Grupo),
+/// proyectados por el backend en `premiumFlags.memberPacks`. El cliente solo los
+/// LEE; el tope efectivo ya viene resuelto en `premiumFlags.maxMembers`. Modelo
+/// de datos puro (sin dependencia del catálogo de SKUs).
+@freezed
+class MemberPacks with _$MemberPacks {
+  const MemberPacks._();
+
+  const factory MemberPacks({
+    @Default(false) bool plus5,
+    @Default(false) bool plus10,
+  }) = _MemberPacks;
+
+  factory MemberPacks.fromMap(Map<String, dynamic> map) => MemberPacks(
+        plus5: map['plus5'] as bool? ?? false,
+        plus10: map['plus10'] as bool? ?? false,
+      );
+
+  /// Ningún pack activo.
+  static const empty = MemberPacks();
+
+  /// Número de packs activos (0..2).
+  int get activeCount => (plus5 ? 1 : 0) + (plus10 ? 1 : 0);
+
+  /// True cuando ambos packs están activos (hogar en el tope absoluto de 25).
+  bool get isMaxed => plus5 && plus10;
+}
+
 @freezed
 class PremiumFlags with _$PremiumFlags {
   const factory PremiumFlags({
@@ -121,6 +149,16 @@ class PremiumFlags with _$PremiumFlags {
     required bool canUseSmartDistribution,
     required bool canUseVacations,
     required bool canUseReviews,
+    // Tier efectivo + tope de miembros denormalizados por el backend
+    // (`functions/src/entitlement`). El cliente los LEE, nunca los recomputa.
+    // `tier`: 'pareja' | 'familia' | 'grupo' | 'free' | null (flag de tiers OFF).
+    // `maxMembers`: 2 | 5 | 10 | 3 (o hasta 25 con packs). null en dashboards
+    // antiguos.
+    String? tier,
+    int? maxMembers,
+    // Packs de miembro activos (`{plus5, plus10}`). null en dashboards legacy
+    // o cuando el backend no proyecta packs (flag de packs OFF).
+    MemberPacks? memberPacks,
   }) = _PremiumFlags;
 
   factory PremiumFlags.fromMap(Map<String, dynamic> map) => PremiumFlags(
@@ -130,6 +168,12 @@ class PremiumFlags with _$PremiumFlags {
             map['canUseSmartDistribution'] as bool? ?? false,
         canUseVacations: map['canUseVacations'] as bool? ?? false,
         canUseReviews: map['canUseReviews'] as bool? ?? false,
+        tier: map['tier'] as String?,
+        maxMembers: map['maxMembers'] as int?,
+        memberPacks: map['memberPacks'] is Map
+            ? MemberPacks.fromMap(
+                (map['memberPacks'] as Map).cast<String, dynamic>())
+            : null,
       );
 
   factory PremiumFlags.free() => const PremiumFlags(
@@ -138,6 +182,8 @@ class PremiumFlags with _$PremiumFlags {
         canUseSmartDistribution: false,
         canUseVacations: false,
         canUseReviews: false,
+        tier: 'free',
+        maxMembers: 3,
       );
 }
 

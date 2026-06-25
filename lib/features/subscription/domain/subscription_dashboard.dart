@@ -20,6 +20,14 @@ class SubscriptionDashboard with _$SubscriptionDashboard {
     required bool autoRenew,
     required String? currentPayerUid,
     required PlanCounters planCounters,
+    // Tier efectivo + tope, denormalizados por el backend en el dashboard
+    // (`premiumFlags`). `tier` es 'pareja'|'familia'|'grupo'|'free'|null (null
+    // con el flag de tiers OFF o dashboard legacy). El cliente solo los lee.
+    String? tier,
+    int? maxMembers,
+    // Packs de miembro activos (`premiumFlags.memberPacks`). null en dashboards
+    // legacy o con el flag de packs OFF. El cliente solo los lee.
+    MemberPacks? memberPacks,
   }) = _SubscriptionDashboard;
 
   const SubscriptionDashboard._();
@@ -79,6 +87,15 @@ class SubscriptionDashboard with _$SubscriptionDashboard {
             (dashboard['planCounters'] as Map).cast<String, dynamic>())
         : PlanCounters.empty();
 
+    // Tier efectivo + tope: del `premiumFlags` del dashboard (estado efectivo,
+    // evita el `premiumTier` sticky del hogar). Fallback del tope:
+    // `limits.maxMembers` del hogar.
+    final flags = dashboard?['premiumFlags'];
+    final flagsMap = flags is Map ? flags.cast<String, dynamic>() : null;
+    final homeLimits = home['limits'];
+    final homeLimitsMap =
+        homeLimits is Map ? homeLimits.cast<String, dynamic>() : null;
+
     return SubscriptionDashboard(
       homeId: homeId,
       status: status,
@@ -88,6 +105,13 @@ class SubscriptionDashboard with _$SubscriptionDashboard {
       autoRenew: home['autoRenewEnabled'] as bool? ?? false,
       currentPayerUid: home['currentPayerUid'] as String?,
       planCounters: counters,
+      tier: flagsMap?['tier'] as String?,
+      maxMembers: (flagsMap?['maxMembers'] as int?) ??
+          (homeLimitsMap?['maxMembers'] as int?),
+      memberPacks: flagsMap?['memberPacks'] is Map
+          ? MemberPacks.fromMap(
+              (flagsMap!['memberPacks'] as Map).cast<String, dynamic>())
+          : null,
     );
   }
 }

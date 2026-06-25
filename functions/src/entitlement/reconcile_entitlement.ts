@@ -26,45 +26,81 @@ import type {
 } from "firebase-admin/firestore";
 import { buildBannerAdFlags } from "../shared/ad_constants";
 import { isPremium, normalizePremiumStatus } from "../shared/free_limits";
+import { resolveEntitlement } from "../shared/tier_catalog";
+import { isHomeTiersEnabled, isMemberPacksEnabled } from "../shared/feature_flags";
+import { autoSelectForDowngrade } from "./downgrade_helpers";
 import { applySlotRevokeTx } from "./slot_ledger";
+import { activePacksFromHome, type ActivePacks } from "./pack_catalog";
 import type { VerifiedReceipt } from "./store_verifiers";
 
-/** Referencia de una compra: a qué hogar y pagador pertenece un chargeId. */
+/**
+ * Referencia de una compra indexada por chargeId.
+ *
+ * `kind` distingue el EJE de entitlement:
+ *  - 'home': compra de tier de hogar → `homeId` presente (pagador = `uid`).
+ *  - 'plus': compra del eje individual Toka Plus → sin `homeId` (es per-usuario).
+ *  - 'pack': compra de un pack de miembro → `homeId` presente (amplía el tope
+ *    del hogar Grupo; el `productId` identifica el pack +5/+10).
+ *
+ * `kind` es opcional para retrocompatibilidad con índices escritos antes de
+ * existir el eje Plus: ausente ⇒ 'home'.
+ */
 export interface PurchaseRef {
-  homeId: string;
+  /** Hogar de la compra (ejes 'home'/'pack'); ausente en compras de Plus. */
+  homeId?: string;
   uid: string;
   platform: "ios" | "android";
   productId?: string;
+  kind?: "home" | "plus" | "pack";
 }
-
-const FREE_MAX_MEMBERS = 3;
-const PREMIUM_MAX_MEMBERS = 10;
 
 // ---------------------------------------------------------------------------
 // Índice de compras (chargeId → hogar/pagador)
 // ---------------------------------------------------------------------------
 
-/** Escribe (merge) el mapeo chargeId → {homeId, uid, platform} dentro de tx. */
+/** Payload del índice de compras (compartido tx / no-tx). */
+function purchaseIndexPayload(ref: PurchaseRef): Record<string, unknown> {
+  return {
+    homeId: ref.homeId ?? null,
+    uid: ref.uid,
+    platform: ref.platform,
+    productId: ref.productId ?? null,
+    kind: ref.kind ?? "home",
+    updatedAt: FieldValue.serverTimestamp(),
+  };
+}
+
+/** Escribe (merge) el mapeo chargeId → {homeId/uid/platform/kind} dentro de tx. */
 export function writePurchaseIndexTx(
   tx: Transaction,
   db: Firestore,
   chargeId: string,
   ref: PurchaseRef,
 ): void {
-  tx.set(
-    db.collection("purchaseIndex").doc(chargeId),
-    {
-      homeId: ref.homeId,
-      uid: ref.uid,
-      platform: ref.platform,
-      productId: ref.productId ?? null,
-      updatedAt: FieldValue.serverTimestamp(),
-    },
-    { merge: true },
-  );
+  tx.set(db.collection("purchaseIndex").doc(chargeId), purchaseIndexPayload(ref), {
+    merge: true,
+  });
 }
 
-/** Resuelve un chargeId a su hogar/pagador. `null` si no está indexado. */
+/**
+ * Variante NO transaccional: la usa la ruta de compra de Toka Plus, que no
+ * envuelve el índice en la misma transacción que el doc de entitlement.
+ */
+export async function writePurchaseIndex(
+  db: Firestore,
+  chargeId: string,
+  ref: PurchaseRef,
+): Promise<void> {
+  await db
+    .collection("purchaseIndex")
+    .doc(chargeId)
+    .set(purchaseIndexPayload(ref), { merge: true });
+}
+
+/**
+ * Resuelve un chargeId a su referencia de compra. `null` si no está indexado o
+ * le falta lo esencial. Para el eje 'home' se exige `homeId`; para 'plus' no.
+ */
 export async function lookupPurchase(
   db: Firestore,
   chargeId: string,
@@ -75,8 +111,18 @@ export async function lookupPurchase(
   const homeId = d["homeId"] as string | undefined;
   const uid = d["uid"] as string | undefined;
   const platform = d["platform"] as "ios" | "android" | undefined;
-  if (!homeId || !uid || !platform) return null;
-  return { homeId, uid, platform, productId: d["productId"] as string | undefined };
+  // Retrocompat: índices sin `kind` son del eje hogar.
+  const kind = (d["kind"] as "home" | "plus" | "pack" | undefined) ?? "home";
+  if (!uid || !platform) return null;
+  // Los ejes ligados al hogar (tier y packs) exigen homeId; Plus no.
+  if ((kind === "home" || kind === "pack") && !homeId) return null;
+  return {
+    homeId: homeId ?? undefined,
+    uid,
+    platform,
+    productId: d["productId"] as string | undefined,
+    kind,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -88,6 +134,9 @@ export function writeDashboardPremiumFlagsTx(
   db: Firestore,
   homeId: string,
   premiumStatus: string,
+  tier: string | null,
+  maxMembers: number,
+  effectivePacks: ActivePacks = {},
 ): void {
   const homeIsPremium = isPremium(premiumStatus);
   const dashRef = db
@@ -104,6 +153,15 @@ export function writeDashboardPremiumFlagsTx(
         canUseSmartDistribution: homeIsPremium,
         canUseVacations: homeIsPremium,
         canUseReviews: homeIsPremium,
+        // Tier efectivo + tope denormalizados (cliente no recomputa).
+        tier,
+        maxMembers,
+        // Packs que CONTRIBUYEN plazas ahora mismo (efectivos: grupo + flag ON).
+        // El cliente de Fase 7 los lee sin recomputar el cap.
+        memberPacks: {
+          plus5: effectivePacks.plus5 === true,
+          plus10: effectivePacks.plus10 === true,
+        },
       },
       adFlags: buildBannerAdFlags(!homeIsPremium),
       // Si deja de ser premium, ya no está en ventana de rescate.
@@ -114,11 +172,54 @@ export function writeDashboardPremiumFlagsTx(
   );
 }
 
+/**
+ * Lee los miembros activos del hogar dentro de la transacción y devuelve los
+ * docs que deben CONGELARSE para respetar `maxMembers`: el owner siempre se
+ * mantiene; entre el resto gana el más participativo (criterio compartido con el
+ * downgrade vía `autoSelectForDowngrade`). Devuelve [] si no hay excedente.
+ *
+ * READ-ONLY: solo lee (Firestore exige todas las lecturas antes de las
+ * escrituras). El caller aplica la marca de congelación. Compartido por la
+ * bajada de tier (`reconcileVerifiedEntitlement`) y la pérdida de pack
+ * (`pack_entitlement`).
+ */
+export async function selectExcessActiveMembersTx(
+  tx: Transaction,
+  homeRef: DocumentReference,
+  ownerId: string,
+  maxMembers: number,
+): Promise<admin.firestore.QueryDocumentSnapshot[]> {
+  const membersSnap = await tx.get(
+    homeRef.collection("members").where("status", "==", "active"),
+  );
+  if (membersSnap.size <= maxMembers) return [];
+  const members = membersSnap.docs.map((d) => ({
+    uid: d.id,
+    status: "active",
+    completions60d: (d.data()["completions60d"] as number) ?? 0,
+    lastCompletedAt: (d.data()["lastCompletedAt"] as Timestamp | null) ?? null,
+    joinedAt: d.data()["joinedAt"] as Timestamp,
+  }));
+  const { selectedMemberIds } = autoSelectForDowngrade(
+    members,
+    [],
+    ownerId,
+    maxMembers,
+  );
+  const keep = new Set(selectedMemberIds);
+  return membersSnap.docs.filter((d) => !keep.has(d.id));
+}
+
 // ---------------------------------------------------------------------------
 // Reconciliación de un recibo verificado (renovación / cambio de estado)
 // ---------------------------------------------------------------------------
 
-function laterTimestamp(
+/**
+ * Devuelve el MAYOR entre el `endsAt` existente y el nuevo: nunca acorta el
+ * periodo por una notificación fuera de orden. Compartido con el eje Plus
+ * (`plus_entitlement.ts`).
+ */
+export function laterTimestamp(
   existing: Timestamp | null | undefined,
   next: Date | null,
 ): Timestamp | null {
@@ -148,14 +249,57 @@ export async function reconcileVerifiedEntitlement(
   const status = normalizePremiumStatus(verified.status);
   const homeIsPremium = isPremium(status);
 
+  // Guard de tipo: esta reconciliación es del eje HOGAR; sin homeId no aplica.
+  const homeId = ref.homeId;
+  if (!homeId) {
+    logger.warn("reconcileVerifiedEntitlement sin homeId (no es eje hogar); skip");
+    return { applied: false, status, reason: "no-home-id" };
+  }
+
+  // Flags de RC leídos fuera de la tx (cacheados). El tope se recomputa DENTRO
+  // de la tx para incluir los packs activos del hogar (eje aditivo): así una
+  // renovación de un Grupo con packs NO baja el tope a 10 ni congela de más.
+  const tiersEnabled = await isHomeTiersEnabled();
+  const packsEnabled = await isMemberPacksEnabled();
+
   const result = await db.runTransaction(async (tx) => {
-    const homeRef = db.collection("homes").doc(ref.homeId);
+    const homeRef = db.collection("homes").doc(homeId);
     const homeSnap = await tx.get(homeRef);
     if (!homeSnap.exists) {
       return { applied: false, status, reason: "home-not-found" } as ReconcileResult;
     }
+    const homeData = homeSnap.data() ?? {};
 
-    const existingEndsAt = homeSnap.data()?.["premiumEndsAt"] as
+    // Packs activos del hogar (verdad de la store) + tope efectivo (tier + packs,
+    // gateado por el flag). El productId del recibo es del TIER, no de los packs:
+    // los packs se conservan tal cual están persistidos.
+    const activePacks = activePacksFromHome(homeData, Timestamp.now().toMillis());
+    const resolved = resolveEntitlement({
+      premiumStatus: status,
+      productId: verified.productId,
+      tiersEnabled,
+      packsEnabled,
+      packs: activePacks,
+    });
+    if (resolved.failSafe) {
+      logger.error("reconcileVerifiedEntitlement: producto premium no catalogado, fail-safe a Free", {
+        homeId,
+        productId: verified.productId,
+      });
+    }
+    const effectivePacks: ActivePacks =
+      resolved.tier === "grupo" && packsEnabled ? activePacks : {};
+
+    // Si el hogar sigue premium y el nuevo tope es menor que los miembros
+    // activos (bajada de tier), congelamos los excedentes reutilizando el mismo
+    // criterio que el downgrade a Free (owner + más activos). Las tareas NO se
+    // tocan: sigue siendo premium. Lectura ANTES de cualquier escritura.
+    const ownerId = homeData["ownerUid"] as string;
+    const toFreeze = homeIsPremium
+      ? await selectExcessActiveMembersTx(tx, homeRef, ownerId, resolved.maxMembers)
+      : [];
+
+    const existingEndsAt = homeData["premiumEndsAt"] as
       | Timestamp
       | null
       | undefined;
@@ -168,12 +312,21 @@ export async function reconcileVerifiedEntitlement(
     tx.update(homeRef, {
       premiumStatus: status,
       premiumPlan: verified.plan,
+      premiumTier: resolved.tier,
       premiumEndsAt: endsAtTs,
       autoRenewEnabled: verified.autoRenewEnabled,
       currentPayerUid: ref.uid,
-      "limits.maxMembers": homeIsPremium ? PREMIUM_MAX_MEMBERS : FREE_MAX_MEMBERS,
+      "limits.maxMembers": resolved.maxMembers,
       updatedAt: FieldValue.serverTimestamp(),
     });
+
+    // Congelar excedentes (mismo marcado que apply_downgrade_plan).
+    for (const d of toFreeze) {
+      tx.update(d.ref, {
+        status: "frozen",
+        frozenAt: FieldValue.serverTimestamp(),
+      });
+    }
 
     // Auditoría: upsert del cargo (no es la clave de idempotencia aquí, solo
     // historial; el chargeId sigue siendo estable durante toda la suscripción).
@@ -199,19 +352,21 @@ export async function reconcileVerifiedEntitlement(
       { merge: true },
     );
 
-    writeDashboardPremiumFlagsTx(tx, db, ref.homeId, status);
+    writeDashboardPremiumFlagsTx(
+      tx, db, homeId, status, resolved.tier, resolved.maxMembers, effectivePacks,
+    );
     return { applied: true, status } as ReconcileResult;
   });
 
   if (result.applied) {
     logger.info("reconcileVerifiedEntitlement applied", {
-      homeId: ref.homeId,
+      homeId,
       status: result.status,
       chargeId: verified.chargeId,
     });
   } else {
     logger.warn("reconcileVerifiedEntitlement skipped", {
-      homeId: ref.homeId,
+      homeId,
       reason: result.reason,
     });
   }
@@ -251,6 +406,9 @@ export async function revokeEntitlement(
   db: Firestore,
   args: RevokeArgs,
 ): Promise<RevokeResult> {
+  // Tras revocar, el hogar es Free: tope 3 (y tier 'free'/null según flag).
+  const tiersEnabled = await isHomeTiersEnabled();
+  const resolved = resolveEntitlement({ premiumStatus: "expiredFree", tiersEnabled });
   const result = await db.runTransaction(async (tx) => {
     const homeRef = db.collection("homes").doc(args.homeId);
     const userRef: DocumentReference = db.collection("users").doc(args.uid);
@@ -274,9 +432,10 @@ export async function revokeEntitlement(
     // 1) Hogar → estado no-premium efectivo inmediato.
     tx.update(homeRef, {
       premiumStatus: "expiredFree",
+      premiumTier: resolved.tier,
       premiumEndsAt: Timestamp.now(),
       autoRenewEnabled: false,
-      "limits.maxMembers": FREE_MAX_MEMBERS,
+      "limits.maxMembers": resolved.maxMembers,
       lastBillingError: `revoked:${args.reason}`,
       updatedAt: FieldValue.serverTimestamp(),
     });
@@ -313,7 +472,7 @@ export async function revokeEntitlement(
     }
 
     // 5) Dashboard a Free (ads reaparecen).
-    writeDashboardPremiumFlagsTx(tx, db, args.homeId, "expiredFree");
+    writeDashboardPremiumFlagsTx(tx, db, args.homeId, "expiredFree", resolved.tier, resolved.maxMembers);
 
     return { premiumRevoked: true, slotRevoked };
   });

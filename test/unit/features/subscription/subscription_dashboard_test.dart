@@ -35,6 +35,82 @@ void main() {
       expect(dash.isPremium, isTrue);
     });
 
+    test('lee tier y maxMembers del premiumFlags del dashboard', () {
+      final dash = SubscriptionDashboard.fromMaps(
+        homeId: 'h1',
+        home: {
+          'premiumStatus': 'active',
+          'premiumPlan': 'annual',
+          'limits': {'maxMembers': 5},
+        },
+        dashboard: {
+          'planCounters': {'activeMembers': 4},
+          'premiumFlags': {'isPremium': true, 'tier': 'familia', 'maxMembers': 5},
+        },
+      );
+      expect(dash.tier, 'familia');
+      expect(dash.maxMembers, 5);
+    });
+
+    test('lee memberPacks del premiumFlags del dashboard', () {
+      final dash = SubscriptionDashboard.fromMaps(
+        homeId: 'h1',
+        home: {
+          'premiumStatus': 'active',
+          'limits': {'maxMembers': 20},
+        },
+        dashboard: {
+          'premiumFlags': {
+            'isPremium': true,
+            'tier': 'grupo',
+            'maxMembers': 20,
+            'memberPacks': {'plus5': false, 'plus10': true},
+          },
+        },
+      );
+      expect(dash.tier, 'grupo');
+      expect(dash.maxMembers, 20);
+      expect(dash.memberPacks, isNotNull);
+      expect(dash.memberPacks!.plus5, isFalse);
+      expect(dash.memberPacks!.plus10, isTrue);
+    });
+
+    test('memberPacks null cuando el dashboard no trae el campo (legacy)', () {
+      final dash = SubscriptionDashboard.fromMaps(
+        homeId: 'h1',
+        home: const {'premiumStatus': 'active'},
+        dashboard: {
+          'premiumFlags': {'isPremium': true, 'tier': 'grupo', 'maxMembers': 10},
+        },
+      );
+      expect(dash.memberPacks, isNull);
+    });
+
+    test('maxMembers cae a limits.maxMembers del hogar si falta en el dashboard',
+        () {
+      final dash = SubscriptionDashboard.fromMaps(
+        homeId: 'h1',
+        home: {
+          'premiumStatus': 'active',
+          'limits': {'maxMembers': 10},
+        },
+      );
+      expect(dash.maxMembers, 10);
+      expect(dash.tier, isNull);
+    });
+
+    test('tier null cuando el dashboard no trae premiumFlags (flag OFF/legacy)',
+        () {
+      final dash = SubscriptionDashboard.fromMaps(
+        homeId: 'h1',
+        home: const {'premiumStatus': 'active'},
+        dashboard: {
+          'planCounters': {'activeMembers': 2},
+        },
+      );
+      expect(dash.tier, isNull);
+    });
+
     test('usa free cuando no hay premiumStatus', () {
       final dash = SubscriptionDashboard.fromMaps(
         homeId: 'h1',

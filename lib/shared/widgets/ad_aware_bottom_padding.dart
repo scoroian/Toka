@@ -21,9 +21,10 @@ import 'skins/shell_presence_marker.dart';
 /// Tanto `banner` como `navBar` se evalúan a 0 cuando el teclado del
 /// sistema está visible: la spec oculta ambos mientras el usuario escribe
 /// para no tapar el input (ver `keyboard_visible_provider.dart`).
-/// Adicionalmente `banner` es 0 cuando la config remota no lo muestra
-/// (Premium, `showBanner=false`), el `unitId` está vacío, o la ruta actual
-/// está en la lista de rutas que suprimen el banner (p. ej. `/settings`).
+/// Adicionalmente `banner` es 0 cuando la config per-usuario no lo muestra
+/// (`adBannerConfigProvider.show == false`: pagador de hogar Premium, con Toka
+/// Plus, o hogar Premium con el flag maestro OFF) o la ruta actual está en la
+/// lista de rutas que suprimen el banner (p. ej. `/settings`).
 ///
 /// Las dimensiones (NavBar height/bottom, bannerGap) se obtienen del
 /// `shellMetricsProvider`, que devuelve la impl correcta según la skin
@@ -50,8 +51,9 @@ double adAwareBottomPadding(
   final keyboardVisible = ref.watch(keyboardVisibleProvider);
   final location = _safeLocation(context);
   final suppressedHere = metrics.suppressBannerFor(location);
+  // Gate por la decisión per-usuario `show`; el unit vacío (hogar Premium) no
+  // oculta el banner — `AdBanner` resuelve el test ID/guardrail al renderizar.
   final bannerVisible = config.show
-      && config.unitId.isNotEmpty
       && !keyboardVisible
       && !suppressedHere;
 

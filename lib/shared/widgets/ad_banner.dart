@@ -97,7 +97,12 @@ class _AdBannerState extends ConsumerState<AdBanner> {
   }
 
   void _syncWithConfig(AdBannerConfig config) {
-    if (!config.show || config.unitId.isEmpty) {
+    // El gate es SOLO `config.show`. No ocultamos por `unitId` vacío: en hogares
+    // Premium el dashboard deja el unit vacío, pero un miembro sin Plus SÍ debe
+    // ver banner (matriz per-usuario). `_effectiveUnitId` siempre resuelve un id
+    // mostrable (test ID en dev / guardrail), así que la decisión de mostrar es
+    // exclusivamente `config.show` (calculado por `adBannerConfigProvider`).
+    if (!config.show) {
       _refreshTimer?.cancel();
       if (_banner != null || _loaded) {
         setState(_disposeBanner);
@@ -133,15 +138,15 @@ class _AdBannerState extends ConsumerState<AdBanner> {
     }
 
     final config = ref.watch(adBannerConfigProvider);
-    // Inicializar el banner en el primer build si procede.
-    if (_banner == null && !_failed && config.show && config.unitId.isNotEmpty) {
+    // Inicializar el banner en el primer build si procede (gate solo por `show`).
+    if (_banner == null && !_failed && config.show) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         _syncWithConfig(config);
       });
     }
 
-    if (!config.show || config.unitId.isEmpty) {
+    if (!config.show) {
       return const SizedBox.shrink();
     }
 

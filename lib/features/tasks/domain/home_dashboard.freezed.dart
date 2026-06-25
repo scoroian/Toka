@@ -1145,12 +1145,171 @@ abstract class _MemberPreview implements MemberPreview {
 }
 
 /// @nodoc
+mixin _$MemberPacks {
+  bool get plus5 => throw _privateConstructorUsedError;
+  bool get plus10 => throw _privateConstructorUsedError;
+
+  /// Create a copy of MemberPacks
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $MemberPacksCopyWith<MemberPacks> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $MemberPacksCopyWith<$Res> {
+  factory $MemberPacksCopyWith(
+          MemberPacks value, $Res Function(MemberPacks) then) =
+      _$MemberPacksCopyWithImpl<$Res, MemberPacks>;
+  @useResult
+  $Res call({bool plus5, bool plus10});
+}
+
+/// @nodoc
+class _$MemberPacksCopyWithImpl<$Res, $Val extends MemberPacks>
+    implements $MemberPacksCopyWith<$Res> {
+  _$MemberPacksCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of MemberPacks
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? plus5 = null,
+    Object? plus10 = null,
+  }) {
+    return _then(_value.copyWith(
+      plus5: null == plus5
+          ? _value.plus5
+          : plus5 // ignore: cast_nullable_to_non_nullable
+              as bool,
+      plus10: null == plus10
+          ? _value.plus10
+          : plus10 // ignore: cast_nullable_to_non_nullable
+              as bool,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$MemberPacksImplCopyWith<$Res>
+    implements $MemberPacksCopyWith<$Res> {
+  factory _$$MemberPacksImplCopyWith(
+          _$MemberPacksImpl value, $Res Function(_$MemberPacksImpl) then) =
+      __$$MemberPacksImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({bool plus5, bool plus10});
+}
+
+/// @nodoc
+class __$$MemberPacksImplCopyWithImpl<$Res>
+    extends _$MemberPacksCopyWithImpl<$Res, _$MemberPacksImpl>
+    implements _$$MemberPacksImplCopyWith<$Res> {
+  __$$MemberPacksImplCopyWithImpl(
+      _$MemberPacksImpl _value, $Res Function(_$MemberPacksImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of MemberPacks
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? plus5 = null,
+    Object? plus10 = null,
+  }) {
+    return _then(_$MemberPacksImpl(
+      plus5: null == plus5
+          ? _value.plus5
+          : plus5 // ignore: cast_nullable_to_non_nullable
+              as bool,
+      plus10: null == plus10
+          ? _value.plus10
+          : plus10 // ignore: cast_nullable_to_non_nullable
+              as bool,
+    ));
+  }
+}
+
+/// @nodoc
+
+class _$MemberPacksImpl extends _MemberPacks {
+  const _$MemberPacksImpl({this.plus5 = false, this.plus10 = false})
+      : super._();
+
+  @override
+  @JsonKey()
+  final bool plus5;
+  @override
+  @JsonKey()
+  final bool plus10;
+
+  @override
+  String toString() {
+    return 'MemberPacks(plus5: $plus5, plus10: $plus10)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$MemberPacksImpl &&
+            (identical(other.plus5, plus5) || other.plus5 == plus5) &&
+            (identical(other.plus10, plus10) || other.plus10 == plus10));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, plus5, plus10);
+
+  /// Create a copy of MemberPacks
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$MemberPacksImplCopyWith<_$MemberPacksImpl> get copyWith =>
+      __$$MemberPacksImplCopyWithImpl<_$MemberPacksImpl>(this, _$identity);
+}
+
+abstract class _MemberPacks extends MemberPacks {
+  const factory _MemberPacks({final bool plus5, final bool plus10}) =
+      _$MemberPacksImpl;
+  const _MemberPacks._() : super._();
+
+  @override
+  bool get plus5;
+  @override
+  bool get plus10;
+
+  /// Create a copy of MemberPacks
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$MemberPacksImplCopyWith<_$MemberPacksImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
 mixin _$PremiumFlags {
   bool get isPremium => throw _privateConstructorUsedError;
   bool get showAds => throw _privateConstructorUsedError;
   bool get canUseSmartDistribution => throw _privateConstructorUsedError;
   bool get canUseVacations => throw _privateConstructorUsedError;
-  bool get canUseReviews => throw _privateConstructorUsedError;
+  bool get canUseReviews =>
+      throw _privateConstructorUsedError; // Tier efectivo + tope de miembros denormalizados por el backend
+// (`functions/src/entitlement`). El cliente los LEE, nunca los recomputa.
+// `tier`: 'pareja' | 'familia' | 'grupo' | 'free' | null (flag de tiers OFF).
+// `maxMembers`: 2 | 5 | 10 | 3 (o hasta 25 con packs). null en dashboards
+// antiguos.
+  String? get tier => throw _privateConstructorUsedError;
+  int? get maxMembers =>
+      throw _privateConstructorUsedError; // Packs de miembro activos (`{plus5, plus10}`). null en dashboards legacy
+// o cuando el backend no proyecta packs (flag de packs OFF).
+  MemberPacks? get memberPacks => throw _privateConstructorUsedError;
 
   /// Create a copy of PremiumFlags
   /// with the given fields replaced by the non-null parameter values.
@@ -1170,7 +1329,12 @@ abstract class $PremiumFlagsCopyWith<$Res> {
       bool showAds,
       bool canUseSmartDistribution,
       bool canUseVacations,
-      bool canUseReviews});
+      bool canUseReviews,
+      String? tier,
+      int? maxMembers,
+      MemberPacks? memberPacks});
+
+  $MemberPacksCopyWith<$Res>? get memberPacks;
 }
 
 /// @nodoc
@@ -1193,6 +1357,9 @@ class _$PremiumFlagsCopyWithImpl<$Res, $Val extends PremiumFlags>
     Object? canUseSmartDistribution = null,
     Object? canUseVacations = null,
     Object? canUseReviews = null,
+    Object? tier = freezed,
+    Object? maxMembers = freezed,
+    Object? memberPacks = freezed,
   }) {
     return _then(_value.copyWith(
       isPremium: null == isPremium
@@ -1215,7 +1382,33 @@ class _$PremiumFlagsCopyWithImpl<$Res, $Val extends PremiumFlags>
           ? _value.canUseReviews
           : canUseReviews // ignore: cast_nullable_to_non_nullable
               as bool,
+      tier: freezed == tier
+          ? _value.tier
+          : tier // ignore: cast_nullable_to_non_nullable
+              as String?,
+      maxMembers: freezed == maxMembers
+          ? _value.maxMembers
+          : maxMembers // ignore: cast_nullable_to_non_nullable
+              as int?,
+      memberPacks: freezed == memberPacks
+          ? _value.memberPacks
+          : memberPacks // ignore: cast_nullable_to_non_nullable
+              as MemberPacks?,
     ) as $Val);
+  }
+
+  /// Create a copy of PremiumFlags
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $MemberPacksCopyWith<$Res>? get memberPacks {
+    if (_value.memberPacks == null) {
+      return null;
+    }
+
+    return $MemberPacksCopyWith<$Res>(_value.memberPacks!, (value) {
+      return _then(_value.copyWith(memberPacks: value) as $Val);
+    });
   }
 }
 
@@ -1232,7 +1425,13 @@ abstract class _$$PremiumFlagsImplCopyWith<$Res>
       bool showAds,
       bool canUseSmartDistribution,
       bool canUseVacations,
-      bool canUseReviews});
+      bool canUseReviews,
+      String? tier,
+      int? maxMembers,
+      MemberPacks? memberPacks});
+
+  @override
+  $MemberPacksCopyWith<$Res>? get memberPacks;
 }
 
 /// @nodoc
@@ -1253,6 +1452,9 @@ class __$$PremiumFlagsImplCopyWithImpl<$Res>
     Object? canUseSmartDistribution = null,
     Object? canUseVacations = null,
     Object? canUseReviews = null,
+    Object? tier = freezed,
+    Object? maxMembers = freezed,
+    Object? memberPacks = freezed,
   }) {
     return _then(_$PremiumFlagsImpl(
       isPremium: null == isPremium
@@ -1275,6 +1477,18 @@ class __$$PremiumFlagsImplCopyWithImpl<$Res>
           ? _value.canUseReviews
           : canUseReviews // ignore: cast_nullable_to_non_nullable
               as bool,
+      tier: freezed == tier
+          ? _value.tier
+          : tier // ignore: cast_nullable_to_non_nullable
+              as String?,
+      maxMembers: freezed == maxMembers
+          ? _value.maxMembers
+          : maxMembers // ignore: cast_nullable_to_non_nullable
+              as int?,
+      memberPacks: freezed == memberPacks
+          ? _value.memberPacks
+          : memberPacks // ignore: cast_nullable_to_non_nullable
+              as MemberPacks?,
     ));
   }
 }
@@ -1287,7 +1501,10 @@ class _$PremiumFlagsImpl implements _PremiumFlags {
       required this.showAds,
       required this.canUseSmartDistribution,
       required this.canUseVacations,
-      required this.canUseReviews});
+      required this.canUseReviews,
+      this.tier,
+      this.maxMembers,
+      this.memberPacks});
 
   @override
   final bool isPremium;
@@ -1299,10 +1516,23 @@ class _$PremiumFlagsImpl implements _PremiumFlags {
   final bool canUseVacations;
   @override
   final bool canUseReviews;
+// Tier efectivo + tope de miembros denormalizados por el backend
+// (`functions/src/entitlement`). El cliente los LEE, nunca los recomputa.
+// `tier`: 'pareja' | 'familia' | 'grupo' | 'free' | null (flag de tiers OFF).
+// `maxMembers`: 2 | 5 | 10 | 3 (o hasta 25 con packs). null en dashboards
+// antiguos.
+  @override
+  final String? tier;
+  @override
+  final int? maxMembers;
+// Packs de miembro activos (`{plus5, plus10}`). null en dashboards legacy
+// o cuando el backend no proyecta packs (flag de packs OFF).
+  @override
+  final MemberPacks? memberPacks;
 
   @override
   String toString() {
-    return 'PremiumFlags(isPremium: $isPremium, showAds: $showAds, canUseSmartDistribution: $canUseSmartDistribution, canUseVacations: $canUseVacations, canUseReviews: $canUseReviews)';
+    return 'PremiumFlags(isPremium: $isPremium, showAds: $showAds, canUseSmartDistribution: $canUseSmartDistribution, canUseVacations: $canUseVacations, canUseReviews: $canUseReviews, tier: $tier, maxMembers: $maxMembers, memberPacks: $memberPacks)';
   }
 
   @override
@@ -1319,12 +1549,25 @@ class _$PremiumFlagsImpl implements _PremiumFlags {
             (identical(other.canUseVacations, canUseVacations) ||
                 other.canUseVacations == canUseVacations) &&
             (identical(other.canUseReviews, canUseReviews) ||
-                other.canUseReviews == canUseReviews));
+                other.canUseReviews == canUseReviews) &&
+            (identical(other.tier, tier) || other.tier == tier) &&
+            (identical(other.maxMembers, maxMembers) ||
+                other.maxMembers == maxMembers) &&
+            (identical(other.memberPacks, memberPacks) ||
+                other.memberPacks == memberPacks));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, isPremium, showAds,
-      canUseSmartDistribution, canUseVacations, canUseReviews);
+  int get hashCode => Object.hash(
+      runtimeType,
+      isPremium,
+      showAds,
+      canUseSmartDistribution,
+      canUseVacations,
+      canUseReviews,
+      tier,
+      maxMembers,
+      memberPacks);
 
   /// Create a copy of PremiumFlags
   /// with the given fields replaced by the non-null parameter values.
@@ -1341,7 +1584,10 @@ abstract class _PremiumFlags implements PremiumFlags {
       required final bool showAds,
       required final bool canUseSmartDistribution,
       required final bool canUseVacations,
-      required final bool canUseReviews}) = _$PremiumFlagsImpl;
+      required final bool canUseReviews,
+      final String? tier,
+      final int? maxMembers,
+      final MemberPacks? memberPacks}) = _$PremiumFlagsImpl;
 
   @override
   bool get isPremium;
@@ -1352,7 +1598,20 @@ abstract class _PremiumFlags implements PremiumFlags {
   @override
   bool get canUseVacations;
   @override
-  bool get canUseReviews;
+  bool
+      get canUseReviews; // Tier efectivo + tope de miembros denormalizados por el backend
+// (`functions/src/entitlement`). El cliente los LEE, nunca los recomputa.
+// `tier`: 'pareja' | 'familia' | 'grupo' | 'free' | null (flag de tiers OFF).
+// `maxMembers`: 2 | 5 | 10 | 3 (o hasta 25 con packs). null en dashboards
+// antiguos.
+  @override
+  String? get tier;
+  @override
+  int?
+      get maxMembers; // Packs de miembro activos (`{plus5, plus10}`). null en dashboards legacy
+// o cuando el backend no proyecta packs (flag de packs OFF).
+  @override
+  MemberPacks? get memberPacks;
 
   /// Create a copy of PremiumFlags
   /// with the given fields replaced by the non-null parameter values.

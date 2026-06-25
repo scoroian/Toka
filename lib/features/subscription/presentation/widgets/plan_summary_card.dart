@@ -5,6 +5,8 @@ import '../../../../core/utils/toka_dates.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../homes/domain/home.dart';
 import '../../domain/subscription_dashboard.dart';
+import '../../domain/tier_catalog.dart';
+import '../tier_display.dart';
 
 /// Bloque principal "Tu suscripción". Resume el plan activo o inactivo del
 /// hogar en función del `SubscriptionDashboard` que recibe. La responsabilidad
@@ -16,9 +18,15 @@ class PlanSummaryCard extends StatelessWidget {
     required this.data,
     this.currentUserUid,
     this.payerName,
+    this.showPacks = true,
   });
 
   final SubscriptionDashboard data;
+
+  /// Si mostrar la fila de packs activos. El interruptor maestro de cliente
+  /// (`member_packs_enabled`) la suprime por completo cuando está OFF, aunque el
+  /// dashboard traiga packs proyectados.
+  final bool showPacks;
 
   /// Si coincide con `data.currentPayerUid` se muestra "tú" en el campo
   /// pagador. Se pasa opcional para poder probar el widget sin auth.
@@ -169,6 +177,8 @@ class PlanSummaryCard extends StatelessWidget {
         ? l10n.subscription_next_renewal(
             TokaDates.dateLongFull(data.endsAt!, locale))
         : '';
+    final tierRow = _tierRow(theme, l10n);
+    final packsRow = _packsRow(theme, l10n);
     return [
       _header(
         theme: theme,
@@ -177,6 +187,8 @@ class PlanSummaryCard extends StatelessWidget {
         title: l10n.subscription_status_active,
         subtitle: renewal.isEmpty ? null : renewal,
       ),
+      if (tierRow != null) tierRow,
+      if (packsRow != null) packsRow,
       if (data.plan != null) ...[
         const SizedBox(height: 12),
         _planRow(theme, l10n, data.plan!),
@@ -197,6 +209,8 @@ class PlanSummaryCard extends StatelessWidget {
     final endsAt = data.endsAt != null
         ? TokaDates.dateLongFull(data.endsAt!, locale)
         : '';
+    final tierRowCancelled = _tierRow(theme, l10n);
+    final packsRowCancelled = _packsRow(theme, l10n);
     return [
       _header(
         theme: theme,
@@ -205,6 +219,8 @@ class PlanSummaryCard extends StatelessWidget {
         title: l10n.subscription_premium_until(endsAt),
         subtitle: l10n.subscription_no_auto_renew,
       ),
+      if (tierRowCancelled != null) tierRowCancelled,
+      if (packsRowCancelled != null) packsRowCancelled,
       if (data.currentPayerUid != null) ...[
         const SizedBox(height: 8),
         _payerRow(theme, l10n),
@@ -292,6 +308,65 @@ class PlanSummaryCard extends StatelessWidget {
         title: l10n.subscription_restorable_until(restore, data.restoreDaysLeft),
       ),
     ];
+  }
+
+  /// Fila "Plan Toka {tier} · hasta {n} miembros". Solo si el hogar tiene un
+  /// tier premium efectivo (flag de tiers ON y premium vigente). Devuelve null
+  /// con el flag OFF (tier null) → la card mantiene el copy binario.
+  Widget? _tierRow(ThemeData theme, AppLocalizations l10n) {
+    final tier = homeTierFromString(data.tier);
+    if (tier == null) return null;
+    final limit = data.maxMembers ?? tier.maxMembers;
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Row(
+        children: [
+          Icon(Icons.groups_outlined,
+              size: 18, color: theme.colorScheme.onSurfaceVariant),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              l10n.subscription_tier_summary(
+                  tierDisplayName(l10n, tier), limit),
+              key: const Key('plan_tier_summary'),
+              style: theme.textTheme.bodyMedium,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Fila "Packs: +5, +10 · hasta {n} miembros". Solo si hay packs activos
+  /// proyectados en el dashboard (`premiumFlags.memberPacks`). El backend solo
+  /// proyecta packs vigentes en Grupo con el flag ON, así que su presencia ya
+  /// implica que aplican.
+  Widget? _packsRow(ThemeData theme, AppLocalizations l10n) {
+    if (!showPacks) return null;
+    final packs = data.memberPacks;
+    if (packs == null || packs.activeCount == 0) return null;
+    final parts = <String>[
+      if (packs.plus5) '+5',
+      if (packs.plus10) '+10',
+    ];
+    final limit = data.maxMembers ?? kAbsoluteMaxMembers;
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Row(
+        children: [
+          Icon(Icons.add_circle_outline,
+              size: 18, color: theme.colorScheme.onSurfaceVariant),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              l10n.plan_summary_packs_row(parts.join(', '), limit),
+              key: const Key('plan_packs_summary'),
+              style: theme.textTheme.bodyMedium,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _benefit(String text) {

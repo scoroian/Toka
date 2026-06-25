@@ -15,8 +15,8 @@ class PremiumUpgradeBanner extends StatelessWidget {
     this.title,
     required this.message,
     this.highlight,
-    required this.cta,
-    required this.onCta,
+    this.cta,
+    this.onCta,
     this.ctaKey,
     this.margin = EdgeInsets.zero,
   });
@@ -24,8 +24,10 @@ class PremiumUpgradeBanner extends StatelessWidget {
   final String? title;
   final String message;
   final String? highlight;
-  final String cta;
-  final VoidCallback onCta;
+  /// Texto del CTA. Si es `null` (o sin [onCta]) el banner es solo informativo
+  /// (p. ej. tier Grupo ya en su tope máximo, sin plan superior al que subir).
+  final String? cta;
+  final VoidCallback? onCta;
   final Key? ctaKey;
   final EdgeInsetsGeometry margin;
 
@@ -67,15 +69,17 @@ class PremiumUpgradeBanner extends StatelessWidget {
               style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700),
             ),
           ],
-          const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              key: ctaKey,
-              onPressed: onCta,
-              child: Text(cta),
+          if (cta != null && onCta != null) ...[
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                key: ctaKey,
+                onPressed: onCta,
+                child: Text(cta!),
+              ),
             ),
-          ),
+          ],
         ],
       ),
     );

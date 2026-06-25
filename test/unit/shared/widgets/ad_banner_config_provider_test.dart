@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:toka/features/homes/application/dashboard_provider.dart';
 import 'package:toka/features/tasks/domain/home_dashboard.dart';
 import 'package:toka/shared/widgets/ad_banner_config_provider.dart';
+import 'package:toka/shared/widgets/ad_flags_provider.dart';
+import 'package:toka/shared/widgets/ad_visibility_provider.dart';
 
 const _kBannerUnit = 'ca-app-pub-3940256099942544/6300978111';
 
@@ -171,6 +173,73 @@ void main() {
           rcUnits: const BannerAdUnits(android: '', ios: ''),
         );
         expect(cfg.unitId, dashAndroid);
+      });
+    });
+
+    group('flag maestro OFF → comportamiento de hogar actual (legacy)', () {
+      test('por defecto el maestro está OFF (RC no disponible en tests)',
+          () async {
+        // Sin override de adDifferentiatedEnabledProvider: el provider real cae a
+        // false (Firebase no disponible) → camino legacy. Hogar gratis con banner
+        // activo muestra banner; premium lo oculta.
+        final libre =
+            await _resolve(_dashboard(showAds: true, showBanner: true));
+        expect(libre.show, isTrue);
+        final premium =
+            await _resolve(_dashboard(showAds: false, showBanner: false));
+        expect(premium.show, isFalse);
+      });
+    });
+
+    group('flag maestro ON → banner per-usuario (adVisibilityProvider)', () {
+      Future<AdBannerConfig> _resolveDiff(
+        HomeDashboard? dashboard, {
+        required bool bannerVisible,
+        BannerAdUnits? rcUnits,
+      }) async {
+        final container = ProviderContainer(overrides: [
+          dashboardProvider.overrideWith((_) => Stream.value(dashboard)),
+          adDifferentiatedEnabledProvider.overrideWithValue(true),
+          adVisibilityProvider.overrideWithValue(
+            AdVisibility(banner: bannerVisible, interstitial: false),
+          ),
+          if (rcUnits != null)
+            remoteBannerAdUnitsProvider.overrideWithValue(rcUnits),
+        ]);
+        addTearDown(container.dispose);
+        await container.read(dashboardProvider.future);
+        return container.read(adBannerConfigProvider);
+      }
+
+      test('show sigue adVisibility.banner=true aunque el dashboard sea premium '
+          '(showBanner=false): el flag de hogar ya no manda', () async {
+        final cfg = await _resolveDiff(
+          _dashboard(showAds: false, showBanner: false),
+          bannerVisible: true,
+        );
+        expect(cfg.show, isTrue);
+      });
+
+      test('show sigue adVisibility.banner=false aunque el hogar sea gratis con '
+          'banner activo (pagador/Plus quita banner individual)', () async {
+        final cfg = await _resolveDiff(
+          _dashboard(showAds: true, showBanner: true),
+          bannerVisible: false,
+        );
+        expect(cfg.show, isFalse);
+      });
+
+      test('unitId se resuelve igual (Remote Config gana) en el camino per-usuario',
+          () async {
+        debugDefaultTargetPlatformOverride = TargetPlatform.android;
+        addTearDown(() => debugDefaultTargetPlatformOverride = null);
+        final cfg = await _resolveDiff(
+          _dashboard(showAds: false, showBanner: false),
+          bannerVisible: true,
+          rcUnits: const BannerAdUnits(android: 'rc-android', ios: 'rc-ios'),
+        );
+        expect(cfg.show, isTrue);
+        expect(cfg.unitId, 'rc-android');
       });
     });
   });

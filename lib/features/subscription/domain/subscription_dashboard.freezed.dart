@@ -23,7 +23,15 @@ mixin _$SubscriptionDashboard {
   DateTime? get restoreUntil => throw _privateConstructorUsedError;
   bool get autoRenew => throw _privateConstructorUsedError;
   String? get currentPayerUid => throw _privateConstructorUsedError;
-  PlanCounters get planCounters => throw _privateConstructorUsedError;
+  PlanCounters get planCounters =>
+      throw _privateConstructorUsedError; // Tier efectivo + tope, denormalizados por el backend en el dashboard
+// (`premiumFlags`). `tier` es 'pareja'|'familia'|'grupo'|'free'|null (null
+// con el flag de tiers OFF o dashboard legacy). El cliente solo los lee.
+  String? get tier => throw _privateConstructorUsedError;
+  int? get maxMembers =>
+      throw _privateConstructorUsedError; // Packs de miembro activos (`premiumFlags.memberPacks`). null en dashboards
+// legacy o con el flag de packs OFF. El cliente solo los lee.
+  MemberPacks? get memberPacks => throw _privateConstructorUsedError;
 
   /// Create a copy of SubscriptionDashboard
   /// with the given fields replaced by the non-null parameter values.
@@ -46,9 +54,13 @@ abstract class $SubscriptionDashboardCopyWith<$Res> {
       DateTime? restoreUntil,
       bool autoRenew,
       String? currentPayerUid,
-      PlanCounters planCounters});
+      PlanCounters planCounters,
+      String? tier,
+      int? maxMembers,
+      MemberPacks? memberPacks});
 
   $PlanCountersCopyWith<$Res> get planCounters;
+  $MemberPacksCopyWith<$Res>? get memberPacks;
 }
 
 /// @nodoc
@@ -75,6 +87,9 @@ class _$SubscriptionDashboardCopyWithImpl<$Res,
     Object? autoRenew = null,
     Object? currentPayerUid = freezed,
     Object? planCounters = null,
+    Object? tier = freezed,
+    Object? maxMembers = freezed,
+    Object? memberPacks = freezed,
   }) {
     return _then(_value.copyWith(
       homeId: null == homeId
@@ -109,6 +124,18 @@ class _$SubscriptionDashboardCopyWithImpl<$Res,
           ? _value.planCounters
           : planCounters // ignore: cast_nullable_to_non_nullable
               as PlanCounters,
+      tier: freezed == tier
+          ? _value.tier
+          : tier // ignore: cast_nullable_to_non_nullable
+              as String?,
+      maxMembers: freezed == maxMembers
+          ? _value.maxMembers
+          : maxMembers // ignore: cast_nullable_to_non_nullable
+              as int?,
+      memberPacks: freezed == memberPacks
+          ? _value.memberPacks
+          : memberPacks // ignore: cast_nullable_to_non_nullable
+              as MemberPacks?,
     ) as $Val);
   }
 
@@ -119,6 +146,20 @@ class _$SubscriptionDashboardCopyWithImpl<$Res,
   $PlanCountersCopyWith<$Res> get planCounters {
     return $PlanCountersCopyWith<$Res>(_value.planCounters, (value) {
       return _then(_value.copyWith(planCounters: value) as $Val);
+    });
+  }
+
+  /// Create a copy of SubscriptionDashboard
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $MemberPacksCopyWith<$Res>? get memberPacks {
+    if (_value.memberPacks == null) {
+      return null;
+    }
+
+    return $MemberPacksCopyWith<$Res>(_value.memberPacks!, (value) {
+      return _then(_value.copyWith(memberPacks: value) as $Val);
     });
   }
 }
@@ -140,10 +181,15 @@ abstract class _$$SubscriptionDashboardImplCopyWith<$Res>
       DateTime? restoreUntil,
       bool autoRenew,
       String? currentPayerUid,
-      PlanCounters planCounters});
+      PlanCounters planCounters,
+      String? tier,
+      int? maxMembers,
+      MemberPacks? memberPacks});
 
   @override
   $PlanCountersCopyWith<$Res> get planCounters;
+  @override
+  $MemberPacksCopyWith<$Res>? get memberPacks;
 }
 
 /// @nodoc
@@ -168,6 +214,9 @@ class __$$SubscriptionDashboardImplCopyWithImpl<$Res>
     Object? autoRenew = null,
     Object? currentPayerUid = freezed,
     Object? planCounters = null,
+    Object? tier = freezed,
+    Object? maxMembers = freezed,
+    Object? memberPacks = freezed,
   }) {
     return _then(_$SubscriptionDashboardImpl(
       homeId: null == homeId
@@ -202,6 +251,18 @@ class __$$SubscriptionDashboardImplCopyWithImpl<$Res>
           ? _value.planCounters
           : planCounters // ignore: cast_nullable_to_non_nullable
               as PlanCounters,
+      tier: freezed == tier
+          ? _value.tier
+          : tier // ignore: cast_nullable_to_non_nullable
+              as String?,
+      maxMembers: freezed == maxMembers
+          ? _value.maxMembers
+          : maxMembers // ignore: cast_nullable_to_non_nullable
+              as int?,
+      memberPacks: freezed == memberPacks
+          ? _value.memberPacks
+          : memberPacks // ignore: cast_nullable_to_non_nullable
+              as MemberPacks?,
     ));
   }
 }
@@ -217,7 +278,10 @@ class _$SubscriptionDashboardImpl extends _SubscriptionDashboard {
       required this.restoreUntil,
       required this.autoRenew,
       required this.currentPayerUid,
-      required this.planCounters})
+      required this.planCounters,
+      this.tier,
+      this.maxMembers,
+      this.memberPacks})
       : super._();
 
   @override
@@ -236,10 +300,21 @@ class _$SubscriptionDashboardImpl extends _SubscriptionDashboard {
   final String? currentPayerUid;
   @override
   final PlanCounters planCounters;
+// Tier efectivo + tope, denormalizados por el backend en el dashboard
+// (`premiumFlags`). `tier` es 'pareja'|'familia'|'grupo'|'free'|null (null
+// con el flag de tiers OFF o dashboard legacy). El cliente solo los lee.
+  @override
+  final String? tier;
+  @override
+  final int? maxMembers;
+// Packs de miembro activos (`premiumFlags.memberPacks`). null en dashboards
+// legacy o con el flag de packs OFF. El cliente solo los lee.
+  @override
+  final MemberPacks? memberPacks;
 
   @override
   String toString() {
-    return 'SubscriptionDashboard(homeId: $homeId, status: $status, plan: $plan, endsAt: $endsAt, restoreUntil: $restoreUntil, autoRenew: $autoRenew, currentPayerUid: $currentPayerUid, planCounters: $planCounters)';
+    return 'SubscriptionDashboard(homeId: $homeId, status: $status, plan: $plan, endsAt: $endsAt, restoreUntil: $restoreUntil, autoRenew: $autoRenew, currentPayerUid: $currentPayerUid, planCounters: $planCounters, tier: $tier, maxMembers: $maxMembers, memberPacks: $memberPacks)';
   }
 
   @override
@@ -258,12 +333,28 @@ class _$SubscriptionDashboardImpl extends _SubscriptionDashboard {
             (identical(other.currentPayerUid, currentPayerUid) ||
                 other.currentPayerUid == currentPayerUid) &&
             (identical(other.planCounters, planCounters) ||
-                other.planCounters == planCounters));
+                other.planCounters == planCounters) &&
+            (identical(other.tier, tier) || other.tier == tier) &&
+            (identical(other.maxMembers, maxMembers) ||
+                other.maxMembers == maxMembers) &&
+            (identical(other.memberPacks, memberPacks) ||
+                other.memberPacks == memberPacks));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, homeId, status, plan, endsAt,
-      restoreUntil, autoRenew, currentPayerUid, planCounters);
+  int get hashCode => Object.hash(
+      runtimeType,
+      homeId,
+      status,
+      plan,
+      endsAt,
+      restoreUntil,
+      autoRenew,
+      currentPayerUid,
+      planCounters,
+      tier,
+      maxMembers,
+      memberPacks);
 
   /// Create a copy of SubscriptionDashboard
   /// with the given fields replaced by the non-null parameter values.
@@ -284,7 +375,10 @@ abstract class _SubscriptionDashboard extends SubscriptionDashboard {
       required final DateTime? restoreUntil,
       required final bool autoRenew,
       required final String? currentPayerUid,
-      required final PlanCounters planCounters}) = _$SubscriptionDashboardImpl;
+      required final PlanCounters planCounters,
+      final String? tier,
+      final int? maxMembers,
+      final MemberPacks? memberPacks}) = _$SubscriptionDashboardImpl;
   const _SubscriptionDashboard._() : super._();
 
   @override
@@ -302,7 +396,18 @@ abstract class _SubscriptionDashboard extends SubscriptionDashboard {
   @override
   String? get currentPayerUid;
   @override
-  PlanCounters get planCounters;
+  PlanCounters
+      get planCounters; // Tier efectivo + tope, denormalizados por el backend en el dashboard
+// (`premiumFlags`). `tier` es 'pareja'|'familia'|'grupo'|'free'|null (null
+// con el flag de tiers OFF o dashboard legacy). El cliente solo los lee.
+  @override
+  String? get tier;
+  @override
+  int?
+      get maxMembers; // Packs de miembro activos (`premiumFlags.memberPacks`). null en dashboards
+// legacy o con el flag de packs OFF. El cliente solo los lee.
+  @override
+  MemberPacks? get memberPacks;
 
   /// Create a copy of SubscriptionDashboard
   /// with the given fields replaced by the non-null parameter values.

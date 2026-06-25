@@ -37,6 +37,8 @@ final shellMetricsProvider = Provider<ShellMetrics>((ref) {
   final skin = ref.watch(skinModeProvider);
   switch (skin) {
     case AppSkin.v2:
+    case AppSkin.oceano:
+      // Las skins cosméticas reutilizan el layout/metrics de v2.
       return const MainShellV2Metrics();
   }
 });

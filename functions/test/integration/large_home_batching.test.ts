@@ -18,8 +18,10 @@ import {
 } from "./helpers/setup";
 import { restorePremiumState } from "../../src/jobs/restore_premium_state";
 import { reassignTasksFromDeletedUser } from "../../src/users/cleanup_user";
+import { applyDowngradeJob } from "../../src/entitlement/apply_downgrade_plan";
 
 const callRestore = (req: any): Promise<any> => (restorePremiumState as any).run(req);
+const runDowngrade = (data: any): Promise<any> => (applyDowngradeJob as any).run(data);
 
 async function seedTasks(
   homeId: string,
@@ -123,5 +125,53 @@ describe("reassignTasksFromDeletedUser — hogar grande (>500 tareas del ex-miem
     const t0 = await getDb().collection("homes").doc(HOME).collection("tasks").doc("task-0").get();
     expect(t0.data()!["currentAssigneeUid"]).toBe(HEIR);
     expect(t0.data()!["assignmentOrder"]).not.toContain(GONE);
+  }, 90000);
+});
+
+describe("applyDowngradeJob — hogar grande (>500 entidades a congelar)", () => {
+  const HOME = "home-downgrade-big";
+  const OWNER = "owner-downgrade-big";
+  const N_TASKS = 520; // > 500 incluso sin contar miembros: rompía el batch único
+
+  beforeAll(async () => {
+    await cleanAll();
+    await createUser(OWNER);
+    // Grupo expirado (elegible para downgrade a Free) con tope 10.
+    await createHome(HOME, OWNER, {
+      premiumStatus: "active",
+      premiumTier: "grupo",
+      premiumEndsAt: admin.firestore.Timestamp.fromDate(new Date(Date.now() - 86400000)),
+      limits: { maxMembers: 10, maxTasks: 999 },
+    });
+    // Varios miembros activos además del owner (se congelan todos menos owner+2).
+    for (let i = 0; i < 8; i++) {
+      await addMemberToHome(HOME, `${HOME}-m${i}`, "member", "active", { completions60d: 100 - i });
+    }
+    await seedTasks(HOME, N_TASKS, () => ({
+      status: "active",
+      currentAssigneeUid: OWNER,
+      assignmentOrder: [OWNER],
+    }));
+  }, 90000);
+
+  it("congela >500 entidades sin romper el límite de 500 y deja el hogar restorable", async () => {
+    await runDowngrade({});
+
+    const home = await getDb().collection("homes").doc(HOME).get();
+    expect(home.data()!["premiumStatus"]).toBe("restorable");
+    expect(home.data()!["limits"]["maxMembers"]).toBe(3); // Free
+
+    // Free conserva 4 tareas activas; el resto congeladas.
+    const activeTasks = await getDb()
+      .collection("homes").doc(HOME).collection("tasks").where("status", "==", "active").get();
+    expect(activeTasks.size).toBe(4);
+    const frozenTasks = await getDb()
+      .collection("homes").doc(HOME).collection("tasks").where("status", "==", "frozen").get();
+    expect(frozenTasks.size).toBe(N_TASKS - 4);
+
+    // Free conserva owner + 2 miembros activos; el resto congelados.
+    const activeMembers = await getDb()
+      .collection("homes").doc(HOME).collection("members").where("status", "==", "active").get();
+    expect(activeMembers.size).toBe(3);
   }, 90000);
 });

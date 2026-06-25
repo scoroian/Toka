@@ -8,10 +8,16 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/ad_aware_bottom_padding.dart';
 import '../../../auth/application/auth_provider.dart';
 import '../../../homes/domain/home.dart';
+import '../../../homes/domain/home_membership.dart';
 import '../../../members/application/members_provider.dart';
+import '../../application/home_tiers_provider.dart';
+import '../../application/member_packs_enabled_provider.dart';
 import '../../application/paywall_provider.dart';
 import '../../application/subscription_management_view_model.dart';
+import '../../domain/member_pack_catalog.dart';
 import '../../domain/subscription_dashboard.dart';
+import '../pack_display.dart';
+import '../widgets/pack_cancel_dialog.dart';
 import '../widgets/plan_summary_card.dart';
 
 /// Pantalla *Ajustes → Gestionar suscripción*. Reemplaza la versión anterior
@@ -43,6 +49,19 @@ class SubscriptionManagementScreenV2 extends ConsumerWidget {
             break;
           }
         }
+      }
+    }
+
+    // Para el aviso de congelación al cancelar un pack necesitamos el nº de
+    // miembros activos EN VIVO (no `planCounters`, que queda stale tras
+    // expulsar/abandonar). Solo se lee cuando el eje de packs está activo.
+    final packsEnabled = ref.watch(memberPacksEnabledProvider);
+    int activeMembers = 0;
+    if (packsEnabled && vm.homeId.isNotEmpty) {
+      final members = ref.watch(homeMembersProvider(vm.homeId)).valueOrNull;
+      if (members != null) {
+        activeMembers =
+            members.where((m) => m.status == MemberStatus.active).length;
       }
     }
 
@@ -83,12 +102,16 @@ class SubscriptionManagementScreenV2 extends ConsumerWidget {
               data: dashboard,
               currentUserUid: currentUid,
               payerName: payerName,
+              showPacks: packsEnabled,
             ),
             _ActionSection(
               data: dashboard,
               vm: vm,
               isLoading: vm.isLoading,
               isCurrentUserPayer: dashboard.currentPayerUid == currentUid,
+              tiersEnabled: ref.watch(homeTiersEnabledProvider),
+              packsEnabled: packsEnabled,
+              activeMembers: activeMembers,
             ),
           ],
         ),
@@ -105,11 +128,17 @@ class _ActionSection extends StatelessWidget {
     required this.vm,
     required this.isLoading,
     required this.isCurrentUserPayer,
+    required this.tiersEnabled,
+    required this.packsEnabled,
+    required this.activeMembers,
   });
   final SubscriptionDashboard data;
   final SubscriptionManagementViewModel vm;
   final bool isLoading;
   final bool isCurrentUserPayer;
+  final bool tiersEnabled;
+  final bool packsEnabled;
+  final int activeMembers;
 
   @override
   Widget build(BuildContext context) {
@@ -138,11 +167,38 @@ class _ActionSection extends StatelessWidget {
             onPressed: isLoading ? null : () => _openPlayStoreSubscriptions(),
             child: Text(l10n.subscription_manage_billing),
           ),
+          // Cambiar de tier (upsell/bajada): abre el paywall de tiers. El cambio
+          // real lo procesa la store y el backend reconcilia/congela excedentes
+          // (store-handoff). Solo con el flag de tiers ON.
+          if (tiersEnabled)
+            OutlinedButton(
+              key: const Key('btn_change_plan_tier'),
+              onPressed:
+                  isLoading ? null : () => context.push(AppRoutes.paywall),
+              child: Text(l10n.subscription_change_plan),
+            ),
           OutlinedButton(
             key: const Key('btn_cancel_renewal'),
             onPressed: isLoading ? null : () => _openPlayStoreSubscriptions(),
             child: Text(l10n.subscription_cancel_renewal),
           ),
+          // Packs de miembro: solo en Grupo con el flag ON. "Añadir pack" abre
+          // el paywall (sección de packs); cada pack activo se puede cancelar,
+          // mostrando antes el aviso de congelación de excedentes.
+          if (packsEnabled && data.tier == 'grupo') ...[
+            OutlinedButton(
+              key: const Key('btn_add_pack'),
+              onPressed: isLoading ? null : () => context.push(AppRoutes.paywall),
+              child: Text(l10n.subscription_add_pack),
+            ),
+            for (final pack in _activePacks)
+              OutlinedButton(
+                key: Key('btn_cancel_pack_${pack.id}'),
+                onPressed: isLoading ? null : () => _cancelPack(context, pack),
+                child: Text(
+                    l10n.subscription_cancel_pack(packDisplayName(l10n, pack))),
+              ),
+          ],
         ]);
       case HomePremiumStatus.cancelledPendingEnd:
         return _actions([
@@ -208,6 +264,30 @@ class _ActionSection extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  /// Packs activos del hogar según el dashboard (`premiumFlags.memberPacks`).
+  List<MemberPack> get _activePacks {
+    final packs = data.memberPacks;
+    return [
+      if (packs?.plus5 ?? false) MemberPack.plus5,
+      if (packs?.plus10 ?? false) MemberPack.plus10,
+    ];
+  }
+
+  /// Cancela un pack: muestra el aviso de congelación (tope resultante +
+  /// excedentes a congelar) y, si se confirma, abre la gestión de suscripciones
+  /// de la store. El freeze real lo aplica el backend al reportar la store.
+  Future<void> _cancelPack(BuildContext context, MemberPack pack) async {
+    final newMax = (data.maxMembers ?? kAbsoluteMaxMembers) - pack.seats;
+    final confirmed = await showPackCancelFreezeDialog(
+      context,
+      pack: pack,
+      newMax: newMax,
+      activeMembers: activeMembers,
+      endsAt: data.endsAt,
+    );
+    if (confirmed && context.mounted) await _openPlayStoreSubscriptions();
   }
 
   Future<void> _openPlayStoreSubscriptions() async {

@@ -4,6 +4,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:toka/features/homes/application/dashboard_provider.dart';
 import 'package:toka/shared/services/remote_config_service.dart';
+import 'package:toka/shared/widgets/ad_flags_provider.dart';
+import 'package:toka/shared/widgets/ad_visibility_provider.dart';
 
 part 'ad_banner_config_provider.g.dart';
 
@@ -53,25 +55,39 @@ BannerAdUnits remoteBannerAdUnits(RemoteBannerAdUnitsRef ref) {
 @Riverpod(keepAlive: true)
 AdBannerConfig adBannerConfig(AdBannerConfigRef ref) {
   final dashboard = ref.watch(dashboardProvider).valueOrNull;
-  // `premiumFlags.showAds` es la fuente de verdad del estado premium del hogar.
-  // `adFlags` es un flag derivado que puede quedar desincronizado si el premium
-  // cambia por una vía que no recomputa el dashboard completo (p. ej. una vía
-  // interna que actualiza `premiumFlags` pero no
-  // `adFlags`). Gateamos también por `showAds` para que un hogar premium nunca
-  // muestre banner aunque `adFlags` llegue stale. Una única instancia de
-  // AdBanner (la del shell) consume este config, así que esto cubre Hoy,
-  // Tareas, Miembros, Historial y Crear/Editar tarea de una vez.
-  final adsAllowed = dashboard?.premiumFlags.showAds ?? true;
   final isIos = defaultTargetPlatform == TargetPlatform.iOS;
 
-  // Precedencia del unit ID:
+  // Precedencia del unit ID (igual en ambos caminos):
   //   1) Remote Config (cambiable sin redeploy desde la consola).
   //   2) dashboard.adFlags (inyectado por el backend desde env, con guardrail).
   //   3) test IDs (fallback de debug/vacío, resuelto en ad_banner.dart).
+  // En hogares Premium el dashboard deja el unit vacío (banner suprimido a nivel
+  // de hogar); por eso, en el camino per-usuario, el unit real debe venir de
+  // Remote Config y, en dev, lo cubre el test ID de `ad_banner.dart`.
   final rcUnit = ref.watch(remoteBannerAdUnitsProvider).forPlatform(isIos: isIos);
   final dashUnit = dashboard?.adFlags.bannerUnitFor(isIos: isIos) ?? '';
   final unitId = rcUnit.isNotEmpty ? rcUnit : dashUnit;
 
+  // ── Flag MAESTRO de la publicidad diferenciada ──────────────────────────
+  // ON  → la visibilidad del banner es per-usuario (`adVisibilityProvider`):
+  //       un flag de hogar binario no puede expresar "banner sí para el miembro,
+  //       no para el pagador". El banner se quita individualmente (pagador de un
+  //       hogar Premium, o con Toka Plus).
+  // OFF → comportamiento de hogar actual: `showAds && showBanner` (ambos a nivel
+  //       de hogar, premium-gated por el backend).
+  if (ref.watch(adDifferentiatedEnabledProvider)) {
+    return AdBannerConfig(
+      show: ref.watch(adVisibilityProvider).banner,
+      unitId: unitId,
+    );
+  }
+
+  // `premiumFlags.showAds` es la fuente de verdad del estado premium del hogar.
+  // `adFlags` es un flag derivado que puede quedar desincronizado; gateamos
+  // también por `showAds` para que un hogar premium nunca muestre banner aunque
+  // `adFlags` llegue stale. Una única instancia de AdBanner (la del shell)
+  // consume este config: cubre Hoy, Tareas, Miembros, Historial y Crear/Editar.
+  final adsAllowed = dashboard?.premiumFlags.showAds ?? true;
   return AdBannerConfig(
     show: adsAllowed && (dashboard?.adFlags.showBanner ?? false),
     unitId: unitId,

@@ -9,6 +9,11 @@ class FreeLimits {
   static const int maxAutomaticRecurringTasks = 3;
 }
 
+/// Tope absoluto de miembros de un hogar (tier Grupo + todos los packs).
+/// Espejo de `ABSOLUTE_MAX_MEMBERS` del backend (`functions/src/shared/
+/// tier_catalog.ts`). Por encima de este tope solo aplica Toka Business.
+const int kAbsoluteMaxMembers = 25;
+
 /// Estados de `premiumStatus` en los que un hogar todavía tiene
 /// capacidades Premium (billing activo, cancelado en espera o rescue).
 ///

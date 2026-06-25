@@ -30,7 +30,7 @@ final remoteBannerAdUnitsProvider = Provider<BannerAdUnits>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef RemoteBannerAdUnitsRef = ProviderRef<BannerAdUnits>;
-String _$adBannerConfigHash() => r'8c4c47a404a053536593c0d504fd27f8c6b12f28';
+String _$adBannerConfigHash() => r'4141be2b4cd0c1aef5191520fef7d9733f0f0851';
 
 /// See also [adBannerConfig].
 @ProviderFor(adBannerConfig)

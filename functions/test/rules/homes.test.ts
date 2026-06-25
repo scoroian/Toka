@@ -4,7 +4,7 @@ import {
   assertFails,
   RulesTestEnvironment,
 } from '@firebase/rules-unit-testing';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { readFileSync } from 'fs';
 import * as path from 'path';
 
@@ -132,5 +132,37 @@ describe('homes security rules', () => {
   it('usuario externo NO puede leer tareas', async () => {
     const ctx = testEnv.authenticatedContext(OUTSIDER_UID);
     await assertFails(getDoc(doc(ctx.firestore(), `homes/${HOME1}/tasks/task1`)));
+  });
+
+  describe('update — campos de entitlement reservados al backend', () => {
+    it('owner puede actualizar un campo permitido (name)', async () => {
+      const ctx = testEnv.authenticatedContext(ADMIN_UID);
+      await assertSucceeds(
+        updateDoc(doc(ctx.firestore(), `homes/${HOME1}`), { name: 'Nuevo nombre' })
+      );
+    });
+
+    it('owner NO puede escribir premiumTier (entitlement = solo backend)', async () => {
+      const ctx = testEnv.authenticatedContext(ADMIN_UID);
+      await assertFails(
+        updateDoc(doc(ctx.firestore(), `homes/${HOME1}`), { premiumTier: 'grupo' })
+      );
+    });
+
+    it('owner NO puede escribir limits (saltarse el tope de miembros)', async () => {
+      const ctx = testEnv.authenticatedContext(ADMIN_UID);
+      await assertFails(
+        updateDoc(doc(ctx.firestore(), `homes/${HOME1}`), { limits: { maxMembers: 999 } })
+      );
+    });
+
+    it('owner NO puede escribir memberPacks (auto-concederse plazas de pack)', async () => {
+      const ctx = testEnv.authenticatedContext(ADMIN_UID);
+      await assertFails(
+        updateDoc(doc(ctx.firestore(), `homes/${HOME1}`), {
+          memberPacks: { plus5: { status: 'active', active: true } },
+        })
+      );
+    });
   });
 });

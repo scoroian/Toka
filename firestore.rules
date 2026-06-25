@@ -146,6 +146,17 @@ service cloud.firestore {
         allow read: if isUser(uid);
         allow write: if false; // Solo via Functions
       }
+
+      // Eje de entitlement INDIVIDUAL "Toka Plus" (entitlements/plus). El doc
+      // crudo (status/active/cycle/fechas/productId/chargeId) es PRIVADO del
+      // propio usuario; la escritura es SOLO backend (verificación de recibos /
+      // reconciliación con stores). Los co-miembros NO leen este doc: la
+      // proyección que necesitan (¿tiene Plus?) vive denormalizada en
+      // homes/{homeId}/members/{uid}.plusActive, ya legible por miembros vigentes.
+      match /entitlements/{entitlementId} {
+        allow read: if isUser(uid);
+        allow write: if false; // Solo via Functions
+      }
     }
 
     // ─── Hogares ───────────────────────────────────────────────────────────────
@@ -155,10 +166,16 @@ service cloud.firestore {
       // excluyendo a quienes salieron/fueron expulsados — status 'left').
       allow read: if isCurrentMember(homeId);
       allow create: if false; // Solo via Functions
+      // Campos de entitlement/tope reservados al backend. `limits` y
+      // `premiumTier` se añaden porque el tope de miembros se enforce server-side
+      // leyendo el tier: si el cliente pudiera escribir `limits.maxMembers` o
+      // `premiumTier` podría auto-concederse un tope mayor y saltarse el límite.
+      // `memberPacks` es el eje aditivo de plazas (packs): si el cliente pudiera
+      // escribirlo se auto-concedería plazas extra y eludiría el tope absoluto 25.
       allow update: if isAdminOrOwner(homeId) &&
                        !request.resource.data.diff(resource.data).affectedKeys()
                        .hasAny(['ownerUid', 'currentPayerUid', 'premiumStatus', 'premiumEndsAt',
-                                'lifetimeUnlockedHomeSlots']);
+                                'premiumTier', 'limits', 'lifetimeUnlockedHomeSlots', 'memberPacks']);
       allow delete: if false;
 
       // Dashboard: lectura para miembros vigentes, escritura solo Functions

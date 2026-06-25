@@ -23,7 +23,7 @@ final supportRepositoryProvider = Provider<SupportRepository>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef SupportRepositoryRef = ProviderRef<SupportRepository>;
-String _$isSupportAgentHash() => r'6d87acf222a36fd55cfc0cf5a28050e345f536b4';
+String _$isSupportAgentHash() => r'9745396bebe1374b682a54469b148e71ef448eb9';
 
 /// True si la cuenta autenticada tiene el custom claim `support`. Gatea la
 /// entrada de Ajustes y la propia pantalla (defensa en profundidad; el backend

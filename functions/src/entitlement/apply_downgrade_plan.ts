@@ -7,6 +7,9 @@ import {
   DOWNGRADE_ELIGIBLE_STATUSES,
 } from "./downgrade_helpers";
 import { buildBannerAdFlags } from "../shared/ad_constants";
+import { resolveEntitlement } from "../shared/tier_catalog";
+import { isHomeTiersEnabled } from "../shared/feature_flags";
+import { commitInChunks } from "../shared/batch_utils";
 
 /**
  * Cron cada 30 minutos. Aplica downgrade a hogares cuyo premiumEndsAt <= now y
@@ -27,6 +30,12 @@ export const applyDowngradeJob = onSchedule("*/30 * * * *", async () => {
     .where("premiumStatus", "in", [...DOWNGRADE_ELIGIBLE_STATUSES])
     .where("premiumEndsAt", "<=", now)
     .get();
+
+  // El downgrade por expiración siempre va a Free (tope 3). El tier efectivo del
+  // dashboard es 'free' (flag ON) o null (flag OFF, modo binario). NO se toca
+  // `premiumTier` del hogar: se conserva sticky para poder restaurar el tope.
+  const tiersEnabled = await isHomeTiersEnabled();
+  const downgraded = resolveEntitlement({ premiumStatus: "restorable", tiersEnabled });
 
   logger.info(`applyDowngradeJob: ${snapshot.size} homes to downgrade`);
 
@@ -92,29 +101,19 @@ export const applyDowngradeJob = onSchedule("*/30 * * * *", async () => {
         selectedTaskIds = selection.selectedTaskIds;
       }
 
-      // Congelar miembros excedentes
+      // Recolectar los refs a congelar (miembros + tareas excedentes). Hallazgo
+      // #16: un hogar grande (sin tope de tareas en Premium, y hasta 25 miembros
+      // con packs) puede superar el límite DURO de 500 ops/batch — que el
+      // emulador NO aplica → falso verde. Troceamos en lotes ≤MAX_BATCH_OPS y
+      // dejamos el flip del hogar + dashboard + plan para el FINAL: si algo falla
+      // a mitad, el hogar sigue en estado elegible y el cron reintenta
+      // (idempotente: re-congelar lo ya congelado es un no-op).
       const allMembersSnap = await db
         .collection("homes")
         .doc(homeId)
         .collection("members")
         .get();
 
-      const batch = db.batch();
-
-      for (const memberDoc of allMembersSnap.docs) {
-        const memberData = memberDoc.data();
-        if (
-          !selectedMemberIds.includes(memberDoc.id) &&
-          memberData["status"] === "active"
-        ) {
-          batch.update(memberDoc.ref, {
-            status: "frozen",
-            frozenAt: FieldValue.serverTimestamp(),
-          });
-        }
-      }
-
-      // Congelar tareas excedentes
       const allTasksSnap = await db
         .collection("homes")
         .doc(homeId)
@@ -122,26 +121,42 @@ export const applyDowngradeJob = onSchedule("*/30 * * * *", async () => {
         .where("status", "==", "active")
         .get();
 
-      for (const taskDoc of allTasksSnap.docs) {
-        if (!selectedTaskIds.includes(taskDoc.id)) {
-          batch.update(taskDoc.ref, {
+      const freezeRefs: admin.firestore.DocumentReference[] = [
+        ...allMembersSnap.docs
+          .filter((d) => !selectedMemberIds.includes(d.id) && d.data()["status"] === "active")
+          .map((d) => d.ref),
+        ...allTasksSnap.docs
+          .filter((d) => !selectedTaskIds.includes(d.id))
+          .map((d) => d.ref),
+      ];
+
+      await commitInChunks(
+        freezeRefs,
+        () => db.batch(),
+        (batch, ref) =>
+          batch.update(ref, {
             status: "frozen",
             frozenAt: FieldValue.serverTimestamp(),
-          });
-        }
-      }
+          }),
+      );
 
-      // Actualizar estado del hogar
+      // Flip del hogar + plan + dashboard (nº fijo de ops, nunca supera el límite).
       const restoreUntil = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-      batch.update(homeDoc.ref, {
+      const dashRef = db
+        .collection("homes")
+        .doc(homeId)
+        .collection("views")
+        .doc("dashboard");
+      const finalBatch = db.batch();
+
+      finalBatch.update(homeDoc.ref, {
         premiumStatus: "restorable",
         restoreUntil: admin.firestore.Timestamp.fromDate(restoreUntil),
-        "limits.maxMembers": 3,
+        "limits.maxMembers": downgraded.maxMembers,
         updatedAt: FieldValue.serverTimestamp(),
       });
 
-      // Guardar selección aplicada
-      batch.set(
+      finalBatch.set(
         manualPlanRef,
         {
           selectedMemberIds,
@@ -152,14 +167,7 @@ export const applyDowngradeJob = onSchedule("*/30 * * * *", async () => {
         { merge: true }
       );
 
-      // Actualizar dashboard
-      const dashRef = db
-        .collection("homes")
-        .doc(homeId)
-        .collection("views")
-        .doc("dashboard");
-
-      batch.set(
+      finalBatch.set(
         dashRef,
         {
           premiumFlags: {
@@ -168,6 +176,10 @@ export const applyDowngradeJob = onSchedule("*/30 * * * *", async () => {
             canUseSmartDistribution: false,
             canUseVacations: false,
             canUseReviews: false,
+            tier: downgraded.tier,
+            maxMembers: downgraded.maxMembers,
+            // Free no tiene plazas de pack → packs dormidos.
+            memberPacks: { plus5: false, plus10: false },
           },
           adFlags: buildBannerAdFlags(true),
           rescueFlags: { isInRescue: false, daysLeft: null },
@@ -176,7 +188,7 @@ export const applyDowngradeJob = onSchedule("*/30 * * * *", async () => {
         { merge: true }
       );
 
-      await batch.commit();
+      await finalBatch.commit();
       logger.info(`applyDowngradeJob: home ${homeId} downgraded (${selectionMode})`);
     } catch (err) {
       logger.error(`applyDowngradeJob: error processing home ${homeId}`, err);

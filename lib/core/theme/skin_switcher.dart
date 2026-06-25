@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app_skin.dart';
-import 'skin_provider.dart';
+import 'effective_skin_provider.dart';
 
 /// Elige qué widget renderizar según la skin activa y aplica una transición
 /// suave al cambiar.
@@ -31,14 +31,17 @@ class SkinSwitch extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final skin = ref.watch(skinModeProvider);
+    final skin = ref.watch(effectiveSkinProvider);
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 220),
       switchInCurve: Curves.easeOut,
       child: KeyedSubtree(
         key: ValueKey<AppSkin>(skin),
         child: switch (skin) {
+          // Las skins cosméticas (p. ej. Océano) reutilizan las pantallas v2:
+          // solo cambian el ThemeData (ver app.dart), no el árbol de widgets.
           AppSkin.v2 => v2(context),
+          AppSkin.oceano => v2(context),
         },
       ),
     );

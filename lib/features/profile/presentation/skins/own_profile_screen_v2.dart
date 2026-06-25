@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/routes.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/loading_widget.dart';
+import '../../../subscription/application/toka_plus_enabled_provider.dart';
 import '../../application/own_profile_view_model.dart';
 import '../widgets/access_management_section.dart';
 import '../widgets/radar_chart_widget.dart';
@@ -110,6 +111,18 @@ class OwnProfileScreenV2 extends ConsumerWidget {
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (_, __) => const RadarChartWidget(entries: []),
               ),
+
+              // Entrada a métricas personales detalladas (solo con Toka Plus
+              // habilitado; la pantalla aplica el gating de Plus por su cuenta).
+              if (ref.watch(tokaPlusEnabledProvider)) ...[
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  key: const Key('own_profile_metrics_entry'),
+                  icon: const Icon(Icons.insights_outlined),
+                  label: Text(l10n.personalMetricsTitle),
+                  onPressed: () => context.push(AppRoutes.personalMetrics),
+                ),
+              ],
 
               const Divider(height: 32),
 

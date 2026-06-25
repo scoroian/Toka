@@ -12,6 +12,7 @@ import 'package:toka/features/members/domain/members_repository.dart';
 import 'package:toka/features/settings/application/settings_view_model.dart';
 import 'package:toka/features/settings/presentation/settings_screen.dart';
 import 'package:toka/features/subscription/application/subscription_provider.dart';
+import 'package:toka/features/subscription/application/toka_plus_enabled_provider.dart';
 import 'package:toka/features/subscription/domain/subscription_state.dart';
 import 'package:toka/l10n/app_localizations.dart';
 
@@ -115,8 +116,40 @@ Widget _wrapWithHome({
   );
 }
 
+Widget _wrapPlus({required bool plusEnabled}) => ProviderScope(
+      overrides: [
+        tokaPlusEnabledProvider.overrideWithValue(plusEnabled),
+      ],
+      child: MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('es'),
+        home: const SettingsScreen(),
+      ),
+    );
+
 void main() {
   setUp(_setupPackageInfoStub);
+
+  testWidgets('flag Plus ON: muestra entradas Toka Plus y Mis métricas',
+      (tester) async {
+    await tester.pumpWidget(_wrapPlus(plusEnabled: true));
+    await tester.pumpAndSettle();
+    await tester.dragUntilVisible(
+      find.byKey(const Key('settings_plus_entry')),
+      find.byType(ListView),
+      const Offset(0, -200),
+    );
+    expect(find.byKey(const Key('settings_plus_entry')), findsOneWidget);
+    expect(find.byKey(const Key('settings_metrics_entry')), findsOneWidget);
+  });
+
+  testWidgets('flag Plus OFF: oculta las entradas de Plus', (tester) async {
+    await tester.pumpWidget(_wrapPlus(plusEnabled: false));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('settings_plus_entry')), findsNothing);
+    expect(find.byKey(const Key('settings_metrics_entry')), findsNothing);
+  });
 
   testWidgets('SettingsScreen renderiza sección Cuenta', (tester) async {
     await tester.pumpWidget(_wrap());

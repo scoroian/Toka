@@ -52,7 +52,7 @@ TodayViewData _buildData({required int todoCount}) {
   );
   return TodayViewData(
     grouped: {
-      'daily': (todos: todos, dones: <DoneTaskPreview>[]),
+      'daily': (todos: todos, upcoming: <TaskPreview>[], dones: <DoneTaskPreview>[]),
     },
     counters: const DashboardCounters(
       totalActiveTasks: 10,

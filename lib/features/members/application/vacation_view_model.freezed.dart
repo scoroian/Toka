@@ -20,6 +20,7 @@ mixin _$VacationVMState {
   bool get isActive => throw _privateConstructorUsedError;
   DateTime? get startDate => throw _privateConstructorUsedError;
   DateTime? get endDate => throw _privateConstructorUsedError;
+  String? get reason => throw _privateConstructorUsedError;
   bool get savedSuccessfully => throw _privateConstructorUsedError;
 
   /// Create a copy of _VacationVMState
@@ -40,6 +41,7 @@ abstract class _$VacationVMStateCopyWith<$Res> {
       bool isActive,
       DateTime? startDate,
       DateTime? endDate,
+      String? reason,
       bool savedSuccessfully});
 }
 
@@ -62,6 +64,7 @@ class __$VacationVMStateCopyWithImpl<$Res, $Val extends _VacationVMState>
     Object? isActive = null,
     Object? startDate = freezed,
     Object? endDate = freezed,
+    Object? reason = freezed,
     Object? savedSuccessfully = null,
   }) {
     return _then(_value.copyWith(
@@ -81,6 +84,10 @@ class __$VacationVMStateCopyWithImpl<$Res, $Val extends _VacationVMState>
           ? _value.endDate
           : endDate // ignore: cast_nullable_to_non_nullable
               as DateTime?,
+      reason: freezed == reason
+          ? _value.reason
+          : reason // ignore: cast_nullable_to_non_nullable
+              as String?,
       savedSuccessfully: null == savedSuccessfully
           ? _value.savedSuccessfully
           : savedSuccessfully // ignore: cast_nullable_to_non_nullable
@@ -102,6 +109,7 @@ abstract class _$$_VacationVMStateImplCopyWith<$Res>
       bool isActive,
       DateTime? startDate,
       DateTime? endDate,
+      String? reason,
       bool savedSuccessfully});
 }
 
@@ -122,6 +130,7 @@ class __$$_VacationVMStateImplCopyWithImpl<$Res>
     Object? isActive = null,
     Object? startDate = freezed,
     Object? endDate = freezed,
+    Object? reason = freezed,
     Object? savedSuccessfully = null,
   }) {
     return _then(_$_VacationVMStateImpl(
@@ -141,6 +150,10 @@ class __$$_VacationVMStateImplCopyWithImpl<$Res>
           ? _value.endDate
           : endDate // ignore: cast_nullable_to_non_nullable
               as DateTime?,
+      reason: freezed == reason
+          ? _value.reason
+          : reason // ignore: cast_nullable_to_non_nullable
+              as String?,
       savedSuccessfully: null == savedSuccessfully
           ? _value.savedSuccessfully
           : savedSuccessfully // ignore: cast_nullable_to_non_nullable
@@ -157,6 +170,7 @@ class _$_VacationVMStateImpl implements __VacationVMState {
       this.isActive = false,
       this.startDate,
       this.endDate,
+      this.reason,
       this.savedSuccessfully = false});
 
   @override
@@ -170,12 +184,14 @@ class _$_VacationVMStateImpl implements __VacationVMState {
   @override
   final DateTime? endDate;
   @override
+  final String? reason;
+  @override
   @JsonKey()
   final bool savedSuccessfully;
 
   @override
   String toString() {
-    return '_VacationVMState(isInitialized: $isInitialized, isActive: $isActive, startDate: $startDate, endDate: $endDate, savedSuccessfully: $savedSuccessfully)';
+    return '_VacationVMState(isInitialized: $isInitialized, isActive: $isActive, startDate: $startDate, endDate: $endDate, reason: $reason, savedSuccessfully: $savedSuccessfully)';
   }
 
   @override
@@ -190,13 +206,14 @@ class _$_VacationVMStateImpl implements __VacationVMState {
             (identical(other.startDate, startDate) ||
                 other.startDate == startDate) &&
             (identical(other.endDate, endDate) || other.endDate == endDate) &&
+            (identical(other.reason, reason) || other.reason == reason) &&
             (identical(other.savedSuccessfully, savedSuccessfully) ||
                 other.savedSuccessfully == savedSuccessfully));
   }
 
   @override
   int get hashCode => Object.hash(runtimeType, isInitialized, isActive,
-      startDate, endDate, savedSuccessfully);
+      startDate, endDate, reason, savedSuccessfully);
 
   /// Create a copy of _VacationVMState
   /// with the given fields replaced by the non-null parameter values.
@@ -214,6 +231,7 @@ abstract class __VacationVMState implements _VacationVMState {
       final bool isActive,
       final DateTime? startDate,
       final DateTime? endDate,
+      final String? reason,
       final bool savedSuccessfully}) = _$_VacationVMStateImpl;
 
   @override
@@ -224,6 +242,8 @@ abstract class __VacationVMState implements _VacationVMState {
   DateTime? get startDate;
   @override
   DateTime? get endDate;
+  @override
+  String? get reason;
   @override
   bool get savedSuccessfully;
 

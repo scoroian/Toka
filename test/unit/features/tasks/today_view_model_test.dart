@@ -140,6 +140,62 @@ void main() {
       expect(result['daily']!.todos.first.taskId, 'ta');
     });
 
+    test('parte activas en todos (accionables hoy) y upcoming (futuras)', () {
+      final now = DateTime(2026, 6, 24, 12);
+      final actionable = TaskPreview(
+        taskId: 't_hoy',
+        title: 'Fregar',
+        visualKind: 'emoji',
+        visualValue: '🍽️',
+        recurrenceType: 'daily',
+        currentAssigneeUid: null,
+        currentAssigneeName: null,
+        currentAssigneePhoto: null,
+        nextDueAt: DateTime(2026, 6, 24, 18), // hoy, más tarde → accionable
+        isOverdue: false,
+        status: 'active',
+      );
+      final upcoming = TaskPreview(
+        taskId: 't_manana',
+        title: 'Barrer',
+        visualKind: 'emoji',
+        visualValue: '🧹',
+        recurrenceType: 'daily',
+        currentAssigneeUid: null,
+        currentAssigneeName: null,
+        currentAssigneePhoto: null,
+        nextDueAt: DateTime(2026, 6, 25, 9), // mañana → NO accionable hoy
+        isOverdue: false,
+        status: 'active',
+      );
+      final result = groupByRecurrence([upcoming, actionable], [], now: now);
+      expect(result['daily']!.todos.map((t) => t.taskId), ['t_hoy']);
+      expect(result['daily']!.upcoming.map((t) => t.taskId), ['t_manana']);
+      expect(result['daily']!.dones, isEmpty);
+    });
+
+    test('upcoming se ordena por nextDueAt ascendente', () {
+      final now = DateTime(2026, 6, 24, 12);
+      TaskPreview upc(String id, DateTime due) => TaskPreview(
+            taskId: id,
+            title: id,
+            visualKind: 'emoji',
+            visualValue: '🧹',
+            recurrenceType: 'daily',
+            currentAssigneeUid: null,
+            currentAssigneeName: null,
+            currentAssigneePhoto: null,
+            nextDueAt: due,
+            isOverdue: false,
+            status: 'active',
+          );
+      final later = upc('later', DateTime(2026, 6, 27, 9));
+      final sooner = upc('sooner', DateTime(2026, 6, 25, 9));
+      final result = groupByRecurrence([later, sooner], [], now: now);
+      expect(result['daily']!.upcoming.map((t) => t.taskId),
+          ['sooner', 'later']);
+    });
+
     test('tasks from different recurrence types go to separate groups', () {
       final weekly = TaskPreview(
         taskId: 'tw',

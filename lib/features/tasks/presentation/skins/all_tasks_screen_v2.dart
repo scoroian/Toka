@@ -11,6 +11,7 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/ad_aware_bottom_padding.dart';
 import '../../../../shared/widgets/no_home_empty_state.dart';
 import '../../../../shared/widgets/skins/main_shell_v2.dart';
+import '../../../homes/application/current_home_provider.dart';
 import '../../../homes/application/dashboard_provider.dart';
 import '../../application/all_tasks_view_model.dart';
 import '../../domain/task.dart';
@@ -102,6 +103,7 @@ class _AllTasksScreenV2State extends ConsumerState<AllTasksScreenV2>
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final AllTasksViewModel vm = ref.watch(allTasksViewModelProvider);
+    final homeTz = ref.watch(currentHomeProvider).valueOrNull?.timezone;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return vm.viewData.when(
@@ -177,6 +179,7 @@ class _AllTasksScreenV2State extends ConsumerState<AllTasksScreenV2>
                             },
                             child: TaskCard(
                               task: task,
+                              homeTimezone: homeTz,
                               onTap: () => context.push(AppRoutes.taskDetail.replaceAll(':id', task.id)),
                               onLongPress: () => vm.toggleSelection(task.id),
                             ),

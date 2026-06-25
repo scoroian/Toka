@@ -520,12 +520,24 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String today_tasks_due(int count) {
-    return '$count tareas para hoy';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tareas para hoy',
+      one: '$count tarea para hoy',
+    );
+    return '$_temp0';
   }
 
   @override
   String today_tasks_done_today(int count) {
-    return '$count completadas hoy';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count completadas hoy',
+      one: '$count completada hoy',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -533,6 +545,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get today_section_done => 'Hechas';
+
+  @override
+  String get today_section_upcoming => 'Próximas';
 
   @override
   String get today_overdue => 'Vencida';
@@ -678,7 +693,13 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String members_pending_tasks(int count) {
-    return '$count tareas pendientes';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tareas pendientes',
+      one: '$count tarea pendiente',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -942,7 +963,13 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String paywall_trial_badge(int days) {
-    return '$days días gratis';
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days días gratis',
+      one: '$days día gratis',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -1666,7 +1693,13 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String tasks_selection_count(int count) {
-    return '$count seleccionadas';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count seleccionadas',
+      one: '$count seleccionada',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -2006,6 +2039,105 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get skinClassicDescription => 'Cálido, luminoso, familiar';
+
+  @override
+  String get skinOceanoLabel => 'Océano';
+
+  @override
+  String get skinOceanoDescription => 'Azul fresco y sereno';
+
+  @override
+  String get plusLockedBadge => 'Requiere Toka Plus';
+
+  @override
+  String get plusPaywallTitle => 'Toka Plus';
+
+  @override
+  String get plusPaywallSubtitle =>
+      'Desbloquea aspectos exclusivos y tus métricas personales.';
+
+  @override
+  String get plusBenefitSkinsTitle => 'Aspectos exclusivos';
+
+  @override
+  String get plusBenefitSkinsDesc =>
+      'Personaliza Toka con skins solo para Plus.';
+
+  @override
+  String get plusBenefitMetricsTitle => 'Métricas personales';
+
+  @override
+  String get plusBenefitMetricsDesc =>
+      'Consulta tu racha, puntualidad y reparto al detalle.';
+
+  @override
+  String get plusPlanAnnualLabel => 'Anual';
+
+  @override
+  String get plusPlanMonthlyLabel => 'Mensual';
+
+  @override
+  String get plusPriceAnnualFallback => '14,99 €';
+
+  @override
+  String get plusPriceMonthlyFallback => '1,99 €';
+
+  @override
+  String get plusPriceAnnualSuffix => '/año';
+
+  @override
+  String get plusPriceMonthlySuffix => '/mes';
+
+  @override
+  String get plusAnnualSavingsBadge => 'Mejor precio';
+
+  @override
+  String get plusCtaSubscribe => 'Suscribirme';
+
+  @override
+  String get plusRestore => 'Restaurar compra';
+
+  @override
+  String get plusAlreadyActiveTitle => 'Ya tienes Toka Plus';
+
+  @override
+  String get plusAlreadyActiveBody =>
+      'Disfruta de los aspectos exclusivos y tus métricas personales.';
+
+  @override
+  String get plusPurchaseSuccess => '¡Bienvenido a Toka Plus!';
+
+  @override
+  String get personalMetricsTitle => 'Mis métricas';
+
+  @override
+  String get personalMetricsLockedTitle => 'Métricas personales con Toka Plus';
+
+  @override
+  String get personalMetricsLockedBody =>
+      'Suscríbete a Toka Plus para ver tu racha, puntualidad, puntuación y reparto en detalle.';
+
+  @override
+  String get personalMetricsUnlockCta => 'Obtener Toka Plus';
+
+  @override
+  String get personalMetricsEmpty =>
+      'Aún no tienes actividad. Completa tareas para ver tus métricas.';
+
+  @override
+  String get metricCurrentStreak => 'Racha actual';
+
+  @override
+  String get metricPunctuality => 'Puntualidad';
+
+  @override
+  String get metricAverageScore => 'Puntuación media';
+
+  @override
+  String get metricPassedCount => 'Turnos pasados';
+
+  @override
+  String get metricShare => 'Tu reparto';
 
   @override
   String get homes_role_frozen => 'Congelado';
@@ -2529,4 +2661,213 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get support_error_generic => 'No se pudo obtener el diagnóstico.';
+
+  @override
+  String get tier_name_pareja => 'Toka Pareja';
+
+  @override
+  String get tier_name_familia => 'Toka Familia';
+
+  @override
+  String get tier_name_grupo => 'Toka Grupo';
+
+  @override
+  String member_limit_free(int limit) {
+    return 'Tu plan Free permite hasta $limit miembros. Hazte Premium para añadir más.';
+  }
+
+  @override
+  String member_limit_pareja(int limit) {
+    return 'Tu plan Toka Pareja permite hasta $limit miembros. Sube a Familia o Grupo para añadir más.';
+  }
+
+  @override
+  String member_limit_familia(int limit) {
+    return 'Tu plan Toka Familia permite hasta $limit miembros. Sube a Grupo para añadir más.';
+  }
+
+  @override
+  String member_limit_grupo(int limit) {
+    return 'Has alcanzado el máximo de $limit miembros del plan Toka Grupo.';
+  }
+
+  @override
+  String member_limit_premium_max(int limit) {
+    return 'Has alcanzado el máximo de $limit miembros de tu plan.';
+  }
+
+  @override
+  String member_limit_counter(int current, int limit) {
+    return '$current / $limit miembros';
+  }
+
+  @override
+  String get member_limit_upgrade_cta => 'Subir de plan';
+
+  @override
+  String get paywall_tiers_same_features =>
+      'Las mismas funciones premium en los tres planes. Solo cambia cuántos miembros caben.';
+
+  @override
+  String paywall_tier_members(int count) {
+    return 'Hasta $count miembros';
+  }
+
+  @override
+  String get paywall_cycle_monthly => 'Mensual';
+
+  @override
+  String get paywall_cycle_annual => 'Anual';
+
+  @override
+  String get paywall_price_monthly_suffix => '/mes';
+
+  @override
+  String get paywall_price_annual_suffix => '/año';
+
+  @override
+  String get paywall_tier_continue_cta => 'Continuar';
+
+  @override
+  String get tier_price_pareja_monthly => '2,99 €';
+
+  @override
+  String get tier_price_pareja_annual => '19,99 €';
+
+  @override
+  String get tier_price_familia_monthly => '3,99 €';
+
+  @override
+  String get tier_price_familia_annual => '29,99 €';
+
+  @override
+  String get tier_price_grupo_monthly => '5,99 €';
+
+  @override
+  String get tier_price_grupo_annual => '49,99 €';
+
+  @override
+  String get paywall_packs_title => 'Amplía tu hogar';
+
+  @override
+  String get paywall_packs_subtitle =>
+      'Añade packs de miembros a tu plan Grupo.';
+
+  @override
+  String get pack_name_plus5 => 'Pack +5 miembros';
+
+  @override
+  String get pack_name_plus10 => 'Pack +10 miembros';
+
+  @override
+  String pack_seats(int count) {
+    return '+$count plazas';
+  }
+
+  @override
+  String pack_result_cap(int max) {
+    return 'Hasta $max miembros';
+  }
+
+  @override
+  String get pack_buy_cta => 'Añadir pack';
+
+  @override
+  String get pack_active_badge => 'Activo';
+
+  @override
+  String get pack_requires_grupo_title => 'Packs de miembros';
+
+  @override
+  String get pack_requires_grupo_body =>
+      'Los packs de miembros están disponibles en el plan Toka Grupo.';
+
+  @override
+  String get pack_requires_grupo_cta => 'Sube a Grupo';
+
+  @override
+  String get pack_price_plus5_monthly => '1,49 €';
+
+  @override
+  String get pack_price_plus5_annual => '9,99 €';
+
+  @override
+  String get pack_price_plus10_monthly => '2,49 €';
+
+  @override
+  String get pack_price_plus10_annual => '19,99 €';
+
+  @override
+  String get subscription_packs_section => 'Packs de miembros';
+
+  @override
+  String get subscription_add_pack => 'Añadir pack';
+
+  @override
+  String subscription_cancel_pack(String pack) {
+    return 'Cancelar $pack';
+  }
+
+  @override
+  String plan_summary_packs_row(String packs, int max) {
+    return 'Packs: $packs · hasta $max miembros';
+  }
+
+  @override
+  String pack_cancel_title(String pack) {
+    return '¿Cancelar $pack?';
+  }
+
+  @override
+  String pack_cancel_active_until(String date) {
+    return 'El pack seguirá activo hasta el $date.';
+  }
+
+  @override
+  String pack_cancel_freeze_warning(int count, int max) {
+    return 'Al finalizar, tu tope baja a $max miembros y se congelarán los $count miembros más recientes por encima del tope (recuperables).';
+  }
+
+  @override
+  String pack_cancel_no_freeze(int max) {
+    return 'Al finalizar, tu tope de miembros baja a $max.';
+  }
+
+  @override
+  String get pack_cancel_confirm => 'Cancelar pack';
+
+  @override
+  String get pack_cancel_dismiss => 'Mantener pack';
+
+  @override
+  String get toka_business_title => 'Toka Business';
+
+  @override
+  String toka_business_body(int max) {
+    return 'Has alcanzado el máximo de $max miembros. Para hogares u organizaciones más grandes, Toka Business llegará pronto.';
+  }
+
+  @override
+  String get toka_business_dismiss => 'Entendido';
+
+  @override
+  String member_limit_grupo_packs(int limit) {
+    return 'Has alcanzado el tope de $limit miembros de tu plan. Añade un pack para crecer.';
+  }
+
+  @override
+  String member_limit_business(int limit) {
+    return 'Has alcanzado el máximo de $limit miembros.';
+  }
+
+  @override
+  String get member_limit_add_pack_cta => 'Añadir pack';
+
+  @override
+  String get member_limit_business_cta => 'Toka Business';
+
+  @override
+  String subscription_tier_summary(String tierName, int limit) {
+    return 'Plan $tierName · hasta $limit miembros';
+  }
 }

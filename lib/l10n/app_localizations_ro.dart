@@ -519,12 +519,26 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String today_tasks_due(int count) {
-    return '$count sarcini pentru azi';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count de sarcini pentru azi',
+      few: '$count sarcini pentru azi',
+      one: '$count sarcină pentru azi',
+    );
+    return '$_temp0';
   }
 
   @override
   String today_tasks_done_today(int count) {
-    return '$count finalizate azi';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count de finalizate azi',
+      few: '$count finalizate azi',
+      one: '$count finalizată azi',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -532,6 +546,9 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get today_section_done => 'Finalizate';
+
+  @override
+  String get today_section_upcoming => 'Următoarele';
 
   @override
   String get today_overdue => 'Întârziată';
@@ -677,7 +694,14 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String members_pending_tasks(int count) {
-    return '$count sarcini în așteptare';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count de sarcini în așteptare',
+      few: '$count sarcini în așteptare',
+      one: '$count sarcină în așteptare',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -940,7 +964,14 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String paywall_trial_badge(int days) {
-    return '$days zile gratuite';
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days de zile gratuite',
+      few: '$days zile gratuite',
+      one: '$days zi gratuită',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -1667,7 +1698,14 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String tasks_selection_count(int count) {
-    return '$count selectate';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count de selectate',
+      few: '$count selectate',
+      one: '$count selectată',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -2013,6 +2051,105 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get skinClassicDescription => 'Cald, luminos, familiar';
+
+  @override
+  String get skinOceanoLabel => 'Ocean';
+
+  @override
+  String get skinOceanoDescription => 'Albastru calm și senin';
+
+  @override
+  String get plusLockedBadge => 'Necesită Toka Plus';
+
+  @override
+  String get plusPaywallTitle => 'Toka Plus';
+
+  @override
+  String get plusPaywallSubtitle =>
+      'Deblochează aspecte exclusive și statisticile tale personale.';
+
+  @override
+  String get plusBenefitSkinsTitle => 'Aspecte exclusive';
+
+  @override
+  String get plusBenefitSkinsDesc =>
+      'Personalizează Toka cu teme doar pentru Plus.';
+
+  @override
+  String get plusBenefitMetricsTitle => 'Statistici personale';
+
+  @override
+  String get plusBenefitMetricsDesc =>
+      'Vezi în detaliu seria, punctualitatea și repartizarea.';
+
+  @override
+  String get plusPlanAnnualLabel => 'Anual';
+
+  @override
+  String get plusPlanMonthlyLabel => 'Lunar';
+
+  @override
+  String get plusPriceAnnualFallback => '14,99 €';
+
+  @override
+  String get plusPriceMonthlyFallback => '1,99 €';
+
+  @override
+  String get plusPriceAnnualSuffix => '/an';
+
+  @override
+  String get plusPriceMonthlySuffix => '/lună';
+
+  @override
+  String get plusAnnualSavingsBadge => 'Cel mai bun preț';
+
+  @override
+  String get plusCtaSubscribe => 'Abonează-te';
+
+  @override
+  String get plusRestore => 'Restaurează achiziția';
+
+  @override
+  String get plusAlreadyActiveTitle => 'Ai deja Toka Plus';
+
+  @override
+  String get plusAlreadyActiveBody =>
+      'Bucură-te de aspectele exclusive și statisticile tale personale.';
+
+  @override
+  String get plusPurchaseSuccess => 'Bun venit la Toka Plus!';
+
+  @override
+  String get personalMetricsTitle => 'Statisticile mele';
+
+  @override
+  String get personalMetricsLockedTitle => 'Statistici personale cu Toka Plus';
+
+  @override
+  String get personalMetricsLockedBody =>
+      'Abonează-te la Toka Plus pentru a vedea în detaliu seria, punctualitatea, scorul și repartizarea.';
+
+  @override
+  String get personalMetricsUnlockCta => 'Obține Toka Plus';
+
+  @override
+  String get personalMetricsEmpty =>
+      'Încă nu ai activitate. Finalizează sarcini pentru a-ți vedea statisticile.';
+
+  @override
+  String get metricCurrentStreak => 'Serie curentă';
+
+  @override
+  String get metricPunctuality => 'Punctualitate';
+
+  @override
+  String get metricAverageScore => 'Scor mediu';
+
+  @override
+  String get metricPassedCount => 'Ture cedate';
+
+  @override
+  String get metricShare => 'Repartiția ta';
 
   @override
   String get homes_role_frozen => 'Înghețat';
@@ -2536,4 +2673,213 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get support_error_generic => 'Nu s-a putut obține diagnosticul.';
+
+  @override
+  String get tier_name_pareja => 'Toka Pareja';
+
+  @override
+  String get tier_name_familia => 'Toka Familia';
+
+  @override
+  String get tier_name_grupo => 'Toka Grupo';
+
+  @override
+  String member_limit_free(int limit) {
+    return 'Planul Free permite până la $limit membri. Treci la Premium pentru a adăuga mai mulți.';
+  }
+
+  @override
+  String member_limit_pareja(int limit) {
+    return 'Planul Toka Pareja permite până la $limit membri. Treci la Familia sau Grupo pentru a adăuga mai mulți.';
+  }
+
+  @override
+  String member_limit_familia(int limit) {
+    return 'Planul Toka Familia permite până la $limit membri. Treci la Grupo pentru a adăuga mai mulți.';
+  }
+
+  @override
+  String member_limit_grupo(int limit) {
+    return 'Ai atins maximul de $limit membri al planului Toka Grupo.';
+  }
+
+  @override
+  String member_limit_premium_max(int limit) {
+    return 'Ai atins maximul de $limit membri al planului tău.';
+  }
+
+  @override
+  String member_limit_counter(int current, int limit) {
+    return '$current / $limit membri';
+  }
+
+  @override
+  String get member_limit_upgrade_cta => 'Schimbă planul';
+
+  @override
+  String get paywall_tiers_same_features =>
+      'Aceleași funcții premium în toate cele trei planuri. Se schimbă doar câți membri încap.';
+
+  @override
+  String paywall_tier_members(int count) {
+    return 'Până la $count membri';
+  }
+
+  @override
+  String get paywall_cycle_monthly => 'Lunar';
+
+  @override
+  String get paywall_cycle_annual => 'Anual';
+
+  @override
+  String get paywall_price_monthly_suffix => '/lună';
+
+  @override
+  String get paywall_price_annual_suffix => '/an';
+
+  @override
+  String get paywall_tier_continue_cta => 'Continuă';
+
+  @override
+  String get tier_price_pareja_monthly => '2,99 €';
+
+  @override
+  String get tier_price_pareja_annual => '19,99 €';
+
+  @override
+  String get tier_price_familia_monthly => '3,99 €';
+
+  @override
+  String get tier_price_familia_annual => '29,99 €';
+
+  @override
+  String get tier_price_grupo_monthly => '5,99 €';
+
+  @override
+  String get tier_price_grupo_annual => '49,99 €';
+
+  @override
+  String get paywall_packs_title => 'Extinde-ți casa';
+
+  @override
+  String get paywall_packs_subtitle =>
+      'Adaugă pachete de membri la planul Grupo.';
+
+  @override
+  String get pack_name_plus5 => 'Pachet +5 membri';
+
+  @override
+  String get pack_name_plus10 => 'Pachet +10 membri';
+
+  @override
+  String pack_seats(int count) {
+    return '+$count locuri';
+  }
+
+  @override
+  String pack_result_cap(int max) {
+    return 'Până la $max membri';
+  }
+
+  @override
+  String get pack_buy_cta => 'Adaugă pachet';
+
+  @override
+  String get pack_active_badge => 'Activ';
+
+  @override
+  String get pack_requires_grupo_title => 'Pachete de membri';
+
+  @override
+  String get pack_requires_grupo_body =>
+      'Pachetele de membri sunt disponibile în planul Toka Grupo.';
+
+  @override
+  String get pack_requires_grupo_cta => 'Treci la Grupo';
+
+  @override
+  String get pack_price_plus5_monthly => '1,49 €';
+
+  @override
+  String get pack_price_plus5_annual => '9,99 €';
+
+  @override
+  String get pack_price_plus10_monthly => '2,49 €';
+
+  @override
+  String get pack_price_plus10_annual => '19,99 €';
+
+  @override
+  String get subscription_packs_section => 'Pachete de membri';
+
+  @override
+  String get subscription_add_pack => 'Adaugă pachet';
+
+  @override
+  String subscription_cancel_pack(String pack) {
+    return 'Anulează $pack';
+  }
+
+  @override
+  String plan_summary_packs_row(String packs, int max) {
+    return 'Pachete: $packs · până la $max membri';
+  }
+
+  @override
+  String pack_cancel_title(String pack) {
+    return 'Anulezi $pack?';
+  }
+
+  @override
+  String pack_cancel_active_until(String date) {
+    return 'Pachetul rămâne activ până la $date.';
+  }
+
+  @override
+  String pack_cancel_freeze_warning(int count, int max) {
+    return 'La final, limita scade la $max membri și cei $count membri adăugați cel mai recent peste limită vor fi înghețați (recuperabili).';
+  }
+
+  @override
+  String pack_cancel_no_freeze(int max) {
+    return 'La final, limita de membri scade la $max.';
+  }
+
+  @override
+  String get pack_cancel_confirm => 'Anulează pachetul';
+
+  @override
+  String get pack_cancel_dismiss => 'Păstrează pachetul';
+
+  @override
+  String get toka_business_title => 'Toka Business';
+
+  @override
+  String toka_business_body(int max) {
+    return 'Ai atins maximul de $max membri. Pentru case sau organizații mai mari, Toka Business vine în curând.';
+  }
+
+  @override
+  String get toka_business_dismiss => 'Am înțeles';
+
+  @override
+  String member_limit_grupo_packs(int limit) {
+    return 'Ai atins limita de $limit membri a planului tău. Adaugă un pachet pentru a crește.';
+  }
+
+  @override
+  String member_limit_business(int limit) {
+    return 'Ai atins maximul de $limit membri.';
+  }
+
+  @override
+  String get member_limit_add_pack_cta => 'Adaugă pachet';
+
+  @override
+  String get member_limit_business_cta => 'Toka Business';
+
+  @override
+  String subscription_tier_summary(String tierName, int limit) {
+    return 'Plan $tierName · până la $limit membri';
+  }
 }

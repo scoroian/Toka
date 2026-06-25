@@ -514,12 +514,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String today_tasks_due(int count) {
-    return '$count tasks due today';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tasks due today',
+      one: '$count task due today',
+    );
+    return '$_temp0';
   }
 
   @override
   String today_tasks_done_today(int count) {
-    return '$count done today';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count done today',
+      one: '$count done today',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -527,6 +539,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get today_section_done => 'Done';
+
+  @override
+  String get today_section_upcoming => 'Upcoming';
 
   @override
   String get today_overdue => 'Overdue';
@@ -670,7 +685,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String members_pending_tasks(int count) {
-    return '$count pending tasks';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pending tasks',
+      one: '$count pending task',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -931,7 +952,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String paywall_trial_badge(int days) {
-    return '$days days free';
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days free',
+      one: '$days day free',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -1652,7 +1679,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String tasks_selection_count(int count) {
-    return '$count selected';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count selected',
+      one: '$count selected',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -1990,6 +2023,104 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get skinClassicDescription => 'Warm, bright, familiar';
+
+  @override
+  String get skinOceanoLabel => 'Ocean';
+
+  @override
+  String get skinOceanoDescription => 'Cool, calm blue';
+
+  @override
+  String get plusLockedBadge => 'Requires Toka Plus';
+
+  @override
+  String get plusPaywallTitle => 'Toka Plus';
+
+  @override
+  String get plusPaywallSubtitle =>
+      'Unlock exclusive looks and your personal stats.';
+
+  @override
+  String get plusBenefitSkinsTitle => 'Exclusive looks';
+
+  @override
+  String get plusBenefitSkinsDesc => 'Personalize Toka with Plus-only skins.';
+
+  @override
+  String get plusBenefitMetricsTitle => 'Personal stats';
+
+  @override
+  String get plusBenefitMetricsDesc =>
+      'See your streak, punctuality and share in detail.';
+
+  @override
+  String get plusPlanAnnualLabel => 'Annual';
+
+  @override
+  String get plusPlanMonthlyLabel => 'Monthly';
+
+  @override
+  String get plusPriceAnnualFallback => '€14.99';
+
+  @override
+  String get plusPriceMonthlyFallback => '€1.99';
+
+  @override
+  String get plusPriceAnnualSuffix => '/year';
+
+  @override
+  String get plusPriceMonthlySuffix => '/month';
+
+  @override
+  String get plusAnnualSavingsBadge => 'Best value';
+
+  @override
+  String get plusCtaSubscribe => 'Subscribe';
+
+  @override
+  String get plusRestore => 'Restore purchase';
+
+  @override
+  String get plusAlreadyActiveTitle => 'You already have Toka Plus';
+
+  @override
+  String get plusAlreadyActiveBody =>
+      'Enjoy the exclusive looks and your personal stats.';
+
+  @override
+  String get plusPurchaseSuccess => 'Welcome to Toka Plus!';
+
+  @override
+  String get personalMetricsTitle => 'My stats';
+
+  @override
+  String get personalMetricsLockedTitle => 'Personal stats with Toka Plus';
+
+  @override
+  String get personalMetricsLockedBody =>
+      'Subscribe to Toka Plus to see your streak, punctuality, score and share in detail.';
+
+  @override
+  String get personalMetricsUnlockCta => 'Get Toka Plus';
+
+  @override
+  String get personalMetricsEmpty =>
+      'No activity yet. Complete tasks to see your stats.';
+
+  @override
+  String get metricCurrentStreak => 'Current streak';
+
+  @override
+  String get metricPunctuality => 'Punctuality';
+
+  @override
+  String get metricAverageScore => 'Average score';
+
+  @override
+  String get metricPassedCount => 'Turns passed';
+
+  @override
+  String get metricShare => 'Your share';
 
   @override
   String get homes_role_frozen => 'Frozen';
@@ -2512,4 +2643,212 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get support_error_generic => 'Couldn\'t fetch diagnostics.';
+
+  @override
+  String get tier_name_pareja => 'Toka Pareja';
+
+  @override
+  String get tier_name_familia => 'Toka Familia';
+
+  @override
+  String get tier_name_grupo => 'Toka Grupo';
+
+  @override
+  String member_limit_free(int limit) {
+    return 'Your Free plan allows up to $limit members. Go Premium to add more.';
+  }
+
+  @override
+  String member_limit_pareja(int limit) {
+    return 'Your Toka Pareja plan allows up to $limit members. Upgrade to Familia or Grupo to add more.';
+  }
+
+  @override
+  String member_limit_familia(int limit) {
+    return 'Your Toka Familia plan allows up to $limit members. Upgrade to Grupo to add more.';
+  }
+
+  @override
+  String member_limit_grupo(int limit) {
+    return 'You\'ve reached the maximum of $limit members on the Toka Grupo plan.';
+  }
+
+  @override
+  String member_limit_premium_max(int limit) {
+    return 'You\'ve reached the maximum of $limit members on your plan.';
+  }
+
+  @override
+  String member_limit_counter(int current, int limit) {
+    return '$current / $limit members';
+  }
+
+  @override
+  String get member_limit_upgrade_cta => 'Upgrade plan';
+
+  @override
+  String get paywall_tiers_same_features =>
+      'The same premium features in all three plans. Only the number of members changes.';
+
+  @override
+  String paywall_tier_members(int count) {
+    return 'Up to $count members';
+  }
+
+  @override
+  String get paywall_cycle_monthly => 'Monthly';
+
+  @override
+  String get paywall_cycle_annual => 'Annual';
+
+  @override
+  String get paywall_price_monthly_suffix => '/mo';
+
+  @override
+  String get paywall_price_annual_suffix => '/yr';
+
+  @override
+  String get paywall_tier_continue_cta => 'Continue';
+
+  @override
+  String get tier_price_pareja_monthly => '€2.99';
+
+  @override
+  String get tier_price_pareja_annual => '€19.99';
+
+  @override
+  String get tier_price_familia_monthly => '€3.99';
+
+  @override
+  String get tier_price_familia_annual => '€29.99';
+
+  @override
+  String get tier_price_grupo_monthly => '€5.99';
+
+  @override
+  String get tier_price_grupo_annual => '€49.99';
+
+  @override
+  String get paywall_packs_title => 'Expand your home';
+
+  @override
+  String get paywall_packs_subtitle => 'Add member packs to your Grupo plan.';
+
+  @override
+  String get pack_name_plus5 => 'Member pack +5';
+
+  @override
+  String get pack_name_plus10 => 'Member pack +10';
+
+  @override
+  String pack_seats(int count) {
+    return '+$count seats';
+  }
+
+  @override
+  String pack_result_cap(int max) {
+    return 'Up to $max members';
+  }
+
+  @override
+  String get pack_buy_cta => 'Add pack';
+
+  @override
+  String get pack_active_badge => 'Active';
+
+  @override
+  String get pack_requires_grupo_title => 'Member packs';
+
+  @override
+  String get pack_requires_grupo_body =>
+      'Member packs are available on the Toka Grupo plan.';
+
+  @override
+  String get pack_requires_grupo_cta => 'Upgrade to Grupo';
+
+  @override
+  String get pack_price_plus5_monthly => '€1.49';
+
+  @override
+  String get pack_price_plus5_annual => '€9.99';
+
+  @override
+  String get pack_price_plus10_monthly => '€2.49';
+
+  @override
+  String get pack_price_plus10_annual => '€19.99';
+
+  @override
+  String get subscription_packs_section => 'Member packs';
+
+  @override
+  String get subscription_add_pack => 'Add pack';
+
+  @override
+  String subscription_cancel_pack(String pack) {
+    return 'Cancel $pack';
+  }
+
+  @override
+  String plan_summary_packs_row(String packs, int max) {
+    return 'Packs: $packs · up to $max members';
+  }
+
+  @override
+  String pack_cancel_title(String pack) {
+    return 'Cancel $pack?';
+  }
+
+  @override
+  String pack_cancel_active_until(String date) {
+    return 'The pack stays active until $date.';
+  }
+
+  @override
+  String pack_cancel_freeze_warning(int count, int max) {
+    return 'When it ends, your limit drops to $max members and the $count most recently added members above the limit will be frozen (recoverable).';
+  }
+
+  @override
+  String pack_cancel_no_freeze(int max) {
+    return 'When it ends, your member limit drops to $max.';
+  }
+
+  @override
+  String get pack_cancel_confirm => 'Cancel pack';
+
+  @override
+  String get pack_cancel_dismiss => 'Keep pack';
+
+  @override
+  String get toka_business_title => 'Toka Business';
+
+  @override
+  String toka_business_body(int max) {
+    return 'You\'ve reached the maximum of $max members. For larger homes or organizations, Toka Business is coming soon.';
+  }
+
+  @override
+  String get toka_business_dismiss => 'Got it';
+
+  @override
+  String member_limit_grupo_packs(int limit) {
+    return 'You\'ve reached your plan\'s limit of $limit members. Add a pack to grow your home.';
+  }
+
+  @override
+  String member_limit_business(int limit) {
+    return 'You\'ve reached the maximum of $limit members.';
+  }
+
+  @override
+  String get member_limit_add_pack_cta => 'Add pack';
+
+  @override
+  String get member_limit_business_cta => 'Toka Business';
+
+  @override
+  String subscription_tier_summary(String tierName, int limit) {
+    return '$tierName plan · up to $limit members';
+  }
 }

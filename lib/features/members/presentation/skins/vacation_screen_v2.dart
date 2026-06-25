@@ -17,6 +17,7 @@ class VacationScreenV2 extends ConsumerStatefulWidget {
 
 class _VacationScreenV2State extends ConsumerState<VacationScreenV2> {
   final _reasonController = TextEditingController();
+  bool _reasonHydrated = false;
 
   @override
   void dispose() {
@@ -63,10 +64,12 @@ class _VacationScreenV2State extends ConsumerState<VacationScreenV2> {
       vacationViewModelNotifierProvider(widget.homeId, widget.uid),
     );
 
-    // Initialize reasonController from loaded vacation (once)
-    if (vm.isInitialized && _reasonController.text.isEmpty) {
-      // No-op — reason is only user-entered, existing reason not shown
-      // (Screen re-create reads fresh state anyway)
+    // Rehidrata el motivo guardado UNA sola vez tras cargar la vacación. Sin
+    // esto el campo salía vacío al reabrir y, al guardar otros cambios, el
+    // motivo previo se borraba silenciosamente (Hallazgo #2-QA vacaciones).
+    if (vm.isInitialized && !_reasonHydrated) {
+      _reasonHydrated = true;
+      _reasonController.text = vm.reason ?? '';
     }
 
     return Scaffold(

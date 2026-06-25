@@ -35,6 +35,7 @@ class HomeModel {
       updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       lastBillingError: data['lastBillingError'] as String?,
       photoUrl: data['photoUrl'] as String?,
+      timezone: data['timezone'] as String? ?? 'Europe/Madrid',
     );
   }
 

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:toka/shared/widgets/ad_aware_scaffold.dart';
 import 'package:toka/shared/widgets/ad_banner_config_provider.dart';
+import 'package:toka/shared/widgets/skins/main_shell_v2.dart';
 
 Widget _pump({required bool bannerVisible, Widget? fab}) {
   return ProviderScope(
@@ -40,9 +41,13 @@ void main() {
       expect(find.byKey(const Key('ad_banner')), findsNothing);
     });
 
+    // Hallazgo #4-QA: el Scaffold anidado de AdAwareScaffold NO propaga al body
+    // el espacio que el shell reserva, así que `bottomPaddingOf` ahora delega en
+    // MainShellV2.bottomContentPadding (safeBottom + navBar + banner), igual que
+    // las pantallas tab, para que el último control no quede tapado.
     testWidgets(
-        'bottomPaddingOf devuelve solo safeBottom incluso con banner activo '
-        '(el shell ya reserva el espacio del banner)', (t) async {
+        'bottomPaddingOf incluye safeBottom + navBar + banner cuando el banner '
+        'está visible', (t) async {
       double? captured;
       await t.pumpWidget(
         ProviderScope(
@@ -64,11 +69,16 @@ void main() {
           ),
         ),
       );
-      expect(captured, 24);
+      final expected = 24 +
+          MainShellV2.kNavBarHeight +
+          MainShellV2.kNavBarBottom +
+          MainShellV2.bannerSlotHeight(bannerVisible: true);
+      expect(captured, expected);
     });
 
-    testWidgets('bottomPaddingOf devuelve solo safeBottom cuando no hay banner',
-        (t) async {
+    testWidgets(
+        'bottomPaddingOf incluye safeBottom + navBar (sin banner) cuando no hay '
+        'banner', (t) async {
       double? captured;
       await t.pumpWidget(
         ProviderScope(
@@ -90,7 +100,9 @@ void main() {
           ),
         ),
       );
-      expect(captured, 24);
+      final expected =
+          24 + MainShellV2.kNavBarHeight + MainShellV2.kNavBarBottom;
+      expect(captured, expected);
     });
   });
 }

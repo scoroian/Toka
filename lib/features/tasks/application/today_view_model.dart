@@ -15,6 +15,7 @@ import '../domain/pass_turn_logic.dart';
 import '../domain/recurrence_order.dart';
 import '../domain/recurrence_rule.dart';
 import '../domain/task.dart';
+import '../domain/task_actionability.dart';
 import '../domain/task_status.dart';
 import '../presentation/widgets/pass_turn_dialog.dart';
 import 'pending_completions_provider.dart';
@@ -26,6 +27,7 @@ part 'today_view_model.g.dart';
 
 typedef RecurrenceGroup = ({
   List<TaskPreview> todos,
+  List<TaskPreview> upcoming,
   List<DoneTaskPreview> dones,
 });
 
@@ -135,18 +137,38 @@ List<TaskPreview> excludePendingCompletions(
   return tasks.where((t) => !pendingTaskIds.contains(t.taskId)).toList();
 }
 
+/// Orden dentro de una sección: vencidas primero, luego por `nextDueAt`
+/// ascendente y, a igualdad, alfabético por título.
+int _compareForToday(TaskPreview a, TaskPreview b) {
+  if (a.isOverdue && !b.isOverdue) return -1;
+  if (!a.isOverdue && b.isOverdue) return 1;
+  final dateCmp = a.nextDueAt.compareTo(b.nextDueAt);
+  if (dateCmp != 0) return dateCmp;
+  return a.title.compareTo(b.title);
+}
+
 @visibleForTesting
 Map<String, RecurrenceGroup> groupByRecurrence(
   List<TaskPreview> activeTasks,
-  List<DoneTaskPreview> doneTasks,
-) {
+  List<DoneTaskPreview> doneTasks, {
+  DateTime? now,
+  String? timezone,
+}) {
   final result = <String, RecurrenceGroup>{};
 
+  // Las tareas activas se reparten entre "Por hacer" (accionables hoy) y
+  // "Próximas" (ocurrencias futuras fuera de su ventana de recurrencia, con el
+  // botón Hecho deshabilitado). El criterio es el MISMO que usa la tarjeta para
+  // habilitar/deshabilitar "Hecho", así no hay desajuste entre la sección en la
+  // que aparece la tarea y si se puede completar (Hallazgo #3-QA).
   for (final task in activeTasks) {
     final key = task.recurrenceType;
     final existing = result[key];
+    final actionable =
+        TaskActionability.isActionable(task, now: now, timezone: timezone);
     result[key] = (
-      todos: [...(existing?.todos ?? []), task],
+      todos: [...(existing?.todos ?? []), if (actionable) task],
+      upcoming: [...(existing?.upcoming ?? []), if (!actionable) task],
       dones: existing?.dones ?? [],
     );
   }
@@ -156,25 +178,19 @@ Map<String, RecurrenceGroup> groupByRecurrence(
     final existing = result[key];
     result[key] = (
       todos: existing?.todos ?? [],
+      upcoming: existing?.upcoming ?? [],
       dones: [...(existing?.dones ?? []), done],
     );
   }
 
-  // Sort todos within each group
+  // Ordena "Por hacer" y "Próximas" dentro de cada grupo con el mismo criterio.
   for (final key in result.keys) {
     final group = result[key]!;
-    final sorted = List<TaskPreview>.from(group.todos)
-      ..sort((a, b) {
-        // 1. Overdue first
-        if (a.isOverdue && !b.isOverdue) return -1;
-        if (!a.isOverdue && b.isOverdue) return 1;
-        // 2. By nextDueAt ascending
-        final dateCmp = a.nextDueAt.compareTo(b.nextDueAt);
-        if (dateCmp != 0) return dateCmp;
-        // 3. Alphabetically
-        return a.title.compareTo(b.title);
-      });
-    result[key] = (todos: sorted, dones: group.dones);
+    result[key] = (
+      todos: List<TaskPreview>.from(group.todos)..sort(_compareForToday),
+      upcoming: List<TaskPreview>.from(group.upcoming)..sort(_compareForToday),
+      dones: group.dones,
+    );
   }
 
   return result;
@@ -358,7 +374,11 @@ TodayViewModel todayViewModel(TodayViewModelRef ref) {
   final dashboardAsync = ref.watch(dashboardProvider);
   final auth = ref.watch(authProvider);
   final currentUid = auth.whenOrNull(authenticated: (u) => u.uid);
-  final homeId = ref.watch(currentHomeProvider).valueOrNull?.id ?? '';
+  final currentHome = ref.watch(currentHomeProvider).valueOrNull;
+  final homeId = currentHome?.id ?? '';
+  // Zona del hogar: la partición Por hacer/Próximas se evalúa en esta zona para
+  // que coincida con el label de hora (Hallazgo #2-QA).
+  final homeTz = currentHome?.timezone;
   // Completaciones "diferidas" en su ventana de Deshacer: se ocultan de la
   // lista de "Por hacer" hasta que el commit se confirma (o se deshace).
   final pending = ref.watch(pendingCompletionsProvider);
@@ -381,7 +401,8 @@ TodayViewModel todayViewModel(TodayViewModelRef ref) {
       return TodayViewData(
         grouped: groupByRecurrence(
             excludePendingCompletions(data.activeTasksPreview, pending),
-            data.doneTasksPreview),
+            data.doneTasksPreview,
+            timezone: homeTz),
         counters: data.counters,
         showAdBanner: data.adFlags.showBanner,
         adBannerUnit: data.adFlags.bannerUnit,
@@ -413,7 +434,7 @@ TodayViewModel todayViewModel(TodayViewModelRef ref) {
     );
 
     return TodayViewData(
-      grouped: groupByRecurrence(previews, []),
+      grouped: groupByRecurrence(previews, [], timezone: homeTz),
       counters: DashboardCounters(
         totalActiveTasks: activeTasks.length,
         totalMembers: members.length,

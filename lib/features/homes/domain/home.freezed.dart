@@ -33,7 +33,12 @@ mixin _$Home {
       throw _privateConstructorUsedError; // URL de la foto del hogar en Cloud Storage. null cuando el hogar
 // todavía usa la inicial. Se actualiza desde el sheet de "Avatar
 // del hogar" en `home_settings_screen` (ambas skins).
-  String? get photoUrl => throw _privateConstructorUsedError;
+  String? get photoUrl =>
+      throw _privateConstructorUsedError; // Zona horaria IANA del hogar (p. ej. "Europe/Madrid"), backfill en
+// `homes/{homeId}.timezone`. Es la zona canónica para mostrar horas de
+// tareas en toda la UI, de modo que todos los miembros vean la misma hora
+// aunque sus dispositivos estén en zonas distintas (Hallazgo #2-QA).
+  String get timezone => throw _privateConstructorUsedError;
 
   /// Create a copy of Home
   /// with the given fields replaced by the non-null parameter values.
@@ -61,7 +66,8 @@ abstract class $HomeCopyWith<$Res> {
       DateTime createdAt,
       DateTime updatedAt,
       String? lastBillingError,
-      String? photoUrl});
+      String? photoUrl,
+      String timezone});
 
   $HomeLimitsCopyWith<$Res> get limits;
 }
@@ -96,6 +102,7 @@ class _$HomeCopyWithImpl<$Res, $Val extends Home>
     Object? updatedAt = null,
     Object? lastBillingError = freezed,
     Object? photoUrl = freezed,
+    Object? timezone = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -158,6 +165,10 @@ class _$HomeCopyWithImpl<$Res, $Val extends Home>
           ? _value.photoUrl
           : photoUrl // ignore: cast_nullable_to_non_nullable
               as String?,
+      timezone: null == timezone
+          ? _value.timezone
+          : timezone // ignore: cast_nullable_to_non_nullable
+              as String,
     ) as $Val);
   }
 
@@ -194,7 +205,8 @@ abstract class _$$HomeImplCopyWith<$Res> implements $HomeCopyWith<$Res> {
       DateTime createdAt,
       DateTime updatedAt,
       String? lastBillingError,
-      String? photoUrl});
+      String? photoUrl,
+      String timezone});
 
   @override
   $HomeLimitsCopyWith<$Res> get limits;
@@ -227,6 +239,7 @@ class __$$HomeImplCopyWithImpl<$Res>
     Object? updatedAt = null,
     Object? lastBillingError = freezed,
     Object? photoUrl = freezed,
+    Object? timezone = null,
   }) {
     return _then(_$HomeImpl(
       id: null == id
@@ -289,6 +302,10 @@ class __$$HomeImplCopyWithImpl<$Res>
           ? _value.photoUrl
           : photoUrl // ignore: cast_nullable_to_non_nullable
               as String?,
+      timezone: null == timezone
+          ? _value.timezone
+          : timezone // ignore: cast_nullable_to_non_nullable
+              as String,
     ));
   }
 }
@@ -311,7 +328,8 @@ class _$HomeImpl implements _Home {
       required this.createdAt,
       required this.updatedAt,
       this.lastBillingError,
-      this.photoUrl});
+      this.photoUrl,
+      this.timezone = 'Europe/Madrid'});
 
   @override
   final String id;
@@ -346,10 +364,17 @@ class _$HomeImpl implements _Home {
 // del hogar" en `home_settings_screen` (ambas skins).
   @override
   final String? photoUrl;
+// Zona horaria IANA del hogar (p. ej. "Europe/Madrid"), backfill en
+// `homes/{homeId}.timezone`. Es la zona canónica para mostrar horas de
+// tareas en toda la UI, de modo que todos los miembros vean la misma hora
+// aunque sus dispositivos estén en zonas distintas (Hallazgo #2-QA).
+  @override
+  @JsonKey()
+  final String timezone;
 
   @override
   String toString() {
-    return 'Home(id: $id, name: $name, ownerUid: $ownerUid, currentPayerUid: $currentPayerUid, lastPayerUid: $lastPayerUid, premiumStatus: $premiumStatus, premiumPlan: $premiumPlan, premiumEndsAt: $premiumEndsAt, restoreUntil: $restoreUntil, autoRenewEnabled: $autoRenewEnabled, limits: $limits, createdAt: $createdAt, updatedAt: $updatedAt, lastBillingError: $lastBillingError, photoUrl: $photoUrl)';
+    return 'Home(id: $id, name: $name, ownerUid: $ownerUid, currentPayerUid: $currentPayerUid, lastPayerUid: $lastPayerUid, premiumStatus: $premiumStatus, premiumPlan: $premiumPlan, premiumEndsAt: $premiumEndsAt, restoreUntil: $restoreUntil, autoRenewEnabled: $autoRenewEnabled, limits: $limits, createdAt: $createdAt, updatedAt: $updatedAt, lastBillingError: $lastBillingError, photoUrl: $photoUrl, timezone: $timezone)';
   }
 
   @override
@@ -383,7 +408,9 @@ class _$HomeImpl implements _Home {
             (identical(other.lastBillingError, lastBillingError) ||
                 other.lastBillingError == lastBillingError) &&
             (identical(other.photoUrl, photoUrl) ||
-                other.photoUrl == photoUrl));
+                other.photoUrl == photoUrl) &&
+            (identical(other.timezone, timezone) ||
+                other.timezone == timezone));
   }
 
   @override
@@ -403,7 +430,8 @@ class _$HomeImpl implements _Home {
       createdAt,
       updatedAt,
       lastBillingError,
-      photoUrl);
+      photoUrl,
+      timezone);
 
   /// Create a copy of Home
   /// with the given fields replaced by the non-null parameter values.
@@ -430,7 +458,8 @@ abstract class _Home implements Home {
       required final DateTime createdAt,
       required final DateTime updatedAt,
       final String? lastBillingError,
-      final String? photoUrl}) = _$HomeImpl;
+      final String? photoUrl,
+      final String timezone}) = _$HomeImpl;
 
   @override
   String get id;
@@ -464,7 +493,13 @@ abstract class _Home implements Home {
 // todavía usa la inicial. Se actualiza desde el sheet de "Avatar
 // del hogar" en `home_settings_screen` (ambas skins).
   @override
-  String? get photoUrl;
+  String?
+      get photoUrl; // Zona horaria IANA del hogar (p. ej. "Europe/Madrid"), backfill en
+// `homes/{homeId}.timezone`. Es la zona canónica para mostrar horas de
+// tareas en toda la UI, de modo que todos los miembros vean la misma hora
+// aunque sus dispositivos estén en zonas distintas (Hallazgo #2-QA).
+  @override
+  String get timezone;
 
   /// Create a copy of Home
   /// with the given fields replaced by the non-null parameter values.

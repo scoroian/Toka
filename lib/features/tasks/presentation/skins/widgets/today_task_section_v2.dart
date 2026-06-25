@@ -15,12 +15,17 @@ class TodayTaskSectionV2 extends StatelessWidget {
     required this.todos,
     required this.dones,
     required this.currentUid,
+    this.upcoming = const [],
     this.onDone,
     this.onPass,
   });
 
   final String recurrenceType;
   final List<TaskPreview> todos;
+  /// Ocurrencias futuras (fuera de su ventana de recurrencia): se muestran en
+  /// una sub-sección "Próximas" con el botón Hecho deshabilitado, para que no
+  /// se confundan con las tareas accionables hoy (Hallazgo #3-QA).
+  final List<TaskPreview> upcoming;
   final List<DoneTaskPreview> dones;
   final String? currentUid;
   final void Function(TaskPreview)? onDone;
@@ -66,6 +71,26 @@ class TodayTaskSectionV2 extends StatelessWidget {
             currentUid: currentUid,
             onDone: onDone != null ? () => onDone!(todos[i]) : null,
             onPass: onPass != null ? () => onPass!(todos[i]) : null,
+          ),
+        ),
+      ],
+      if (upcoming.isNotEmpty) ...[
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+            child: Text(l10n.today_section_upcoming,
+                key: Key('section_upcoming_$recurrenceType'),
+                style: GoogleFonts.plusJakartaSans(
+                    fontSize: 10, fontWeight: FontWeight.w600, color: titleColor)),
+          ),
+        ),
+        SliverList.builder(
+          itemCount: upcoming.length,
+          itemBuilder: (ctx, i) => TodayTaskCardTodoV2(
+            task: upcoming[i],
+            currentUid: currentUid,
+            onDone: onDone != null ? () => onDone!(upcoming[i]) : null,
+            onPass: onPass != null ? () => onPass!(upcoming[i]) : null,
           ),
         ),
       ],

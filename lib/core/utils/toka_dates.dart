@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
+import 'package:timezone/timezone.dart' as tz;
 
 /// Formateadores de fecha y hora centralizados para Toka.
 ///
@@ -12,6 +13,24 @@ import 'package:intl/intl.dart';
 /// consistencia interna (ver BUG-15 en la sesión QA 2026-04-20).
 class TokaDates {
   const TokaDates._();
+
+  /// Devuelve el mismo instante representado en la zona horaria [timezone]
+  /// (IANA, p. ej. "Europe/Madrid"). El momento absoluto se preserva; solo
+  /// cambian los componentes de pared (hora/día) que luego leen los
+  /// formateadores. Es la zona del HOGAR la canónica en la UI (Hallazgo #2-QA):
+  /// dos miembros en zonas distintas ven la misma hora para la misma tarea.
+  ///
+  /// Si [timezone] es null/vacío/desconocido —o el paquete `timezone` no se ha
+  /// inicializado— cae a la zona del dispositivo (`toLocal`), preservando el
+  /// comportamiento previo en lugar de romper.
+  static DateTime inZone(DateTime instant, String? timezone) {
+    if (timezone == null || timezone.isEmpty) return instant.toLocal();
+    try {
+      return tz.TZDateTime.from(instant, tz.getLocation(timezone));
+    } catch (_) {
+      return instant.toLocal();
+    }
+  }
 
   /// "09:30" — siempre HH:mm (24h, con cero a la izquierda).
   static String timeShort(DateTime dt, Locale locale) =>

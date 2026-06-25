@@ -65,7 +65,11 @@ TodayViewData _dataWithOneOwnTask() {
   );
   return TodayViewData(
     grouped: <String, RecurrenceGroup>{
-      'daily': (todos: [task], dones: const <DoneTaskPreview>[]),
+      'daily': (
+        todos: [task],
+        upcoming: const <TaskPreview>[],
+        dones: const <DoneTaskPreview>[]
+      ),
     },
     counters: const DashboardCounters(
       totalActiveTasks: 1,

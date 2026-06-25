@@ -97,5 +97,37 @@ void main() {
       verify(() => mockRepo.saveVacation('home1', 'uid1', any())).called(1);
       expect(notifier.savedSuccessfully, isTrue);
     });
+
+    // Hallazgo #2-QA (vacaciones): el motivo guardado debe rehidratarse al
+    // reabrir; si no, editar otra cosa y guardar lo borra silenciosamente.
+    test('carga el reason de una vacación existente (rehidratación)', () async {
+      when(() => mockRepo.watchVacation('home1', 'uid1')).thenAnswer(
+        (_) => Stream.value(Vacation(
+          uid: 'uid1',
+          homeId: 'home1',
+          isActive: true,
+          reason: 'Viaje',
+          createdAt: DateTime(2026, 1, 1),
+        )),
+      );
+      final container = _makeContainer();
+      addTearDown(container.dispose);
+      // Mantiene vivo el notifier para que se reconstruya cuando el stream emita.
+      final sub = container.listen(
+        vacationViewModelNotifierProvider('home1', 'uid1'),
+        (_, __) {},
+      );
+      addTearDown(sub.close);
+      // Espera activa a que la inicialización async (stream) aplique el estado.
+      vacationState() =>
+          container.read(vacationViewModelNotifierProvider('home1', 'uid1'));
+      for (var i = 0; i < 100 && !vacationState().isInitialized; i++) {
+        await Future.delayed(const Duration(milliseconds: 10));
+      }
+      final s = vacationState();
+      expect(s.isInitialized, isTrue);
+      expect(s.isActive, isTrue);
+      expect(s.reason, 'Viaje');
+    });
   });
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:toka/core/utils/toka_dates.dart';
 
 void main() {
@@ -8,6 +9,7 @@ void main() {
     await initializeDateFormatting('es');
     await initializeDateFormatting('en');
     await initializeDateFormatting('ro');
+    tz_data.initializeTimeZones();
   });
 
   const esLocale = Locale('es');
@@ -134,6 +136,41 @@ void main() {
         TokaDates.dateLongDayMonth(d, roLocale).toLowerCase(),
         contains('decembrie'),
       );
+    });
+  });
+
+  // Hallazgo #2-QA: la hora mostrada en lista/Hoy/detalle debe ser la del HOGAR,
+  // no la del dispositivo. `inZone` convierte el instante a la zona del hogar
+  // preservando el momento; los formateadores luego usan sus componentes.
+  group('TokaDates.inZone', () {
+    test('convierte un instante UTC a la hora de pared de Madrid (CEST)', () {
+      final utcInstant = DateTime.utc(2026, 6, 24, 7); // 07:00Z, verano
+      final madrid = TokaDates.inZone(utcInstant, 'Europe/Madrid');
+      expect(madrid.hour, 9, reason: 'CEST = UTC+2 en verano');
+      expect(madrid.minute, 0);
+      expect(TokaDates.timeShort(madrid, esLocale), '09:00');
+    });
+
+    test('en invierno aplica CET (UTC+1)', () {
+      final utcInstant = DateTime.utc(2026, 1, 15, 8); // 08:00Z, invierno
+      final madrid = TokaDates.inZone(utcInstant, 'Europe/Madrid');
+      expect(madrid.hour, 9, reason: 'CET = UTC+1 en invierno');
+    });
+
+    test('preserva el instante (mismo momento, distinta zona)', () {
+      final utcInstant = DateTime.utc(2026, 1, 15, 12);
+      final madrid = TokaDates.inZone(utcInstant, 'Europe/Madrid');
+      expect(madrid.isAtSameMomentAs(utcInstant), isTrue);
+    });
+
+    test('timezone null cae a la zona del dispositivo (toLocal)', () {
+      final instant = DateTime.utc(2026, 6, 24, 7);
+      expect(TokaDates.inZone(instant, null), instant.toLocal());
+    });
+
+    test('timezone desconocido no lanza y cae a toLocal', () {
+      final instant = DateTime.utc(2026, 6, 24, 7);
+      expect(TokaDates.inZone(instant, 'No/Existe'), instant.toLocal());
     });
   });
 

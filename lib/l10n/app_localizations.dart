@@ -1051,13 +1051,13 @@ abstract class AppLocalizations {
   /// Number of tasks due today
   ///
   /// In es, this message translates to:
-  /// **'{count} tareas para hoy'**
+  /// **'{count, plural, one{{count} tarea para hoy} other{{count} tareas para hoy}}'**
   String today_tasks_due(int count);
 
   /// Number of tasks done today
   ///
   /// In es, this message translates to:
-  /// **'{count} completadas hoy'**
+  /// **'{count, plural, one{{count} completada hoy} other{{count} completadas hoy}}'**
   String today_tasks_done_today(int count);
 
   /// Section label: pending tasks
@@ -1071,6 +1071,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Hechas'**
   String get today_section_done;
+
+  /// Section label: future occurrences not yet actionable today
+  ///
+  /// In es, this message translates to:
+  /// **'Próximas'**
+  String get today_section_upcoming;
 
   /// Overdue chip label
   ///
@@ -1309,7 +1315,7 @@ abstract class AppLocalizations {
   /// Pending tasks badge on member card
   ///
   /// In es, this message translates to:
-  /// **'{count} tareas pendientes'**
+  /// **'{count, plural, one{{count} tarea pendiente} other{{count} tareas pendientes}}'**
   String members_pending_tasks(int count);
 
   /// Compliance rate on member card
@@ -1771,7 +1777,7 @@ abstract class AppLocalizations {
   /// Free trial badge on the annual plan chip
   ///
   /// In es, this message translates to:
-  /// **'{days} días gratis'**
+  /// **'{days, plural, one{{days} día gratis} other{{days} días gratis}}'**
   String paywall_trial_badge(int days);
 
   /// Annual CTA when a free trial is available
@@ -3061,7 +3067,7 @@ abstract class AppLocalizations {
   /// No description provided for @tasks_selection_count.
   ///
   /// In es, this message translates to:
-  /// **'{count} seleccionadas'**
+  /// **'{count, plural, one{{count} seleccionada} other{{count} seleccionadas}}'**
   String tasks_selection_count(int count);
 
   /// No description provided for @tasks_bulk_freeze.
@@ -3579,6 +3585,192 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Cálido, luminoso, familiar'**
   String get skinClassicDescription;
+
+  /// Name of the Ocean (Plus) cosmetic skin
+  ///
+  /// In es, this message translates to:
+  /// **'Océano'**
+  String get skinOceanoLabel;
+
+  /// Short description of the Ocean skin
+  ///
+  /// In es, this message translates to:
+  /// **'Azul fresco y sereno'**
+  String get skinOceanoDescription;
+
+  /// Badge on Plus-gated cosmetic options when the user has no Plus
+  ///
+  /// In es, this message translates to:
+  /// **'Requiere Toka Plus'**
+  String get plusLockedBadge;
+
+  /// Title of the Toka Plus paywall
+  ///
+  /// In es, this message translates to:
+  /// **'Toka Plus'**
+  String get plusPaywallTitle;
+
+  /// Subtitle of the Toka Plus paywall
+  ///
+  /// In es, this message translates to:
+  /// **'Desbloquea aspectos exclusivos y tus métricas personales.'**
+  String get plusPaywallSubtitle;
+
+  /// Plus benefit: cosmetic skins title
+  ///
+  /// In es, this message translates to:
+  /// **'Aspectos exclusivos'**
+  String get plusBenefitSkinsTitle;
+
+  /// Plus benefit: cosmetic skins description
+  ///
+  /// In es, this message translates to:
+  /// **'Personaliza Toka con skins solo para Plus.'**
+  String get plusBenefitSkinsDesc;
+
+  /// Plus benefit: personal metrics title
+  ///
+  /// In es, this message translates to:
+  /// **'Métricas personales'**
+  String get plusBenefitMetricsTitle;
+
+  /// Plus benefit: personal metrics description
+  ///
+  /// In es, this message translates to:
+  /// **'Consulta tu racha, puntualidad y reparto al detalle.'**
+  String get plusBenefitMetricsDesc;
+
+  /// Annual Plus plan label
+  ///
+  /// In es, this message translates to:
+  /// **'Anual'**
+  String get plusPlanAnnualLabel;
+
+  /// Monthly Plus plan label
+  ///
+  /// In es, this message translates to:
+  /// **'Mensual'**
+  String get plusPlanMonthlyLabel;
+
+  /// Fallback annual Plus price when store is unavailable
+  ///
+  /// In es, this message translates to:
+  /// **'14,99 €'**
+  String get plusPriceAnnualFallback;
+
+  /// Fallback monthly Plus price when store is unavailable
+  ///
+  /// In es, this message translates to:
+  /// **'1,99 €'**
+  String get plusPriceMonthlyFallback;
+
+  /// Annual price suffix
+  ///
+  /// In es, this message translates to:
+  /// **'/año'**
+  String get plusPriceAnnualSuffix;
+
+  /// Monthly price suffix
+  ///
+  /// In es, this message translates to:
+  /// **'/mes'**
+  String get plusPriceMonthlySuffix;
+
+  /// Badge on the annual Plus plan
+  ///
+  /// In es, this message translates to:
+  /// **'Mejor precio'**
+  String get plusAnnualSavingsBadge;
+
+  /// Subscribe CTA on the Plus paywall
+  ///
+  /// In es, this message translates to:
+  /// **'Suscribirme'**
+  String get plusCtaSubscribe;
+
+  /// Restore purchase button on the Plus paywall
+  ///
+  /// In es, this message translates to:
+  /// **'Restaurar compra'**
+  String get plusRestore;
+
+  /// Header shown when the user already has Plus
+  ///
+  /// In es, this message translates to:
+  /// **'Ya tienes Toka Plus'**
+  String get plusAlreadyActiveTitle;
+
+  /// Body shown when the user already has Plus
+  ///
+  /// In es, this message translates to:
+  /// **'Disfruta de los aspectos exclusivos y tus métricas personales.'**
+  String get plusAlreadyActiveBody;
+
+  /// Snackbar shown after a successful Plus purchase
+  ///
+  /// In es, this message translates to:
+  /// **'¡Bienvenido a Toka Plus!'**
+  String get plusPurchaseSuccess;
+
+  /// Title of the personal metrics screen and its entry
+  ///
+  /// In es, this message translates to:
+  /// **'Mis métricas'**
+  String get personalMetricsTitle;
+
+  /// Header shown when metrics are gated by Plus
+  ///
+  /// In es, this message translates to:
+  /// **'Métricas personales con Toka Plus'**
+  String get personalMetricsLockedTitle;
+
+  /// Body shown when metrics are gated by Plus
+  ///
+  /// In es, this message translates to:
+  /// **'Suscríbete a Toka Plus para ver tu racha, puntualidad, puntuación y reparto en detalle.'**
+  String get personalMetricsLockedBody;
+
+  /// CTA to the Plus paywall from the metrics gate
+  ///
+  /// In es, this message translates to:
+  /// **'Obtener Toka Plus'**
+  String get personalMetricsUnlockCta;
+
+  /// Empty state for personal metrics
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no tienes actividad. Completa tareas para ver tus métricas.'**
+  String get personalMetricsEmpty;
+
+  /// Personal metric: current streak
+  ///
+  /// In es, this message translates to:
+  /// **'Racha actual'**
+  String get metricCurrentStreak;
+
+  /// Personal metric: punctuality
+  ///
+  /// In es, this message translates to:
+  /// **'Puntualidad'**
+  String get metricPunctuality;
+
+  /// Personal metric: average score
+  ///
+  /// In es, this message translates to:
+  /// **'Puntuación media'**
+  String get metricAverageScore;
+
+  /// Personal metric: turns passed
+  ///
+  /// In es, this message translates to:
+  /// **'Turnos pasados'**
+  String get metricPassedCount;
+
+  /// Personal metric: share of completed tasks
+  ///
+  /// In es, this message translates to:
+  /// **'Tu reparto'**
+  String get metricShare;
 
   /// Frozen member role label
   ///
@@ -4473,6 +4665,342 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'No se pudo obtener el diagnóstico.'**
   String get support_error_generic;
+
+  /// Tier display name: Pareja (brand name, kept across locales)
+  ///
+  /// In es, this message translates to:
+  /// **'Toka Pareja'**
+  String get tier_name_pareja;
+
+  /// Tier display name: Familia
+  ///
+  /// In es, this message translates to:
+  /// **'Toka Familia'**
+  String get tier_name_familia;
+
+  /// Tier display name: Grupo
+  ///
+  /// In es, this message translates to:
+  /// **'Toka Grupo'**
+  String get tier_name_grupo;
+
+  /// Member limit banner — Free tier
+  ///
+  /// In es, this message translates to:
+  /// **'Tu plan Free permite hasta {limit} miembros. Hazte Premium para añadir más.'**
+  String member_limit_free(int limit);
+
+  /// Member limit banner — Pareja tier
+  ///
+  /// In es, this message translates to:
+  /// **'Tu plan Toka Pareja permite hasta {limit} miembros. Sube a Familia o Grupo para añadir más.'**
+  String member_limit_pareja(int limit);
+
+  /// Member limit banner — Familia tier
+  ///
+  /// In es, this message translates to:
+  /// **'Tu plan Toka Familia permite hasta {limit} miembros. Sube a Grupo para añadir más.'**
+  String member_limit_familia(int limit);
+
+  /// Member limit banner — Grupo tier (max, no upsell)
+  ///
+  /// In es, this message translates to:
+  /// **'Has alcanzado el máximo de {limit} miembros del plan Toka Grupo.'**
+  String member_limit_grupo(int limit);
+
+  /// Member limit banner — binary premium (tiers flag off)
+  ///
+  /// In es, this message translates to:
+  /// **'Has alcanzado el máximo de {limit} miembros de tu plan.'**
+  String member_limit_premium_max(int limit);
+
+  /// Members counter highlight in the limit banner
+  ///
+  /// In es, this message translates to:
+  /// **'{current} / {limit} miembros'**
+  String member_limit_counter(int current, int limit);
+
+  /// CTA to upgrade to a bigger tier from the limit banner
+  ///
+  /// In es, this message translates to:
+  /// **'Subir de plan'**
+  String get member_limit_upgrade_cta;
+
+  /// Key copy in the tiered paywall
+  ///
+  /// In es, this message translates to:
+  /// **'Las mismas funciones premium en los tres planes. Solo cambia cuántos miembros caben.'**
+  String get paywall_tiers_same_features;
+
+  /// Tier card member cap
+  ///
+  /// In es, this message translates to:
+  /// **'Hasta {count} miembros'**
+  String paywall_tier_members(int count);
+
+  /// Billing cycle toggle: monthly
+  ///
+  /// In es, this message translates to:
+  /// **'Mensual'**
+  String get paywall_cycle_monthly;
+
+  /// Billing cycle toggle: annual
+  ///
+  /// In es, this message translates to:
+  /// **'Anual'**
+  String get paywall_cycle_annual;
+
+  /// Suffix appended to a monthly price
+  ///
+  /// In es, this message translates to:
+  /// **'/mes'**
+  String get paywall_price_monthly_suffix;
+
+  /// Suffix appended to an annual price
+  ///
+  /// In es, this message translates to:
+  /// **'/año'**
+  String get paywall_price_annual_suffix;
+
+  /// Primary CTA in tiered paywall when no trial
+  ///
+  /// In es, this message translates to:
+  /// **'Continuar'**
+  String get paywall_tier_continue_cta;
+
+  /// Fallback price (store price preferred): Pareja monthly
+  ///
+  /// In es, this message translates to:
+  /// **'2,99 €'**
+  String get tier_price_pareja_monthly;
+
+  /// Fallback price: Pareja annual
+  ///
+  /// In es, this message translates to:
+  /// **'19,99 €'**
+  String get tier_price_pareja_annual;
+
+  /// Fallback price: Familia monthly
+  ///
+  /// In es, this message translates to:
+  /// **'3,99 €'**
+  String get tier_price_familia_monthly;
+
+  /// Fallback price: Familia annual
+  ///
+  /// In es, this message translates to:
+  /// **'29,99 €'**
+  String get tier_price_familia_annual;
+
+  /// Fallback price: Grupo monthly
+  ///
+  /// In es, this message translates to:
+  /// **'5,99 €'**
+  String get tier_price_grupo_monthly;
+
+  /// Fallback price: Grupo annual
+  ///
+  /// In es, this message translates to:
+  /// **'49,99 €'**
+  String get tier_price_grupo_annual;
+
+  /// Member packs section title in the paywall
+  ///
+  /// In es, this message translates to:
+  /// **'Amplía tu hogar'**
+  String get paywall_packs_title;
+
+  /// Member packs section subtitle
+  ///
+  /// In es, this message translates to:
+  /// **'Añade packs de miembros a tu plan Grupo.'**
+  String get paywall_packs_subtitle;
+
+  /// Display name of the +5 member pack
+  ///
+  /// In es, this message translates to:
+  /// **'Pack +5 miembros'**
+  String get pack_name_plus5;
+
+  /// Display name of the +10 member pack
+  ///
+  /// In es, this message translates to:
+  /// **'Pack +10 miembros'**
+  String get pack_name_plus10;
+
+  /// Seats a pack adds
+  ///
+  /// In es, this message translates to:
+  /// **'+{count} plazas'**
+  String pack_seats(int count);
+
+  /// Resulting member cap after buying a pack
+  ///
+  /// In es, this message translates to:
+  /// **'Hasta {max} miembros'**
+  String pack_result_cap(int max);
+
+  /// Buy/add a member pack button
+  ///
+  /// In es, this message translates to:
+  /// **'Añadir pack'**
+  String get pack_buy_cta;
+
+  /// Badge shown on a pack already owned
+  ///
+  /// In es, this message translates to:
+  /// **'Activo'**
+  String get pack_active_badge;
+
+  /// Locked packs section title (home is not Grupo)
+  ///
+  /// In es, this message translates to:
+  /// **'Packs de miembros'**
+  String get pack_requires_grupo_title;
+
+  /// Locked packs section body
+  ///
+  /// In es, this message translates to:
+  /// **'Los packs de miembros están disponibles en el plan Toka Grupo.'**
+  String get pack_requires_grupo_body;
+
+  /// CTA to upgrade to Grupo to unlock packs
+  ///
+  /// In es, this message translates to:
+  /// **'Sube a Grupo'**
+  String get pack_requires_grupo_cta;
+
+  /// Fallback price: pack +5 monthly
+  ///
+  /// In es, this message translates to:
+  /// **'1,49 €'**
+  String get pack_price_plus5_monthly;
+
+  /// Fallback price: pack +5 annual
+  ///
+  /// In es, this message translates to:
+  /// **'9,99 €'**
+  String get pack_price_plus5_annual;
+
+  /// Fallback price: pack +10 monthly
+  ///
+  /// In es, this message translates to:
+  /// **'2,49 €'**
+  String get pack_price_plus10_monthly;
+
+  /// Fallback price: pack +10 annual
+  ///
+  /// In es, this message translates to:
+  /// **'19,99 €'**
+  String get pack_price_plus10_annual;
+
+  /// Active packs section header in subscription management
+  ///
+  /// In es, this message translates to:
+  /// **'Packs de miembros'**
+  String get subscription_packs_section;
+
+  /// Add a member pack button in management
+  ///
+  /// In es, this message translates to:
+  /// **'Añadir pack'**
+  String get subscription_add_pack;
+
+  /// Cancel a specific member pack button
+  ///
+  /// In es, this message translates to:
+  /// **'Cancelar {pack}'**
+  String subscription_cancel_pack(String pack);
+
+  /// Active packs + effective cap line in the plan summary
+  ///
+  /// In es, this message translates to:
+  /// **'Packs: {packs} · hasta {max} miembros'**
+  String plan_summary_packs_row(String packs, int max);
+
+  /// Freeze-warning dialog title
+  ///
+  /// In es, this message translates to:
+  /// **'¿Cancelar {pack}?'**
+  String pack_cancel_title(String pack);
+
+  /// Freeze-warning: pack stays active until end date
+  ///
+  /// In es, this message translates to:
+  /// **'El pack seguirá activo hasta el {date}.'**
+  String pack_cancel_active_until(String date);
+
+  /// Freeze-warning: members that will be frozen
+  ///
+  /// In es, this message translates to:
+  /// **'Al finalizar, tu tope baja a {max} miembros y se congelarán los {count} miembros más recientes por encima del tope (recuperables).'**
+  String pack_cancel_freeze_warning(int count, int max);
+
+  /// Freeze-warning when nothing gets frozen
+  ///
+  /// In es, this message translates to:
+  /// **'Al finalizar, tu tope de miembros baja a {max}.'**
+  String pack_cancel_no_freeze(int max);
+
+  /// Confirm pack cancellation button
+  ///
+  /// In es, this message translates to:
+  /// **'Cancelar pack'**
+  String get pack_cancel_confirm;
+
+  /// Dismiss pack cancellation button
+  ///
+  /// In es, this message translates to:
+  /// **'Mantener pack'**
+  String get pack_cancel_dismiss;
+
+  /// Toka Business informational dialog title
+  ///
+  /// In es, this message translates to:
+  /// **'Toka Business'**
+  String get toka_business_title;
+
+  /// Toka Business informational dialog body
+  ///
+  /// In es, this message translates to:
+  /// **'Has alcanzado el máximo de {max} miembros. Para hogares u organizaciones más grandes, Toka Business llegará pronto.'**
+  String toka_business_body(int max);
+
+  /// Dismiss the Toka Business dialog
+  ///
+  /// In es, this message translates to:
+  /// **'Entendido'**
+  String get toka_business_dismiss;
+
+  /// Member limit banner — Grupo with packs available
+  ///
+  /// In es, this message translates to:
+  /// **'Has alcanzado el tope de {limit} miembros de tu plan. Añade un pack para crecer.'**
+  String member_limit_grupo_packs(int limit);
+
+  /// Member limit banner — absolute max reached
+  ///
+  /// In es, this message translates to:
+  /// **'Has alcanzado el máximo de {limit} miembros.'**
+  String member_limit_business(int limit);
+
+  /// Banner CTA to buy a member pack
+  ///
+  /// In es, this message translates to:
+  /// **'Añadir pack'**
+  String get member_limit_add_pack_cta;
+
+  /// Banner CTA opening the Toka Business dialog
+  ///
+  /// In es, this message translates to:
+  /// **'Toka Business'**
+  String get member_limit_business_cta;
+
+  /// Current tier summary line in subscription management
+  ///
+  /// In es, this message translates to:
+  /// **'Plan {tierName} · hasta {limit} miembros'**
+  String subscription_tier_summary(String tierName, int limit);
 }
 
 class _AppLocalizationsDelegate

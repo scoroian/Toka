@@ -7,6 +7,7 @@ import 'package:toka/app.dart';
 import 'package:toka/core/constants/routes.dart';
 import 'package:toka/features/auth/application/auth_provider.dart';
 import 'package:toka/features/auth/application/auth_state.dart';
+import 'package:toka/features/auth/domain/auth_user.dart';
 import 'package:toka/features/auth/domain/failures/auth_failure.dart';
 import 'package:toka/features/homes/application/current_home_provider.dart';
 import 'package:toka/features/homes/domain/home.dart';
@@ -22,6 +23,15 @@ class _FakeAuth extends Auth {
 class _FakeCurrentHome extends CurrentHome {
   @override
   Future<Home?> build() async => null;
+  @override
+  Future<void> switchHome(String homeId) async {}
+}
+
+/// Simula la pérdida de acceso al hogar (p. ej. el usuario fue expulsado):
+/// la lectura de Firestore falla por permisos y el provider queda en error.
+class _ErrorCurrentHome extends CurrentHome {
+  @override
+  Future<Home?> build() async => throw Exception('sin acceso al hogar');
   @override
   Future<void> switchHome(String homeId) async {}
 }
@@ -87,6 +97,44 @@ void main() {
 
     test('loading en splash se queda en splash', () {
       expect(_redirectFor(loadingState, AppRoutes.splash), isNull);
+    });
+  });
+
+  group('pérdida de hogar dentro de la app (Hallazgo #6)', () {
+    final authed = AuthState.authenticated(const AuthUser(
+      uid: 'u1',
+      email: 'a@b.c',
+      displayName: null,
+      photoUrl: null,
+      emailVerified: true,
+      providers: ['password'],
+    ));
+
+    Future<String?> redirectWithErrorHome(String location) async {
+      final container = ProviderContainer(overrides: [
+        authProvider.overrideWith(() => _FakeAuth(authed)),
+        currentHomeProvider.overrideWith(() => _ErrorCurrentHome()),
+        onboardingCompletedProvider.overrideWith((ref) async => false),
+      ]);
+      addTearDown(container.dispose);
+      // Forzar la resolución del AsyncNotifier a AsyncError antes del redirect.
+      await expectLater(
+          container.read(currentHomeProvider.future), throwsA(anything));
+      final notifier = container.read(routerNotifierProvider.notifier);
+      final state = _MockGoRouterState();
+      when(() => state.matchedLocation).thenReturn(location);
+      return notifier.redirect(_MockBuildContext(), state);
+    }
+
+    test('expulsado en subpantalla (currentHome error) redirige a /home',
+        () async {
+      expect(await redirectWithErrorHome(AppRoutes.historyEventDetail),
+          AppRoutes.home);
+    });
+
+    test('en /home con currentHome error NO rebota (evita bucle de redirect)',
+        () async {
+      expect(await redirectWithErrorHome(AppRoutes.home), isNull);
     });
   });
 }

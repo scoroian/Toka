@@ -167,6 +167,10 @@ class _CreateEditTaskScreenV2State
       body: ListView(
         padding: EdgeInsets.fromLTRB(
           16, 16, 16,
+          // El form es una pantalla push DENTRO del shell: hereda el banner y la
+          // NavBar flotante, así que su scroll debe reservar también esa altura
+          // (no solo el safe area) para que la última opción no quede tapada.
+          // `bottomPaddingOf` delega en MainShellV2.bottomContentPadding.
           AdAwareScaffold.bottomPaddingOf(context, ref),
         ),
         children: [

@@ -12,6 +12,7 @@ import '../../../domain/home_dashboard.dart';
 import '../../../domain/task_actionability.dart';
 import '../../../presentation/utils/task_visual_utils.dart';
 import '../../../../profile/application/profile_provider.dart';
+import '../../../../homes/application/current_home_provider.dart';
 
 class TodayTaskCardTodoV2 extends ConsumerStatefulWidget {
   const TodayTaskCardTodoV2({
@@ -67,10 +68,12 @@ class _TodayTaskCardTodoV2State extends ConsumerState<TodayTaskCardTodoV2>
     _checkCtrl.reset();
   }
 
-  void _handleDoneNotReady(BuildContext context, AppLocalizations l10n) {
+  void _handleDoneNotReady(
+      BuildContext context, AppLocalizations l10n, String? homeTz) {
     final dateStr = TaskActionability.formatDueForMessage(
       widget.task,
       Localizations.localeOf(context),
+      timezone: homeTz,
     );
     ScaffoldMessenger.of(context)
       ..clearSnackBars()
@@ -81,10 +84,13 @@ class _TodayTaskCardTodoV2State extends ConsumerState<TodayTaskCardTodoV2>
       ));
   }
 
-  String _dueDateLabel(BuildContext context, AppLocalizations l10n) {
+  String _dueDateLabel(
+      BuildContext context, AppLocalizations l10n, String? homeTz) {
     if (widget.task.isOverdue) return l10n.today_overdue;
     final now      = widget.now ?? DateTime.now();
-    final due      = widget.task.nextDueAt.toLocal();
+    // La hora mostrada es la del HOGAR (no la del dispositivo) para que cuadre
+    // con el detalle y con el contador `tasksDueToday` (Hallazgo #2-QA).
+    final due      = TokaDates.inZone(widget.task.nextDueAt, homeTz);
     final locale   = Localizations.localeOf(context);
     final timeStr  = TokaDates.timeShort(due, locale);
     // "Hoy" lo decide la clasificación del backend (zona del hogar), la misma
@@ -108,9 +114,11 @@ class _TodayTaskCardTodoV2State extends ConsumerState<TodayTaskCardTodoV2>
     final isDark    = Theme.of(context).brightness == Brightness.dark;
     final isOwn     = widget.task.currentAssigneeUid == widget.currentUid;
     final isOverdue = widget.task.isOverdue;
+    final homeTz = ref.watch(currentHomeProvider).valueOrNull?.timezone;
     final actionable = TaskActionability.isActionable(
       widget.task,
       now: widget.now,
+      timezone: homeTz,
     );
 
     // resolve name/photo
@@ -177,7 +185,7 @@ class _TodayTaskCardTodoV2State extends ConsumerState<TodayTaskCardTodoV2>
                     ),
                 ])),
                 const SizedBox(width: 8),
-                _DueChipV2(label: _dueDateLabel(context, l10n), isOverdue: isOverdue, isDark: isDark),
+                _DueChipV2(label: _dueDateLabel(context, l10n, homeTz), isOverdue: isOverdue, isDark: isDark),
               ]),
               if (isOwn) ...[
                 const SizedBox(height: 10),
@@ -191,7 +199,7 @@ class _TodayTaskCardTodoV2State extends ConsumerState<TodayTaskCardTodoV2>
                     isActive: actionable,
                     onTap: actionable
                         ? _handleDone
-                        : () => _handleDoneNotReady(context, l10n),
+                        : () => _handleDoneNotReady(context, l10n, homeTz),
                   )),
                   const SizedBox(width: 6),
                   Expanded(child: _PassButtonV2(

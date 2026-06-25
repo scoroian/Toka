@@ -12,18 +12,23 @@ class TaskCard extends StatelessWidget {
     required this.task,
     required this.onTap,
     this.onLongPress,
+    this.homeTimezone,
   });
 
   final Task task;
   final VoidCallback onTap;
   final VoidCallback? onLongPress;
+  /// Zona horaria IANA del hogar; la hora se muestra en esta zona (Hallazgo
+  /// #2-QA). Si es null cae a la zona del dispositivo.
+  final String? homeTimezone;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final isFrozen = task.status == TaskStatus.frozen;
     final dateStr = TokaDates.dayMonthTimeShort(
-        task.nextDueAt, Localizations.localeOf(context));
+        TokaDates.inZone(task.nextDueAt, homeTimezone),
+        Localizations.localeOf(context));
 
     // Suppress unused warning
     // ignore: unused_local_variable

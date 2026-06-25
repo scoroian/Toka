@@ -42,5 +42,10 @@ class Home with _$Home {
     // todavía usa la inicial. Se actualiza desde el sheet de "Avatar
     // del hogar" en `home_settings_screen` (ambas skins).
     String? photoUrl,
+    // Zona horaria IANA del hogar (p. ej. "Europe/Madrid"), backfill en
+    // `homes/{homeId}.timezone`. Es la zona canónica para mostrar horas de
+    // tareas en toda la UI, de modo que todos los miembros vean la misma hora
+    // aunque sus dispositivos estén en zonas distintas (Hallazgo #2-QA).
+    @Default('Europe/Madrid') String timezone,
   }) = _Home;
 }

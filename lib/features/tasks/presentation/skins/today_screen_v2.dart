@@ -104,6 +104,7 @@ class TodayScreenV2 extends ConsumerWidget {
                   TodayTaskSectionV2(
                     recurrenceType: recType,
                     todos: data.grouped[recType]!.todos,
+                    upcoming: data.grouped[recType]!.upcoming,
                     dones: data.grouped[recType]!.dones,
                     currentUid: data.currentUid,
                     onDone: data.homeId.isNotEmpty

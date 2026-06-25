@@ -1,6 +1,7 @@
 import 'dart:ui' show Locale;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:toka/features/tasks/domain/home_dashboard.dart';
 import 'package:toka/features/tasks/domain/task_actionability.dart';
 
@@ -27,6 +28,7 @@ void main() {
     await initializeDateFormatting('es');
     await initializeDateFormatting('en');
     await initializeDateFormatting('ro');
+    tz_data.initializeTimeZones();
   });
 
   const es = Locale('es');
@@ -109,6 +111,53 @@ void main() {
       expect(TaskActionability.isActionable(t, now: now), isTrue);
       final t2 = _t(recurrence: 'unknown', due: DateTime(2026, 4, 27, 1, 0));
       expect(TaskActionability.isActionable(t2, now: now), isFalse);
+    });
+  });
+
+  // Hallazgo #2-QA (extensión): la decisión "accionable hoy" debe evaluarse en
+  // la zona del HOGAR, igual que el label de hora, para que no haya desajuste
+  // sección/label cuando el dispositivo está en otra zona.
+  group('TaskActionability.isActionable con zona del hogar', () {
+    // due = 25 jun 09:00 Madrid (07:00 UTC); now = 25 jun 00:30 Madrid (22:30 UTC del 24).
+    final due = DateTime.utc(2026, 6, 25, 7);
+    final now = DateTime.utc(2026, 6, 24, 22, 30);
+
+    test('daily due hoy en la zona del hogar ES accionable aunque el device '
+        'esté en otra zona', () {
+      final t = _t(recurrence: 'daily', due: due);
+      expect(
+        TaskActionability.isActionable(t, now: now, timezone: 'Europe/Madrid'),
+        isTrue,
+      );
+    });
+
+    test('la MISMA tarea evaluada en la zona del dispositivo (GMT) NO sería '
+        'accionable (era el bug)', () {
+      final t = _t(recurrence: 'daily', due: due);
+      expect(
+        TaskActionability.isActionable(t, now: now, timezone: 'Etc/GMT'),
+        isFalse,
+      );
+    });
+
+    test('timezone null conserva el comportamiento previo (zona dispositivo)',
+        () {
+      final localNow = DateTime(2026, 4, 26, 8);
+      final t = _t(recurrence: 'daily', due: DateTime(2026, 4, 26, 22));
+      expect(TaskActionability.isActionable(t, now: localNow), isTrue);
+      expect(
+        TaskActionability.isActionable(t, now: localNow, timezone: null),
+        isTrue,
+      );
+    });
+
+    test('timezone desconocido no lanza (cae a zona del dispositivo)', () {
+      final t = _t(recurrence: 'daily', due: DateTime(2026, 4, 26, 22));
+      expect(
+        () => TaskActionability.isActionable(t,
+            now: DateTime(2026, 4, 26, 8), timezone: 'No/Existe'),
+        returnsNormally,
+      );
     });
   });
 

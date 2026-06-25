@@ -16,6 +16,7 @@ abstract class VacationViewModel {
   bool get isActive;
   DateTime? get startDate;
   DateTime? get endDate;
+  String? get reason;
   bool get savedSuccessfully;
   void setActive(bool v);
   void setStartDate(DateTime d);
@@ -30,6 +31,7 @@ class _VacationVMState with _$VacationVMState {
     @Default(false) bool isActive,
     DateTime? startDate,
     DateTime? endDate,
+    String? reason,
     @Default(false) bool savedSuccessfully,
   }) = __VacationVMState;
 }
@@ -39,25 +41,28 @@ class VacationViewModelNotifier extends _$VacationViewModelNotifier
     implements VacationViewModel {
   @override
   _VacationVMState build(String homeId, String uid) {
-    final vacationAsync =
-        ref.watch(memberVacationProvider(homeId: homeId, uid: uid));
-    vacationAsync.whenData((v) {
-      if (!state.isInitialized) {
-        if (v != null) {
-          Future.microtask(() {
-            state = state.copyWith(
-              isInitialized: true,
-              isActive: v.isActive,
-              startDate: v.startDate,
-              endDate: v.endDate,
-            );
-          });
-        } else {
-          Future.microtask(
-              () => state = state.copyWith(isInitialized: true));
-        }
-      }
-    });
+    // Cargamos la vacación existente UNA sola vez (flag isInitialized) y luego
+    // dejamos que el usuario edite libremente. Usamos `ref.listen` (no
+    // watch+microtask): el callback corre FUERA del build cuando el stream
+    // emite, lo que es idiomático y observable en tests. Antes, el patrón
+    // `Future.microtask` dentro de build no rehidrataba de forma fiable.
+    ref.listen(
+      memberVacationProvider(homeId: homeId, uid: uid),
+      (prev, next) {
+        if (state.isInitialized) return;
+        next.whenData((v) {
+          state = v != null
+              ? state.copyWith(
+                  isInitialized: true,
+                  isActive: v.isActive,
+                  startDate: v.startDate,
+                  endDate: v.endDate,
+                  reason: v.reason,
+                )
+              : state.copyWith(isInitialized: true);
+        });
+      },
+    );
     return const _VacationVMState();
   }
 
@@ -69,6 +74,8 @@ class VacationViewModelNotifier extends _$VacationViewModelNotifier
   DateTime? get startDate => state.startDate;
   @override
   DateTime? get endDate => state.endDate;
+  @override
+  String? get reason => state.reason;
   @override
   bool get savedSuccessfully => state.savedSuccessfully;
 

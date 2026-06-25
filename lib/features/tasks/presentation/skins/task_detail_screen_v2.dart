@@ -10,6 +10,7 @@ import '../../../../core/theme/app_colors_v2.dart';
 import '../../../../core/utils/toka_dates.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/ad_aware_scaffold.dart';
+import '../../../homes/application/current_home_provider.dart';
 import '../../../homes/application/dashboard_provider.dart';
 import '../../application/task_detail_view_model.dart';
 import '../../domain/task.dart';
@@ -186,8 +187,11 @@ class TaskDetailScreenV2 extends ConsumerWidget {
                   _InfoRow(
                     key: const Key('detail_next_due'),
                     label: l10n.task_detail_next_due,
+                    // Zona del HOGAR (igual que "Próximas fechas" más abajo y
+                    // que la lista/Hoy), no la del dispositivo (Hallazgo #2-QA).
                     value: TokaDates.dateMediumWithWeekday(
-                        task.nextDueAt.toLocal(),
+                        TokaDates.inZone(task.nextDueAt,
+                            ref.watch(currentHomeProvider).valueOrNull?.timezone),
                         Localizations.localeOf(context)),
                     isDark: isDark,
                   ),

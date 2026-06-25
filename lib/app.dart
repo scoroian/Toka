@@ -11,8 +11,9 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'core/constants/routes.dart';
 import 'core/services/locale_service.dart';
 import 'core/theme/app_skin.dart';
+import 'core/theme/app_theme_oceano.dart';
 import 'core/theme/app_theme_v2.dart';
-import 'core/theme/skin_provider.dart';
+import 'core/theme/effective_skin_provider.dart';
 import 'core/theme/theme_mode_provider.dart';
 import 'core/utils/text_scaling.dart';
 import 'features/auth/application/auth_provider.dart';
@@ -33,8 +34,10 @@ import 'features/members/presentation/skins/members_screen.dart';
 import 'features/members/presentation/skins/vacation_screen.dart';
 import 'features/profile/presentation/skins/own_profile_screen.dart';
 import 'features/profile/presentation/skins/edit_profile_screen.dart';
+import 'features/profile/presentation/skins/personal_metrics_screen.dart';
 import 'features/subscription/presentation/paywall_entry_context.dart';
 import 'features/subscription/presentation/skins/paywall_screen.dart';
+import 'features/subscription/presentation/skins/plus_paywall_screen.dart';
 import 'features/subscription/presentation/skins/subscription_management_screen.dart';
 import 'features/subscription/presentation/skins/rescue_screen.dart';
 import 'features/subscription/presentation/skins/downgrade_planner_screen.dart';
@@ -154,6 +157,18 @@ class RouterNotifier extends _$RouterNotifier implements Listenable {
           }
           // Genuinamente nuevo → onboarding.
           return AppRoutes.onboarding;
+        }
+        // Pérdida de acceso al hogar estando DENTRO de la app (p. ej. el usuario
+        // fue expulsado mientras tenía abierta una pantalla profunda como el
+        // detalle de un evento): currentHomeProvider entra en error por perder
+        // los permisos de lectura. En vez de dejar la pantalla mostrando "Algo
+        // salió mal. Inténtalo de nuevo.", lo devolvemos al shell de Hoy, que ya
+        // renderiza el estado "sin hogar" (Hallazgo #6-QA). RouterNotifier ya
+        // escucha currentHomeProvider, así que el redirect se reevalúa al
+        // producirse el error. Se excluye /home para no rebotar contra sí mismo.
+        if (location != AppRoutes.home &&
+            ref.read(currentHomeProvider).hasError) {
+          return AppRoutes.home;
         }
         return null;
       },
@@ -310,6 +325,10 @@ GoRouter appRouter(AppRouterRef ref) {
         builder: (_, __) => const EditProfileScreen(),
       ),
       GoRoute(
+        path: AppRoutes.personalMetrics,
+        builder: (_, __) => const PersonalMetricsScreen(),
+      ),
+      GoRoute(
         path: AppRoutes.subscription,
         builder: (_, __) => const SubscriptionManagementScreen(),
       ),
@@ -323,6 +342,10 @@ GoRouter appRouter(AppRouterRef ref) {
           );
           return PaywallScreen(entryContext: entry);
         },
+      ),
+      GoRoute(
+        path: AppRoutes.plusPaywall,
+        builder: (_, __) => const PlusPaywallScreen(),
       ),
       GoRoute(
         path: AppRoutes.rescueScreen,
@@ -451,9 +474,10 @@ class _TokaAppState extends ConsumerState<TokaApp>
     final locale = ref.watch(localeNotifierProvider);
     final router = ref.watch(appRouterProvider);
     final themeMode = ref.watch(themeModeNotifierProvider);
-    final skin = ref.watch(skinModeProvider);
+    final skin = ref.watch(effectiveSkinProvider);
     final (lightTheme, darkTheme) = switch (skin) {
       AppSkin.v2 => (AppThemeV2.light, AppThemeV2.dark),
+      AppSkin.oceano => (AppThemeOceano.light, AppThemeOceano.dark),
     };
 
     return KeyboardVisibilityBuilder(

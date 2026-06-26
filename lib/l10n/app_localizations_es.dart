@@ -970,13 +970,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get subscription_annual => 'Anual';
 
   @override
-  String get subscription_price_monthly => '3,99 €/mes';
-
-  @override
-  String get subscription_price_annual => '29,99 €/año';
-
-  @override
-  String get subscription_annual_saving => 'Ahorra 17,89 €';
+  String get subscription_annual_saving => 'Ahorra 21,89 €';
 
   @override
   String get paywall_title => 'Haz tu hogar Premium';
@@ -1018,7 +1012,8 @@ class AppLocalizationsEs extends AppLocalizations {
   String get paywall_terms => 'Ver términos y política de privacidad';
 
   @override
-  String get paywall_feature_members => 'Hasta 10 miembros por hogar';
+  String get premium_benefit_members_range =>
+      'De 2 a 10 miembros según el plan';
 
   @override
   String get paywall_feature_smart => 'Distribución inteligente de tareas';
@@ -1033,7 +1028,11 @@ class AppLocalizationsEs extends AppLocalizations {
   String get paywall_feature_history => 'Historial 90 días';
 
   @override
-  String get paywall_feature_no_ads => 'Sin publicidad';
+  String get paywall_feature_no_ads => 'Sin anuncios a pantalla completa';
+
+  @override
+  String get paywall_ads_banner_note =>
+      'El banner inferior se quita para quien paga el plan; los demás miembros pueden quitarlo con Toka Plus.';
 
   @override
   String rescue_banner_text(int days) {
@@ -2084,7 +2083,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get plusPaywallSubtitle =>
-      'Desbloquea aspectos exclusivos y tus métricas personales.';
+      'Quita el banner, desbloquea aspectos exclusivos y consulta tus métricas personales.';
 
   @override
   String get plusBenefitSkinsTitle => 'Aspectos exclusivos';
@@ -2099,6 +2098,13 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get plusBenefitMetricsDesc =>
       'Consulta tu racha, puntualidad y reparto al detalle.';
+
+  @override
+  String get plusBenefitNoAdsTitle => 'Sin banner de anuncios';
+
+  @override
+  String get plusBenefitNoAdsDesc =>
+      'Quita el banner inferior solo para ti, en todos tus hogares.';
 
   @override
   String get plusPlanAnnualLabel => 'Anual';
@@ -2132,7 +2138,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get plusAlreadyActiveBody =>
-      'Disfruta de los aspectos exclusivos y tus métricas personales.';
+      'Sin banner, con aspectos exclusivos y tus métricas personales.';
 
   @override
   String get plusPurchaseSuccess => '¡Bienvenido a Toka Plus!';
@@ -2900,4 +2906,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String subscription_tier_summary(String tierName, int limit) {
     return 'Plan $tierName · hasta $limit miembros';
   }
+
+  @override
+  String get ad_banner_notice_text => 'Quita también el banner con Toka Plus';
+
+  @override
+  String get ad_banner_notice_dismiss => 'Descartar';
 }

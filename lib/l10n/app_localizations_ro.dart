@@ -972,13 +972,7 @@ class AppLocalizationsRo extends AppLocalizations {
   String get subscription_annual => 'Anual';
 
   @override
-  String get subscription_price_monthly => '3,99 €/lună';
-
-  @override
-  String get subscription_price_annual => '29,99 €/an';
-
-  @override
-  String get subscription_annual_saving => 'Economisești 17,89 €';
+  String get subscription_annual_saving => 'Economisești 21,89 €';
 
   @override
   String get paywall_title => 'Fă-ți locuința Premium';
@@ -1021,7 +1015,8 @@ class AppLocalizationsRo extends AppLocalizations {
   String get paywall_terms => 'Termeni și politică de confidențialitate';
 
   @override
-  String get paywall_feature_members => 'Până la 10 membri pe locuință';
+  String get premium_benefit_members_range =>
+      'De la 2 la 10 membri în funcție de plan';
 
   @override
   String get paywall_feature_smart => 'Distribuție inteligentă a sarcinilor';
@@ -1036,7 +1031,11 @@ class AppLocalizationsRo extends AppLocalizations {
   String get paywall_feature_history => 'Istoric 90 de zile';
 
   @override
-  String get paywall_feature_no_ads => 'Fără reclame';
+  String get paywall_feature_no_ads => 'Fără reclame pe tot ecranul';
+
+  @override
+  String get paywall_ads_banner_note =>
+      'Bannerul de jos dispare pentru cine plătește planul; ceilalți membri îl pot elimina cu Toka Plus.';
 
   @override
   String rescue_banner_text(int days) {
@@ -2097,7 +2096,7 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get plusPaywallSubtitle =>
-      'Deblochează aspecte exclusive și statisticile tale personale.';
+      'Elimină bannerul, deblochează aspecte exclusive și vezi-ți statisticile personale.';
 
   @override
   String get plusBenefitSkinsTitle => 'Aspecte exclusive';
@@ -2112,6 +2111,13 @@ class AppLocalizationsRo extends AppLocalizations {
   @override
   String get plusBenefitMetricsDesc =>
       'Vezi în detaliu seria, punctualitatea și repartizarea.';
+
+  @override
+  String get plusBenefitNoAdsTitle => 'Fără bannere publicitare';
+
+  @override
+  String get plusBenefitNoAdsDesc =>
+      'Elimină bannerul de jos doar pentru tine, în toate casele tale.';
 
   @override
   String get plusPlanAnnualLabel => 'Anual';
@@ -2145,7 +2151,7 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get plusAlreadyActiveBody =>
-      'Bucură-te de aspectele exclusive și statisticile tale personale.';
+      'Fără banner, cu aspecte exclusive și statisticile tale personale.';
 
   @override
   String get plusPurchaseSuccess => 'Bun venit la Toka Plus!';
@@ -2913,4 +2919,10 @@ class AppLocalizationsRo extends AppLocalizations {
   String subscription_tier_summary(String tierName, int limit) {
     return 'Plan $tierName · până la $limit membri';
   }
+
+  @override
+  String get ad_banner_notice_text => 'Elimină și bannerul cu Toka Plus';
+
+  @override
+  String get ad_banner_notice_dismiss => 'Închide';
 }

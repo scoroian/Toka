@@ -1780,22 +1780,10 @@ abstract class AppLocalizations {
   /// **'Anual'**
   String get subscription_annual;
 
-  /// Monthly price
-  ///
-  /// In es, this message translates to:
-  /// **'3,99 €/mes'**
-  String get subscription_price_monthly;
-
-  /// Annual price
-  ///
-  /// In es, this message translates to:
-  /// **'29,99 €/año'**
-  String get subscription_price_annual;
-
   /// Annual plan saving label
   ///
   /// In es, this message translates to:
-  /// **'Ahorra 17,89 €'**
+  /// **'Ahorra 21,89 €'**
   String get subscription_annual_saving;
 
   /// Paywall screen title
@@ -1852,11 +1840,11 @@ abstract class AppLocalizations {
   /// **'Ver términos y política de privacidad'**
   String get paywall_terms;
 
-  /// Premium feature: members
+  /// Free benefit card: member range across tiers
   ///
   /// In es, this message translates to:
-  /// **'Hasta 10 miembros por hogar'**
-  String get paywall_feature_members;
+  /// **'De 2 a 10 miembros según el plan'**
+  String get premium_benefit_members_range;
 
   /// Premium feature: smart distribution
   ///
@@ -1882,11 +1870,17 @@ abstract class AppLocalizations {
   /// **'Historial 90 días'**
   String get paywall_feature_history;
 
-  /// Premium feature: no ads
+  /// Premium feature: no full-screen (interstitial) ads, removed home-wide
   ///
   /// In es, this message translates to:
-  /// **'Sin publicidad'**
+  /// **'Sin anuncios a pantalla completa'**
   String get paywall_feature_no_ads;
+
+  /// Footnote in the plan comparison card clarifying banner ads are removed per-payer; others use Toka Plus
+  ///
+  /// In es, this message translates to:
+  /// **'El banner inferior se quita para quien paga el plan; los demás miembros pueden quitarlo con Toka Plus.'**
+  String get paywall_ads_banner_note;
 
   /// Rescue banner text with days remaining
   ///
@@ -3661,7 +3655,7 @@ abstract class AppLocalizations {
   /// Subtitle of the Toka Plus paywall
   ///
   /// In es, this message translates to:
-  /// **'Desbloquea aspectos exclusivos y tus métricas personales.'**
+  /// **'Quita el banner, desbloquea aspectos exclusivos y consulta tus métricas personales.'**
   String get plusPaywallSubtitle;
 
   /// Plus benefit: cosmetic skins title
@@ -3687,6 +3681,18 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Consulta tu racha, puntualidad y reparto al detalle.'**
   String get plusBenefitMetricsDesc;
+
+  /// Plus benefit: removes the banner ad title
+  ///
+  /// In es, this message translates to:
+  /// **'Sin banner de anuncios'**
+  String get plusBenefitNoAdsTitle;
+
+  /// Plus benefit: removes the banner ad description
+  ///
+  /// In es, this message translates to:
+  /// **'Quita el banner inferior solo para ti, en todos tus hogares.'**
+  String get plusBenefitNoAdsDesc;
 
   /// Annual Plus plan label
   ///
@@ -3751,7 +3757,7 @@ abstract class AppLocalizations {
   /// Body shown when the user already has Plus
   ///
   /// In es, this message translates to:
-  /// **'Disfruta de los aspectos exclusivos y tus métricas personales.'**
+  /// **'Sin banner, con aspectos exclusivos y tus métricas personales.'**
   String get plusAlreadyActiveBody;
 
   /// Snackbar shown after a successful Plus purchase
@@ -5049,6 +5055,18 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Plan {tierName} · hasta {limit} miembros'**
   String subscription_tier_summary(String tierName, int limit);
+
+  /// Dismissible caption above the banner for non-paying members of a Premium home; tapping opens the Toka Plus paywall
+  ///
+  /// In es, this message translates to:
+  /// **'Quita también el banner con Toka Plus'**
+  String get ad_banner_notice_text;
+
+  /// Accessibility label for the dismiss (x) button on the banner notice caption
+  ///
+  /// In es, this message translates to:
+  /// **'Descartar'**
+  String get ad_banner_notice_dismiss;
 }
 
 class _AppLocalizationsDelegate

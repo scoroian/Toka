@@ -128,6 +128,11 @@ class _PlansBody extends ConsumerWidget {
             ),
           ),
           _Benefit(
+            icon: Icons.block,
+            title: l10n.plusBenefitNoAdsTitle,
+            description: l10n.plusBenefitNoAdsDesc,
+          ),
+          _Benefit(
             icon: Icons.palette_outlined,
             title: l10n.plusBenefitSkinsTitle,
             description: l10n.plusBenefitSkinsDesc,

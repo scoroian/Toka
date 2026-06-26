@@ -69,6 +69,17 @@ void main() {
     expect(find.byKey(const Key('plus_cta')), findsOneWidget);
   });
 
+  testWidgets('lista el beneficio de quitar el banner', (tester) async {
+    await tester.pumpWidget(_harness(hasPlus: false));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Sin banner de anuncios'), findsOneWidget);
+    expect(
+      find.text('Quita el banner inferior solo para ti, en todos tus hogares.'),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('usa el precio de la store cuando existe', (tester) async {
     await tester.pumpWidget(_harness(
       hasPlus: false,

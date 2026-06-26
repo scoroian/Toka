@@ -4,13 +4,17 @@ import '../../../../l10n/app_localizations.dart';
 
 /// Tarjeta comparativa Free vs Premium con tabla de features.
 class PlanComparisonCard extends StatelessWidget {
-  const PlanComparisonCard({super.key});
+  const PlanComparisonCard({super.key, required this.premiumMemberLimit});
+
+  /// Tope de miembros del tier a comparar contra Free. Cada superficie inyecta
+  /// el valor correcto (paywall binario → Grupo/10; rescate → tier del hogar).
+  final int premiumMemberLimit;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final features = [
-      (l10n.paywall_feature_members, false, true),
+      (l10n.paywall_tier_members(premiumMemberLimit), false, true),
       (l10n.paywall_feature_smart, false, true),
       (l10n.paywall_feature_vacations, false, true),
       (l10n.paywall_feature_reviews, false, true),
@@ -53,6 +57,17 @@ class PlanComparisonCard extends StatelessWidget {
                 label: f.$1,
                 hasFree: f.$2,
                 hasPremium: f.$3,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                l10n.paywall_ads_banner_note,
+                key: const Key('plan_comparison_ads_note'),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
               ),
             ),
           ],

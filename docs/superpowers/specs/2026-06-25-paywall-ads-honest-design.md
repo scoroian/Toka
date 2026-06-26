@@ -213,8 +213,14 @@ goldens regenerados · verificación en ambos dispositivos.
 - Relacionado con **10** (trigger del intersticial).
 
 ## Decisiones tomadas
-- Caption **descartable** (✕); descarte **por hogar, scope sesión** (in-memory:
-  reaparece tras reinicio, suave, sin estado persistido).
+- Caption **descartable** (✕); descarte **global de sesión** (in-memory:
+  reaparece tras reinicio, suave, sin estado persistido). Refinado durante la
+  implementación desde "por hogar": ligar el descarte a un hogar exigía leer
+  `currentHomeProvider` en el camino de padding del shell, que arrastra el timer
+  de `authProvider` y rompía tests de pantalla; global es además "menos nag".
+- Elegibilidad de la caption derivada de `adVisibilityProvider`
+  (`banner ∧ isPremium`), no de releer auth/currentHome/plus → no acopla el
+  padding del shell al timer de auth y hereda los overrides de los tests del shell.
 - Nota del banner dentro de `PlanComparisonCard` (DRY: cubre binario + rescate).
 - `paywall_feature_no_ads` reescrito (no se crea clave nueva) para no dejar
   huérfana una clave referenciada por la tarjeta.

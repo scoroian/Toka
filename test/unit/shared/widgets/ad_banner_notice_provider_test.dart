@@ -130,20 +130,17 @@ void main() {
       expect(c.read(adBannerNoticeVisibleProvider), isFalse);
     });
 
-    test('descartar el hogar actual lo oculta', () async {
+    test('descartar oculta la caption en la sesión', () async {
       final c = _c(
-          dashboard: _dash(isPremium: true),
-          payerUid: 'otro',
-          hasPlus: false,
-          id: 'h1');
+          dashboard: _dash(isPremium: true), payerUid: 'otro', hasPlus: false);
       addTearDown(c.dispose);
       await c.read(dashboardProvider.future);
       await c.read(currentHomeProvider.future);
       expect(c.read(adBannerNoticeVisibleProvider), isTrue);
 
-      c.read(adBannerNoticeDismissalProvider.notifier).dismiss('h1');
+      c.read(adBannerNoticeDismissedProvider.notifier).dismiss();
       expect(c.read(adBannerNoticeVisibleProvider), isFalse);
-      expect(c.read(adBannerNoticeDismissalProvider).contains('h1'), isTrue);
+      expect(c.read(adBannerNoticeDismissedProvider), isTrue);
     });
   });
 }

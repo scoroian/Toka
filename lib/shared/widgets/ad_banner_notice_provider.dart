@@ -1,9 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import 'package:toka/features/auth/application/auth_provider.dart';
-import 'package:toka/features/homes/application/current_home_provider.dart';
 import 'package:toka/features/homes/application/dashboard_provider.dart';
-import 'package:toka/features/subscription/application/plus_provider.dart';
+import 'ad_visibility_provider.dart';
 
 part 'ad_banner_notice_provider.g.dart';
 
@@ -20,48 +18,44 @@ bool computeBannerNoticeEligible({
 }) =>
     homeIsPremium && !isPayer && !hasPlus;
 
-/// Elegibilidad cableada a Firestore (mismos inputs que `adVisibilityProvider`).
-/// Fail-safe `false` mientras dashboard/home no se conocen (cargando o error).
+/// Elegibilidad cableada reusando [adVisibilityProvider] como fuente de verdad.
+///
+/// Equivalencia (probada): `banner ∧ isPremium ⇔ premium ∧ ¬pagador ∧ ¬Plus`.
+/// Como `banner = ¬Plus ∧ ¬(premium ∧ pagador)`, al conjugarlo con `premium`
+/// queda `premium ∧ ¬Plus ∧ ¬pagador` — exactamente [computeBannerNoticeEligible].
+///
+/// Reusar [adVisibilityProvider] (en vez de releer auth/currentHome/plus) evita
+/// duplicar el cómputo y NO acopla el camino de padding del shell al timer de
+/// `authProvider`: donde adVisibility ya está resuelto/mockeado, esto lo sigue.
+/// Fail-safe `false` mientras el dashboard no se conoce (cargando o error).
 @Riverpod(keepAlive: true)
 bool adBannerNoticeEligible(AdBannerNoticeEligibleRef ref) {
   final dashboard = ref.watch(dashboardProvider).valueOrNull;
-  final home = ref.watch(currentHomeProvider).valueOrNull;
-  if (dashboard == null || home == null) return false;
-
-  final uid = ref.watch(authProvider).whenOrNull(authenticated: (u) => u.uid);
-  final isPayer = home.currentPayerUid != null && home.currentPayerUid == uid;
-  final hasPlus = ref.watch(plusActiveProvider);
-
-  return computeBannerNoticeEligible(
-    homeIsPremium: dashboard.premiumFlags.isPremium,
-    isPayer: isPayer,
-    hasPlus: hasPlus,
-  );
+  if (dashboard == null || !dashboard.premiumFlags.isPremium) return false;
+  return ref.watch(adVisibilityProvider).banner;
 }
 
-/// Conjunto de homeIds para los que el usuario descartó la caption en ESTA
-/// sesión (in-memory: reaparece tras reiniciar la app, comportamiento suave y
-/// sin estado persistido).
+/// Descarte de la caption para ESTA sesión (in-memory, ámbito global: reaparece
+/// tras reiniciar la app, comportamiento suave y sin estado persistido).
+///
+/// Global (no por hogar) a propósito: ligar el descarte a un hogar concreto
+/// exigiría leer `currentHomeProvider` en el camino de padding del shell, que
+/// arrastra el timer de `authProvider`. Global es además "menos nag".
 @Riverpod(keepAlive: true)
-class AdBannerNoticeDismissal extends _$AdBannerNoticeDismissal {
+class AdBannerNoticeDismissed extends _$AdBannerNoticeDismissed {
   @override
-  Set<String> build() => const {};
+  bool build() => false;
 
-  void dismiss(String homeId) {
-    if (state.contains(homeId)) return;
-    state = {...state, homeId};
-  }
+  void dismiss() => state = true;
 }
 
-/// Visible ⇔ elegible ∧ hay homeId ∧ no descartada para ese hogar.
+/// Visible ⇔ elegible ∧ no descartada en esta sesión.
 ///
 /// Route/teclado-agnóstico a propósito: cada consumidor (shell, helpers de
 /// padding) lo combina con su propio `bannerVisible` para no reservar altura
 /// cuando el banner no se muestra (ruta suprimida, teclado abierto, etc.).
 @Riverpod(keepAlive: true)
 bool adBannerNoticeVisible(AdBannerNoticeVisibleRef ref) {
-  if (!ref.watch(adBannerNoticeEligibleProvider)) return false;
-  final homeId = ref.watch(currentHomeProvider).valueOrNull?.id;
-  if (homeId == null) return false;
-  return !ref.watch(adBannerNoticeDismissalProvider).contains(homeId);
+  if (ref.watch(adBannerNoticeDismissedProvider)) return false;
+  return ref.watch(adBannerNoticeEligibleProvider);
 }

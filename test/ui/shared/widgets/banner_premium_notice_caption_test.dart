@@ -4,33 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:toka/core/constants/routes.dart';
-import 'package:toka/features/homes/application/current_home_provider.dart';
-import 'package:toka/features/homes/domain/home.dart';
-import 'package:toka/features/homes/domain/home_limits.dart';
 import 'package:toka/l10n/app_localizations.dart';
 import 'package:toka/shared/widgets/ad_banner_notice_provider.dart';
 import 'package:toka/shared/widgets/banner_premium_notice_caption.dart';
-
-class _FakeCurrentHome extends CurrentHome {
-  @override
-  Future<Home?> build() async => Home(
-        id: 'h1',
-        name: 'Casa',
-        ownerUid: 'o',
-        currentPayerUid: 'otro',
-        lastPayerUid: null,
-        premiumStatus: HomePremiumStatus.active,
-        premiumPlan: null,
-        premiumEndsAt: null,
-        restoreUntil: null,
-        autoRenewEnabled: false,
-        limits: const HomeLimits(maxMembers: 5),
-        createdAt: DateTime(2024),
-        updatedAt: DateTime(2024),
-      );
-  @override
-  Future<void> switchHome(String i) async {}
-}
 
 GoRouter _router() => GoRouter(routes: [
       GoRoute(
@@ -57,32 +33,24 @@ Widget _app(GoRouter r) => MaterialApp.router(
 
 void main() {
   testWidgets('renderiza texto + botón descartar', (t) async {
-    await t.pumpWidget(ProviderScope(
-      overrides: [currentHomeProvider.overrideWith(() => _FakeCurrentHome())],
-      child: _app(_router()),
-    ));
+    await t.pumpWidget(ProviderScope(child: _app(_router())));
     await t.pumpAndSettle();
     expect(find.text('Quita también el banner con Toka Plus'), findsOneWidget);
-    expect(find.byKey(const Key('banner_premium_notice_dismiss')), findsOneWidget);
+    expect(
+        find.byKey(const Key('banner_premium_notice_dismiss')), findsOneWidget);
   });
 
   testWidgets('tap en el CTA navega al paywall de Plus', (t) async {
-    await t.pumpWidget(ProviderScope(
-      overrides: [currentHomeProvider.overrideWith(() => _FakeCurrentHome())],
-      child: _app(_router()),
-    ));
+    await t.pumpWidget(ProviderScope(child: _app(_router())));
     await t.pumpAndSettle();
     await t.tap(find.byKey(const Key('banner_premium_notice_cta')));
     await t.pumpAndSettle();
     expect(find.text('PLUS_PAYWALL'), findsOneWidget);
   });
 
-  testWidgets('tap en ✕ descarta el hogar actual', (t) async {
-    final container = ProviderContainer(
-      overrides: [currentHomeProvider.overrideWith(() => _FakeCurrentHome())],
-    );
+  testWidgets('tap en ✕ descarta la caption en la sesión', (t) async {
+    final container = ProviderContainer();
     addTearDown(container.dispose);
-    await container.read(currentHomeProvider.future);
 
     await t.pumpWidget(UncontrolledProviderScope(
       container: container,
@@ -90,9 +58,9 @@ void main() {
     ));
     await t.pumpAndSettle();
 
-    expect(container.read(adBannerNoticeDismissalProvider).contains('h1'), isFalse);
+    expect(container.read(adBannerNoticeDismissedProvider), isFalse);
     await t.tap(find.byKey(const Key('banner_premium_notice_dismiss')));
     await t.pumpAndSettle();
-    expect(container.read(adBannerNoticeDismissalProvider).contains('h1'), isTrue);
+    expect(container.read(adBannerNoticeDismissedProvider), isTrue);
   });
 }

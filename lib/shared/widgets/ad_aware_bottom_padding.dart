@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import 'ad_banner.dart';
 import 'ad_banner_config_provider.dart';
+import 'ad_banner_notice_provider.dart';
+import 'banner_premium_notice_caption.dart';
 import 'keyboard_visible_provider.dart';
 import 'skins/shell_metrics.dart';
 import 'skins/shell_presence_marker.dart';
@@ -60,11 +62,18 @@ double adAwareBottomPadding(
   final banner = bannerVisible
       ? AdBanner.kBannerHeight + metrics.bannerGap
       : 0.0;
+  // Caption "Premium con banner" (#06): suma su alto solo si el banner se ve y
+  // la caption es elegible/no descartada (`adBannerNoticeVisibleProvider`).
+  final noticeVisible =
+      bannerVisible && ref.watch(adBannerNoticeVisibleProvider);
+  final notice = noticeVisible
+      ? BannerPremiumNoticeCaption.kNoticeHeight + metrics.bannerGap
+      : 0.0;
   final navBar = keyboardVisible
       ? 0.0
       : metrics.navBarHeight + metrics.navBarBottom;
 
-  return banner + navBar + safeArea + extra;
+  return banner + notice + navBar + safeArea + extra;
 }
 
 /// Devuelve la ruta actual desde [GoRouterState], o cadena vacía si el

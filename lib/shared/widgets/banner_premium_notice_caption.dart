@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/constants/routes.dart';
 import '../../core/theme/app_colors_v2.dart';
-import '../../features/homes/application/current_home_provider.dart';
 import '../../l10n/app_localizations.dart';
 import 'ad_banner_notice_provider.dart';
 
@@ -78,14 +77,9 @@ class BannerPremiumNoticeCaption extends ConsumerWidget {
                 constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
                 padding: EdgeInsets.zero,
                 icon: const Icon(Icons.close),
-                onPressed: () {
-                  final id = ref.read(currentHomeProvider).valueOrNull?.id;
-                  if (id != null) {
-                    ref
-                        .read(adBannerNoticeDismissalProvider.notifier)
-                        .dismiss(id);
-                  }
-                },
+                onPressed: () => ref
+                    .read(adBannerNoticeDismissedProvider.notifier)
+                    .dismiss(),
               ),
             ],
           ),

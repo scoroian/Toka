@@ -8,7 +8,9 @@ import '../../../core/theme/app_colors_v2.dart';
 import '../../../l10n/app_localizations.dart';
 import '../ad_banner.dart';
 import '../ad_banner_config_provider.dart';
+import '../ad_banner_notice_provider.dart';
 import '../ad_interstitial_trigger.dart';
+import '../banner_premium_notice_caption.dart';
 import '../keyboard_visible_provider.dart';
 import 'shell_metrics.dart';
 import 'shell_presence_marker.dart';
@@ -61,6 +63,13 @@ class MainShellV2 extends ConsumerWidget {
     return AdBanner.kBannerHeight + _kBannerGap;
   }
 
+  // Altura reservada por la caption "Premium con banner" (#06) cuando es
+  // visible. Se suma SOBRE el slot del banner: la caption va encima del anuncio.
+  static double noticeSlotHeight({required bool noticeVisible}) {
+    if (!noticeVisible) return 0;
+    return BannerPremiumNoticeCaption.kNoticeHeight + _kBannerGap;
+  }
+
   /// Padding inferior total que un `ScrollView` dentro de una pantalla tab
   /// debe aplicar para que su último ítem quede por encima del banner y
   /// la NavBar flotante.
@@ -85,9 +94,12 @@ class MainShellV2 extends ConsumerWidget {
         && !metrics.suppressBannerFor(location)
         && !keyboardVisible;
     final navBarSlot = keyboardVisible ? 0.0 : kNavBarHeight + kNavBarBottom;
+    final noticeVisible =
+        bannerVisible && ref.watch(adBannerNoticeVisibleProvider);
     return safeBottom
         + navBarSlot
-        + bannerSlotHeight(bannerVisible: bannerVisible);
+        + bannerSlotHeight(bannerVisible: bannerVisible)
+        + noticeSlotHeight(noticeVisible: noticeVisible);
   }
 
   /// Padding inferior que un `floatingActionButton` dentro de una pantalla tab
@@ -113,7 +125,11 @@ class MainShellV2 extends ConsumerWidget {
         && !metrics.suppressBannerFor(location)
         && !keyboardVisible;
     final navBarSlot = keyboardVisible ? 0.0 : kNavBarHeight + kNavBarBottom;
-    return navBarSlot + bannerSlotHeight(bannerVisible: bannerVisible);
+    final noticeVisible =
+        bannerVisible && ref.watch(adBannerNoticeVisibleProvider);
+    return navBarSlot
+        + bannerSlotHeight(bannerVisible: bannerVisible)
+        + noticeSlotHeight(noticeVisible: noticeVisible);
   }
 
   @override
@@ -130,6 +146,9 @@ class MainShellV2 extends ConsumerWidget {
         && !keyboardVisible;
     final bannerSlot = bannerSlotHeight(bannerVisible: bannerVisible);
     final navBarSlot = keyboardVisible ? 0.0 : _kNavBarHeight + _kNavBarBottom;
+    final noticeVisible =
+        bannerVisible && ref.watch(adBannerNoticeVisibleProvider);
+    final noticeSlot = noticeSlotHeight(noticeVisible: noticeVisible);
 
     // El SizedBox transparente registra la altura de la barra + banner en
     // el Scaffold, de modo que MediaQuery.padding.bottom crece para los hijos.
@@ -151,7 +170,7 @@ class MainShellV2 extends ConsumerWidget {
       child: Scaffold(
         extendBody: true,
         bottomNavigationBar: SizedBox(
-          height: navBarSlot + safeBottom + bannerSlot,
+          height: navBarSlot + safeBottom + bannerSlot + noticeSlot,
         ),
         body: Stack(
           children: [
@@ -165,6 +184,21 @@ class MainShellV2 extends ConsumerWidget {
                 right: 0,
                 bottom: navBarSlot + safeBottom + _kBannerGap,
                 child: const AdBanner(key: Key('ad_banner')),
+              ),
+            // Caption "Premium con banner" (#06): justo encima del banner, con
+            // separación (el banner reserva su slot; la caption suma el suyo).
+            if (noticeVisible)
+              Positioned(
+                left: 16,
+                right: 16,
+                bottom: navBarSlot +
+                    safeBottom +
+                    _kBannerGap +
+                    AdBanner.kBannerHeight +
+                    _kBannerGap,
+                child: const BannerPremiumNoticeCaption(
+                  key: Key('shell_banner_notice'),
+                ),
               ),
             if (!keyboardVisible)
               Positioned(

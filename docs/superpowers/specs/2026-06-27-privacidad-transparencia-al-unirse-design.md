@@ -88,13 +88,15 @@ Render (Material 3, dentro de un `Container`/`Card` con `cs.surfaceContainerHigh
 
 ### 2. Onboarding — `HomeJoinForm` + propagación
 
-- `HomeJoinForm` (`home_join_form.dart`): nuevo parámetro `required bool phoneShared`. Insertar
+- `HomeJoinForm` (`home_join_form.dart`): nuevo parámetro `bool phoneShared` con **default `false`**
+  (valor seguro: no promete teléfono; evita romper los call sites de test existentes). Insertar
   `JoinPrivacyNotice(phoneShared: phoneShared)` **sin** `onChangeVisibility` (mención textual) entre el
   campo de código (y su error) y la `Row` de botones Atrás/Unirse.
-- `HomeChoiceStepV2` (`steps/skins/home_choice_step_v2.dart`): nuevo parámetro `bool phoneShared`,
-  pasado al `HomeJoinForm`.
+- `HomeChoiceStepV2` (`steps/skins/home_choice_step_v2.dart`) y su wrapper `HomeChoiceStep`
+  (`steps/skins/home_choice_step.dart`): nuevo parámetro `bool phoneShared` (default `false`), propagado
+  hasta el `HomeJoinForm`.
 - `onboarding_flow_screen.dart`: calcula `phoneShared` del view model
-  (`vm.phoneVisible && (vm.phoneNumber?.trim().isNotEmpty ?? false)`) y lo pasa a `HomeChoiceStepV2`.
+  (`vm.phoneVisible && (vm.phoneNumber?.trim().isNotEmpty ?? false)`) y lo pasa a `HomeChoiceStep`.
 
 ### 3. Selector — `_AddHomeSheet._buildJoinCode`
 

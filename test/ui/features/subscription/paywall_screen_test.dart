@@ -8,8 +8,10 @@ import 'package:toka/features/homes/domain/home.dart';
 import 'package:toka/features/homes/domain/home_limits.dart';
 import 'package:toka/features/subscription/application/intro_offer_provider.dart';
 import 'package:toka/features/subscription/application/paywall_provider.dart';
+import 'package:toka/features/subscription/application/tier_pricing_provider.dart';
 import 'package:toka/features/subscription/domain/intro_offer.dart';
 import 'package:toka/features/subscription/domain/purchase_result.dart';
+import 'package:toka/features/subscription/domain/subscription_products.dart';
 import 'package:toka/features/subscription/presentation/skins/paywall_screen_v2.dart';
 import 'package:toka/l10n/app_localizations.dart';
 
@@ -67,6 +69,7 @@ void main() {
     currentHomeProvider.overrideWith(() => _FakeCurrentHome(home: _freeHome)),
     paywallProvider.overrideWith(() => _FakePaywall()),
     annualIntroOfferProvider.overrideWith((ref) async => IntroOffer.none),
+    binaryPricingProvider.overrideWith((ref) async => const {}),
   ];
 
   List<Override> overridesWithOffer(IntroOffer offer) => [
@@ -74,6 +77,7 @@ void main() {
             .overrideWith(() => _FakeCurrentHome(home: _freeHome)),
         paywallProvider.overrideWith(() => _FakePaywall()),
         annualIntroOfferProvider.overrideWith((ref) async => offer),
+        binaryPricingProvider.overrideWith((ref) async => const {}),
       ];
 
   testWidgets('PaywallScreen muestra CTA anual y mensual', (tester) async {
@@ -116,6 +120,47 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('paywall_trial_note')), findsNothing);
+  });
+
+  testWidgets('binario: precios de Grupo (fallback ARB), no las cifras de Familia',
+      (tester) async {
+    await tester.pumpWidget(
+        _wrap(const PaywallScreenV2(), overrides: baseOverrides));
+    await tester.pumpAndSettle();
+
+    expect(find.text('5,99 €'), findsOneWidget); // Grupo mensual
+    expect(find.text('49,99 €'), findsOneWidget); // Grupo anual
+    expect(find.text('Ahorra 21,89 €'), findsOneWidget);
+    expect(find.text('3,99 €/mes'), findsNothing);
+    expect(find.text('29,99 €/año'), findsNothing);
+  });
+
+  testWidgets('binario: usa el precio localizado de la store cuando existe',
+      (tester) async {
+    final overrides = <Override>[
+      currentHomeProvider.overrideWith(() => _FakeCurrentHome(home: _freeHome)),
+      paywallProvider.overrideWith(() => _FakePaywall()),
+      annualIntroOfferProvider.overrideWith((ref) async => IntroOffer.none),
+      binaryPricingProvider.overrideWith((ref) async => {
+            kMonthlyProductId: const TierProductInfo(
+              productId: kMonthlyProductId,
+              price: '7,77 €',
+              introOffer: IntroOffer.none,
+            ),
+            kAnnualProductId: const TierProductInfo(
+              productId: kAnnualProductId,
+              price: '66,66 €',
+              introOffer: IntroOffer.none,
+            ),
+          }),
+    ];
+    await tester.pumpWidget(_wrap(const PaywallScreenV2(), overrides: overrides));
+    await tester.pumpAndSettle();
+
+    expect(find.text('7,77 €'), findsOneWidget);
+    expect(find.text('66,66 €'), findsOneWidget);
+    expect(find.text('5,99 €'), findsNothing);
+    expect(find.text('49,99 €'), findsNothing);
   });
 
   testWidgets('golden: PaywallScreen', (tester) async {

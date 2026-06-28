@@ -47,7 +47,7 @@ class RescueScreenV2 extends ConsumerWidget {
               _LastBillingErrorTile(message: vm.lastBillingError!),
             ],
             const SizedBox(height: 24),
-            const PlanComparisonCard(),
+            PlanComparisonCard(premiumMemberLimit: vm.premiumMemberLimit),
             const SizedBox(height: 24),
             FilledButton(
               key: const Key('btn_renew_annual'),

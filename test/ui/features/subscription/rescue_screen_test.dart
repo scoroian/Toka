@@ -173,6 +173,36 @@ void main() {
     expect(_purchasedSkus, ['toka_premium_annual']);
   });
 
+  testWidgets('RescueScreen: tier Pareja → comparación dice "Hasta 2 miembros"',
+      (tester) async {
+    final overrides = [
+      currentHomeProvider.overrideWith(() => _FakeCurrentHome(_rescueHome)),
+      subscriptionRepositoryProvider
+          .overrideWithValue(_MockSubscriptionRepository()),
+      subscriptionStateProvider.overrideWith(
+        (_) => const SubscriptionState.rescue(
+            plan: 'monthly', endsAt: null, daysLeft: 2),
+      ),
+      paywallProvider.overrideWith(() => _FakePaywall()),
+      currentHomeTierProvider.overrideWithValue(HomeTier.pareja),
+      homeTiersEnabledProvider.overrideWithValue(true),
+    ];
+    await tester.pumpWidget(_wrap(const RescueScreenV2(), overrides: overrides));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Hasta 2 miembros'), findsOneWidget);
+    expect(find.text('Hasta 10 miembros por hogar'), findsNothing);
+  });
+
+  testWidgets('RescueScreen: tier desconocido → fallback "Hasta 10 miembros"',
+      (tester) async {
+    // baseOverrides usa currentHomeTierProvider=null, homeTiersEnabled=false.
+    await tester.pumpWidget(_wrap(const RescueScreenV2(), overrides: baseOverrides));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Hasta 10 miembros'), findsOneWidget);
+  });
+
   testWidgets(
       'RescueScreen: tiers ON + Pareja → renueva toka_pareja_annual (no sube a Grupo)',
       (tester) async {

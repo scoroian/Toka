@@ -215,4 +215,40 @@ void main() {
       expect(vm.isLoading, isFalse);
     });
   });
+
+  group('RescueViewModel — premiumMemberLimit (tier del hogar)', () {
+    const rescue = SubscriptionState.rescue(
+      plan: 'monthly',
+      endsAt: null,
+      daysLeft: 2,
+    );
+
+    test('Pareja → 2 miembros', () {
+      final container =
+          _makeContainer(subState: rescue, tier: HomeTier.pareja, tiersEnabled: true);
+      addTearDown(container.dispose);
+      expect(container.read(rescueViewModelProvider).premiumMemberLimit, 2);
+    });
+
+    test('Familia → 5 miembros', () {
+      final container =
+          _makeContainer(subState: rescue, tier: HomeTier.familia, tiersEnabled: true);
+      addTearDown(container.dispose);
+      expect(container.read(rescueViewModelProvider).premiumMemberLimit, 5);
+    });
+
+    test('tier desconocido (null) → fallback Grupo (10)', () {
+      final container =
+          _makeContainer(subState: rescue, tier: null, tiersEnabled: false);
+      addTearDown(container.dispose);
+      expect(container.read(rescueViewModelProvider).premiumMemberLimit, 10);
+    });
+
+    test('flag OFF aunque haya tier → fallback Grupo (10), coherente con renovación legacy', () {
+      final container =
+          _makeContainer(subState: rescue, tier: HomeTier.pareja, tiersEnabled: false);
+      addTearDown(container.dispose);
+      expect(container.read(rescueViewModelProvider).premiumMemberLimit, 10);
+    });
+  });
 }

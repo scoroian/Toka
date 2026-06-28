@@ -206,4 +206,28 @@ void main() {
       matchesGoldenFile('goldens/plan_summary_card_restorable.png'),
     );
   });
+
+  testWidgets('free: muestra el rango de miembros, no "Hasta 10" fijo',
+      (t) async {
+    await t.pumpWidget(_wrap(
+      PlanSummaryCard(
+        data: _dashboard(
+          HomePremiumStatus.free,
+          plan: null,
+          withEndsAt: false,
+          autoRenew: false,
+          payerUid: null,
+          counters: const PlanCounters(
+            activeMembers: 2,
+            activeTasks: 0,
+            automaticRecurringTasks: 1,
+            totalAdmins: 1,
+          ),
+        ),
+      ),
+    ));
+    await t.pumpAndSettle();
+    expect(find.text('De 2 a 10 miembros según el plan'), findsOneWidget);
+    expect(find.text('Hasta 10 miembros por hogar'), findsNothing);
+  });
 }

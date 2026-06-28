@@ -2,6 +2,7 @@ import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../domain/intro_offer.dart';
+import '../domain/subscription_products.dart';
 import '../domain/tier_catalog.dart';
 import 'intro_offer_parser.dart';
 
@@ -39,12 +40,35 @@ InAppPurchase inAppPurchase(InAppPurchaseRef ref) => InAppPurchase.instance;
 @riverpod
 Future<Map<String, TierProductInfo>> tierPricing(TierPricingRef ref) async {
   final iap = ref.watch(inAppPurchaseProvider);
+  return _queryPricing(iap, allTierProductIds);
+}
+
+/// Precios localizados de los 2 SKUs **legacy** del paywall binario
+/// (`toka_premium_*`). El binario COMPRA el legacy; mostrar su precio garantiza
+/// que lo mostrado coincide con lo cobrado. Fallback (mapa vacío) → el consumidor
+/// usa el precio de referencia ARB de Grupo (legacy = Grupo en el backend), p.ej.
+/// en desarrollo sin SKUs dados de alta en la store. `FutureProvider` manual para
+/// poder overridearlo en tests sin tocar el canal IAP.
+final binaryPricingProvider =
+    FutureProvider<Map<String, TierProductInfo>>((ref) async {
+  final iap = ref.watch(inAppPurchaseProvider);
+  return _queryPricing(iap, {kMonthlyProductId, kAnnualProductId});
+});
+
+/// Consulta a la store los precios + trials de [ids] y devuelve `productId →
+/// TierProductInfo` SOLO con los SKUs que la store resolvió. Nunca lanza: ante
+/// store no disponible o error devuelve un mapa vacío (todo fallback en el
+/// consumidor).
+Future<Map<String, TierProductInfo>> _queryPricing(
+  InAppPurchase iap,
+  Set<String> ids,
+) async {
   try {
     if (!await iap.isAvailable()) return const {};
-    final response = await iap.queryProductDetails(allTierProductIds);
+    final response = await iap.queryProductDetails(ids);
     final result = <String, TierProductInfo>{};
     for (final details in response.productDetails) {
-      if (!allTierProductIds.contains(details.id)) continue;
+      if (!ids.contains(details.id)) continue;
       result[details.id] = TierProductInfo(
         productId: details.id,
         price: details.price,

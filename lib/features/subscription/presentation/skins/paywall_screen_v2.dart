@@ -87,6 +87,15 @@ class _BinaryPaywallBody extends ConsumerWidget {
         ref.watch(annualIntroOfferProvider).valueOrNull ?? IntroOffer.none;
     final hasTrial = annualOffer.hasFreeTrial;
 
+    // Modo binario: el SKU legacy (toka_premium_*) es el que se COMPRA. Mostramos
+    // su precio de store con fallback ARB de Grupo (legacy = Grupo en el backend),
+    // así lo mostrado coincide con lo cobrado.
+    final pricing = ref.watch(binaryPricingProvider).valueOrNull ?? const {};
+    final monthlyPrice = pricing[kMonthlyProductId]?.price ??
+        tierFallbackPrice(l10n, HomeTier.grupo, BillingCycle.monthly);
+    final annualPrice = pricing[kAnnualProductId]?.price ??
+        tierFallbackPrice(l10n, HomeTier.grupo, BillingCycle.annual);
+
     return SingleChildScrollView(
       padding: const EdgeInsets.only(bottom: 32),
       child: Column(
@@ -100,12 +109,12 @@ class _BinaryPaywallBody extends ConsumerWidget {
               style: Theme.of(context).textTheme.bodyLarge,
             ),
           ),
-          const PlanComparisonCard(),
+          PlanComparisonCard(premiumMemberLimit: HomeTier.grupo.maxMembers),
           const SizedBox(height: 24),
           _PriceChip(
             key: const Key('chip_annual'),
             label: l10n.subscription_annual,
-            price: l10n.subscription_price_annual,
+            price: annualPrice,
             badge: hasTrial
                 ? l10n.paywall_trial_badge(annualOffer.freeTrialDays)
                 : l10n.subscription_annual_saving,
@@ -114,7 +123,7 @@ class _BinaryPaywallBody extends ConsumerWidget {
           _PriceChip(
             key: const Key('chip_monthly'),
             label: l10n.subscription_monthly,
-            price: l10n.subscription_price_monthly,
+            price: monthlyPrice,
           ),
           const SizedBox(height: 24),
           Padding(

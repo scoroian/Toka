@@ -28,6 +28,12 @@ abstract class RescueViewModel {
   /// SKU de renovación MENSUAL resuelto (ver [annualProductId]).
   String get monthlyProductId;
 
+  /// Tope de miembros del tier ACTUAL del hogar (Pareja 2 / Familia 5 / Grupo
+  /// 10). Fallback a Grupo (10) si el tier es desconocido — coherente con
+  /// `renewalProductId`, que cae al SKU legacy (=Grupo) en ese caso. Lo usa la
+  /// pantalla de rescate para mostrar los miembros de "su tier", no "10" fijo.
+  int get premiumMemberLimit;
+
   Future<void> startPurchase(String productId);
 }
 
@@ -41,6 +47,7 @@ class _RescueViewModelImpl implements RescueViewModel {
     required this.homeId,
     required this.annualProductId,
     required this.monthlyProductId,
+    required this.premiumMemberLimit,
     required this.ref,
   });
   @override
@@ -59,6 +66,8 @@ class _RescueViewModelImpl implements RescueViewModel {
   final String annualProductId;
   @override
   final String monthlyProductId;
+  @override
+  final int premiumMemberLimit;
   final Ref ref;
 
   @override
@@ -99,6 +108,8 @@ RescueViewModel rescueViewModel(RescueViewModelRef ref) {
         tiersEnabled: tiersEnabled, tier: tier, cycle: BillingCycle.annual),
     monthlyProductId: renewalProductId(
         tiersEnabled: tiersEnabled, tier: tier, cycle: BillingCycle.monthly),
+    premiumMemberLimit:
+        (tiersEnabled && tier != null ? tier : HomeTier.grupo).maxMembers,
     ref: ref,
   );
 }

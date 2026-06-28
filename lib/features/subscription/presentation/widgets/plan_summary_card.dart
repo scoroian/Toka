@@ -134,7 +134,7 @@ class PlanSummaryCard extends StatelessWidget {
         style: theme.textTheme.titleSmall,
       ),
       const SizedBox(height: 8),
-      _benefit(l10n.paywall_feature_members),
+      _benefit(l10n.premium_benefit_members_range),
       _benefit(l10n.paywall_feature_smart),
       _benefit(l10n.paywall_feature_vacations),
       _benefit(l10n.paywall_feature_reviews),

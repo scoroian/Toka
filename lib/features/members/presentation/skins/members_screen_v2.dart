@@ -311,10 +311,10 @@ Future<void> _reinstateMember(
 
 /// Tarjeta "Equilibrio del hogar".
 ///
-/// Muestra el promedio de `complianceRate` de miembros activos como un
-/// porcentaje con barra. Si la diferencia entre el miembro con más tareas
-/// hechas y el resto es relevante (≥2), se indica nominal — útil para
-/// detectar reparto desigual.
+/// Muestra el promedio de `complianceRate` de los miembros activos como un
+/// porcentaje con barra. Habla del hogar en conjunto: si el reparto está
+/// desigual (≥2 miembros activos y balance < 75 %) sugiere repartir, sin
+/// señalar a nadie por nombre ni usar color de alarma.
 class _BalanceCardV2 extends StatelessWidget {
   const _BalanceCardV2({required this.activeMembers, required this.l10n});
 
@@ -330,26 +330,16 @@ class _BalanceCardV2 extends StatelessWidget {
     return (sum / activeMembers.length).clamp(0.0, 1.0);
   }
 
-  String _topDelta() {
-    if (activeMembers.length < 2) return l10n.members_section_active;
-    final sorted = [...activeMembers]
-      ..sort((a, b) => b.tasksCompleted.compareTo(a.tasksCompleted));
-    final top = sorted.first;
-    final rest = sorted.sublist(1);
-    final avgRest =
-        rest.fold<int>(0, (a, m) => a + m.tasksCompleted) / rest.length;
-    final diff = (top.tasksCompleted - avgRest).round();
-    if (diff <= 1) return l10n.members_section_active;
-    return '${top.nickname} +$diff';
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final value = _balance;
     final percent = (value * 100).round();
-    final isBalanced = percent >= 75;
+    // Con un solo miembro activo no hay reparto que equilibrar.
+    final isBalanced = activeMembers.length < 2 || percent >= 75;
+    // Neutro/informativo en desequilibrio: nunca color de alarma.
+    final neutral = cs.onSurfaceVariant;
 
     return Container(
       padding: const EdgeInsets.all(14),
@@ -366,7 +356,7 @@ class _BalanceCardV2 extends StatelessWidget {
               Icon(
                 isBalanced ? Icons.balance : Icons.scale_outlined,
                 size: 20,
-                color: isBalanced ? cs.primary : cs.tertiary,
+                color: isBalanced ? cs.primary : neutral,
               ),
               const SizedBox(width: 8),
               Expanded(
@@ -381,7 +371,7 @@ class _BalanceCardV2 extends StatelessWidget {
                 '$percent%',
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w800,
-                  color: isBalanced ? cs.primary : cs.tertiary,
+                  color: isBalanced ? cs.primary : neutral,
                 ),
               ),
             ],
@@ -394,19 +384,41 @@ class _BalanceCardV2 extends StatelessWidget {
               minHeight: 8,
               backgroundColor: cs.surface,
               valueColor: AlwaysStoppedAnimation(
-                isBalanced ? cs.primary : cs.tertiary,
+                isBalanced ? cs.primary : cs.secondary,
               ),
             ),
           ),
           const SizedBox(height: 6),
-          Text(
-            isBalanced
-                ? l10n.members_balance_well_distributed
-                : l10n.members_balance_unbalanced(_topDelta()),
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: cs.onSurfaceVariant,
+          if (isBalanced)
+            Text(
+              l10n.members_balance_well_distributed,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: cs.onSurfaceVariant,
+              ),
+            )
+          else ...[
+            Text(
+              l10n.members_balance_uneven,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: cs.onSurfaceVariant,
+              ),
             ),
-          ),
+            const SizedBox(height: 4),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                key: const Key('btn_balance_share'),
+                onPressed: () => context.go(AppRoutes.tasks),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  minimumSize: const Size(0, 36),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                icon: const Icon(Icons.swap_horiz, size: 18),
+                label: Text(l10n.members_balance_share_cta),
+              ),
+            ),
+          ],
         ],
       ),
     );

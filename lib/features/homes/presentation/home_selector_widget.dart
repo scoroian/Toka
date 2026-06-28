@@ -9,6 +9,7 @@ import '../../../core/errors/exceptions.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/bottom_sheet_padding.dart';
 import '../../auth/application/auth_provider.dart';
+import '../../profile/application/profile_provider.dart';
 import '../application/current_home_provider.dart';
 import '../application/join_home_error.dart';
 import '../application/join_home_error_messages.dart';
@@ -16,6 +17,7 @@ import '../application/home_slot_provider.dart';
 import '../application/homes_provider.dart';
 import '../domain/home_membership.dart';
 import 'widgets/home_avatar.dart';
+import 'widgets/join_privacy_notice.dart';
 
 @visibleForTesting
 List<HomeMembership> sortMembershipsForSelector(
@@ -642,6 +644,15 @@ class _AddHomeSheetState extends ConsumerState<_AddHomeSheet> {
   }
 
   Widget _buildJoinCode(BuildContext context, AppLocalizations l10n) {
+    // Hallazgo #09: el aviso refleja el estado REAL de visibilidad del
+    // teléfono del usuario (perfil en Firestore). Si aún no resolvió, se
+    // trata como no compartido para no prometer de más.
+    final uid =
+        ref.read(authProvider).whenOrNull(authenticated: (u) => u.uid);
+    final profile =
+        uid != null ? ref.watch(userProfileProvider(uid)).valueOrNull : null;
+    final phoneShared = (profile?.phone?.trim().isNotEmpty ?? false) &&
+        profile?.phoneVisibility == 'sameHomeMembers';
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -688,6 +699,14 @@ class _AddHomeSheetState extends ConsumerState<_AddHomeSheet> {
           Text(_error!,
               style: TextStyle(color: Theme.of(context).colorScheme.error)),
         ],
+        const SizedBox(height: 12),
+        JoinPrivacyNotice(
+          phoneShared: phoneShared,
+          onChangeVisibility: () {
+            Navigator.of(context).pop();
+            context.push(AppRoutes.editProfile);
+          },
+        ),
         const SizedBox(height: 12),
         FilledButton(
           key: const Key('btn_join_submit'),

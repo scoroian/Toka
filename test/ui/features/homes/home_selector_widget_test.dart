@@ -7,6 +7,7 @@ import 'package:toka/features/auth/application/auth_provider.dart';
 import 'package:toka/features/auth/application/auth_state.dart';
 import 'package:toka/features/auth/domain/auth_user.dart';
 import 'package:toka/features/homes/application/current_home_provider.dart';
+import 'package:toka/features/homes/application/home_slot_provider.dart';
 import 'package:toka/features/homes/application/homes_provider.dart';
 import 'package:toka/features/homes/domain/home.dart';
 import 'package:toka/features/homes/domain/home_limits.dart';
@@ -14,7 +15,10 @@ import 'package:toka/features/homes/domain/home_membership.dart';
 import 'package:toka/features/homes/domain/homes_repository.dart';
 import 'package:toka/features/homes/presentation/home_selector_widget.dart';
 import 'package:toka/features/homes/presentation/widgets/home_avatar.dart';
+import 'package:toka/features/profile/application/profile_provider.dart';
+import 'package:toka/features/profile/domain/user_profile.dart';
 import 'package:toka/l10n/app_localizations.dart';
+import 'package:toka/shared/widgets/ad_banner_config_provider.dart';
 
 // ---------------------------------------------------------------------------
 // Fakes & mocks
@@ -316,5 +320,79 @@ void main() {
       find.byType(MaterialApp),
       matchesGoldenFile('goldens/home_selector_3_homes.png'),
     );
+  });
+
+  // ── Hallazgo #09: aviso de transparencia en el form de unión del selector ──
+  UserProfile makeProfile({required bool phoneShared}) => UserProfile(
+        uid: 'uid1',
+        nickname: 'User',
+        photoUrl: null,
+        bio: null,
+        phone: phoneShared ? '+34600000000' : null,
+        phoneVisibility: phoneShared ? 'sameHomeMembers' : 'hidden',
+        locale: 'es',
+      );
+
+  Widget wrapJoinSheetHost({required bool phoneShared}) => ProviderScope(
+        overrides: [
+          authProvider.overrideWith(
+              () => _FakeAuth(const AuthState.authenticated(_fakeUser))),
+          userProfileProvider('uid1')
+              .overrideWith((ref) => Stream.value(makeProfile(phoneShared: phoneShared))),
+          availableSlotsProvider.overrideWith((ref) => Future.value(5)),
+          adBannerConfigProvider
+              .overrideWithValue(const AdBannerConfig(show: false, unitId: '')),
+        ],
+        child: MaterialApp(
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [Locale('es')],
+          home: Consumer(
+            builder: (context, ref, _) => Scaffold(
+              body: Center(
+                child: ElevatedButton(
+                  key: const Key('open_join'),
+                  onPressed: () => showJoinHomeSheet(context, ref, 1),
+                  child: const Text('open'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+  testWidgets(
+      'selector (#09): el form de unión muestra el aviso con enlace Cambiar; '
+      'teléfono oculto no se promete', (tester) async {
+    await tester.pumpWidget(wrapJoinSheetHost(phoneShared: false));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('open_join')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('join_privacy_notice')), findsOneWidget);
+    // En el selector hay enlace navegable a editar perfil.
+    expect(find.byKey(const Key('join_privacy_change_visibility')), findsOneWidget);
+    expect(find.text('Tu teléfono permanece oculto.'), findsOneWidget);
+    expect(find.text('Tu teléfono también será visible para ellos.'),
+        findsNothing);
+  });
+
+  testWidgets(
+      'selector (#09): con teléfono visible el aviso lo refleja',
+      (tester) async {
+    await tester.pumpWidget(wrapJoinSheetHost(phoneShared: true));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('open_join')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Tu teléfono también será visible para ellos.'),
+        findsOneWidget);
+    expect(find.text('Tu teléfono permanece oculto.'), findsNothing);
   });
 }

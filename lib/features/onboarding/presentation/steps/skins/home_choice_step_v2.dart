@@ -15,6 +15,7 @@ class HomeChoiceStepV2 extends StatefulWidget {
     required this.onJoinHome,
     required this.onPrev,
     this.onClearError,
+    this.phoneShared = false,
   });
 
   final bool isLoading;
@@ -25,6 +26,9 @@ class HomeChoiceStepV2 extends StatefulWidget {
 
   /// Limpia el error de servidor del view model al editar un campo.
   final VoidCallback? onClearError;
+
+  /// Hallazgo #09: si el teléfono del usuario se compartirá al unirse.
+  final bool phoneShared;
 
   @override
   State<HomeChoiceStepV2> createState() => _HomeChoiceStepV2State();
@@ -183,6 +187,7 @@ class _HomeChoiceStepV2State extends State<HomeChoiceStepV2> {
                     HomeJoinForm(
                       isLoading: widget.isLoading,
                       error: widget.error,
+                      phoneShared: widget.phoneShared,
                       onJoin: widget.onJoinHome,
                       onBack: () => setState(() => _choice = _HomeChoice.none),
                       onClearError: widget.onClearError,

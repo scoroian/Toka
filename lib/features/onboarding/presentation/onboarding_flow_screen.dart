@@ -103,6 +103,10 @@ class _OnboardingFlowScreenState extends ConsumerState<OnboardingFlowScreen> {
                 HomeChoiceStep(
                   isLoading: vm.isLoading,
                   error: vm.error,
+                  // Hallazgo #09: el aviso de transparencia refleja si el
+                  // teléfono configurado en el paso de perfil se compartirá.
+                  phoneShared: vm.phoneVisible &&
+                      (vm.phoneNumber?.trim().isNotEmpty ?? false),
                   onCreateHome: (name, emoji) => vm.createHome(name, emoji),
                   onJoinHome: vm.joinHome,
                   onPrev: vm.prevStep,

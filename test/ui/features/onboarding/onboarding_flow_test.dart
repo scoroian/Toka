@@ -44,7 +44,12 @@ class _FakeOnboardingNotifier extends OnboardingNotifier {
   Future<void> loadSavedProgress() async {}
 }
 
-_MockOnboardingVM _defaultMock({int currentStep = 0, int totalSteps = 4}) {
+_MockOnboardingVM _defaultMock({
+  int currentStep = 0,
+  int totalSteps = 4,
+  bool phoneVisible = false,
+  String? phoneNumber,
+}) {
   final m = _MockOnboardingVM();
   when(() => m.isInitialized).thenReturn(true);
   when(() => m.shouldNavigateHome).thenReturn(false);
@@ -52,8 +57,8 @@ _MockOnboardingVM _defaultMock({int currentStep = 0, int totalSteps = 4}) {
   when(() => m.totalSteps).thenReturn(totalSteps);
   when(() => m.selectedLocale).thenReturn(null);
   when(() => m.nickname).thenReturn(null);
-  when(() => m.phoneNumber).thenReturn(null);
-  when(() => m.phoneVisible).thenReturn(false);
+  when(() => m.phoneNumber).thenReturn(phoneNumber);
+  when(() => m.phoneVisible).thenReturn(phoneVisible);
   when(() => m.photoLocalPath).thenReturn(null);
   when(() => m.isLoading).thenReturn(false);
   when(() => m.error).thenReturn(null);
@@ -437,5 +442,114 @@ void main() {
         find.byKey(const Key('invite_code_field')), 'XYZ789');
     await tester.pumpAndSettle();
     expect(find.text('Código de invitación inválido'), findsNothing);
+  });
+
+  // ── Hallazgo #09: aviso de transparencia en el form de unión ──────────────
+  Widget wrapJoinFormPhone({required bool phoneShared}) => MaterialApp(
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: const [Locale('es')],
+        home: Scaffold(
+          body: HomeJoinForm(
+            isLoading: false,
+            error: null,
+            phoneShared: phoneShared,
+            onJoin: (_) async {},
+            onBack: () {},
+          ),
+        ),
+      );
+
+  testWidgets(
+      'HomeJoinForm (#09) muestra el aviso de transparencia antes del botón, '
+      'sin enlace Cambiar (mención textual en onboarding)', (tester) async {
+    await tester.pumpWidget(wrapJoinFormPhone(phoneShared: false));
+    await tester.pumpAndSettle();
+
+    // El aviso está presente y antes del botón Unirme.
+    expect(find.byKey(const Key('join_privacy_notice')), findsOneWidget);
+    expect(find.byKey(const Key('join_button')), findsOneWidget);
+    // En onboarding no hay enlace navegable: mención textual.
+    expect(find.byKey(const Key('join_privacy_change_visibility')), findsNothing);
+    expect(
+        find.text('Puedes ajustar la visibilidad de tu teléfono en tu perfil.'),
+        findsOneWidget);
+    // Teléfono oculto → no promete mostrarlo.
+    expect(find.text('Tu teléfono permanece oculto.'), findsOneWidget);
+  });
+
+  testWidgets(
+      'HomeJoinForm (#09) con phoneShared=true promete teléfono visible',
+      (tester) async {
+    await tester.pumpWidget(wrapJoinFormPhone(phoneShared: true));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Tu teléfono también será visible para ellos.'),
+        findsOneWidget);
+    expect(find.text('Tu teléfono permanece oculto.'), findsNothing);
+  });
+
+  // ── Hallazgo #09: propagación end-to-end desde el flow real ──────────────
+  // Estos tests montan el OnboardingFlowScreen COMPLETO (no HomeJoinForm
+  // directamente) para verificar que el cálculo en onboarding_flow_screen.dart
+  // (`phoneShared: vm.phoneVisible && (vm.phoneNumber?.trim().isNotEmpty ?? false)`)
+  // se propaga correctamente a través de HomeChoiceStep → HomeChoiceStepV2 →
+  // HomeJoinForm → JoinPrivacyNotice.
+  // Una regresión que rompa la propagación (p.ej. hardcodear phoneShared:false)
+  // fallaría aquí pero NO en wrapJoinFormPhone, que instancia HomeJoinForm directo.
+
+  testWidgets(
+      '#09 flow end-to-end: phoneVisible+número real → aviso "teléfono visible" '
+      'llega hasta JoinPrivacyNotice (prueba toda la cadena de propagación)',
+      (tester) async {
+    // phoneVisible=true y número no vacío → AND verdadero → phoneShared=true
+    final vm = _defaultMock(
+      currentStep: 3,
+      phoneVisible: true,
+      phoneNumber: '+34600000000',
+    );
+    await tester.pumpWidget(_wrap(vm: vm, currentStep: 3));
+    await tester.pumpAndSettle();
+
+    // Navegar al sub-form de unión igual que el test existente (línea ~203)
+    await tester.tap(find.byKey(const Key('join_home_card')));
+    await tester.pumpAndSettle();
+
+    // El flow calculó phoneShared=true y lo propagó: debe aparecer el aviso
+    // de teléfono visible, NO el de oculto.
+    expect(
+      find.text('Tu teléfono también será visible para ellos.'),
+      findsOneWidget,
+    );
+    expect(find.text('Tu teléfono permanece oculto.'), findsNothing);
+  });
+
+  testWidgets(
+      '#09 flow end-to-end: phoneVisible=true pero número vacío → AND falso → '
+      'aviso "teléfono oculto" (verifica que el AND con phoneNumber se respeta)',
+      (tester) async {
+    // phoneVisible=true pero número vacío → AND falso → phoneShared=false
+    final vm = _defaultMock(
+      currentStep: 3,
+      phoneVisible: true,
+      phoneNumber: '',
+    );
+    await tester.pumpWidget(_wrap(vm: vm, currentStep: 3));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('join_home_card')));
+    await tester.pumpAndSettle();
+
+    // El número vacío hace que el AND sea false → phoneShared=false →
+    // el aviso debe ser "teléfono permanece oculto".
+    expect(find.text('Tu teléfono permanece oculto.'), findsOneWidget);
+    expect(
+      find.text('Tu teléfono también será visible para ellos.'),
+      findsNothing,
+    );
   });
 }

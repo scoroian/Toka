@@ -5,6 +5,7 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../homes/application/join_home_error.dart';
 import '../../../homes/application/join_home_error_messages.dart';
+import '../../../homes/presentation/widgets/join_privacy_notice.dart';
 
 /// Resuelve el código de error del view model (nombre de [JoinHomeError]) al
 /// mensaje localizado, usando la MISMA fuente de verdad que el selector
@@ -26,12 +27,17 @@ class HomeJoinForm extends StatefulWidget {
     required this.onJoin,
     required this.onBack,
     this.onClearError,
+    this.phoneShared = false,
   });
 
   final bool isLoading;
   final String? error;
   final ValueChanged<String> onJoin;
   final VoidCallback onBack;
+
+  /// Si el teléfono del usuario se compartirá con los miembros (Hallazgo #09).
+  /// Gobierna la línea del teléfono del aviso de transparencia.
+  final bool phoneShared;
 
   /// Se invoca al editar el código para limpiar el error de servidor
   /// ("Código de invitación inválido", etc.), que vive en el view model y no
@@ -150,6 +156,10 @@ class _HomeJoinFormState extends State<HomeJoinForm> {
               _joinErrorText(widget.error!, l10n),
               style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
+          const SizedBox(height: 16),
+          // Aviso de transparencia (#09): qué verán los demás miembros. En
+          // onboarding sin enlace navegable → mención textual.
+          JoinPrivacyNotice(phoneShared: widget.phoneShared),
           const SizedBox(height: 16),
           Row(
             children: [

@@ -27,3 +27,22 @@ bool shouldShowInterstitial({
   }
   return true;
 }
+
+/// Decisión PURA de si el regreso a primer plano ("app resume") es un MOMENTO
+/// elegible para evaluar un intersticial. NO decide la frecuencia (eso lo hace
+/// [shouldShowInterstitial] dentro del controlador); solo discierne si este
+/// resume sigue a un background lo bastante largo como para considerarse un
+/// "me fui y volví" en vez de un vistazo fugaz.
+///
+/// Devuelve `true` ⇔ hubo un background previo (`backgroundedAt != null`) y han
+/// transcurrido al menos `minBackgroundSeconds` desde entonces. Un
+/// `backgroundedAt == null` (cold-start, sin background previo) devuelve `false`
+/// para que abrir la app nunca quede gateado por un anuncio.
+bool shouldShowInterstitialOnResume({
+  required DateTime? backgroundedAt,
+  required DateTime now,
+  required int minBackgroundSeconds,
+}) {
+  if (backgroundedAt == null) return false;
+  return now.difference(backgroundedAt).inSeconds >= minBackgroundSeconds;
+}

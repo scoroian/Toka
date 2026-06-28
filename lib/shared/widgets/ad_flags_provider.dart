@@ -36,6 +36,7 @@ class InterstitialRemoteConfig {
     required this.enabled,
     required this.minIntervalSeconds,
     required this.maxPerSession,
+    required this.resumeMinBackgroundSeconds,
     required this.unitAndroid,
     required this.unitIos,
   });
@@ -44,6 +45,11 @@ class InterstitialRemoteConfig {
   final bool enabled;
   final int minIntervalSeconds;
   final int maxPerSession;
+
+  /// Tiempo mínimo en segundo plano para que un "app resume" sea momento
+  /// elegible de intersticial (Hallazgo #10). Lo consume el trigger, no el
+  /// controlador.
+  final int resumeMinBackgroundSeconds;
   final String unitAndroid;
   final String unitIos;
 
@@ -54,6 +60,7 @@ class InterstitialRemoteConfig {
     enabled: false,
     minIntervalSeconds: 210,
     maxPerSession: 3,
+    resumeMinBackgroundSeconds: 240,
     unitAndroid: '',
     unitIos: '',
   );
@@ -76,6 +83,7 @@ InterstitialRemoteConfig interstitialRemoteConfig(
       enabled: rc.adInterstitialEnabled,
       minIntervalSeconds: rc.adInterstitialMinIntervalSeconds,
       maxPerSession: rc.adInterstitialMaxPerSession,
+      resumeMinBackgroundSeconds: rc.adInterstitialResumeMinBackgroundSeconds,
       unitAndroid: rc.adInterstitialUnitAndroid,
       unitIos: rc.adInterstitialUnitIos,
     );

@@ -45,6 +45,11 @@ class RemoteConfigService {
     // tope por sesión. ~3,5 min por defecto para no ser intrusivo.
     'ad_interstitial_min_interval_seconds': 210,
     'ad_interstitial_max_per_session': 3,
+    // Tiempo mínimo (segundos) que la app debe haber estado en segundo plano
+    // para que el regreso a primer plano ("app resume") sea un momento elegible
+    // para un intersticial (Hallazgo #10: el trigger ya NO es el cambio de
+    // pestaña). 240 s (4 min) por defecto: un vistazo corto no dispara anuncio.
+    'ad_interstitial_resume_min_background_seconds': 240,
     // Unit IDs del intersticial por plataforma (prod). En dev quedan vacíos y el
     // controlador cae a los TEST IDs oficiales de AdMob.
     'ad_interstitial_unit_android': '',
@@ -154,6 +159,12 @@ class RemoteConfigService {
   /// Tope de intersticiales por sesión. Default 3.
   int get adInterstitialMaxPerSession {
     try { return _remoteConfig.getInt('ad_interstitial_max_per_session'); } catch (_) { return 3; }
+  }
+
+  /// Tiempo mínimo (segundos) en segundo plano para que un "app resume" sea
+  /// momento elegible de intersticial (Hallazgo #10). Default 240 (4 min).
+  int get adInterstitialResumeMinBackgroundSeconds {
+    try { return _remoteConfig.getInt('ad_interstitial_resume_min_background_seconds'); } catch (_) { return 240; }
   }
 
   /// Unit ID del intersticial en Android (prod). Vacío → el controlador usa el

@@ -23,6 +23,7 @@
 | `ad_interstitial_unit_android` / `ad_interstitial_unit_ios` | string | '' | Unit IDs reales del intersticial; '' → test IDs en dev. |
 | `ad_interstitial_min_interval_seconds` | int | 210 | Cap de frecuencia (~3,5 min). |
 | `ad_interstitial_max_per_session` | int | 3 | Tope por sesión. |
+| `ad_interstitial_resume_min_background_seconds` | int | 240 | **Hallazgo #10**: tiempo mínimo en segundo plano para que el regreso a primer plano ("app resume") sea momento elegible de intersticial. El trigger ya **no** es el cambio de pestaña. Pendiente de publicar en ambos namespaces (ver Hallazgo #21). |
 | `paywall_default_plan` | string | 'monthly' | Plan preseleccionado. |
 | `paywall_show_annual_savings` | bool | true | Badge de ahorro anual. |
 | `rescue_notification_days` | int | 3 | Ventana de rescate. |

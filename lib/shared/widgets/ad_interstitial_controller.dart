@@ -38,17 +38,19 @@ final interstitialAdGatewayProvider =
 ///
 /// El estado de frecuencia (`lastShownAt`, `sessionCount`) vive en la instancia
 /// del notifier (keepAlive). La decisión de mostrar es la función pura
-/// [shouldShowInterstitial]. Disparado por el cambio de pestaña principal
-/// ([AdInterstitialTrigger]); nunca desde flujos críticos.
+/// [shouldShowInterstitial]. Disparado al volver a primer plano tras X tiempo en
+/// segundo plano ([AdInterstitialResumeTrigger]); nunca desde flujos críticos ni
+/// desde la navegación entre pestañas (Hallazgo #10).
 @Riverpod(keepAlive: true)
 class AdInterstitialController extends _$AdInterstitialController {
   DateTime? _lastShownAt;
   int _sessionCount = 0;
   InterstitialPresentation? _ready;
   bool _loading = false;
-  // Gracia de cortesía: el primer cambio de pestaña de la sesión nunca dispara
-  // intersticial (evita interrumpir al usuario nada más entrar). Hallazgo #4-QA.
-  bool _firstTabChangeSeen = false;
+  // Gracia de cortesía: el primer intento de la sesión nunca dispara
+  // intersticial (evita interrumpir al usuario en su primer regreso a la app).
+  // Hallazgo #4-QA; agnóstico del trigger desde el Hallazgo #10.
+  bool _firstShowAttemptSeen = false;
 
   @override
   void build() {}
@@ -75,17 +77,17 @@ class AdInterstitialController extends _$AdInterstitialController {
     }
   }
 
-  /// Punto de entrada del disparador (cambio de pestaña). Muestra un intersticial
-  /// solo si la decisión pura lo permite; si no, no hace nada.
+  /// Punto de entrada del disparador (regreso a primer plano). Muestra un
+  /// intersticial solo si la decisión pura lo permite; si no, no hace nada.
   Future<void> maybeShow() async {
     // Corto antes de tocar `adVisibility` (y su cadena dashboard/currentHome):
     // con el subsistema apagado no hay nada que evaluar ni que suscribir.
     if (!_enabled) return;
-    // Gracia: el PRIMER cambio de pestaña de la sesión no muestra intersticial.
-    // No consume cupo ni marca `_lastShownAt`; aprovechamos para precargar el
-    // siguiente, de modo que la primera impresión real sea instantánea.
-    if (!_firstTabChangeSeen) {
-      _firstTabChangeSeen = true;
+    // Gracia: el PRIMER intento de la sesión no muestra intersticial. No consume
+    // cupo ni marca `_lastShownAt`; aprovechamos para precargar el siguiente, de
+    // modo que la primera impresión real sea instantánea.
+    if (!_firstShowAttemptSeen) {
+      _firstShowAttemptSeen = true;
       unawaited(preload());
       return;
     }

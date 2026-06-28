@@ -56,6 +56,7 @@ ProviderContainer _container({
       enabled: interstitialEnabled,
       minIntervalSeconds: minInterval,
       maxPerSession: maxPerSession,
+      resumeMinBackgroundSeconds: 240,
       unitAndroid: '',
       unitIos: '',
     )),
@@ -104,7 +105,7 @@ void main() {
       addTearDown(c.dispose);
       final ctrl = c.read(adInterstitialControllerProvider.notifier);
 
-      await ctrl.maybeShow(); // consume la gracia del primer cambio de pestaña
+      await ctrl.maybeShow(); // consume la gracia del primer intento de la sesión
       await ctrl.maybeShow();
       expect(gw.totalShows, 1);
     });
@@ -149,9 +150,9 @@ void main() {
     });
   });
 
-  group('AdInterstitialController.maybeShow — gracia primer cambio de pestaña',
+  group('AdInterstitialController.maybeShow — gracia primer intento de la sesión',
       () {
-    test('no muestra en el PRIMER cambio de pestaña; el segundo sí', () async {
+    test('no muestra en el PRIMER intento de la sesión; el segundo sí', () async {
       final gw = _FakeGateway();
       final clock = _Clock(DateTime(2026, 6, 24, 12));
       // minInterval 0 para aislar la gracia del cap de intervalo: si el 2º no
@@ -162,11 +163,11 @@ void main() {
 
       await ctrl.maybeShow();
       expect(gw.totalShows, 0,
-          reason: 'el primer cambio de pestaña de la sesión no muestra');
+          reason: 'el primer intento de la sesión no muestra');
 
       clock.value = clock.value.add(const Duration(seconds: 1));
       await ctrl.maybeShow();
-      expect(gw.totalShows, 1, reason: 'el segundo cambio sí muestra');
+      expect(gw.totalShows, 1, reason: 'el segundo intento sí muestra');
     });
 
     test('la gracia precarga para que el 2º sea instantáneo', () async {
@@ -204,7 +205,7 @@ void main() {
       addTearDown(c.dispose);
       final ctrl = c.read(adInterstitialControllerProvider.notifier);
 
-      await ctrl.maybeShow(); // consume la gracia del primer cambio de pestaña
+      await ctrl.maybeShow(); // consume la gracia del primer intento de la sesión
       await ctrl.maybeShow(); // intento real con la carga fallando
       expect(gw.totalShows, 0);
 

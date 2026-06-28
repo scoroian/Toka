@@ -9,7 +9,7 @@ import '../../../l10n/app_localizations.dart';
 import '../ad_banner.dart';
 import '../ad_banner_config_provider.dart';
 import '../ad_banner_notice_provider.dart';
-import '../ad_interstitial_trigger.dart';
+import '../ad_interstitial_resume_trigger.dart';
 import '../banner_premium_notice_caption.dart';
 import '../keyboard_visible_provider.dart';
 import 'shell_metrics.dart';
@@ -175,9 +175,11 @@ class MainShellV2 extends ConsumerWidget {
         body: Stack(
           children: [
             ShellPresenceMarker(child: child),
-            // Observa el cambio de pestaña principal para evaluar el intersticial
-            // (sujeto a flags + cap de frecuencia). Tamaño cero, no afecta layout.
-            AdInterstitialTrigger(tabIndex: tabIndex),
+            // Evalúa el intersticial al volver a primer plano tras X tiempo en
+            // segundo plano (Hallazgo #10: ya NO se dispara con el cambio de
+            // pestaña). Sujeto a flags + cap de frecuencia + gating Premium.
+            // Tamaño cero, no afecta layout.
+            const AdInterstitialResumeTrigger(),
             if (bannerVisible)
               Positioned(
                 left: 0,

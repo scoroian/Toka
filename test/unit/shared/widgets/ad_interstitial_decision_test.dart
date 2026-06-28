@@ -86,4 +86,48 @@ void main() {
       expect(_decide(maxPerSession: 0, sessionCount: 0), isFalse);
     });
   });
+
+  group('shouldShowInterstitialOnResume', () {
+    bool decide({DateTime? backgroundedAt, int minBackgroundSeconds = 240}) =>
+        shouldShowInterstitialOnResume(
+          backgroundedAt: backgroundedAt,
+          now: _now,
+          minBackgroundSeconds: minBackgroundSeconds,
+        );
+
+    test('sin background previo (null) → false (cold-start no dispara)', () {
+      expect(decide(backgroundedAt: null), isFalse);
+    });
+
+    test('background por debajo del umbral (100s < 240s) → false', () {
+      expect(
+        decide(backgroundedAt: _now.subtract(const Duration(seconds: 100))),
+        isFalse,
+      );
+    });
+
+    test('background justo en el umbral (240s == 240s) → true', () {
+      expect(
+        decide(backgroundedAt: _now.subtract(const Duration(seconds: 240))),
+        isTrue,
+      );
+    });
+
+    test('background por encima del umbral (600s > 240s) → true', () {
+      expect(
+        decide(backgroundedAt: _now.subtract(const Duration(seconds: 600))),
+        isTrue,
+      );
+    });
+
+    test('umbral 0 con cualquier background previo → true', () {
+      expect(
+        decide(
+          backgroundedAt: _now.subtract(const Duration(seconds: 1)),
+          minBackgroundSeconds: 0,
+        ),
+        isTrue,
+      );
+    });
+  });
 }

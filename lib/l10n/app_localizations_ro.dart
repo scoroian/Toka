@@ -700,9 +700,10 @@ class AppLocalizationsRo extends AppLocalizations {
   String get members_balance_well_distributed => 'Bine repartizat';
 
   @override
-  String members_balance_unbalanced(String topName) {
-    return 'Dezechilibrat · $topName';
-  }
+  String get members_balance_uneven => 'Sarcinile sunt cam inegale acum.';
+
+  @override
+  String get members_balance_share_cta => 'Repartizează sarcinile';
 
   @override
   String get members_section_frozen => 'Înghețați';
@@ -1816,9 +1817,7 @@ class AppLocalizationsRo extends AppLocalizations {
   String get tasks_assignment_drag_hint => 'Trage pentru a reordona';
 
   @override
-  String history_event_missed(String name) {
-    return '$name nu a finalizat';
-  }
+  String get history_event_missed => 'Sarcină expirată';
 
   @override
   String get history_filter_missed => 'Expirate';
@@ -2925,4 +2924,23 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get ad_banner_notice_dismiss => 'Închide';
+
+  @override
+  String get join_privacy_notice_intro =>
+      'Când te alături, membrii casei îți vor vedea numele, fotografia și statisticile sarcinilor.';
+
+  @override
+  String get join_privacy_notice_phone_visible =>
+      'Numărul tău de telefon va fi de asemenea vizibil pentru ei.';
+
+  @override
+  String get join_privacy_notice_phone_hidden =>
+      'Numărul tău de telefon rămâne ascuns.';
+
+  @override
+  String get join_privacy_notice_change => 'Modifică';
+
+  @override
+  String get join_privacy_notice_change_hint =>
+      'Poți ajusta vizibilitatea telefonului în profilul tău.';
 }

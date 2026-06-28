@@ -698,9 +698,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get members_balance_well_distributed => 'Bien repartido';
 
   @override
-  String members_balance_unbalanced(String topName) {
-    return 'Desequilibrado · $topName';
-  }
+  String get members_balance_uneven => 'El reparto está algo desigual.';
+
+  @override
+  String get members_balance_share_cta => 'Repartir las tareas';
 
   @override
   String get members_section_frozen => 'Congelados';
@@ -1808,9 +1809,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get tasks_assignment_drag_hint => 'Arrastra para reordenar';
 
   @override
-  String history_event_missed(String name) {
-    return '$name no completó';
-  }
+  String get history_event_missed => 'Tarea vencida';
 
   @override
   String get history_filter_missed => 'Vencidas';
@@ -2912,4 +2911,23 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get ad_banner_notice_dismiss => 'Descartar';
+
+  @override
+  String get join_privacy_notice_intro =>
+      'Al unirte, los miembros del hogar verán tu nombre, tu foto y tus estadísticas de tareas.';
+
+  @override
+  String get join_privacy_notice_phone_visible =>
+      'Tu teléfono también será visible para ellos.';
+
+  @override
+  String get join_privacy_notice_phone_hidden =>
+      'Tu teléfono permanece oculto.';
+
+  @override
+  String get join_privacy_notice_change => 'Cambiar';
+
+  @override
+  String get join_privacy_notice_change_hint =>
+      'Puedes ajustar la visibilidad de tu teléfono en tu perfil.';
 }

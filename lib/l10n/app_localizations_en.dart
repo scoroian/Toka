@@ -691,9 +691,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get members_balance_well_distributed => 'Well distributed';
 
   @override
-  String members_balance_unbalanced(String topName) {
-    return 'Unbalanced · $topName';
-  }
+  String get members_balance_uneven => 'Chores are a bit uneven right now.';
+
+  @override
+  String get members_balance_share_cta => 'Share out the tasks';
 
   @override
   String get members_section_frozen => 'Frozen';
@@ -1794,9 +1795,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tasks_assignment_drag_hint => 'Drag to reorder';
 
   @override
-  String history_event_missed(String name) {
-    return '$name didn\'t complete';
-  }
+  String get history_event_missed => 'Task overdue';
 
   @override
   String get history_filter_missed => 'Missed';
@@ -2894,4 +2893,23 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ad_banner_notice_dismiss => 'Dismiss';
+
+  @override
+  String get join_privacy_notice_intro =>
+      'When you join, the household members will see your name, photo and task stats.';
+
+  @override
+  String get join_privacy_notice_phone_visible =>
+      'Your phone number will also be visible to them.';
+
+  @override
+  String get join_privacy_notice_phone_hidden =>
+      'Your phone number stays hidden.';
+
+  @override
+  String get join_privacy_notice_change => 'Change';
+
+  @override
+  String get join_privacy_notice_change_hint =>
+      'You can adjust your phone visibility in your profile.';
 }

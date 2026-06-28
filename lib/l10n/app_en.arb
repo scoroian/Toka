@@ -454,11 +454,10 @@
   "@members_balance_title": { "description": "Title of the household balance card" },
   "members_balance_well_distributed": "Well distributed",
   "@members_balance_well_distributed": { "description": "Message when household chores are evenly distributed" },
-  "members_balance_unbalanced": "Unbalanced · {topName}",
-  "@members_balance_unbalanced": {
-    "description": "Message when one member has done many more tasks than the rest",
-    "placeholders": { "topName": { "type": "String" } }
-  },
+  "members_balance_uneven": "Chores are a bit uneven right now.",
+  "@members_balance_uneven": { "description": "Cooperative message when chores are unevenly shared; never names a member" },
+  "members_balance_share_cta": "Share out the tasks",
+  "@members_balance_share_cta": { "description": "Button that opens the Tasks tab to rebalance chores" },
   "members_section_frozen": "Frozen",
   "@members_section_frozen": { "description": "Frozen members section" },
   "members_section_left": "Former members",
@@ -1117,9 +1116,9 @@
     "placeholders": { "name": { "type": "String" } }
   },
   "tasks_assignment_drag_hint": "Drag to reorder",
-  "history_event_missed": "{name} didn't complete",
+  "history_event_missed": "Task overdue",
   "@history_event_missed": {
-    "placeholders": { "name": { "type": "String" } }
+    "description": "Neutral, task-centric label for an overdue (missed) task event. No person named (finding #08, cooperative tone)."
   },
   "history_filter_missed": "Missed",
   "@history_filter_missed": {},
@@ -1744,5 +1743,10 @@
   "member_limit_business_cta": "Toka Business",
   "subscription_tier_summary": "{tierName} plan · up to {limit} members",
   "ad_banner_notice_text": "Remove the banner too with Toka Plus",
-  "ad_banner_notice_dismiss": "Dismiss"
+  "ad_banner_notice_dismiss": "Dismiss",
+  "join_privacy_notice_intro": "When you join, the household members will see your name, photo and task stats.",
+  "join_privacy_notice_phone_visible": "Your phone number will also be visible to them.",
+  "join_privacy_notice_phone_hidden": "Your phone number stays hidden.",
+  "join_privacy_notice_change": "Change",
+  "join_privacy_notice_change_hint": "You can adjust your phone visibility in your profile."
 }

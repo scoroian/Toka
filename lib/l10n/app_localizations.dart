@@ -1324,11 +1324,17 @@ abstract class AppLocalizations {
   /// **'Bien repartido'**
   String get members_balance_well_distributed;
 
-  /// Message when one member has done many more tasks than the rest
+  /// Cooperative message when chores are unevenly shared; never names a member
   ///
   /// In es, this message translates to:
-  /// **'Desequilibrado · {topName}'**
-  String members_balance_unbalanced(String topName);
+  /// **'El reparto está algo desigual.'**
+  String get members_balance_uneven;
+
+  /// Button that opens the Tasks tab to rebalance chores
+  ///
+  /// In es, this message translates to:
+  /// **'Repartir las tareas'**
+  String get members_balance_share_cta;
 
   /// Frozen members section
   ///
@@ -3244,11 +3250,11 @@ abstract class AppLocalizations {
   /// **'Arrastra para reordenar'**
   String get tasks_assignment_drag_hint;
 
-  /// No description provided for @history_event_missed.
+  /// Etiqueta neutra, centrada en la tarea, para un evento de tarea vencida (missed). Sin nombrar a la persona (Hallazgo #08, tono cooperativo).
   ///
   /// In es, this message translates to:
-  /// **'{name} no completó'**
-  String history_event_missed(String name);
+  /// **'Tarea vencida'**
+  String get history_event_missed;
 
   /// No description provided for @history_filter_missed.
   ///
@@ -5067,6 +5073,36 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Descartar'**
   String get ad_banner_notice_dismiss;
+
+  /// Transparency notice (Hallazgo #09) shown before joining a home: what other members will see
+  ///
+  /// In es, this message translates to:
+  /// **'Al unirte, los miembros del hogar verán tu nombre, tu foto y tus estadísticas de tareas.'**
+  String get join_privacy_notice_intro;
+
+  /// Join transparency notice: phone line when the user's phone is visible to home members
+  ///
+  /// In es, this message translates to:
+  /// **'Tu teléfono también será visible para ellos.'**
+  String get join_privacy_notice_phone_visible;
+
+  /// Join transparency notice: phone line when the user's phone stays hidden
+  ///
+  /// In es, this message translates to:
+  /// **'Tu teléfono permanece oculto.'**
+  String get join_privacy_notice_phone_hidden;
+
+  /// Join transparency notice: link to change phone visibility (opens edit profile)
+  ///
+  /// In es, this message translates to:
+  /// **'Cambiar'**
+  String get join_privacy_notice_change;
+
+  /// Join transparency notice: textual hint (onboarding) on where to change phone visibility
+  ///
+  /// In es, this message translates to:
+  /// **'Puedes ajustar la visibilidad de tu teléfono en tu perfil.'**
+  String get join_privacy_notice_change_hint;
 }
 
 class _AppLocalizationsDelegate

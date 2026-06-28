@@ -125,7 +125,7 @@ class _EventSummary extends StatelessWidget {
       CompletedEvent e => l10n.history_event_completed(_name(e.actorUid)),
       PassedEvent e =>
         '${_name(e.fromUid)} → ${_name(e.toUid)} · ${l10n.history_event_pass_turn}',
-      MissedEvent e => l10n.history_event_missed(_name(e.actorUid)),
+      MissedEvent _ => l10n.history_event_missed,
     };
     return Text(text,
         key: const Key('event_summary'),

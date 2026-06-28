@@ -158,4 +158,42 @@ void main() {
       expect(find.byKey(const Key('no_reviews_message')), findsOneWidget);
     });
   });
+
+  group('HistoryEventDetailScreenV2 — evento missed (tono neutro)', () {
+    final missedEvent = TaskEvent.missed(
+      id: 'e9',
+      taskId: 't9',
+      taskTitleSnapshot: 'Aspirar',
+      taskVisualSnapshot: const TaskVisual(kind: 'emoji', value: '🧹'),
+      actorUid: 'uid_performer',
+      toUid: 'uid_third',
+      penaltyApplied: true,
+      missedAt: DateTime(2026, 4, 20, 12),
+      createdAt: DateTime(2026, 4, 20, 12),
+    );
+
+    testWidgets('el resumen muestra copy neutro sin nombre del responsable',
+        (tester) async {
+      await tester.pumpWidget(_wrap(
+        const HistoryEventDetailScreenV2(homeId: 'home1', eventId: 'e1'),
+        [
+          authProvider.overrideWith(
+              () => _FakeAuth(AuthState.authenticated(_user('uid_third')))),
+          homeMembersProvider('home1').overrideWith((ref) => Stream.value([
+                _member('uid_performer', 'Luis', MemberRole.member),
+                _member('uid_third', 'Pepe', MemberRole.admin),
+              ])),
+          historyEventDetailProvider(homeId: 'home1', eventId: 'e1')
+              .overrideWith((ref) => Stream.value(HistoryEventDetail(
+                    event: missedEvent,
+                    reviews: const [],
+                  ))),
+        ],
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Tarea vencida'), findsOneWidget);
+      expect(find.textContaining('Luis'), findsNothing);
+    });
+  });
 }

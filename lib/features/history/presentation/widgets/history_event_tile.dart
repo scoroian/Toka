@@ -77,8 +77,6 @@ class HistoryEventTile extends StatelessWidget {
       ),
       missed: (e) => _MissedTile(
         event: e,
-        actorName: actorName,
-        actorPhotoUrl: actorPhotoUrl,
         timestamp: _formatRelativeTime(l10n, e.missedAt, locale),
         l10n: l10n,
         trailingOverride: trailing,
@@ -243,21 +241,18 @@ class _PassedTile extends StatelessWidget {
 class _MissedTile extends StatelessWidget {
   const _MissedTile({
     required this.event,
-    required this.actorName,
-    required this.actorPhotoUrl,
     required this.timestamp,
     required this.l10n,
     this.trailingOverride,
   });
   final MissedEvent event;
-  final String actorName;
-  final String? actorPhotoUrl;
   final String timestamp;
   final AppLocalizations l10n;
   final Widget? trailingOverride;
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final visual = event.taskVisualSnapshot;
     final taskLabel = visual.kind == 'emoji'
         ? '${visual.value} ${event.taskTitleSnapshot}'
@@ -265,8 +260,14 @@ class _MissedTile extends StatelessWidget {
 
     return ListTile(
       key: Key('history_tile_${event.id}'),
-      leading: _Avatar(photoUrl: actorPhotoUrl, name: actorName),
-      title: Text(l10n.history_event_missed(actorName)),
+      // Encuadre neutro (Hallazgo #08): el evento habla del estado de la tarea,
+      // no de la persona. Sin avatar de miembro: icono neutro centrado en la tarea.
+      leading: CircleAvatar(
+        radius: 20,
+        backgroundColor: cs.surfaceContainerHighest,
+        child: Icon(Icons.event_busy_outlined, color: cs.onSurfaceVariant),
+      ),
+      title: Text(l10n.history_event_missed),
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -276,7 +277,8 @@ class _MissedTile extends StatelessWidget {
         ],
       ),
       trailing: _wrapTrailing(
-        trailingOverride ?? const Icon(Icons.timer_off_outlined, color: Colors.orange),
+        trailingOverride ??
+            Icon(Icons.timer_off_outlined, color: cs.onSurfaceVariant),
       ),
       isThreeLine: true,
     );
